@@ -1,11 +1,12 @@
-function toggleNavCart() {
-    $("#nav_cart").toggle(350);
-    $("#nav_cart_close_layer").show();
+function toggleMenu(menu_id, close_layer_id) {
+    $(`#${menu_id}`).toggle(350);
+    $(`#${close_layer_id}`).show();
 }
 
-function hideNavCart() {
-    $("#nav_cart").hide(350);
-    $("#nav_cart_close_layer").hide();
+function hideMenuCloseLayer(menu_id, close_layer_id) {
+    console.log("hideMenuCloseLayer");
+    $(`#${menu_id}`).hide(350);
+    $(`#${close_layer_id}`).hide();
 }
 
 function formatHarga(harga) {

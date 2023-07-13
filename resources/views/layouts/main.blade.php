@@ -9,8 +9,10 @@
     <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.js') }}"></script>
     <script src="{{ asset('js/jquery.table2excel.js') }}"></script>
     <script src="{{ asset('js/functions.js') }}"></script>
+    <title>MC-Parts-SAS</title>
 </head>
-<body>
+<body class="relative">
+    <div id="menu-close-layer" class="absolute w-screen h-screen hidden z-30" onclick="hideMenuCloseLayer('profile-menu','menu-close-layer')"></div>
     <div class="min-h-full">
         <nav class="bg-gray-800">
           <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -22,11 +24,17 @@
                 <div class="hidden md:block">
                   <div class="ml-10 flex items-baseline space-x-4">
                     <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                    <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Dashboard</a>
-                    <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Team</a>
+                    @foreach ($menus as $menu)
+                    @if ($route_now === $menu['route'])
+                    <a href="{{ route($menu['route']) }}" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                    @else
+                    <a href="{{ route($menu['route']) }}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                    @endif
+                    @endforeach
+                    {{-- <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Dashboard</a>
                     <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Projects</a>
                     <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Calendar</a>
-                    <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Reports</a>
+                    <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Reports</a> --}}
                   </div>
                 </div>
               </div>
@@ -42,7 +50,7 @@
                   <!-- Profile dropdown -->
                   <div class="relative ml-3">
                     <div>
-                      <button type="button" class="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button" aria-expanded="false" aria-haspopup="true" onclick="showMenu('profile-menu')">
+                      <button type="button" class="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button" aria-expanded="false" aria-haspopup="true" onclick="toggleMenu('profile-menu', 'menu-close-layer')">
                         <span class="sr-only">Open user menu</span>
                         <img class="h-8 w-8 rounded-full" src="{{ asset('images/srikandi-mascot.jpg') }}" alt="">
                       </button>
@@ -58,11 +66,20 @@
                         From: "transform opacity-100 scale-100"
                         To: "transform opacity-0 scale-95"
                     -->
-                    <div id="profile-menu" class="hidden absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                    <div id="profile-menu" class="hidden absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                       <!-- Active: "bg-gray-100", Not Active: "" -->
-                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
-                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
-                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
+                      @foreach ($profile_menus as $profile_menu)
+                      @if ($profile_menu['route'] === 'logout')
+                        <form action="{{ route($profile_menu['route']) }}" method="post" class="block">
+                            @csrf
+                            <button type="submit" class="py-2 text-sm text-left pl-4 text-red-600 font-semibold hover:bg-gray-200 w-full">Log Out</button>
+                        </form>
+                        @else
+                        <a href="{{ route($profile_menu['route']) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200" role="menuitem" tabindex="-1">{{ $profile_menu['name'] }}</a>
+                      @endif
+                      @endforeach
+                      {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
+                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a> --}}
                     </div>
                   </div>
                 </div>
@@ -88,11 +105,14 @@
           <div class="md:hidden" id="mobile-menu">
             <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
               <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-              <a href="#" class="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium" aria-current="page">Dashboard</a>
+              @foreach ($menus as $menu)
+                <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">{{ $menu['name'] }}</a>
+                @endforeach
+              {{-- <a href="#" class="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium" aria-current="page">Dashboard</a>
               <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Team</a>
               <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Projects</a>
               <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Calendar</a>
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Reports</a>
+              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Reports</a> --}}
             </div>
             <div class="border-t border-gray-700 pb-3 pt-4">
               <div class="flex items-center px-5">
@@ -136,10 +156,6 @@
                 $(`#${button}` + " img").attr("src", "/img/icons/dropdown.svg");
             }
         }, 450);
-    }
-
-    function showMenu(id) {
-        $(`#${id}`).toggle(400);
     }
 </script>
 </html>
