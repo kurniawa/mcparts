@@ -9,7 +9,7 @@
     <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.js') }}"></script>
     <script src="{{ asset('js/jquery.table2excel.js') }}"></script>
     <script src="{{ asset('js/functions.js') }}"></script>
-    <title>MC-Parts-SAS</title>
+    <title>MC-Parts-SAS-v2</title>
 </head>
 <body class="h-full">
     @yield('content')

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
+use App\Models\Produk;
 use App\Models\Spk;
 use App\Models\SpkNota;
+use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
 use App\Models\User;
@@ -78,7 +80,7 @@ class ArtisanController extends Controller
         Schema::create('nota_srjalans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('nota_id')->constrained()->onDelete('cascade');
-            $table->foreignId('srjalan_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('srjalan_id')->constrained()->onDelete('cascade');
         });
         $notas = Nota::all();
         // $notas = Spk::where('id',28)->get();
@@ -120,5 +122,17 @@ class ArtisanController extends Controller
         }
         Artisan::call('optimize:clear');
         dd(Artisan::output());
+    }
+
+    function spk_produk_fix_nama_produk() {
+        $spk_produks = SpkProduk::all();
+        foreach ($spk_produks as $spk_produk) {
+            if ($spk_produk->nama_produk === null) {
+                $produk = Produk::find($spk_produk->produk_id);
+                $spk_produk->nama_produk = $produk->nama;
+                $spk_produk->save();
+            }
+        }
+        return back()->with('success_','spk_produks: nama_produk yang null sudah diisi!');
     }
 }
