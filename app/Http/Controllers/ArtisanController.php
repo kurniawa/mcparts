@@ -70,7 +70,7 @@ class ArtisanController extends Controller
                 ]);
             }
         }
-        $spk_notas = SpkNota::latest()->limit(10)->get();
+        $spk_notas = SpkNota::limit(10)->get();
         dd($spk_notas);
     }
 
@@ -98,7 +98,7 @@ class ArtisanController extends Controller
                 ]);
             }
         }
-        $nota_srjalans = NotaSrjalan::latest()->limit(10)->get();
+        $nota_srjalans = NotaSrjalan::limit(10)->get();
         dd($nota_srjalans);
     }
 

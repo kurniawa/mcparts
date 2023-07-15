@@ -46,6 +46,14 @@
             <p>Setelah Nama Produk ada, masuk ke phpmyadmin untuk edit column nama_produk tidak nullable</p>
         </form>
     </div>
+    <div class="ml-2 mt-5">
+        <div>
+            <ol class="list-decimal">
+                <li>1. Benerin SPK 284 yang 1600 item masuk ke SJ</li>
+                <li>2. Edit Harga pada item nota, hitung otomatis harga_total nota</li>
+            </ol>
+        </div>
+    </div>
     {{-- <div class="ml-2 mt-5">
         <form action="{{ route('artisan.spk_produk_fix_nama_produk') }}" method="post">
             @csrf

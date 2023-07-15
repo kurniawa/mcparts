@@ -21,7 +21,8 @@
                     <div>
                         <label>Customer:</label>
                         <div class="flex mt-1">
-                            <input type="text" class="input" name="nama_pelanggan" placeholder="Nama Customer...">
+                            <input type="text" class="input" name="nama_pelanggan" placeholder="Nama Customer..." id="nama_pelanggan">
+                            <input type="hidden" name="pelanggan_id" id="pelanggan_id">
                         </div>
                     </div>
                     <div class="flex items-center ml-2">
@@ -315,7 +316,7 @@
     }
 
     function setTimeRange(timerange) {
-        console.log(timerange);
+        // console.log(timerange);
         let from_day, from_month, from_year;
         let to_day, to_month, to_year;
         if (timerange === 'now') {
@@ -369,5 +370,17 @@
         document.getElementById('to_month').value = to_month;
         document.getElementById('to_year').value = to_year;
     }
+
+    // SET AUTOCOMPLETE PELANGGAN
+    const label_pelanggans = {!! json_encode($label_pelanggans, JSON_HEX_TAG) !!}
+    $('#nama_pelanggan').autocomplete({
+        source: label_pelanggans,
+        select: function (event, ui) {
+            console.log(ui.item);
+            document.getElementById('pelanggan_id').value = ui.item.id;
+            document.getElementById('nama_pelanggan').value = ui.item.value;
+        }
+    });
+    // END - SET AUTOCOMPLETE PELANGGAN
 </script>
 @endsection
