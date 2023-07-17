@@ -38,11 +38,16 @@ Route::controller(AuthController::class)->group(function(){
 });
 
 Route::controller(UserController::class)->group(function(){
-    Route::get('/profile','profile')->name('user.profile')->middleware('auth');
+    Route::get('/user/profile','profile')->name('user.profile')->middleware('auth');
+    Route::post('/user/profile/update_nama','update_nama')->name('user.profile.update_nama')->middleware('auth');
+    Route::post('/user/profile/update_password','update_password')->name('user.profile.update_password')->middleware('auth');
+    Route::post('/user/profile/update_photo','update_photo')->name('user.profile.update_photo')->middleware('auth');
 });
 
 Route::controller(SpkController::class)->group(function(){
     Route::get('/spks','index')->name('spks');
+    Route::get('/spks/create','create')->name('spks.create');
+    Route::post('/spks/store','store')->name('spks.store');
 });
 
 Route::controller(NotaController::class)->group(function(){
@@ -52,6 +57,7 @@ Route::controller(NotaController::class)->group(function(){
 Route::controller(SrjalanController::class)->group(function(){
     Route::get('/sjs','index')->name('sjs');
 });
+
 
 Route::controller(ArtisanController::class)->group(function(){
     Route::get('/artisan-command','index')->name('artisan.index')->middleware();

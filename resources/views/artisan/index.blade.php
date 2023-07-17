@@ -5,10 +5,11 @@
       <h1 class="text-3xl font-bold tracking-tight text-gray-900">Artisan Command Center</h1>
     </div>
   </header>
-  <main>
+  <main class="text-xs">
       <form action="{{ route('artisan.lower_case_role') }}" method="post" class="ml-2">
           @csrf
           <p>Sebelumnya, ganti nama column clearance menjadi role terlebih dahulu.</p>
+          <p>Tipe ENUM jadi VARCHAR, 20. Comment: member, admin, superadmin, developer.</p>
           <button class="bg-pink-400 text-white font-semibold rounded px-3 py-2">Lower Case Role</button>
       </form>
     <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 flex">

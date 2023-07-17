@@ -24,6 +24,7 @@ class HomeController extends Controller
         // dump($get);
 
         $spks = collect();
+        $nama_pelanggans = collect(); // Ini diperlukan untuk menampilkan nama reseller, apabila ada reseller.
         $col_spk_produks = collect();
         $col_notas = collect();
         $col_spk_produk_notas = collect();
@@ -99,6 +100,14 @@ class HomeController extends Controller
             $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
             $col_spk_produks->push($spk_produks);
             // END - SPK Items
+
+            // NAMA PELANGGANS
+            $nama_pelanggan = $spk->pelanggan_nama;
+            if ($spk->reseller_nama !== null) {
+                $nama_pelanggan = "$spk->reseller_nama - $spk->pelanggan_nama";
+            }
+            $nama_pelanggans->push($nama_pelanggan);
+            // END - NAMA PELANGGANS
             $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
             $notas = collect();
             $arr_srjalans = collect();
@@ -134,6 +143,7 @@ class HomeController extends Controller
             'route_now' => 'home',
             'profile_menus' => Menu::get_profile_menus(),
             'spks' => $spks,
+            'nama_pelanggans' => $nama_pelanggans,
             'col_notas' => $col_notas,
             'col_srjalans' => $col_srjalans,
             'col_spk_produks' => $col_spk_produks,

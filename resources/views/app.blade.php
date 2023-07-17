@@ -9,7 +9,12 @@
     {{-- SEARCH / FILTER --}}
     <x-errors-any></x-errors-any>
     <div class="mx-1 max-w-7xl py-1 sm:px-6 lg:px-8 text-xs">
-        <div><button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggleFilter(this.id,'filter-content')">Filter</button></div>
+        <div class="flex">
+            <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggleFilter(this.id,'filter-content')">Filter</button>
+            <form action="{{ route('spks.create') }}" method="GET" class="flex ml-2">
+                <button type="submit" class="rounded bg-emerald-500 text-white font-semibold px-3 py-1">+ SPK</button>
+            </form>
+        </div>
         <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1" id="filter-content">
             <form action="" method="GET">
                 <div class="flex items-center">
@@ -106,7 +111,7 @@
                 <div class="grid grid-cols-2 border-t pt-1">
                     <div>
                         <a class="font-bold text-indigo-500" href="">{{ $spk->no_spk }}</a>
-                        <div>{{ $spk->pelanggan_nama }}</div>
+                        <div><a href="" class="text-indigo-800">{{ $nama_pelanggans[$key] }}</a></div>
                         <div>
                             <button id="toggle-spk-items-{{ $key }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'spk-items-{{ $key }}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
@@ -235,6 +240,7 @@
                     <div class="grid grid-cols-2 border-t pt-1">
                         <div>
                             <a class="font-bold text-sky-400" href="">{{ $srjalan->no_srjalan }}</a>
+                            <a href="" class="text-sky-700">{{ $srjalan->ekspedisi_nama }}</a>
                             <div>
                                 <button id="toggle-srjalan-items-{{ $key }}-{{ $key2 }}-{{ $key_srjalan }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'srjalan-items-{{ $key }}-{{ $key2 }}-{{ $key_srjalan }}')">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
@@ -384,3 +390,10 @@
     // END - SET AUTOCOMPLETE PELANGGAN
 </script>
 @endsection
+{{-- <a href="https://www.flaticon.com/free-icons/fox" title="fox icons">Fox icons created by Freepik - Flaticon</a> --}}
+{{-- cat --}}
+{{-- <a href="https://www.flaticon.com/free-icons/cute" title="cute icons">Cute icons created by Freepik - Flaticon</a> --}}
+{{-- Honey Badger --}}
+{{-- <a href="https://www.flaticon.com/free-icons/badger" title="badger icons">Badger icons created by Freepik - Flaticon</a> --}}
+{{-- Panda --}}
+{{-- <a href="https://www.flaticon.com/free-icons/cute" title="cute icons">Cute icons created by Smashicons - Flaticon</a> --}}
