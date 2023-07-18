@@ -63,6 +63,14 @@
             <button class="bg-emerald-400 text-white font-semibold rounded px-3 py-2">Lengkapi nama_nota pada spk_produk_nota_srjalans</button>
         </form>
     </div> --}}
+    <div class="ml-2 mt-5">
+        <form action="{{ route('artisan.srjalan_fix_jml_packing') }}" method="post">
+            @csrf
+            <p>Srjalan: Add Column: jml_packing -> string -> nanti value nya string json, karena tipe_packing bisa macam2: colly, dus, rol</p>
+            <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">SJ: srjalan_fix_jml_packing</button>
+            <p>Hapus jml_colly, jml_dus, jml_rol -> karena ini hardcoded, bad programming</p>
+        </form>
+    </div>
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
   </main>

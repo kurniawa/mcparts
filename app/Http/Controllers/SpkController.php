@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Alamat;
 use App\Models\Menu;
+use App\Models\Nota;
+use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
 use App\Models\PelangganAlamat;
 use App\Models\PelangganKontak;
@@ -11,7 +13,11 @@ use App\Models\PelangganProduk;
 use App\Models\Produk;
 use App\Models\ProdukHarga;
 use App\Models\Spk;
+use App\Models\SpkNota;
 use App\Models\SpkProduk;
+use App\Models\SpkProdukNota;
+use App\Models\SpkProdukNotaSrjalan;
+use App\Models\Srjalan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -135,5 +141,26 @@ class SpkController extends Controller
             'success_' => $success_
         ];
         return back()->with($feedback);
+    }
+
+    function show(Spk $spk) {
+        // dd($spk);
+        $data_spk_nota_srjalans = Spk::Data_SPK_Nota_Srjalan($spk);
+        // dd($data_spk_nota_srjalans);
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'spks.create',
+            'profile_menus' => Menu::get_profile_menus(),
+            'spk' => $spk,
+            'nama_pelanggan' => $data_spk_nota_srjalans['nama_pelanggan'],
+            'spk_produks' => $data_spk_nota_srjalans['spk_produks'],
+            'notas' => $data_spk_nota_srjalans['notas'],
+            'cust_kontaks' => $data_spk_nota_srjalans['cust_kontaks'],
+            'col_spk_produk_notas' => $data_spk_nota_srjalans['col_spk_produk_notas'],
+            'col_srjalans' => $data_spk_nota_srjalans['col_srjalans'],
+            'col_ekspedisi_kontaks' => $data_spk_nota_srjalans['col_ekspedisi_kontaks'],
+            'col_col_spk_produk_nota_srjalans' => $data_spk_nota_srjalans['col_col_spk_produk_nota_srjalans'],
+        ];
+        return view('spks.show', $data);
     }
 }

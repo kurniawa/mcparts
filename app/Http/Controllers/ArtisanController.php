@@ -135,4 +135,10 @@ class ArtisanController extends Controller
         }
         return back()->with('success_','spk_produks: nama_produk yang null sudah diisi!');
     }
+
+    function srjalan_fix_jumlah_packing() {
+        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::all();
+
+        return back()->with('success_','srjalan fix jml_packing');
+    }
 }

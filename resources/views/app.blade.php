@@ -8,7 +8,7 @@
   <main>
     {{-- SEARCH / FILTER --}}
     <x-errors-any></x-errors-any>
-    <div class="mx-1 max-w-7xl py-1 sm:px-6 lg:px-8 text-xs">
+    <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="flex">
             <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggleFilter(this.id,'filter-content')">Filter</button>
             <form action="{{ route('spks.create') }}" method="GET" class="flex ml-2">
@@ -100,7 +100,7 @@
         </div>
     </div>
     {{-- END - SEARCH / FILTER --}}
-    <div class="mx-1 max-w-7xl py-1 sm:px-6 lg:px-8 text-xs">
+    <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="grid grid-cols-3 gap-1">
             <div class="text-center bg-violet-200 rounded-t font-bold text-slate-700 py-1">SPK</div>
             <div class="text-center bg-emerald-200 rounded-t font-bold text-slate-700 py-1">Nota</div>
@@ -110,7 +110,7 @@
             <div>
                 <div class="grid grid-cols-2 border-t pt-1">
                     <div>
-                        <a class="font-bold text-indigo-500" href="">{{ $spk->no_spk }}</a>
+                        <a href="{{ route('spks.show', $spk->id) }}" class="font-bold text-indigo-500" href="">{{ $spk->no_spk }}</a>
                         <div><a href="" class="text-indigo-800">{{ $nama_pelanggans[$key] }}</a></div>
                         <div>
                             <button id="toggle-spk-items-{{ $key }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'spk-items-{{ $key }}')">
@@ -142,8 +142,8 @@
                             @if ($spk->finished_at !== null)
                             <div>
                                 <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
-                                    <div>{{ date('d',strtotime($spk->created_at)) }}</div>
-                                    <div>{{ date('m-y',strtotime($spk->created_at)) }}</div>
+                                    <div>{{ date('d',strtotime($spk->finished_at)) }}</div>
+                                    <div>{{ date('m-y',strtotime($spk->finished_at)) }}</div>
                                 </div>
                             </div>
                             @else
@@ -204,8 +204,8 @@
                                 @if ($nota->finished_at !== null)
                                 <div>
                                     <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
-                                        <div>{{ date('d',strtotime($nota->created_at)) }}</div>
-                                        <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                        <div>{{ date('d',strtotime($nota->finished_at)) }}</div>
+                                        <div>{{ date('m-y',strtotime($nota->finished_at)) }}</div>
                                     </div>
                                 </div>
                                 @else
@@ -271,8 +271,8 @@
                                 @if ($srjalan->finished_at !== null)
                                 <div>
                                     <div class="rounded p-1 bg-sky-500 text-white font-bold text-center">
-                                        <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
-                                        <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
+                                        <div>{{ date('d',strtotime($srjalan->finished_at)) }}</div>
+                                        <div>{{ date('m-y',strtotime($srjalan->finished_at)) }}</div>
                                     </div>
                                 </div>
                                 @else

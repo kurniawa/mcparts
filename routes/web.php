@@ -45,17 +45,18 @@ Route::controller(UserController::class)->group(function(){
 });
 
 Route::controller(SpkController::class)->group(function(){
-    Route::get('/spks','index')->name('spks');
+    Route::get('/spks','index')->name('spks.index');
+    Route::get('/spks/{spk}/show','show')->name('spks.show');
     Route::get('/spks/create','create')->name('spks.create');
     Route::post('/spks/store','store')->name('spks.store');
 });
 
 Route::controller(NotaController::class)->group(function(){
-    Route::get('/notas','index')->name('notas');
+    Route::get('/notas','index')->name('notas.index');
 });
 
 Route::controller(SrjalanController::class)->group(function(){
-    Route::get('/sjs','index')->name('sjs');
+    Route::get('/sjs','index')->name('sjs.index');
 });
 
 
@@ -69,4 +70,5 @@ Route::controller(ArtisanController::class)->group(function(){
     Route::post('/artisan-command/symbolic-link','symbolic_link')->name('artisan.symbolic_link')->middleware('developer');
     Route::post('/artisan-command/optimize-clear','optimize_clear')->name('artisan.optimize_clear')->middleware('developer');
     Route::post('/artisan-command/spk-produk-fix-nama-produk','spk_produk_fix_nama_produk')->name('artisan.spk_produk_fix_nama_produk')->middleware('developer');
+    Route::post('/artisan-command/srjalan_fix_jml_packing','srjalan_fix_jml_packing')->name('artisan.srjalan_fix_jml_packing')->middleware('developer');
 });
