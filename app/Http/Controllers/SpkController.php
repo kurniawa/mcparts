@@ -145,6 +145,14 @@ class SpkController extends Controller
 
     function show(Spk $spk) {
         // dd($spk);
+        // $test_array = [["tipe_packing"=>"colly","jumlah"=>2406,"jml_packing"=>16],];
+        // $encoded_test_array = json_encode($test_array);
+        // $test_array2 = [["tipe_packing"=>"colly","jumlah"=>300,"jml_packing"=>2],];
+        // $encoded_test_array2 = json_encode($test_array2);
+        // dump($test_array);
+        // dump($encoded_test_array);
+        // dump($test_array2);
+        // dd($encoded_test_array2);
         $data_spk_nota_srjalans = Spk::Data_SPK_Nota_Srjalan($spk);
         // dd($data_spk_nota_srjalans);
         $data = [

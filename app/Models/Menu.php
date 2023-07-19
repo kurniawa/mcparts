@@ -15,6 +15,7 @@ class Menu extends Model
             ['name'=>'SPK','route'=>'spks.index'],
             ['name'=>'Nota','route'=>'notas.index'],
             ['name'=>'SJ','route'=>'sjs.index'],
+            ['name'=>'Accounting','route'=>'accounting.index'],
             ['name'=>'Artisan','route'=>'artisan.index'],
         ]);
         // $menus = [

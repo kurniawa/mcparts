@@ -11,6 +11,7 @@ use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
+use App\Models\Srjalan;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
@@ -136,9 +137,88 @@ class ArtisanController extends Controller
         return back()->with('success_','spk_produks: nama_produk yang null sudah diisi!');
     }
 
-    function srjalan_fix_jumlah_packing() {
-        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::all();
+    function srjalan_fix_jml_packing() {
+        $srjalans = Srjalan::all();
+        foreach ($srjalans as $srjalan) {
+            $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
+            $jml_dus = 0;
+            $jml_dus_pcs = 0;
+            $jml_colly = 0;
+            $jml_colly_pcs = 0;
+            $jml_rol = 0;
+            $jml_rol_pcs = 0;
+            $jml_bal = 0;
+            $jml_bal_pcs = 0;
+            foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+                if ($spk_produk_nota_srjalan->tipe_packing === 'colly') {
+                    $jml_colly_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jml_colly = $srjalan->jml_colly;
+                } elseif ($spk_produk_nota_srjalan->tipe_packing === 'dus') {
+                    $jml_dus_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jml_dus = $srjalan->jml_dus;
+                } elseif ($spk_produk_nota_srjalan->tipe_packing === 'rol') {
+                    $jml_rol_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jml_rol = $srjalan->jml_rol;
+                } elseif ($spk_produk_nota_srjalan->tipe_packing === 'bal') {
+                    $jml_bal_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jml_bal += $spk_produk_nota_srjalan->jml_packing;
+                }
+            }
+            $jml_packing = array();
+            if ($jml_colly !== 0) {
+                $jml_packing[]=(["tipe_packing"=>"colly","jumlah"=>$jml_colly_pcs,"jml_packing"=>$jml_colly]);
+            }
+            if ($jml_dus !== 0) {
+                $jml_packing[]=(["tipe_packing"=>"dus","jumlah"=>$jml_dus_pcs,"jml_packing"=>$jml_dus]);
+            }
+            if ($jml_rol !== 0) {
+                $jml_packing[]=(["tipe_packing"=>"rol","jumlah"=>$jml_rol_pcs,"jml_packing"=>$jml_rol]);
+            }
+            if ($jml_bal !== 0) {
+                $jml_packing[]=(["tipe_packing"=>"bal","jumlah"=>$jml_bal_pcs,"jml_packing"=>$jml_bal]);
+            }
+            $srjalan->jml_packing = json_encode($jml_packing);
+            $srjalan->save();
+        }
 
         return back()->with('success_','srjalan fix jml_packing');
+    }
+
+    function create_table_accounting() {
+        Schema::dropIfExists('accounting_adis');
+        Schema::dropIfExists('accounting_alberts');
+        Schema::dropIfExists('accounting_dians');
+        Schema::dropIfExists('accounting_demardis');
+
+        Schema::create('accounting_adis', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('tipe',['pengeluaran','pemasukan']);
+            $table->string('keterangan');
+            $table->string('kode',20);
+            $table->bigInteger('jumlah');
+            $table->bigInteger('saldo');
+            $table->string('created_by');
+            $table->string('updated_by');
+            // Tanggal sudah diatur pada timestamps: created_at, updated_at
+        });
+        $spks = Spk::all();
+        // $spks = Spk::where('id',28)->get();
+        $grouped_spk_produk_notas = collect();
+        foreach ($spks as $spk) {
+            $spk_produk_notas = SpkProdukNota::where('spk_id', $spk->id)->get();
+            $grouped = $spk_produk_notas->groupBy('nota_id');
+            $grouped_spk_produk_notas->push($grouped);
+        }
+        foreach ($grouped_spk_produk_notas as $arr_spk_produk_notas) {
+            foreach ($arr_spk_produk_notas as $spk_produk_notas) {
+                SpkNota::create([
+                    'spk_id' => $spk_produk_notas[0]->spk_id,
+                    'nota_id' => $spk_produk_notas[0]->nota_id,
+                ]);
+            }
+        }
+        $spk_notas = SpkNota::limit(10)->get();
+        dd($spk_notas);
     }
 }

@@ -159,6 +159,7 @@
                 @endforeach
                 @endif
             </div>
+            {{-- SJ --}}
             <div>
                 @foreach ($notas as $key2 => $nota)
                 @if (count($col_srjalans[$key2]) === 0)
@@ -245,7 +246,21 @@
                             <tr><td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div></td><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td><div class="text-center">{{ $spk_produk_nota_srjalan->jml_packing }} {{ $spk_produk_nota_srjalan->tipe_packing }}</div></td></tr>
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
-                            <tr><th></th><th>total</th><th>{{ $srjalan->jml_colly }}</th></tr>
+                            <tr>
+                                <th></th><th>total</th>
+                                <th>
+                                    {{-- {{ dump(json_decode('["nama"=>"nama1"],["nama"=>"nama2"]', true)) }} --}}
+                                    {{-- {{ dump(json_decode('[["tipe_packing"=>"colly","jumlah"=>2406,"jml_packing"=>16]]', true)) }} --}}
+                                    {{-- {{ dump(json_decode('["tipe_packing"=>"colly","jumlah"=>2406,"jml_packing"=>16]', true)) }} --}}
+                                    {{-- {{ dump(json_decode('["Semabung Baru No 50", "Pangkalpinang - Bangka"]', true)) }} --}}
+                                    {{-- {{ dump(json_decode('{"tipe_packing":"colly","jumlah":2406,"jml_packing":16}', true)) }} --}}
+                                    {{-- {{ dump($srjalan->jml_packing) }} --}}
+                                    {{-- {{ dd(json_decode($srjalan->jml_packing)) }} --}}
+                                    @foreach (json_decode($srjalan->jml_packing, true) as $jml_packing)
+                                    {{ $jml_packing['jml_packing'] }} {{ $jml_packing['tipe_packing'] }}
+                                    @endforeach
+                                </th>
+                            </tr>
                         </table>
                     </div>
                     {{-- END - Srjalan Items --}}
@@ -254,6 +269,7 @@
                 @endif
                 @endforeach
             </div>
+            {{-- END - SJ --}}
         </div>
     </div>
   </main>

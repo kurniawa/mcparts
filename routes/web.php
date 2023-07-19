@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
@@ -59,6 +60,9 @@ Route::controller(SrjalanController::class)->group(function(){
     Route::get('/sjs','index')->name('sjs.index');
 });
 
+Route::controller(AccountingController::class)->group(function(){
+    Route::get('/accounting','index')->name('accounting.index');
+});
 
 Route::controller(ArtisanController::class)->group(function(){
     Route::get('/artisan-command','index')->name('artisan.index')->middleware();

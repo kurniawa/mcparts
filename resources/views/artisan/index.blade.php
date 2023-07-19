@@ -67,6 +67,7 @@
         <form action="{{ route('artisan.srjalan_fix_jml_packing') }}" method="post">
             @csrf
             <p>Srjalan: Add Column: jml_packing -> string -> nanti value nya string json, karena tipe_packing bisa macam2: colly, dus, rol</p>
+            <p>comment: type: string json</p>
             <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">SJ: srjalan_fix_jml_packing</button>
             <p>Hapus jml_colly, jml_dus, jml_rol -> karena ini hardcoded, bad programming</p>
         </form>
