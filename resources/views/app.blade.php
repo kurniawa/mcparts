@@ -156,7 +156,17 @@
                 <div class="border rounded hidden px-1" id="spk-items-{{ $key }}">
                     <table class="w-full text-xs">
                         @foreach ($col_spk_produks[$key] as $spk_produk)
-                        <tr><td>{{ $spk_produk->nama_produk }}</td><td>{{ $spk_produk->jumlah }}</td></tr>
+                        <tr>
+                            <td>{{ $spk_produk->nama_produk }}</td>
+                            <td>
+                                {{ $spk_produk->jumlah }}
+                                @if ($spk_produk->deviasi_jml > 0)
+                                <span class="text-indigo-500"> +{{ $spk_produk->deviasi_jml }}</span>
+                                @elseif ($spk_produk->deviasi_jml < 0)
+                                <span class="text-pink-500"> -{{ $spk_produk->deviasi_jml }}</span>
+                                @endif
+                            </td>
+                        </tr>
                         @endforeach
                     </table>
                 </div>

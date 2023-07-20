@@ -53,16 +53,110 @@
                 {{-- SPK Items --}}
                 <div class="border rounded px-1 mt-2 py-2" id="spk-items">
                     <table class="w-full text-xs">
-                        <tr><th>Item Produksi</th><th>Jumlah</th></tr>
+                        <tr>
+                            <th>
+                                <div class="flex items-center justify-center">
+                                    <span>Item Produksi</span>
+                                    <button type="button" id="spk_produk_detail_button" class="ml-1 border rounded border-yellow-500 text-yellow-500 p-1" onclick="toggle_detail_classes(this.id,'spk_produk_detail')">D</button>
+                                </div>
+                            </th>
+                            <th>Jumlah</th>
+                        </tr>
                         <tr><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
-                        @foreach ($spk_produks as $spk_produk)
-                        <tr><td>{{ $spk_produk->nama_produk }}</td><td><div class="text-center">{{ $spk_produk->jumlah }}</div></td></tr>
+                        @foreach ($spk_produks as $key_spk_produk => $spk_produk)
+                        <tr>
+                            <td>{{ $spk_produk->nama_produk }}</td>
+                            <td>
+                                <div class="text-center">
+                                    {{ $spk_produk->jumlah }}
+                                    @if ($spk_produk->deviasi_jml > 0)
+                                    <span class="text-emerald-500"> +{{ $spk_produk->deviasi_jml }}</span>
+                                    @elseif ($spk_produk->deviasi_jml < 0)
+                                    <span class="text-pink-500"> -{{ $spk_produk->deviasi_jml }}</span>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="spk_produk_detail hidden">
+                            <td colspan="2">
+                                <div class="flex">
+                                    <div>
+                                        <div class="border rounded border-violet-500 p-1 text-violet-500" onclick="toggle_element('spk_produk_selesai-{{ $key_spk_produk }}')">S: {{ $spk_produk->jml_selesai }}</div>
+                                        {{-- FORM TETAPKAN SPK ITEM SELESAI --}}
+                                        <div class="mt-1 hidden" id="spk_produk_selesai-{{ $key_spk_produk }}">
+                                            <form action="{{ route('spks.spk_item_tetapkan_selesai', $spk_produk->id) }}" method="POST" class="border rounded p-1">
+                                                @csrf
+                                                <table>
+                                                    <tr>
+                                                        <td>S</td><td>:</td>
+                                                        <td>
+                                                            <input type="hidden" name="nota_id" value="new">
+                                                            <input type="hidden" name="spk_produk_id" value="{{ $spk_produk->id }}">
+                                                            <input type="number" name="jumlah" id="" class="rounded text-xs p-1 w-14" value="{{ $spk_produk->jml_selesai }}">
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div class="text-center mt-1">
+                                                    <button type="submit" class="bg-violet-300 text-violet-700 rounded p-1">confirm</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {{-- END - FORM TETAPKAN SPK ITEM SELESAI --}}
+                                    </div>
+                                    <div class="ml-1">
+                                        <div class="border rounded border-emerald-500 p-1 text-emerald-500" onclick="toggle_element('spk_produk_nota-{{ $key_spk_produk }}')">
+                                            @foreach ($data_spk_produks[$key_spk_produk]['data_nota'] as $data_nota)
+                                            <div>N-{{ $data_nota['nota_id'] }}:{{ $data_nota['jumlah'] }}</div>
+                                            @endforeach
+                                        </div>
+                                        {{-- FORM INPUT SPK ITEM KE NOTA --}}
+                                        <div class="mt-1 hidden" id="spk_produk_nota-{{ $key_spk_produk }}">
+                                            <form action="{{ route('notas.create_or_edit_jumlah_spk_produk_nota', $spk_produk->id) }}" method="POST" class="border rounded p-1">
+                                                @csrf
+                                                <table>
+                                                    @foreach ($data_spk_produks[$key_spk_produk]['data_nota'] as $data_nota)
+                                                    <tr>
+                                                        <td>N-{{ $data_nota['nota_id'] }}</td><td>:</td>
+                                                        <td>
+                                                            <input type="hidden" name="nota_id[]" value="{{ $data_nota['nota_id'] }}">
+                                                            <input type="hidden" name="spk_produk_id[]" value="{{ $spk_produk->id }}">
+                                                            <input type="number" name="jumlah[]" id="" class="rounded text-xs p-1 w-14" value="{{ $data_nota['jumlah'] }}">
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                    <tr>
+                                                        <td>new</td><td>:</td>
+                                                        <td>
+                                                            <input type="hidden" name="nota_id[]" value="new">
+                                                            <input type="hidden" name="spk_produk_id[]" value="{{ $spk_produk->id }}">
+                                                            <input type="number" name="jumlah[]" id="" class="rounded text-xs p-1 w-14">
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div class="text-center mt-1">
+                                                    <button type="submit" class="bg-emerald-300 text-emerald-700 rounded p-1">confirm</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {{-- END - FORM INPUT SPK ITEM KE NOTA --}}
+                                    </div>
+                                    <div class="ml-1">
+                                        <div class="border rounded border-orange-400 p-1 text-orange-400">
+                                            @foreach ($data_spk_produks[$key_spk_produk]['data_srjalan'] as $data_srjalan)
+                                            <div>SJ-{{ $data_srjalan['srjalan_id'] }}:{{ $data_srjalan['jumlah'] }}</div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                         @endforeach
                         <tr><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                         <tr><th>Total</th><th>{{ $spk->jumlah_total }}</th></tr>
                     </table>
                 </div>
                 {{-- END - SPK Items --}}
+
             </div>
             {{-- END - SPK --}}
             <div>
@@ -140,15 +234,68 @@
                     {{-- Nota Items --}}
                     <div class="border rounded px-1 py-2 my-2" id="nota-items-{{ $key_nota }}">
                         <table class="w-full text-xs">
-                            <tr><th>Jml.</th><th>Nama Barang</th><th>Hrg.</th><th>Hrg. t</th></tr>
+                            <tr>
+                                <th>Jml.</th>
+                                <th>
+                                    <div class="flex items-center justify-center">
+                                        <span>Nama Barang</span>
+                                        <button type="button" id="spk_produk_nota_detail_button" class="ml-1 border rounded border-yellow-500 text-yellow-500 p-1" onclick="toggle_detail_classes(this.id,'spk_produk_nota_detail')">D</button>
+                                    </div>
+                                </th>
+                                <th>Hrg.</th><th>Hrg. t</th>
+                            </tr>
                             <tr><td><div class="text-center">---</div></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td><td><div class="text-center">---</div></td></tr>
-                            @foreach ($col_spk_produk_notas[$key_nota] as $spk_produk_nota)
+                            @foreach ($col_spk_produk_notas[$key_nota] as $key_spk_produk_nota => $spk_produk_nota)
                             <tr>
                                 <td><div class="text-center">{{ $spk_produk_nota->jumlah }}</div></td>
                                 <td>{{ $spk_produk_nota->nama_nota }}</td>
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div></td>
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga_t,0,',','.') }}</div></td>
                             </tr>
+                            {{-- SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
+                            <tr class="spk_produk_detail hidden">
+                                <td colspan="3">
+                                    <div>
+                                        <div class="border rounded border-orange-400 p-1 text-orange-400" onclick="toggle_element('spk_produk_nota_srjalan-{{ $key_spk_produk_nota }}')">
+                                            @foreach ($data_spk_produk_notas[$key_nota] as $data_srjalan)
+                                            {{ dd($data_srjalan) }}
+                                            <div>SJ-{{ $data_srjalan[$key_spk_produk_nota]['srjalan_id'] }}:{{ $data_srjalan[$key_spk_produk_nota]['jumlah'] }}</div>
+                                            @endforeach
+                                        </div>
+                                        {{-- FORM INPUT NOTA ITEM KE SJ --}}
+                                        <div class="mt-1 hidden" id="spk_produk_nota_srjalan-{{ $key_spk_produk_nota }}">
+                                            <form action="{{ route('notas.create_or_edit_jumlah_spk_produk_nota', $spk_produk->id) }}" method="POST" class="border rounded p-1">
+                                                @csrf
+                                                <table>
+                                                    @foreach ($data_spk_produk_notas[$key_nota] as $data_srjalan)
+                                                    <tr>
+                                                        <td>SJ-{{ $data_srjalan[$key_spk_produk_nota]['srjalan_id'] }}</td><td>:</td>
+                                                        <td>
+                                                            <input type="hidden" name="srjalan_id[]" value="{{ $data_srjalan[$key_spk_produk_nota]['srjalan_id'] }}">
+                                                            <input type="hidden" name="spk_produk_nota_id[]" value="{{ $spk_produk_nota->id }}">
+                                                            <input type="number" name="jumlah[]" id="" class="rounded text-xs p-1 w-14" value="{{ $data_srjalan['jumlah'] }}">
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                    <tr>
+                                                        <td>new</td><td>:</td>
+                                                        <td>
+                                                            <input type="hidden" name="srjalan_id[]" value="new">
+                                                            <input type="hidden" name="spk_produk_nota_id[]" value="{{ $spk_produk_nota->id }}">
+                                                            <input type="number" name="jumlah[]" id="" class="rounded text-xs p-1 w-14">
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div class="text-center mt-1">
+                                                    <button type="submit" class="bg-emerald-300 text-emerald-700 rounded p-1">confirm</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {{-- END - FORM INPUT NOTA ITEM KE SJ --}}
+                                    </div>
+                                </td>
+                            </tr>
+                            {{-- END - SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td></td><td><div class="text-center">---</div></td></tr>
                             <tr><th></th><th>Total</th><th></th><th>{{ number_format($nota->harga_total,0,',','.') }}</th></tr>
@@ -274,6 +421,25 @@
     </div>
   </main>
 </div>
+
+<script>
+    function toggle_detail_classes(btn_id, class_name) {
+        $(`.${class_name}`).toggle(300);
+        setTimeout(() => {
+            let display = $(`.${class_name}`).css('display');
+            let detail_button = document.getElementById(btn_id)
+            if (display === 'table-row') {
+                detail_button.classList.remove('text-yellow-500');
+                detail_button.classList.add('text-yellow-700');
+                detail_button.classList.add('bg-yellow-500');
+            } else {
+                detail_button.classList.remove('text-yellow-700');
+                detail_button.classList.remove('bg-yellow-500');
+                detail_button.classList.add('text-yellow-500');
+            }
+        }, 500);
+    }
+</script>
 @endsection
 {{-- <a href="https://www.flaticon.com/free-icons/fox" title="fox icons">Fox icons created by Freepik - Flaticon</a> --}}
 {{-- cat --}}

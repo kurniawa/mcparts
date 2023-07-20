@@ -168,7 +168,15 @@ class SpkController extends Controller
             'col_srjalans' => $data_spk_nota_srjalans['col_srjalans'],
             'col_ekspedisi_kontaks' => $data_spk_nota_srjalans['col_ekspedisi_kontaks'],
             'col_col_spk_produk_nota_srjalans' => $data_spk_nota_srjalans['col_col_spk_produk_nota_srjalans'],
+            'data_spk_produks' => $data_spk_nota_srjalans['data_spk_produks'],
+            'data_spk_produk_notas' => $data_spk_nota_srjalans['data_spk_produk_notas'],
         ];
         return view('spks.show', $data);
+    }
+
+    function spk_item_tetapkan_selesai(SpkProduk $spk_produk, Request $request) {
+        $post = $request->post();
+        dump($post);
+        dd($spk_produk);
     }
 }

@@ -9,6 +9,10 @@ function hideMenuCloseLayer(menu_id, close_layer_id) {
     $(`#${close_layer_id}`).hide();
 }
 
+function toggle_element(element_id) {
+    $(`#${element_id}`).toggle(300);
+}
+
 function formatHarga(harga) {
     // console.log(harga);
     let harga_ohne_titik = harga.replace(".", "");

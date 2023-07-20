@@ -157,7 +157,7 @@
 
         let toggle_button = document.getElementById(button);
         setTimeout(() => {
-            console.log($selectedDiv.css("display"));
+            // console.log($selectedDiv.css("display"));
             // console.log(`$selectedDiv.css("display") = ${$selectedDiv.css("display")}`);
             // if ($selectedDiv.css("display") === "block" || $selectedDiv.css("display") === "table-row") {
             //     $(`#${button}` + " img").attr("src", "/img/icons/dropup.svg");
