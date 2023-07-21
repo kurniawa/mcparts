@@ -21,6 +21,8 @@ class Spk extends Model
         // dd($spk_produks);
         $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
         $notas = collect();
+        $arr_notas = array(); // akan digunakan nanti untuk data tambahan spk_produks di bawah
+        $arr_srjalan = array(); // akan digunakan nanti untuk data tambahan spk_produks di bawah
         $cust_kontaks = collect();
         $col_spk_produk_notas = collect();
         $col_srjalans = collect();
@@ -29,6 +31,7 @@ class Spk extends Model
         foreach ($spk_notas as $spk_nota) {
             // DATA NOTA
             $nota = Nota::find($spk_nota->nota_id);
+            $arr_notas[] = $nota->id;
             $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
             $notas->push($nota);
             $col_spk_produk_notas->push($spk_produk_notas);
@@ -63,6 +66,7 @@ class Spk extends Model
             foreach ($nota_srjalans as $nota_srjalan) {
                 $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
                 $srjalans->push($srjalan);
+                $arr_srjalan[] = $srjalan->id;
                 $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
                 $col_spk_produk_nota_srjalans->push($spk_produk_nota_srjalans);
                 // EKSPEDISI_KONTAK
@@ -87,16 +91,42 @@ class Spk extends Model
             // END - DATA SJ
         }
         // DATA TAMBAHAN SPK_PRODUKS
-        $data_spk_produks = collect();
+        $data_spk_produks = array();
+        // dump($arr_notas);
         foreach ($spk_produks as $spk_produk) {
             $spk_produk_notas = SpkProdukNota::where('spk_produk_id', $spk_produk->id)->get();
-            $data_nota = collect();
+            $data_nota = array();
+            $arr_notas_2 = $arr_notas;
             foreach ($spk_produk_notas as $spk_produk_nota) {
-                $data_nota->push([
+                $data_nota[] = [
                     'nota_id'=>$spk_produk_nota->nota_id,
                     'jumlah'=>$spk_produk_nota->jumlah,
-                ]);
+                ];
+                // $data_nota->push([
+                //     'nota_id'=>$spk_produk_nota->nota_id,
+                //     'jumlah'=>$spk_produk_nota->jumlah,
+                // ]);
+                $arr_notas_2 = array_filter($arr_notas_2, function ($v) use ($spk_produk_nota) {
+                   return  $v != $spk_produk_nota->nota_id;
+                });
             }
+            if (count($arr_notas_2) !== 0) {
+                $arr_notas_2 = array_values($arr_notas_2);
+                foreach ($arr_notas_2 as $arr_nota) {
+                    $data_nota[] = [
+                        'nota_id'=>$arr_nota,
+                        'jumlah'=>0,
+                    ];
+                    // $data_nota->push([
+                    //     'nota_id'=>$arr_nota,
+                    //     'jumlah'=>null,
+                    // ]);
+                }
+            }
+            // usort($data_nota, function($a, $b) {return strcmp($a['nota_id'], $b['nota_id']);});
+            usort($data_nota, function($a, $b) {return $a['nota_id']<=>$b['nota_id'];});
+
+            // dump($data_nota);
             $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('spk_produk_id', $spk_produk->id)->get();
             $data_srjalan = collect();
             foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
@@ -105,23 +135,41 @@ class Spk extends Model
                     'jumlah'=>$spk_produk_nota_srjalan->jumlah,
                 ]);
             }
-            $data_spk_produks->push(['data_nota'=>$data_nota,'data_srjalan'=>$data_srjalan]);
+            $data_spk_produks[] = ['data_nota'=>$data_nota,'data_srjalan'=>$data_srjalan];
+            // $data_spk_produks->push(['data_nota'=>$data_nota,'data_srjalan'=>$data_srjalan]);
         }
+        // dd($arr_notas);
         // END - DATA TAMBAHAN SPK_PRODUKS
 
         // DATA TAMBAHAN SPK_PRODUK_NOTAS
         $data_spk_produk_notas = collect();
+        // dd($arr_srjalan);
         foreach ($col_spk_produk_notas as $spk_produk_notas) {
             $data_srjalan = collect();
             foreach ($spk_produk_notas as $spk_produk_nota) {
                 $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('spk_produk_nota_id', $spk_produk_nota->id)->get();
-                $data_srjalan_2 = collect();
+                $data_srjalan_2 = array();
+                $arr_srjalan_2 = $arr_srjalan;
                 foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
-                    $data_srjalan_2->push([
+                    $data_srjalan_2[] = [
                         'srjalan_id'=>$spk_produk_nota_srjalan->srjalan_id,
                         'jumlah'=>$spk_produk_nota_srjalan->jumlah,
-                    ]);
+                    ];
+                    $arr_srjalan_2 = array_filter($arr_srjalan_2, function ($v) use ($spk_produk_nota_srjalan) {
+                        return  $v != $spk_produk_nota_srjalan->srjalan_id;
+                     });
                 }
+                if (count($arr_srjalan_2) !== 0) {
+                    $arr_notas_2 = array_values($arr_notas_2);
+                    foreach ($arr_notas_2 as $arr_nota) {
+                        $data_srjalan_2[] = [
+                            'srjalan_id'=>$arr_nota,
+                            'jumlah'=>0,
+                        ];
+                    }
+                }
+                usort($data_srjalan_2, function($a, $b) {return $a['srjalan_id']<=>$b['srjalan_id'];});
+
                 $data_srjalan->push($data_srjalan_2);
             }
             $data_spk_produk_notas->push($data_srjalan);

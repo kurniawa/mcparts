@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Alamat;
 use App\Models\Menu;
-use App\Models\Nota;
-use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
 use App\Models\PelangganAlamat;
 use App\Models\PelangganKontak;
@@ -13,11 +11,8 @@ use App\Models\PelangganProduk;
 use App\Models\Produk;
 use App\Models\ProdukHarga;
 use App\Models\Spk;
-use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
-use App\Models\SpkProdukNotaSrjalan;
-use App\Models\Srjalan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -128,7 +123,7 @@ class SpkController extends Controller
                 'produk_id' => $produk_id,
                 'jumlah' => $post['produk_jumlah'][$key],
                 'jml_blm_sls' => $post['produk_jumlah'][$key],
-                'jml_t' => $post['produk_jumlah'][$key],
+                'jumlah_total' => $post['produk_jumlah'][$key],
                 'harga' => $harga,
                 'keterangan' => $post['produk_keterangan'][$key],
                 'status' => 'PROSES',
@@ -176,7 +171,38 @@ class SpkController extends Controller
 
     function spk_item_tetapkan_selesai(SpkProduk $spk_produk, Request $request) {
         $post = $request->post();
-        dump($post);
-        dd($spk_produk);
+        // dump($post);
+        // dd($spk_produk);
+        // VALIDASI
+        // JUMLAH TIDAK BOLEH KURANG DARI 0
+        // kalau 0 masih gapapa, semisal sempet salah input, sebenarnya item ini belum selesai, maka reset ke 0.
+        if ((int)$post['jumlah'] < 0) {
+            $request->validate(['error'=>'required'],['error.required'=>'jumlah < 0']);
+        }
+        // JUMLAH TIDAK BOLEH LEBIH DARI JUMLAH TOTAL SPK_PRODUK
+        if ((int)$post['jumlah'] > $spk_produk->jumlah_total) {
+            $request->validate(['error'=>'required'],['error.required'=>'jumlah > spk_produk->jumlah_total']);
+        }
+        // CEK APAKAH SUDAH NOTA?
+        // Kalau sudah, cek juga berapa yang masuk ke nota, karena untuk pengeditan, jumlah selesai tidak boleh kurang dari jumlah yang sudah Nota
+        $spk_produk_notas = SpkProdukNota::where('spk_produk_id', $spk_produk->id)->get();
+        if (count($spk_produk_notas) !== 0) {
+            $jumlah_sudah_nota = 0;
+            foreach ($spk_produk_notas as $spk_produk_nota) {
+                $jumlah_sudah_nota+=$spk_produk_nota->jumlah;
+            }
+            if ((int)$post['jumlah'] < $jumlah_sudah_nota) {
+                $request->validate(['error'=>'required'],['error.required'=>'jumlah < jumlah_sudah_nota -> hapus/edit nota_item terlebih dahulu!']);
+            }
+        }
+        // END - VALIDASI
+        $spk_produk->jumlah_selesai = $post['jumlah'];
+        $spk_produk->save();
+
+        return back()->with('success_','jumlah_selesai updated!');
+    }
+
+    function delete(Spk $spk) {
+        dd($spk);
     }
 }

@@ -41,4 +41,33 @@ class Pelanggan extends Model
         return $label_pelanggans;
     }
 
+    static function data($pelanggan_id) {
+        // Data Pelanggan
+        $pelanggan=Pelanggan::find($pelanggan_id);
+        // $pelanggan_nama=$pelanggan['nama'];
+
+        // Data Pelanggan - Alamat
+        $alamat_id=$long=$short=null;
+        $pelanggan_alamat=PelangganAlamat::where('pelanggan_id',$pelanggan['id'])->where('tipe','UTAMA')->first();
+        if ($pelanggan_alamat!==null) {
+            $alamat=Alamat::find($pelanggan_alamat['alamat_id']);
+            $long=$alamat['long'];
+            $short=$alamat['short'];
+        }
+        // Data Pelanggan - Kontak
+        $kontak_id = $kontak = null;
+        $kontak=PelangganKontak::where('pelanggan_id',$pelanggan['id'])->where('is_aktual','yes')->first();
+        if ($kontak !== null) {
+            $kontak_id = $kontak->id;
+        }
+
+        return [
+            "alamat_id" => $alamat_id,
+            "long" => $long,
+            "short" => $short,
+            "kontak" => $kontak,
+            "kontak_id" => $kontak_id,
+        ];
+    }
+
 }

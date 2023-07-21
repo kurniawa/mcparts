@@ -51,15 +51,18 @@ Route::controller(SpkController::class)->group(function(){
     Route::get('/spks/create','create')->name('spks.create');
     Route::post('/spks/store','store')->name('spks.store');
     Route::post('/spks/{spk_produk}/spk_item_tetapkan_selesai','spk_item_tetapkan_selesai')->name('spks.spk_item_tetapkan_selesai');
+    Route::post('/spks/{spk}/delete','delete')->name('spks.delete');
 });
 
 Route::controller(NotaController::class)->group(function(){
     Route::get('/notas','index')->name('notas.index');
-    Route::post('/notas/{spk_produk}/create_or_edit_jumlah_spk_produk_nota','create_or_edit_jumlah_spk_produk_nota')->name('notas.create_or_edit_jumlah_spk_produk_nota');
+    Route::post('/notas/{spk}/{spk_produk}/create_or_edit_jumlah_spk_produk_nota','create_or_edit_jumlah_spk_produk_nota')->name('notas.create_or_edit_jumlah_spk_produk_nota');
+    Route::post('/notas/{nota}/delete','delete')->name('notas.delete');
 });
 
 Route::controller(SrjalanController::class)->group(function(){
     Route::get('/sjs','index')->name('sjs.index');
+    Route::post('/sjs/{spk}/{spk_produk}/{spk_produk_nota}/create_or_edit_jumlah_spk_produk_nota_srjalan','create_or_edit_jumlah_spk_produk_nota_srjalan')->name('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan');
 });
 
 Route::controller(AccountingController::class)->group(function(){
