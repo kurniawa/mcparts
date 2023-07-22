@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\Produk;
 use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
@@ -61,16 +62,34 @@ class NotaController extends Controller
         // MULAI CERATE/EDIT NOTA
         $success_ = '';
         $user = Auth::user();
+        $produk = Produk::find($spk_produk->produk_id);
         for ($i=0; $i < count($post['nota_id']); $i++) {
             if ($post['nota_id'][$i] === 'new') {
                 Nota::create_from_spk_produk($spk, $spk_produk, $post['jumlah'][$i]);
                 $success_ .= '- new nota -';
             } else {
                 $spk_produk_nota = SpkProdukNota::where('spk_produk_id',$spk_produk->id)->where('nota_id',$post['nota_id'][$i])->first();
-                $spk_produk_nota->jumlah = $post['jumlah'][$i];
-                $spk_produk_nota->harga_t = $post['jumlah'][$i] * $spk_produk->harga;
-                $spk_produk_nota->save();
-                $success_ .= '- update spk_produk_nota -';
+                // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
+                // BERARTI BIKIN SPK_PRODUK_NOTA BARU
+                if ($spk_produk_nota === null) {
+                    $spk_produk_nota = SpkProdukNota::create([
+                        'spk_id'=>$spk->id,
+                        'produk_id'=>$spk_produk->produk_id,
+                        'spk_produk_id'=>$spk_produk->id,
+                        'nota_id'=>$post['nota_id'][$i],
+                        'jumlah'=>$post['jumlah'][$i],
+                        'nama_nota'=>$produk->nama_nota,
+                        'harga'=>$spk_produk->harga,
+                        'harga_t'=>$spk_produk->harga * $post['jumlah'][$i],
+                    ]);
+                    $success_ .= '- new spk_produk_nota -';
+                // END - BERARTI BIKIN SPK_PRODUK_NOTA BARU
+                } else {
+                    $spk_produk_nota->jumlah = $post['jumlah'][$i];
+                    $spk_produk_nota->harga_t = $post['jumlah'][$i] * $spk_produk->harga;
+                    $spk_produk_nota->save();
+                    $success_ .= '- update spk_produk_nota -';
+                }
                 // MEMASTIKAN DATA NOTA TERUPDATE
                 $spk_produk_notas = SpkProdukNota::where('nota_id', $post['nota_id'][$i])->get();
                 $jumlah_total = 0;

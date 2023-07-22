@@ -56,18 +56,18 @@ class SpkController extends Controller
         // SPK - CREATE dulu, supaya dapet ID nya
         $pelanggan = Pelanggan::find($post['pelanggan_id']);
         // Data Pelanggan - Alamat
-        $cust_long_ala=$cust_short=null;
+        $cust_long=$cust_short=null;
         $pelanggan_alamat=PelangganAlamat::where('pelanggan_id',$pelanggan['id'])->where('tipe','UTAMA')->first();
         if ($pelanggan_alamat!==null) {
             $alamat=Alamat::find($pelanggan_alamat['alamat_id']);
-            $cust_long_ala=$alamat['long'];
+            $cust_long=$alamat['long'];
             $cust_short=$alamat['short'];
         }
         // Data Pelanggan - Kontak
         $cust_kontak=PelangganKontak::where('pelanggan_id',$pelanggan['id'])->where('is_aktual','yes')->first();
 
         // Data Reseller
-        $reseller=$reseller_id=$reseller_nama=$reseller_long_ala=$reseller_short=$reseller_kontak=null;
+        $reseller=$reseller_id=$reseller_nama=$reseller_long=$reseller_short=$reseller_kontak=null;
 
         if ($post['reseller_id']!==null) {
             $reseller=Pelanggan::find($post['reseller_id']);
@@ -78,7 +78,7 @@ class SpkController extends Controller
             $reseller_alamat=PelangganAlamat::where('pelanggan_id',$reseller_id)->where('tipe','UTAMA')->first();
             if ($reseller_alamat!==null) {
                 $alamat_reseller=Alamat::find($reseller_alamat['alamat_id']);
-                $reseller_long_ala=$alamat_reseller['long'];
+                $reseller_long=$alamat_reseller['long'];
                 $reseller_short=$alamat_reseller['short'];
             }
             // Data Reseller - Kontak
@@ -93,11 +93,11 @@ class SpkController extends Controller
             'updated_by'=>$user['username'],
             'created_at'=>$created_at,
             'pelanggan_nama'=>$pelanggan->nama,
-            'cust_long_ala'=>$cust_long_ala,
+            'cust_long'=>$cust_long,
             'cust_short'=>$cust_short,
             'cust_kontak'=>$cust_kontak,
             'reseller_nama'=>$reseller_nama,
-            'reseller_long_ala'=>$reseller_long_ala,
+            'reseller_long'=>$reseller_long,
             'reseller_short'=>$reseller_short,
             'reseller_kontak'=>$reseller_kontak,
         ]);
@@ -140,9 +140,9 @@ class SpkController extends Controller
 
     function show(Spk $spk) {
         // dd($spk);
-        // $test_array = [["tipe_packing"=>"colly","jumlah"=>2406,"jml_packing"=>16],];
+        // $test_array = [["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16],];
         // $encoded_test_array = json_encode($test_array);
-        // $test_array2 = [["tipe_packing"=>"colly","jumlah"=>300,"jml_packing"=>2],];
+        // $test_array2 = [["tipe_packing"=>"colly","jumlah"=>300,"jumlah_packing"=>2],];
         // $encoded_test_array2 = json_encode($test_array2);
         // dump($test_array);
         // dump($encoded_test_array);

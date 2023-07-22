@@ -12,6 +12,7 @@ use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
 use App\Models\Srjalan;
+use App\Models\TipePacking;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
@@ -137,7 +138,7 @@ class ArtisanController extends Controller
         return back()->with('success_','spk_produks: nama_produk yang null sudah diisi!');
     }
 
-    function srjalan_fix_jml_packing() {
+    function srjalan_fix_jumlah_packing() {
         $srjalans = Srjalan::all();
         foreach ($srjalans as $srjalan) {
             $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
@@ -161,27 +162,27 @@ class ArtisanController extends Controller
                     $jml_rol = $srjalan->jml_rol;
                 } elseif ($spk_produk_nota_srjalan->tipe_packing === 'bal') {
                     $jml_bal_pcs += $spk_produk_nota_srjalan->jumlah;
-                    $jml_bal += $spk_produk_nota_srjalan->jml_packing;
+                    $jml_bal += $spk_produk_nota_srjalan->jumlah_packing;
                 }
             }
-            $jml_packing = array();
+            $jumlah_packing = array();
             if ($jml_colly !== 0) {
-                $jml_packing[]=(["tipe_packing"=>"colly","jumlah"=>$jml_colly_pcs,"jml_packing"=>$jml_colly]);
+                $jumlah_packing[]=(["tipe_packing"=>"colly","jumlah"=>$jml_colly_pcs,"jumlah_packing"=>$jml_colly]);
             }
             if ($jml_dus !== 0) {
-                $jml_packing[]=(["tipe_packing"=>"dus","jumlah"=>$jml_dus_pcs,"jml_packing"=>$jml_dus]);
+                $jumlah_packing[]=(["tipe_packing"=>"dus","jumlah"=>$jml_dus_pcs,"jumlah_packing"=>$jml_dus]);
             }
             if ($jml_rol !== 0) {
-                $jml_packing[]=(["tipe_packing"=>"rol","jumlah"=>$jml_rol_pcs,"jml_packing"=>$jml_rol]);
+                $jumlah_packing[]=(["tipe_packing"=>"rol","jumlah"=>$jml_rol_pcs,"jumlah_packing"=>$jml_rol]);
             }
             if ($jml_bal !== 0) {
-                $jml_packing[]=(["tipe_packing"=>"bal","jumlah"=>$jml_bal_pcs,"jml_packing"=>$jml_bal]);
+                $jumlah_packing[]=(["tipe_packing"=>"bal","jumlah"=>$jml_bal_pcs,"jumlah_packing"=>$jml_bal]);
             }
-            $srjalan->jml_packing = json_encode($jml_packing);
+            $srjalan->jumlah_packing = json_encode($jumlah_packing);
             $srjalan->save();
         }
 
-        return back()->with('success_','srjalan fix jml_packing');
+        return back()->with('success_','srjalan fix jumlah_packing');
     }
 
     function create_table_accounting() {
@@ -220,5 +221,25 @@ class ArtisanController extends Controller
         }
         $spk_notas = SpkNota::limit(10)->get();
         dd($spk_notas);
+    }
+
+    function create_table_tipe_packing() {
+        Schema::dropIfExists('tipe_packings');
+
+        Schema::create('tipe_packings', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        $tipe_packings = [
+            ['name'=>'bal'],['name'=>'colly'],['name'=>'dus'],['name'=>'rol']
+        ];
+
+        foreach ($tipe_packings as $tipe_packing) {
+            TipePacking::create(['name'=>$tipe_packing['name']]);
+        }
+
+        $tipe_packings = TipePacking::all();
+        dd($tipe_packings);
     }
 }

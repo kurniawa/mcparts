@@ -295,7 +295,7 @@
                     <div class="border rounded px-1 hidden" id="srjalan-items-{{ $key }}-{{ $key2 }}-{{ $key_srjalan }}">
                         <table class="w-full text-xs">
                             @foreach ($col_spk_produk_nota_srjalans[$key][$key2] as $spk_produk_nota_srjalan)
-                            <tr><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td>{{ $spk_produk_nota_srjalan->jml_packing }}</td><td>{{ $spk_produk_nota_srjalan->tipe_packing }}</td></tr>
+                            <tr><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td>{{ $spk_produk_nota_srjalan->jumlah_packing }}</td><td>{{ $spk_produk_nota_srjalan->tipe_packing }}</td></tr>
                             @endforeach
                         </table>
                     </div>

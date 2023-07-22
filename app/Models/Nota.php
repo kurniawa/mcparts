@@ -14,12 +14,12 @@ class Nota extends Model
     static function create_from_spk_produk($spk, $spk_produk, $jumlah_total) {
         $alamat_id = null;
         $kontak_id = null;
-        $cust_long_ala = null;
+        $cust_long = null;
         $cust_short = null;
         $cust_kontak = null;
         $reseller_alamat_id = null;
         $reseller_kontak_id = null;
-        $reseller_long_ala = null;
+        $reseller_long = null;
         $reseller_short = null;
         $reseller_kontak = null;
         $spk_notas = SpkNota::where('spk_id',$spk->id)->get();
@@ -28,26 +28,26 @@ class Nota extends Model
             $nota_acuan = Nota::find($spk_notas[0]->nota_id);
             $alamat_id = $nota_acuan->alamat_id;
             $kontak_id = $nota_acuan->kontak_id;
-            $cust_long_ala = $nota_acuan->cust_long_ala;
+            $cust_long = $nota_acuan->cust_long;
             $cust_short = $nota_acuan->cust_short;
             $cust_kontak = $nota_acuan->cust_kontak;
             $reseller_alamat_id = $nota_acuan->reseller_alamat_id;
             $reseller_kontak_id = $nota_acuan->reseller_kontak_id;
-            $reseller_long_ala = $nota_acuan->reseller_long_ala;
+            $reseller_long = $nota_acuan->reseller_long;
             $reseller_short = $nota_acuan->reseller_short;
             $reseller_kontak = $nota_acuan->reseller_kontak;
         } else {
             $pelanggan_data = Pelanggan::data($spk->pelanggan_id);
             $alamat_id = $pelanggan_data['alamat_id'];
             $kontak_id = $pelanggan_data['kontak_id'];
-            $cust_long_ala = $pelanggan_data['long'];
+            $cust_long = $pelanggan_data['long'];
             $cust_short = $pelanggan_data['short'];
             $cust_kontak = $pelanggan_data['kontak'];
             if ($spk->reseller_id !== null) {
                 $reseller_data = Pelanggan::data($spk->reseller_id);
                 $reseller_alamat_id = $reseller_data['alamat_id'];
                 $reseller_kontak_id = $reseller_data['kontak_id'];
-                $reseller_long_ala = $reseller_data['long'];
+                $reseller_long = $reseller_data['long'];
                 $reseller_short = $reseller_data['short'];
                 $reseller_kontak = $reseller_data['kontak'];
             }
@@ -62,13 +62,13 @@ class Nota extends Model
             'harga_total'=>$spk_produk->harga * $jumlah_total,
             //
             'alamat_id'=>$alamat_id,
-            'alamat_reseller_id'=>$reseller_alamat_id,
+            'reseller_alamat_id'=>$reseller_alamat_id,
             'kontak_id'=>$kontak_id,
-            'kontak_reseller_id'=>$reseller_kontak_id,
-            'cust_long_ala'=>$cust_long_ala,
+            'reseller_kontak_id'=>$reseller_kontak_id,
+            'cust_long'=>$cust_long,
             'cust_short'=>$cust_short,
             'cust_kontak'=>$cust_kontak,
-            'reseller_long_ala'=>$reseller_long_ala,
+            'reseller_long'=>$reseller_long,
             'reseller_short'=>$reseller_short,
             'reseller_kontak'=>$reseller_kontak,
             'created_by'=>$user->username,

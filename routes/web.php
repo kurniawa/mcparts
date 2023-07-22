@@ -62,7 +62,7 @@ Route::controller(NotaController::class)->group(function(){
 
 Route::controller(SrjalanController::class)->group(function(){
     Route::get('/sjs','index')->name('sjs.index');
-    Route::post('/sjs/{spk}/{spk_produk}/{spk_produk_nota}/create_or_edit_jumlah_spk_produk_nota_srjalan','create_or_edit_jumlah_spk_produk_nota_srjalan')->name('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan');
+    Route::post('/sjs/{spk}/{nota}/{spk_produk}/{spk_produk_nota}/create_or_edit_jumlah_spk_produk_nota_srjalan','create_or_edit_jumlah_spk_produk_nota_srjalan')->name('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan');
 });
 
 Route::controller(AccountingController::class)->group(function(){
@@ -70,7 +70,7 @@ Route::controller(AccountingController::class)->group(function(){
 });
 
 Route::controller(ArtisanController::class)->group(function(){
-    Route::get('/artisan-command','index')->name('artisan.index')->middleware();
+    Route::get('/artisan-command','index')->name('artisan.index')->middleware('auth');
     Route::post('/artisan-command/change-column-name','change_column_name')->name('artisan.change_column_name')->middleware('auth');
     Route::post('/artisan-command/lower-case-role','lower_case_role')->name('artisan.lower_case_role')->middleware('auth');
     Route::post('/artisan-command/create-spk-nota-relation','create_spk_nota_relation')->name('artisan.create_spk_nota_relation')->middleware('developer');
@@ -79,5 +79,5 @@ Route::controller(ArtisanController::class)->group(function(){
     Route::post('/artisan-command/symbolic-link','symbolic_link')->name('artisan.symbolic_link')->middleware('developer');
     Route::post('/artisan-command/optimize-clear','optimize_clear')->name('artisan.optimize_clear')->middleware('developer');
     Route::post('/artisan-command/spk-produk-fix-nama-produk','spk_produk_fix_nama_produk')->name('artisan.spk_produk_fix_nama_produk')->middleware('developer');
-    Route::post('/artisan-command/srjalan_fix_jml_packing','srjalan_fix_jml_packing')->name('artisan.srjalan_fix_jml_packing')->middleware('developer');
+    Route::post('/artisan-command/srjalan_fix_jumlah_packing','srjalan_fix_jumlah_packing')->name('artisan.srjalan_fix_jumlah_packing')->middleware('developer');
 });

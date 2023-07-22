@@ -70,10 +70,10 @@
                             <td>
                                 <div class="text-center">
                                     {{ $spk_produk->jumlah }}
-                                    @if ($spk_produk->deviasi_jml > 0)
-                                    <span class="text-emerald-500"> +{{ $spk_produk->deviasi_jml }}</span>
-                                    @elseif ($spk_produk->deviasi_jml < 0)
-                                    <span class="text-pink-500"> -{{ $spk_produk->deviasi_jml }}</span>
+                                    @if ($spk_produk->deviasi_jumlah > 0)
+                                    <span class="text-emerald-500"> +{{ $spk_produk->deviasi_jumlah }}</span>
+                                    @elseif ($spk_produk->deviasi_jumlah < 0)
+                                    <span class="text-pink-500"> -{{ $spk_produk->deviasi_jumlah }}</span>
                                     @endif
                                 </div>
                             </td>
@@ -121,7 +121,6 @@
                                                         <td>N-{{ $data_nota['nota_id'] }}</td><td>:</td>
                                                         <td>
                                                             <input type="hidden" name="nota_id[]" value="{{ $data_nota['nota_id'] }}">
-                                                            <input type="hidden" name="spk_produk_id[]" value="{{ $spk_produk->id }}">
                                                             <input type="number" name="jumlah[]" class="rounded text-xs p-1 w-14" value="{{ $data_nota['jumlah'] }}">
                                                         </td>
                                                     </tr>
@@ -130,7 +129,6 @@
                                                         <td>new</td><td>:</td>
                                                         <td>
                                                             <input type="hidden" name="nota_id[]" value="new">
-                                                            <input type="hidden" name="spk_produk_id[]" value="{{ $spk_produk->id }}">
                                                             <input type="number" name="jumlah[]" class="rounded text-xs p-1 w-14" step="1" min="0" value="0">
                                                         </td>
                                                     </tr>
@@ -226,8 +224,8 @@
                             <tr>
                                 <td class="align-top">Alamat</td><td class="align-top">:</td>
                                 <td class="align-top">
-                                    @if ($nota->cust_long_ala!==null)
-                                    @foreach (json_decode($nota->cust_long_ala,true) as $long)
+                                    @if ($nota->cust_long!==null)
+                                    @foreach (json_decode($nota->cust_long,true) as $long)
                                     <div>{{ $long }}</div>
                                     @endforeach
                                     @endif
@@ -282,7 +280,7 @@
                                             </div>
                                             {{-- FORM INPUT NOTA ITEM KE SJ --}}
                                             <div class="mt-1 hidden" id="spk_produk_nota_srjalan-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
-                                                <form action="{{ route('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan', [$spk->id, $spk_produk_nota->spk_produk_id, $spk_produk_nota->id]) }}" method="POST" class="border rounded p-1">
+                                                <form action="{{ route('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan', [$spk->id, $nota->id, $spk_produk_nota->spk_produk_id, $spk_produk_nota->id]) }}" method="POST" class="border rounded p-1">
                                                     @csrf
                                                     <table>
                                                         @foreach ($data_spk_produk_notas[$key_nota][$key_spk_produk_nota] as $data_srjalan)
@@ -290,7 +288,6 @@
                                                             <td>SJ-{{ $data_srjalan['srjalan_id'] }}</td><td>:</td>
                                                             <td>
                                                                 <input type="hidden" name="srjalan_id[]" value="{{ $data_srjalan['srjalan_id'] }}">
-                                                                <input type="hidden" name="spk_produk_nota_id[]" value="{{ $spk_produk_nota->id }}">
                                                                 <input type="number" name="jumlah[]" class="rounded text-xs p-1 w-14" value="{{ $data_srjalan['jumlah'] }}">
                                                             </td>
                                                         </tr>
@@ -299,7 +296,6 @@
                                                             <td>new</td><td>:</td>
                                                             <td>
                                                                 <input type="hidden" name="srjalan_id[]" value="new">
-                                                                <input type="hidden" name="spk_produk_nota_id[]" value="{{ $spk_produk_nota->id }}">
                                                                 <input type="number" name="jumlah[]" class="rounded text-xs p-1 w-14" step="1" min="0" value="0">
                                                             </td>
                                                         </tr>
@@ -421,21 +417,21 @@
                             <tr><th>jml.</th><th>nama barang</th><th>jml.p</th></tr>
                             <tr><td><div class="text-center">---</div></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                             @foreach ($col_col_spk_produk_nota_srjalans[$key2][$key_srjalan] as $spk_produk_nota_srjalan)
-                            <tr><td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div></td><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td><div class="text-center">{{ $spk_produk_nota_srjalan->jml_packing }} {{ $spk_produk_nota_srjalan->tipe_packing }}</div></td></tr>
+                            <tr><td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div></td><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah_packing }} {{ $spk_produk_nota_srjalan->tipe_packing }}</div></td></tr>
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                             <tr>
                                 <th></th><th>total</th>
                                 <th>
                                     {{-- {{ dump(json_decode('["nama"=>"nama1"],["nama"=>"nama2"]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('[["tipe_packing"=>"colly","jumlah"=>2406,"jml_packing"=>16]]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('["tipe_packing"=>"colly","jumlah"=>2406,"jml_packing"=>16]', true)) }} --}}
+                                    {{-- {{ dump(json_decode('[["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16]]', true)) }} --}}
+                                    {{-- {{ dump(json_decode('["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16]', true)) }} --}}
                                     {{-- {{ dump(json_decode('["Semabung Baru No 50", "Pangkalpinang - Bangka"]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('{"tipe_packing":"colly","jumlah":2406,"jml_packing":16}', true)) }} --}}
-                                    {{-- {{ dump($srjalan->jml_packing) }} --}}
-                                    {{-- {{ dd(json_decode($srjalan->jml_packing)) }} --}}
-                                    @foreach (json_decode($srjalan->jml_packing, true) as $jml_packing)
-                                    {{ $jml_packing['jml_packing'] }} {{ $jml_packing['tipe_packing'] }}
+                                    {{-- {{ dump(json_decode('{"tipe_packing":"colly","jumlah":2406,"jumlah_packing":16}', true)) }} --}}
+                                    {{-- {{ dump($srjalan->jumlah_packing) }} --}}
+                                    {{-- {{ dd(json_decode($srjalan->jumlah_packing)) }} --}}
+                                    @foreach (json_decode($srjalan->jumlah_packing, true) as $jumlah_packing)
+                                    {{ $jumlah_packing['jumlah_packing'] }} {{ $jumlah_packing['tipe_packing'] }}
                                     @endforeach
                                 </th>
                             </tr>

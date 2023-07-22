@@ -5,6 +5,8 @@
       <h1 class="text-3xl font-bold tracking-tight text-gray-900">Artisan Command Center</h1>
     </div>
   </header>
+  <x-errors-any></x-errors-any>
+  <x-validation-feedback></x-validation-feedback>
   <main class="text-xs">
       <form action="{{ route('artisan.lower_case_role') }}" method="post" class="ml-2">
           @csrf
@@ -64,28 +66,41 @@
         </form>
     </div> --}}
     <div class="ml-2 mt-5">
-        <form action="{{ route('artisan.srjalan_fix_jml_packing') }}" method="post">
+        <form action="{{ route('artisan.srjalan_fix_jumlah_packing') }}" method="post">
             @csrf
-            <p>Srjalan: Add Column: jml_packing -> string -> nanti value nya string json, karena tipe_packing bisa macam2: colly, dus, rol</p>
+            <p>Srjalan: Add Column: jumlah_packing -> string -> nanti value nya string json, karena tipe_packing bisa macam2: colly, dus, rol</p>
             <p>comment: type: string json</p>
-            <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">SJ: srjalan_fix_jml_packing</button>
-            <p>Hapus jml_colly, jml_dus, jml_rol -> karena ini hardcoded, bad programming</p>
+            <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">SJ: srjalan_fix_jumlah_packing</button>
+            <p>Jangan dulu sampe bener2 yakin: Hapus jml_colly, jml_dus, jml_rol -> karena ini hardcoded, bad programming</p>
         </form>
     </div>
 
-    <div class="ml-2 mt-5">
-        <form action="{{ route('artisan.srjalan_fix_jml_packing') }}" method="post">
+    <div class="ml-2 mt-5 flex">
+        <div class="border-2 border-sky-600 rounded p-1">
             @csrf
-            <p>hapus column spks: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id</p>
-            <p>Sisa column: 21</p>
-            <p>ganti nama column pada spk_produk: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
-            <p>ganti nama column pada spk_produk: hilangkan data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
-            <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">SJ: srjalan_fix_jml_packing</button>
-            <p>Hapus jml_colly, jml_dus, jml_rol -> karena ini hardcoded, bad programming</p>
-        </form>
+            <p>o) hapus column spks: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id, status_nota, status_sj, status_tree</p>
+            <p>-- Sisa column spks: 18</p>
+            <p>o) ganti nama column pada spk_produk: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
+            <p>-- hilangkan data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
+            <p>-- sisa column spk_produks: 17</p>
+            <p>o) ganti nama column pada notas: cust_long, reseller_alamat, reseller_kontak, dll</p>
+            <p>o) ganti nama column pada srjalans: cust_long, reseller_alamat, reseller_kontak, dll</p>
+            <p>o) ganti nama column pada spk_produk_nota_srjalan: jml_packing->jumlah_packing</p>
+        </div>
     </div>
-    <x-errors-any></x-errors-any>
-    <x-validation-feedback></x-validation-feedback>
+
+    <div class="ml-2 mt-5 flex">
+        <div class="border-2 border-sky-600 rounded p-1">
+            @csrf
+            <p>o) hapus column spks: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id, status_nota, status_sj, status_tree</p>
+            <p>-- Sisa column spks: 18</p>
+            <p>o) ganti nama column pada spk_produk: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
+            <p>-- hilangkan data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
+            <p>-- sisa column spk_produks: 17</p>
+            <p>o) ganti nama column pada notas: cust_long, reseller_alamat, reseller_kontak, dll</p>
+            <p>o) ganti nama column pada srjalans: cust_long, reseller_alamat, reseller_kontak, dll</p>
+        </div>
+    </div>
   </main>
 </div>
 @endsection
