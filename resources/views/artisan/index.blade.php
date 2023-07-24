@@ -89,17 +89,12 @@
         </div>
     </div>
 
-    <div class="ml-2 mt-5 flex">
-        <div class="border-2 border-sky-600 rounded p-1">
+
+    <div class="ml-2 mt-5">
+        <form action="{{ route('artisan.create_table_tipe_packing') }}" method="post">
             @csrf
-            <p>o) hapus column spks: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id, status_nota, status_sj, status_tree</p>
-            <p>-- Sisa column spks: 18</p>
-            <p>o) ganti nama column pada spk_produk: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
-            <p>-- hilangkan data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
-            <p>-- sisa column spk_produks: 17</p>
-            <p>o) ganti nama column pada notas: cust_long, reseller_alamat, reseller_kontak, dll</p>
-            <p>o) ganti nama column pada srjalans: cust_long, reseller_alamat, reseller_kontak, dll</p>
-        </div>
+            <button class="bg-orange-400 text-white font-semibold rounded px-3 py-2">create_table_tipe_packing</button>
+        </form>
     </div>
   </main>
 </div>

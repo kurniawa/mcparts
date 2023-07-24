@@ -17,7 +17,7 @@ class PelangganEkspedisi extends Model
         } else {
             $pelanggan_ekspedisi_utama=PelangganEkspedisi::where('pelanggan_id',$pelanggan_id)->where('tipe','UTAMA')->first();
         }
-        $ekspedisi_kontak_id=$ekspedisi_alamat_id=$ekspedisi_nama=$ekspedisi_long=$ekspedisi_short=$ekspedisi_kontak=null;
+        $ekspedisi_id = $ekspedisi_kontak_id=$ekspedisi_alamat_id=$ekspedisi_nama=$ekspedisi_long=$ekspedisi_short=$ekspedisi_kontak=null;
         if ($pelanggan_ekspedisi_utama!==null) {
             $ekspedisi_id=$pelanggan_ekspedisi_utama['ekspedisi_id'];
             $success_logs[]="Ditemukan ekspedisi utama ID:$ekspedisi_id";

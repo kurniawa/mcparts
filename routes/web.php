@@ -80,4 +80,5 @@ Route::controller(ArtisanController::class)->group(function(){
     Route::post('/artisan-command/optimize-clear','optimize_clear')->name('artisan.optimize_clear')->middleware('developer');
     Route::post('/artisan-command/spk-produk-fix-nama-produk','spk_produk_fix_nama_produk')->name('artisan.spk_produk_fix_nama_produk')->middleware('developer');
     Route::post('/artisan-command/srjalan_fix_jumlah_packing','srjalan_fix_jumlah_packing')->name('artisan.srjalan_fix_jumlah_packing')->middleware('developer');
+    Route::post('/artisan-command/create_table_tipe_packing','create_table_tipe_packing')->name('artisan.create_table_tipe_packing')->middleware('developer');
 });

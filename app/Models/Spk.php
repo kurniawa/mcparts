@@ -106,9 +106,11 @@ class Spk extends Model
                 //     'nota_id'=>$spk_produk_nota->nota_id,
                 //     'jumlah'=>$spk_produk_nota->jumlah,
                 // ]);
+                // dump($spk_produk_nota->nota_id);
                 $arr_notas_2 = array_filter($arr_notas_2, function ($v) use ($spk_produk_nota) {
                    return  $v != $spk_produk_nota->nota_id;
                 });
+                // dump($arr_notas);
             }
             if (count($arr_notas_2) !== 0) {
                 $arr_notas_2 = array_values($arr_notas_2);
@@ -142,38 +144,89 @@ class Spk extends Model
         // END - DATA TAMBAHAN SPK_PRODUKS
 
         // DATA TAMBAHAN SPK_PRODUK_NOTAS
+        // dump($arr_srjalan);
+        // 1. Surat Jalan mana saja yang terkait dengan spk?
+        $srjalan_ids = array();
+        foreach ($spk_notas as $spk_nota) {
+            $nota_srjalans = NotaSrjalan::where('nota_id', $spk_nota->nota_id)->get();
+            foreach ($nota_srjalans as $nota_srjalan) {
+                $srjalan_ids[] = $nota_srjalan->srjalan_id;
+            }
+        }
+        $srjalan_ids = array_unique($srjalan_ids); // filter duplicate
+        usort($srjalan_ids, function($a, $b) {return $a<=>$b;}); // sort dari yang id kecil
+
         $data_spk_produk_notas = collect();
-        // dd($arr_srjalan);
+        // dump($col_spk_produk_notas);
         foreach ($col_spk_produk_notas as $spk_produk_notas) {
-            $data_srjalan = collect();
+            $data_spk_produk_notas_2 = collect();
             foreach ($spk_produk_notas as $spk_produk_nota) {
                 $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('spk_produk_nota_id', $spk_produk_nota->id)->get();
-                $data_srjalan_2 = array();
-                $arr_srjalan_2 = $arr_srjalan;
-                foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
-                    $data_srjalan_2[] = [
-                        'srjalan_id'=>$spk_produk_nota_srjalan->srjalan_id,
-                        'jumlah'=>$spk_produk_nota_srjalan->jumlah,
-                    ];
-                    $arr_srjalan_2 = array_filter($arr_srjalan_2, function ($v) use ($spk_produk_nota_srjalan) {
-                        return  $v != $spk_produk_nota_srjalan->srjalan_id;
-                     });
-                }
-                if (count($arr_srjalan_2) !== 0) {
-                    $arr_notas_2 = array_values($arr_notas_2);
-                    foreach ($arr_notas_2 as $arr_nota) {
-                        $data_srjalan_2[] = [
-                            'srjalan_id'=>$arr_nota,
-                            'jumlah'=>0,
-                        ];
+                $data_spk_produk_notas_3 = collect();
+                if (count($spk_produk_nota_srjalans) !== 0) {
+                    // foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+                    //     foreach ($srjalan_ids as $srjalan_id) {
+                    //         if ($data_spk_produk_notas_3->contains('srjalan_id', $srjalan_id)) {
+                    //             if ($spk_produk_nota_srjalan->jumlah !== 0 && $spk_produk_nota_srjalan->jumlah !== null) {
+                    //                 foreach ($data_spk_produk_notas_3 as $data_spk_produk_nota) {
+                    //                     if ($data_spk_produk_nota['srjalan_id'] === $srjalan_id) {
+                    //                         $data_spk_produk_notas_3->push([
+                    //                             'srjalan_id' => $srjalan_id,
+                    //                             'jumlah' => $spk_produk_nota_srjalan->jumlah,
+                    //                         ]);
+                    //                     }
+                    //                 }
+                    //             }
+                    //         } else {
+                    //             if ($spk_produk_nota_srjalan->srjalan_id === $srjalan_id) {
+                    //                 $data_spk_produk_notas_3->push([
+                    //                     'srjalan_id' => $srjalan_id,
+                    //                     'jumlah' => $spk_produk_nota_srjalan->jumlah,
+                    //                 ]);
+                    //             } else {
+                    //                 $data_spk_produk_notas_3->push([
+                    //                     'srjalan_id' => $srjalan_id,
+                    //                     'jumlah' => 0,
+                    //                 ]);
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    dump($srjalan_ids);
+                    $srjalan_ids_2 = $srjalan_ids;
+                    foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+                        foreach ($srjalan_ids as $srjalan_id) {
+                            if ($spk_produk_nota_srjalan->srjalan_id === $srjalan_id) {
+                                $data_spk_produk_notas_3->push([
+                                    'srjalan_id' => $srjalan_id,
+                                    'jumlah' => $spk_produk_nota_srjalan->jumlah,
+                                ]);
+                                $srjalan_ids_2 = array_diff($srjalan_ids_2, array($srjalan_id));
+                                $srjalan_ids_2 = array_values($srjalan_ids_2);
+                            }
+                        }
+                        dump($srjalan_ids_2);
+                        foreach ($srjalan_ids_2 as $srjalan_id) {
+                            $data_spk_produk_notas_3->push([
+                                'srjalan_id' => $srjalan_id,
+                                'jumlah' => 0,
+                            ]);
+                        }
+                    }
+                } else { // ketika nota item belum memiliki srjalan sama sekali
+                    foreach ($srjalan_ids as $srjalan_id) {
+                        $data_spk_produk_notas_3->push([
+                            'srjalan_id' => $srjalan_id,
+                            'jumlah' => 0,
+                        ]);
                     }
                 }
-                usort($data_srjalan_2, function($a, $b) {return $a['srjalan_id']<=>$b['srjalan_id'];});
-
-                $data_srjalan->push($data_srjalan_2);
+                $data_spk_produk_notas_2->push($data_spk_produk_notas_3);
             }
-            $data_spk_produk_notas->push($data_srjalan);
+            $data_spk_produk_notas->push($data_spk_produk_notas_2);
         }
+        // dd($data_spk_produk_notas);
+
         // END - DATA TAMBAHAN SPK_PRODUK_NOTAS
 
         $data = [
@@ -188,7 +241,7 @@ class Spk extends Model
             'data_spk_produks' => $data_spk_produks,
             'data_spk_produk_notas' => $data_spk_produk_notas,
         ];
-
+        // dump($data_spk_produk_notas);
         return $data;
     }
 }

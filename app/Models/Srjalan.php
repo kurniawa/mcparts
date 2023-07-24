@@ -109,7 +109,7 @@ class Srjalan extends Model
         $user = Auth::user();
         $jumlah_packing = [[
             'tipe_packing' => $produk->tipe_packing,
-            'jumlah_packing' => $jumlah / $produk->aturan_packing,
+            'jumlah_packing' => round($jumlah / $produk->aturan_packing),
         ]];
         $jumlah_packing = json_encode($jumlah_packing);
         $srjalan = Srjalan::create([
@@ -163,11 +163,14 @@ class Srjalan extends Model
             'spk_id' => $spk->id,
             'produk_id' => $spk_produk->produk_id,
             'nota_id' => $nota->id,
+            'srjalan_id' => $srjalan->id,
             'spk_produk_id' => $spk_produk->id,
             'spk_produk_nota_id' => $spk_produk_nota->id,
             'tipe_packing' => $produk->tipe_packing,
             'jumlah' => $jumlah,
-            'jumlah_packing' => $jumlah / $produk->aturan_packing,
+            'jumlah_packing' => round($jumlah / $produk->aturan_packing),
         ]);
+
+        return $srjalan;
     }
 }

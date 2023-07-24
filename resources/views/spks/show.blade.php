@@ -87,7 +87,7 @@
                                         <div class="mt-1 hidden" id="spk_produk_selesai-{{ $key_spk_produk }}">
                                             <form action="{{ route('spks.spk_item_tetapkan_selesai', $spk_produk->id) }}" method="POST" class="border rounded p-1">
                                                 @csrf
-                                                <table>
+                                                <table class="text-xs">
                                                     <tr>
                                                         <td>S</td><td>:</td>
                                                         <td>
@@ -282,7 +282,7 @@
                                             <div class="mt-1 hidden" id="spk_produk_nota_srjalan-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
                                                 <form action="{{ route('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan', [$spk->id, $nota->id, $spk_produk_nota->spk_produk_id, $spk_produk_nota->id]) }}" method="POST" class="border rounded p-1">
                                                     @csrf
-                                                    <table>
+                                                    <table class="text-xs">
                                                         @foreach ($data_spk_produk_notas[$key_nota][$key_spk_produk_nota] as $data_srjalan)
                                                         <tr>
                                                             <td>SJ-{{ $data_srjalan['srjalan_id'] }}</td><td>:</td>
