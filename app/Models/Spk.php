@@ -192,7 +192,7 @@ class Spk extends Model
                     //         }
                     //     }
                     // }
-                    dump($srjalan_ids);
+                    // dump($srjalan_ids);
                     $srjalan_ids_2 = $srjalan_ids;
                     foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
                         foreach ($srjalan_ids as $srjalan_id) {
@@ -203,15 +203,16 @@ class Spk extends Model
                                 ]);
                                 $srjalan_ids_2 = array_diff($srjalan_ids_2, array($srjalan_id));
                                 $srjalan_ids_2 = array_values($srjalan_ids_2);
+                                // dump($spk_produk_nota->id, $srjalan_ids_2);
                             }
                         }
-                        dump($srjalan_ids_2);
-                        foreach ($srjalan_ids_2 as $srjalan_id) {
-                            $data_spk_produk_notas_3->push([
-                                'srjalan_id' => $srjalan_id,
-                                'jumlah' => 0,
-                            ]);
-                        }
+                        // dump($srjalan_ids_2);
+                    }
+                    foreach ($srjalan_ids_2 as $srjalan_id) {
+                        $data_spk_produk_notas_3->push([
+                            'srjalan_id' => $srjalan_id,
+                            'jumlah' => 0,
+                        ]);
                     }
                 } else { // ketika nota item belum memiliki srjalan sama sekali
                     foreach ($srjalan_ids as $srjalan_id) {

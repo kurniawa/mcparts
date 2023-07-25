@@ -387,7 +387,7 @@
                         </table>
                         <div class="border rounded border-sky-400">
                             <div class="text-center"><h3>Data Ekspedisi</h3></div>
-                            <table class="w-full">
+                            <table class="w-full text-xs">
                                 <tr><td>Ekspedisi</td><td>:</td><td>{{ $srjalan->ekspedisi_nama }}</td></tr>
                                 <tr>
                                     <td class="align-top">Alamat</td><td class="align-top">:</td>
