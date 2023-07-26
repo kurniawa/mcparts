@@ -122,7 +122,7 @@ class SpkController extends Controller
                 'spk_id' => $new_spk->id,
                 'produk_id' => $produk_id,
                 'jumlah' => $post['produk_jumlah'][$key],
-                'jml_blm_sls' => $post['produk_jumlah'][$key],
+                // 'jml_blm_sls' => $post['produk_jumlah'][$key],
                 'jumlah_total' => $post['produk_jumlah'][$key],
                 'harga' => $harga,
                 'keterangan' => $post['produk_keterangan'][$key],
@@ -176,11 +176,12 @@ class SpkController extends Controller
         // VALIDASI
         // JUMLAH TIDAK BOLEH KURANG DARI 0
         // kalau 0 masih gapapa, semisal sempet salah input, sebenarnya item ini belum selesai, maka reset ke 0.
-        if ((int)$post['jumlah'] < 0) {
+        $jumlah = (int)$post['jumlah'];
+        if ($jumlah < 0) {
             $request->validate(['error'=>'required'],['error.required'=>'jumlah < 0']);
         }
         // JUMLAH TIDAK BOLEH LEBIH DARI JUMLAH TOTAL SPK_PRODUK
-        if ((int)$post['jumlah'] > $spk_produk->jumlah_total) {
+        if ($jumlah > $spk_produk->jumlah_total) {
             $request->validate(['error'=>'required'],['error.required'=>'jumlah > spk_produk->jumlah_total']);
         }
         // CEK APAKAH SUDAH NOTA?
@@ -191,12 +192,19 @@ class SpkController extends Controller
             foreach ($spk_produk_notas as $spk_produk_nota) {
                 $jumlah_sudah_nota+=$spk_produk_nota->jumlah;
             }
-            if ((int)$post['jumlah'] < $jumlah_sudah_nota) {
+            if ($jumlah < $jumlah_sudah_nota) {
                 $request->validate(['error'=>'required'],['error.required'=>'jumlah < jumlah_sudah_nota -> hapus/edit nota_item terlebih dahulu!']);
             }
         }
         // END - VALIDASI
+        $status = 'BELUM';
+        if ($jumlah === $spk_produk->jumlah_total) {
+            $status = 'SELESAI';
+        } elseif ($jumlah <= $spk_produk->jumlah_total && $jumlah > 0) {
+            $status = 'SEBAGIAN';
+        }
         $spk_produk->jumlah_selesai = $post['jumlah'];
+        $spk_produk->status = $status;
         $spk_produk->save();
 
         return back()->with('success_','jumlah_selesai updated!');
@@ -204,5 +212,16 @@ class SpkController extends Controller
 
     function delete(Spk $spk) {
         dd($spk);
+    }
+
+    function selesai_all(Spk $spk) {
+        // dd($spk);
+        $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        foreach ($spk_produks as $spk_produk) {
+            $spk_produk->jumlah_selesai = $spk_produk->jumlah_total;
+            $spk_produk->status = 'SELESAI';
+            $spk_produk->save();
+        }
+        return back()->with('- selesai_all -');
     }
 }

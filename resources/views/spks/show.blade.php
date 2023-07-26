@@ -157,8 +157,13 @@
                 </div>
                 {{-- END - SPK Items --}}
                 {{-- OPSI SPK --}}
-                <div class="flex justify-end mt-1">
-                    <form action="{{ route('spks.delete',$spk->id) }}" method="POST" onsubmit="return confirm('Warning: Hapus SPK akan menghapus Nota dan Surat Jalan terkait!')">
+                <div class="flex justify-end mt-1 items-center">
+                    <form action="{{ route('spks.selesai_all',$spk->id) }}" method="POST" onsubmit="return confirm('Yakin menetapkan semua item pada SPK menjadi SELESAI?')">
+                        @csrf
+                        <button type="submit" class="bg-violet-200 text-violet-500 rounded font-bold text-md px-1" name="spk_id" value="{{ $spk->id }}">S</button>
+                    </form>
+                    <button type="button" class="ml-1 border border-emerald-200 text-emerald-500 rounded font-bold text-md px-1" id="btn_pilihan_nota" value="{{ $spk->id }}" onclick="toggle_light(this.id,'pilihan_nota',[],['bg-emerald-200'], 'block')">N</button>
+                    <form action="{{ route('spks.delete',$spk->id) }}" method="POST" class="ml-1" onsubmit="return confirm('Warning: Hapus SPK akan menghapus Nota dan Surat Jalan terkait!')">
                         @csrf
                         <button type="submit" class="bg-red-200 text-red-500 rounded" name="spk_id" value="{{ $spk->id }}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -167,6 +172,28 @@
                         </button>
                     </form>
                 </div>
+                {{-- NOTA ALL -> PILIHAN NOTA --}}
+                <div class="hidden" id="pilihan_nota">
+                    <div class="mt-1 flex justify-end">
+                        <form action="{{ route('notas.nota_all', $spk->id) }}" method="POST" class="border border-emerald-300 rounded p-1 text-emerald-500" onsubmit="return confirm('Yakin input semua item pada SPK ke Nota terpilih?')">
+                            @csrf
+                            @foreach ($notas as $key_pilih_nota => $nota)
+                            <div class="flex items-center mt-1">
+                                <input type="radio" name="nota_id" id="pilih_nota_id-{{ $key_pilih_nota }}" value="{{ $nota->id }}">
+                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                            </div>
+                            @endforeach
+                            <div class="flex items-center mt-1">
+                                <input type="radio" name="nota_id" id="pilih_nota_id-new" value="new">
+                                <label for="pilih_nota_id-new" class="ml-1">new</label>
+                            </div>
+                            <div class="text-center mt-1">
+                                <button type="submit" class="bg-emerald-300 text-emerald-700 rounded p-1">confirm</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {{-- END - NOTA ALL -> PILIHAN NOTA --}}
                 {{-- END - OPSI SPK --}}
             </div>
             {{-- END - SPK --}}
@@ -463,6 +490,30 @@
                 detail_button.classList.remove('text-yellow-700');
                 detail_button.classList.remove('bg-yellow-500');
                 detail_button.classList.add('text-yellow-500');
+            }
+        }, 500);
+    }
+
+    function toggle_light(btn_id, id, classes_to_remove, classes_to_add, display_ref) {
+        $(`#${id}`).toggle(300);
+        setTimeout(() => {
+            let display = $(`#${id}`).css('display');
+            // console.log(display);
+            let detail_button = document.getElementById(btn_id)
+            if (display === display_ref) {
+                classes_to_remove.forEach(element => {
+                    detail_button.classList.remove(element);
+                });
+                classes_to_add.forEach(element => {
+                    detail_button.classList.add(element);
+                });
+            } else {
+                classes_to_remove.forEach(element => {
+                    detail_button.classList.add(element);
+                });
+                classes_to_add.forEach(element => {
+                    detail_button.classList.remove(element);
+                });
             }
         }, 500);
     }

@@ -86,6 +86,7 @@
             <p>o) ganti nama column pada notas: cust_long, reseller_alamat, reseller_kontak, dll</p>
             <p>o) ganti nama column pada srjalans: cust_long, reseller_alamat, reseller_kontak, dll</p>
             <p>o) ganti nama column pada spk_produk_nota_srjalan: jml_packing->jumlah_packing</p>
+            <p>o) spk_produks column jumlah_sudah_nota dan jumlah_sudah_srjalan, siap2 dihapus</p>
         </div>
     </div>
 

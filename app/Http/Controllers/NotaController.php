@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\Pelanggan;
 use App\Models\Produk;
 use App\Models\Spk;
 use App\Models\SpkNota;
@@ -138,5 +139,118 @@ class NotaController extends Controller
         // MULAI DELETE NOTA
         $nota->delete();
         return back()->with('warnings_','- nota deleted -');
+    }
+
+    function nota_all(Spk $spk, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($spk);
+        if (!isset($post['nota_id'])) {
+            $request->validate(['error'=>'required'],['error.required'=>'isset($post[nota_id]) ?']);
+        }
+
+        $success_ = '';
+        $nota = collect();
+        $user = Auth::user();
+        if ($post['nota_id'] === 'new') {
+            $alamat_id = null;
+            $kontak_id = null;
+            $cust_long = null;
+            $cust_short = null;
+            $cust_kontak = null;
+            $reseller_alamat_id = null;
+            $reseller_kontak_id = null;
+            $reseller_long = null;
+            $reseller_short = null;
+            $reseller_kontak = null;
+            $pelanggan_data = Pelanggan::data($spk->pelanggan_id);
+            $alamat_id = $pelanggan_data['alamat_id'];
+            $kontak_id = $pelanggan_data['kontak_id'];
+            $cust_long = $pelanggan_data['long'];
+            $cust_short = $pelanggan_data['short'];
+            $cust_kontak = $pelanggan_data['kontak'];
+            if ($spk->reseller_id !== null) {
+                $reseller_data = Pelanggan::data($spk->reseller_id);
+                $reseller_alamat_id = $reseller_data['alamat_id'];
+                $reseller_kontak_id = $reseller_data['kontak_id'];
+                $reseller_long = $reseller_data['long'];
+                $reseller_short = $reseller_data['short'];
+                $reseller_kontak = $reseller_data['kontak'];
+            }
+            $nota = Nota::create([
+                'pelanggan_id'=>$spk->pelanggan_id,
+                'reseller_id'=>$spk->reseller_id,
+                'pelanggan_nama'=>$spk->pelanggan_nama,
+                'reseller_nama'=>$spk->reseller_nama,
+                // 'jumlah_total'=>$jumlah_total,
+                // 'harga_total'=>$spk_produk->harga * $jumlah_total,
+                //
+                'alamat_id'=>$alamat_id,
+                'reseller_alamat_id'=>$reseller_alamat_id,
+                'kontak_id'=>$kontak_id,
+                'reseller_kontak_id'=>$reseller_kontak_id,
+                'cust_long'=>$cust_long,
+                'cust_short'=>$cust_short,
+                'cust_kontak'=>$cust_kontak,
+                'reseller_long'=>$reseller_long,
+                'reseller_short'=>$reseller_short,
+                'reseller_kontak'=>$reseller_kontak,
+                'created_by'=>$user->username,
+                'updated_by'=>$user->username,
+            ]);
+            $nota->no_nota = "N-$nota->id";
+            $nota->save();
+
+            SpkNota::create([
+                'spk_id' => $spk->id,
+                'nota_id' => $nota->id,
+            ]);
+            $success_ .= '- nota new, update no_nota, spk_nota -';
+            // dump($nota);
+        } else {
+            $nota = Nota::find($post['nota_id']);
+        }
+        // dd($nota);
+        $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        foreach ($spk_produks as $spk_produk) {
+            // CEK APAKAH ITEM SUDAH NOTA
+            $spk_produk_notas = SpkProdukNota::where('spk_produk_id', $spk_produk->id)->get();
+            $jumlah_sudah_nota = 0;
+            foreach ($spk_produk_notas as $spk_produk_nota) {
+                $jumlah_sudah_nota += $spk_produk_nota->jumlah;
+            }
+            $jumlah_belum_nota = $spk_produk->jumlah_selesai - $jumlah_sudah_nota;
+            if ($jumlah_belum_nota > 0) {
+                $produk = Produk::find($spk_produk->produk_id);
+                SpkProdukNota::create([
+                    'spk_id'=>$spk->id,
+                    'produk_id'=>$spk_produk->produk_id,
+                    'spk_produk_id'=>$spk_produk->id,
+                    'nota_id'=>$nota->id,
+                    'jumlah'=>$jumlah_belum_nota,
+                    'nama_nota'=>$produk->nama_nota,
+                    'harga'=>$spk_produk->harga,
+                    'harga_t'=>$spk_produk->harga * $jumlah_belum_nota,
+                ]);
+            }
+            $spk_produk->jumlah_sudah_nota = $spk_produk->jumlah_selesai;
+            $spk_produk->save();
+            // END - CEK APAKAH ITEM SUDAH NOTA
+        }
+        $success_ .= '- loop spk_produks -';
+
+        // UPDATE NOTA: jumlah_total dan harga_total
+        $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
+        $jumlah_total = $harga_total = 0;
+        foreach ($spk_produk_notas as $spk_produk_nota) {
+            $jumlah_total += $spk_produk_nota->jumlah;
+            $harga_total += $spk_produk_nota->harga_t;
+        }
+        $nota->jumlah_total = $jumlah_total;
+        $nota->harga_total = $harga_total;
+        $nota->save();
+        $success_ .= '- update nota: jumlah_total, harga_total -';
+        // END - UPDATE NOTA: jumlah_total dan harga_total
+        return back()->with('success_', $success_);
     }
 }

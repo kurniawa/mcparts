@@ -52,12 +52,14 @@ Route::controller(SpkController::class)->group(function(){
     Route::post('/spks/store','store')->name('spks.store');
     Route::post('/spks/{spk_produk}/spk_item_tetapkan_selesai','spk_item_tetapkan_selesai')->name('spks.spk_item_tetapkan_selesai');
     Route::post('/spks/{spk}/delete','delete')->name('spks.delete');
+    Route::post('/spks/{spk}/selesai_all','selesai_all')->name('spks.selesai_all');
 });
 
 Route::controller(NotaController::class)->group(function(){
     Route::get('/notas','index')->name('notas.index');
     Route::post('/notas/{spk}/{spk_produk}/create_or_edit_jumlah_spk_produk_nota','create_or_edit_jumlah_spk_produk_nota')->name('notas.create_or_edit_jumlah_spk_produk_nota');
     Route::post('/notas/{nota}/delete','delete')->name('notas.delete');
+    Route::post('/notas/{spk}/nota_all','nota_all')->name('notas.nota_all');
 });
 
 Route::controller(SrjalanController::class)->group(function(){
