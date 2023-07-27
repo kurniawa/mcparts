@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
 use App\Models\Produk;
 use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
+use App\Models\SpkProdukNotaSrjalan;
+use App\Models\Srjalan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +27,7 @@ class NotaController extends Controller
         // JUMLAH PADA NOTA YANG SUDAH ADA, MASIH BOLEH 0 TAPI TIDAK BOLEH < 0
         // kalau 0 masih gapapa, semisal sempet salah input, sebenarnya item ini belum selesai, maka reset ke 0.
         $jumlah_input = 0;
+        // LOOPING UNTUK VALIDASI SEKALIGUS CONVERT MENJADI INTEGER
         for ($i=0; $i < count($post['jumlah']); $i++) {
             if ($post['jumlah'][$i] === null) {
                 $post['jumlah'][$i] = '0';
@@ -65,80 +69,84 @@ class NotaController extends Controller
         $user = Auth::user();
         $produk = Produk::find($spk_produk->produk_id);
         for ($i=0; $i < count($post['nota_id']); $i++) {
-            if ($post['nota_id'][$i] === 'new') {
-                Nota::create_from_spk_produk($spk, $spk_produk, $post['jumlah'][$i]);
-                $success_ .= '- new nota -';
-            } else {
-                $spk_produk_nota = SpkProdukNota::where('spk_produk_id',$spk_produk->id)->where('nota_id',$post['nota_id'][$i])->first();
-                // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
-                // BERARTI BIKIN SPK_PRODUK_NOTA BARU
-                if ($spk_produk_nota === null) {
-                    $spk_produk_nota = SpkProdukNota::create([
-                        'spk_id'=>$spk->id,
-                        'produk_id'=>$spk_produk->produk_id,
-                        'spk_produk_id'=>$spk_produk->id,
-                        'nota_id'=>$post['nota_id'][$i],
-                        'jumlah'=>$post['jumlah'][$i],
-                        'nama_nota'=>$produk->nama_nota,
-                        'harga'=>$spk_produk->harga,
-                        'harga_t'=>$spk_produk->harga * $post['jumlah'][$i],
-                    ]);
-                    $success_ .= '- new spk_produk_nota -';
-                // END - BERARTI BIKIN SPK_PRODUK_NOTA BARU
+            if ($post['jumlah'][$i] > 0) {
+                if ($post['nota_id'][$i] === 'new') {
+                    Nota::create_from_spk_produk($spk, $spk_produk, $post['jumlah'][$i]);
+                    $success_ .= '- new nota -';
                 } else {
-                    $spk_produk_nota->jumlah = $post['jumlah'][$i];
-                    $spk_produk_nota->harga_t = $post['jumlah'][$i] * $spk_produk->harga;
-                    $spk_produk_nota->save();
-                    $success_ .= '- update spk_produk_nota -';
+                    $spk_produk_nota = SpkProdukNota::where('spk_produk_id',$spk_produk->id)->where('nota_id',$post['nota_id'][$i])->first();
+                    // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
+                    // BERARTI BIKIN SPK_PRODUK_NOTA BARU
+                    if ($spk_produk_nota === null) {
+                        $spk_produk_nota = SpkProdukNota::create([
+                            'spk_id'=>$spk->id,
+                            'produk_id'=>$spk_produk->produk_id,
+                            'spk_produk_id'=>$spk_produk->id,
+                            'nota_id'=>$post['nota_id'][$i],
+                            'jumlah'=>$post['jumlah'][$i],
+                            'nama_nota'=>$produk->nama_nota,
+                            'harga'=>$spk_produk->harga,
+                            'harga_t'=>$spk_produk->harga * $post['jumlah'][$i],
+                        ]);
+                        $success_ .= '- new spk_produk_nota -';
+                    // END - BERARTI BIKIN SPK_PRODUK_NOTA BARU
+                    } else {
+                        $spk_produk_nota->jumlah = $post['jumlah'][$i];
+                        $spk_produk_nota->harga_t = $post['jumlah'][$i] * $spk_produk->harga;
+                        $spk_produk_nota->save();
+                        $success_ .= '- update spk_produk_nota -';
+                    }
+
+                    // MEMASTIKAN DATA NOTA TERUPDATE
+                    $spk_produk_notas = SpkProdukNota::where('nota_id', $post['nota_id'][$i])->get();
+                    $jumlah_total = 0;
+                    $harga_total = 0;
+                    foreach ($spk_produk_notas as $spk_produk_nota) {
+                        $jumlah_total += $spk_produk_nota->jumlah;
+                        $harga_total += $spk_produk_nota->harga_t;
+                    }
+                    $nota = Nota::find($post['nota_id'][$i]);
+                    $nota->jumlah_total = $jumlah_total;
+                    $nota->harga_total = $harga_total;
+                    $nota->updated_by = $user->username;
+                    $nota->save();
+                    $success_ .= '- update nota -';
+                    // END - MEMASTIKAN DATA NOTA TERUPDATE
                 }
-                // MEMASTIKAN DATA NOTA TERUPDATE
-                $spk_produk_notas = SpkProdukNota::where('nota_id', $post['nota_id'][$i])->get();
-                $jumlah_total = 0;
-                $harga_total = 0;
-                foreach ($spk_produk_notas as $spk_produk_nota) {
-                    $jumlah_total += $spk_produk_nota->jumlah;
-                    $harga_total += $spk_produk_nota->harga_t;
-                }
-                $nota = Nota::find($post['nota_id'][$i]);
-                $nota->jumlah_total = $jumlah_total;
-                $nota->harga_total = $harga_total;
-                $nota->updated_by = $user->username;
-                $nota->save();
-                $success_ .= '- update nota -';
-                // END - MEMASTIKAN DATA NOTA TERUPDATE
             }
         }
         // END - MULAI CREATE/EDIT NOTA
         return back()->with('success_', $success_);
     }
 
-    function delete(Nota $nota) {
+    function delete(Spk $spk, Nota $nota) {
         // dd($nota);
-        // UPDATE DATA SPK_PRODUK TERKAIT DENGAN SPK_PRODUK_NOTA
-        $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
-        foreach ($spk_produk_notas as $spk_produk_nota) {
-            $spk_produk = SpkProduk::find($spk_produk_nota->spk_produk_id);
-            $spk_produk->jumlah_sudah_nota = $spk_produk->jumlah_sudah_nota - $spk_produk_nota->jumlah;
-            $spk_produk->jumlah_sudah_srjalan = $spk_produk->jumlah_sudah_srjalan - $spk_produk_nota->jumlah;
-            $spk_produk->save();
-        }
-        // END - UPDATE DATA SPK_PRODUK TERKAIT DENGAN SPK_PRODUK_NOTA
-        // UPDATE DATA SPK TERKAIT DENGAN NOTA
-        $spk_notas = SpkNota::where('nota_id', $nota->id)->get();
-        foreach ($spk_notas as $spk_nota) {
-            $spk = Spk::find($spk_nota->spk_id);
-            $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
-            $jumlah_sudah_nota = 0;
-            foreach ($spk_produks as $spk_produk) {
-                $jumlah_sudah_nota += $spk_produk->jumlah_sudah_nota;
+        $danger_ = '';
+        $success_ = '';
+        $nota_srjalans = NotaSrjalan::where('nota_id', $nota->id)->get();
+        $nota->delete(); // akan menghapus spk_produk_nota, spk_produk_nota_srjalan terkait
+        $danger_ .= '-nota deleted-';
+        // KAJI ULANG SPK: status_nota, jumlah_sudah_nota
+        // KAJI ULANG SPK_PRODUKS: jumlah_sudah_nota
+        Nota::kaji_ulang_spk_dan_spk_produk($spk);
+        Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
+        $success_ .= '-spk dan spk_produks: kaji ulang-';
+        // END - PENGKAJIAN ULANG
+        // KAJI ULANG SRJALAN TERKAIT
+        foreach ($nota_srjalans as $nota_srjalan) {
+            $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+            $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
+            if (count($spk_produk_nota_srjalans) === 0) {
+                $srjalan->delete();
+                $danger_ .= '-srjalan deleted-';
             }
-            $spk->jumlah_sudah_nota = $jumlah_sudah_nota;
-            $spk->save();
         }
-        // END - UPDATE DATA SPK TERKAIT DENGAN NOTA
-        // MULAI DELETE NOTA
-        $nota->delete();
-        return back()->with('warnings_','- nota deleted -');
+        // END - KAJI ULANG SRJALAN TERKAIT
+        $feedback = [
+            'danger_' => $danger_,
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
     }
 
     function nota_all(Spk $spk, Request $request) {
@@ -251,6 +259,43 @@ class NotaController extends Controller
         $nota->save();
         $success_ .= '- update nota: jumlah_total, harga_total -';
         // END - UPDATE NOTA: jumlah_total dan harga_total
+        return back()->with('success_', $success_);
+    }
+
+    function edit_tanggal(Nota $nota, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($nota);
+        // VALIDASI
+        if ($post['created_day'] === null || $post['created_month'] === null || $post['created_year'] === null) {
+            $request->validate(['error'=>'required'],['error.required'=>'created_at?']);
+        }
+        if ($post['finished_day'] !== null) {
+            if ($post['finished_month'] === null || $post['finished_year'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        } elseif ($post['finished_month'] !== null) {
+            if ($post['finished_day'] === null || $post['finished_year'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        } elseif ($post['finished_year'] !== null) {
+            if ($post['finished_day'] === null || $post['finished_month'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        }
+        // END - VALIDASI
+        $user = Auth::user();
+        $created_at = date('Y-m-d', strtotime("$post[created_year]-$post[created_month]-$post[created_day]")) . " " . date("H:i:s");
+        $finished_at = null;
+        if ($post['finished_day'] !== null) {
+            $finished_at = date('Y-m-d', strtotime("$post[finished_year]-$post[finished_month]-$post[finished_day]")) . " " . date("H:i:s");
+        }
+
+        $nota->created_at = $created_at;
+        $nota->finished_at = $finished_at;
+        $nota->updated_by = $user->username;
+        $nota->save();
+        $success_ = '-$nota->created_at, finished_at updated-';
         return back()->with('success_', $success_);
     }
 }

@@ -12,9 +12,9 @@ class Menu extends Model
 
     public static function get() {
         $menus = collect([
-            ['name'=>'SPK','route'=>'spks.index'],
-            ['name'=>'Nota','route'=>'notas.index'],
-            ['name'=>'SJ','route'=>'sjs.index'],
+            // ['name'=>'SPK','route'=>'spks.index'],
+            // ['name'=>'Nota','route'=>'notas.index'],
+            // ['name'=>'SJ','route'=>'sjs.index'],
             ['name'=>'Accounting','route'=>'accounting.index'],
             ['name'=>'Artisan','route'=>'artisan.index'],
         ]);

@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Alamat;
 use App\Models\Menu;
+use App\Models\Nota;
+use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
 use App\Models\PelangganAlamat;
+use App\Models\PelangganEkspedisi;
 use App\Models\PelangganKontak;
 use App\Models\PelangganProduk;
 use App\Models\Produk;
 use App\Models\ProdukHarga;
 use App\Models\Spk;
+use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
+use App\Models\Srjalan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,11 +27,11 @@ class SpkController extends Controller
         $label_pelanggans = Pelanggan::label_pelanggans();
         $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
 
-        $produk_hargas = collect();
-        foreach ($label_produks as $produk) {
-            $produk_harga = ProdukHarga::where('produk_id', $produk->id)->latest()->first();
-            $produk_hargas->push($produk_harga);
-        }
+        // $produk_hargas = collect();
+        // foreach ($label_produks as $produk) {
+        //     $produk_harga = ProdukHarga::where('produk_id', $produk->id)->latest()->first();
+        //     $produk_hargas->push($produk_harga);
+        // }
         $data = [
             // 'goback' => 'home',
             // 'user_role' => $user_role,
@@ -41,7 +46,7 @@ class SpkController extends Controller
 
     function store(Request $request) {
         $post = $request->post();
-        dump($post);
+        // dump($post);
         // VALIDASI DATA
         $request->validate(['pelanggan_id'=>'required','produk_id'=>'required','produk_jumlah'=>'required']);
         if (in_array(null,$post['produk_id'],true)) {
@@ -88,18 +93,18 @@ class SpkController extends Controller
         $new_spk = Spk::create([
             'pelanggan_id'=>$post['pelanggan_id'],
             'reseller_id'=>$post['reseller_id'],
-            'judul'=>$post['judul'],
+            'keterangan'=>$post['keterangan'],
             'created_by'=>$user['username'],
             'updated_by'=>$user['username'],
             'created_at'=>$created_at,
             'pelanggan_nama'=>$pelanggan->nama,
-            'cust_long'=>$cust_long,
-            'cust_short'=>$cust_short,
-            'cust_kontak'=>$cust_kontak,
+            // 'cust_long'=>$cust_long,
+            // 'cust_short'=>$cust_short,
+            // 'cust_kontak'=>$cust_kontak,
             'reseller_nama'=>$reseller_nama,
-            'reseller_long'=>$reseller_long,
-            'reseller_short'=>$reseller_short,
-            'reseller_kontak'=>$reseller_kontak,
+            // 'reseller_long'=>$reseller_long,
+            // 'reseller_short'=>$reseller_short,
+            // 'reseller_kontak'=>$reseller_kontak,
         ]);
         // LANGSUNG UPDATE NO_SPK
         $new_spk->no_spk = "SPK-" . $new_spk->id;
@@ -108,6 +113,7 @@ class SpkController extends Controller
         // END - SPK - CREATE dulu, supaya dapet ID nya
 
         // SPK PRODUKS
+        $jumlah_total = 0;
         foreach ($post['produk_id'] as $key => $produk_id) {
             $pelanggan_produk = PelangganProduk::where('pelanggan_id', $pelanggan->id)->where('produk_id', $produk_id)->latest()->first();
             $harga = null;
@@ -129,13 +135,19 @@ class SpkController extends Controller
                 'status' => 'PROSES',
                 'nama_produk' => $post['produk_nama'][$key],
             ]);
+            $jumlah_total += (int)$post['produk_jumlah'][$key];
         }
         $success_ .= "- spk_produks";
         // END - SPK PRODUKS
+        // UPDATE SPK: jumlah_total
+        $new_spk->jumlah_total = $jumlah_total;
+        $new_spk->save();
+        $success_ .= "-spk: update jumlah_total-";
+        // END - UPDATE SPK: jumlah_total
         $feedback = [
             'success_' => $success_
         ];
-        return back()->with($feedback);
+        return redirect()->route('spks.show', $new_spk->id)->with($feedback);
     }
 
     function show(Spk $spk) {
@@ -150,6 +162,8 @@ class SpkController extends Controller
         // dd($encoded_test_array2);
         $data_spk_nota_srjalans = Spk::Data_SPK_Nota_Srjalan($spk);
         // dd($data_spk_nota_srjalans);
+        $label_pelanggans = Pelanggan::label_pelanggans();
+        $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'spks.create',
@@ -165,6 +179,8 @@ class SpkController extends Controller
             'col_col_spk_produk_nota_srjalans' => $data_spk_nota_srjalans['col_col_spk_produk_nota_srjalans'],
             'data_spk_produks' => $data_spk_nota_srjalans['data_spk_produks'],
             'data_spk_produk_notas' => $data_spk_nota_srjalans['data_spk_produk_notas'],
+            'label_pelanggans' => $label_pelanggans,
+            'label_produks' => $label_produks,
         ];
         return view('spks.show', $data);
     }
@@ -211,7 +227,30 @@ class SpkController extends Controller
     }
 
     function delete(Spk $spk) {
-        dd($spk);
+        // dd($spk);
+        $danger_ = '';
+        // CEK NOTA DAN SRJALAN
+        // Nota dan Srjalan apabila sudah dibuat, tidak terhapus otomatis, oleh karena itu hapus nota dan srjalan
+        $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
+        foreach ($spk_notas as $spk_nota) {
+            $nota = Nota::find($spk_nota->nota_id);
+            $nota_srjalans = NotaSrjalan::where('nota_id', $nota->id)->get();
+            foreach ($nota_srjalans as $nota_srjalan) {
+                $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+                $srjalan->delete();
+                $danger_ .= '-srjalan deleted-';
+            }
+            $nota->delete();
+            $danger_ .= '-nota deleted-';
+        }
+        // END - CEK NOTA DAN SRJALAN
+        $spk->delete();
+        $danger_ .= '-spk deleted-';
+
+        $feedback = [
+            'danger_' => $danger_
+        ];
+        return redirect()->route('home')->with($feedback);
     }
 
     function selesai_all(Spk $spk) {
@@ -222,6 +261,217 @@ class SpkController extends Controller
             $spk_produk->status = 'SELESAI';
             $spk_produk->save();
         }
-        return back()->with('- selesai_all -');
+        // UPDATE SPK - jumlah_selesai, status dan finished_at
+        $user = Auth::user();
+        $spk->jumlah_selesai = $spk->jumlah_total;
+        $spk->status = 'SELESAI';
+        $spk->finished_at = date("Y-m-d H:i:s");
+        $spk->updated_by = $user->username;
+        $spk->save();
+        // END - UPDATE SPK - jumlah_selesai, status dan finished_at
+        return back()->with('success_','-selesai_all-');
+    }
+
+    function edit_pelanggan(Spk $spk, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($spk);
+        $success_ = '';
+        $pelanggan_data = Pelanggan::data($post['pelanggan_id']);
+        $pelanggan_nama = $pelanggan_data['nama'];
+        $alamat_id = $pelanggan_data['alamat_id'];
+        $kontak_id = $pelanggan_data['kontak_id'];
+        $cust_long = $pelanggan_data['long'];
+        $cust_short = $pelanggan_data['short'];
+        $cust_kontak = $pelanggan_data['kontak'];
+        $reseller_nama = null;
+        $reseller_alamat_id = null;
+        $reseller_kontak_id = null;
+        $reseller_long = null;
+        $reseller_short = null;
+        $reseller_kontak = null;
+        if ($post['reseller_id'] !== null) {
+            $reseller_data = Pelanggan::data($post['reseller_id']);
+            $reseller_nama = $reseller_data['nama'];
+            $reseller_alamat_id = $reseller_data['alamat_id'];
+            $reseller_kontak_id = $reseller_data['kontak_id'];
+            $reseller_long = $reseller_data['long'];
+            $reseller_short = $reseller_data['short'];
+            $reseller_kontak = $reseller_data['kontak'];
+        }
+        // UPDATE SPK
+        $user = Auth::user();
+        $spk->update([
+            'pelanggan_id'=>$post['pelanggan_id'],
+            'reseller_id'=>$post['reseller_id'],
+            // 'judul'=>$post['judul'],
+            // 'created_by'=>$user['username'],
+            'pelanggan_nama'=>$pelanggan_nama,
+            'cust_long'=>$cust_long,
+            'cust_short'=>$cust_short,
+            'cust_kontak'=>$cust_kontak,
+            'reseller_nama'=>$reseller_nama,
+            'reseller_long'=>$reseller_long,
+            'reseller_short'=>$reseller_short,
+            'reseller_kontak'=>$reseller_kontak,
+            'updated_by'=>$user->username,
+        ]);
+        $success_ .= '-spk updated-';
+        // END - UPDATE SPK
+        // APAKAH SPK SUDAH ADA NOTA DAN SURAT JALAN?
+        // Kalau sudah maka data pelanggan dari nota dan srjalan terkait pun akan diedit
+        $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
+        foreach ($spk_notas as $spk_nota) {
+            $nota = Nota::find($spk_nota->nota_id);
+            $nota->update([
+                'pelanggan_id'=>$spk->pelanggan_id,
+                'reseller_id'=>$spk->reseller_id,
+                'pelanggan_nama'=>$spk->pelanggan_nama,
+                'reseller_nama'=>$spk->reseller_nama,
+                // 'jumlah_total'=>$jumlah_total,
+                // 'harga_total'=>$spk_produk->harga * $jumlah_total,
+                //
+                'alamat_id'=>$alamat_id,
+                'reseller_alamat_id'=>$reseller_alamat_id,
+                'kontak_id'=>$kontak_id,
+                'reseller_kontak_id'=>$reseller_kontak_id,
+                'cust_long'=>$cust_long,
+                'cust_short'=>$cust_short,
+                'cust_kontak'=>$cust_kontak,
+                'reseller_long'=>$reseller_long,
+                'reseller_short'=>$reseller_short,
+                'reseller_kontak'=>$reseller_kontak,
+                'updated_by'=>$user->username,
+            ]);
+            $success_ .= '-nota updated-';
+            $nota_srjalans = NotaSrjalan::where('nota_id', $nota->id)->get();
+            foreach ($nota_srjalans as $nota_srjalan) {
+                // EKSPEDISI
+                $ekspedisi_id = null;
+                $ekspedisi_nama = null;
+                $ekspedisi_alamat_id = null;
+                $ekspedisi_kontak_id = null;
+                $ekspedisi_long = null;
+                $ekspedisi_short = null;
+                $ekspedisi_kontak = null;
+                // TRANSIT
+                $transit_id = null;
+                $transit_nama = null;
+                $transit_alamat_id = null;
+                $transit_kontak_id = null;
+                $transit_long = null;
+                $transit_short = null;
+                $transit_kontak = null;
+                $ekspedisi_data = PelangganEkspedisi::data($nota->pelanggan_id, false);
+                // EKSPEDISI
+                $ekspedisi_id = $ekspedisi_data['ekspedisi_id'];
+                $ekspedisi_nama = $ekspedisi_data['ekspedisi_nama'];
+                $ekspedisi_alamat_id = $ekspedisi_data['ekspedisi_alamat_id'];
+                $ekspedisi_kontak_id = $ekspedisi_data['ekspedisi_kontak_id'];
+                $ekspedisi_long = $ekspedisi_data['ekspedisi_long'];
+                $ekspedisi_short = $ekspedisi_data['ekspedisi_short'];
+                $ekspedisi_kontak = $ekspedisi_data['ekspedisi_kontak'];
+                // TRANSIT
+                $transit_data = PelangganEkspedisi::data($nota->pelanggan_id, true);
+                $transit_id = $transit_data['transit_id'];
+                $transit_nama = $transit_data['transit_nama'];
+                $transit_alamat_id = $transit_data['transit_alamat_id'];
+                $transit_kontak_id = $transit_data['transit_kontak_id'];
+                $transit_long = $transit_data['transit_long'];
+                $transit_short = $transit_data['transit_short'];
+                $transit_kontak = $transit_data['transit_kontak'];
+                $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+                $srjalan->update([
+                    // PELANGGAN
+                    'pelanggan_id'=>$nota->pelanggan_id,
+                    'pelanggan_nama'=>$nota->pelanggan_nama,
+                    'alamat_id'=>$alamat_id,
+                    'kontak_id'=>$kontak_id,
+                    'cust_long'=>$cust_long,
+                    'cust_short'=>$cust_short,
+                    'cust_kontak'=>$cust_kontak,
+                    // RESELLER
+                    'reseller_id'=>$nota->reseller_id,
+                    'reseller_nama'=>$nota->reseller_nama,
+                    'reseller_alamat_id'=>$reseller_alamat_id,
+                    'reseller_kontak_id'=>$reseller_kontak_id,
+                    'reseller_long'=>$reseller_long,
+                    'reseller_short'=>$reseller_short,
+                    'reseller_kontak'=>$reseller_kontak,
+                    // EKSPEDISI
+                    'ekspedisi_id' => $ekspedisi_id,
+                    'ekspedisi_nama' => $ekspedisi_nama,
+                    'ekspedisi_alamat_id' => $ekspedisi_alamat_id,
+                    'ekspedisi_kontak_id' => $ekspedisi_kontak_id,
+                    'ekspedisi_long' => $ekspedisi_long,
+                    'ekspedisi_short' => $ekspedisi_short,
+                    'ekspedisi_kontak' => $ekspedisi_kontak,
+                    // TRANSIT
+                    'transit_id' => $transit_id,
+                    'transit_nama' => $transit_nama,
+                    'transit_alamat_id' => $transit_alamat_id,
+                    'transit_kontak_id' => $transit_kontak_id,
+                    'transit_long' => $transit_long,
+                    'transit_short' => $transit_short,
+                    'transit_kontak' => $transit_kontak,
+                    //
+                    // 'jumlah_packing'=>$jumlah_packing,
+                    // 'created_by'=>$user->username,
+                    'updated_by'=>$user->username,
+                ]);
+                $success_ .= '-srjalan updated-';
+            }
+        }
+        // END - APAKAH SPK SUDAH ADA NOTA DAN SURAT JALAN?
+        return back()->with('success_', $success_);
+    }
+
+    function edit_keterangan(Spk $spk, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($spk);
+        $user = Auth::user();
+        $spk->keterangan = $post['keterangan'];
+        $spk->updated_by = $user->username;
+        $spk->save();
+        $success_ = '-$spk->keterangan updated-';
+        return back()->with('success_', $success_);
+    }
+
+    function edit_tanggal(Spk $spk, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($spk);
+        // VALIDASI
+        if ($post['created_day'] === null || $post['created_month'] === null || $post['created_year'] === null) {
+            $request->validate(['error'=>'required'],['error.required'=>'created_at?']);
+        }
+        if ($post['finished_day'] !== null) {
+            if ($post['finished_month'] === null || $post['finished_year'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        } elseif ($post['finished_month'] !== null) {
+            if ($post['finished_day'] === null || $post['finished_year'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        } elseif ($post['finished_year'] !== null) {
+            if ($post['finished_day'] === null || $post['finished_month'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        }
+        // END - VALIDASI
+        $user = Auth::user();
+        $created_at = date('Y-m-d', strtotime("$post[created_year]-$post[created_month]-$post[created_day]")) . " " . date("H:i:s");
+        $finished_at = null;
+        if ($post['finished_day'] !== null) {
+            $finished_at = date('Y-m-d', strtotime("$post[finished_year]-$post[finished_month]-$post[finished_day]")) . " " . date("H:i:s");
+        }
+
+        $spk->created_at = $created_at;
+        $spk->finished_at = $finished_at;
+        $spk->updated_by = $user->username;
+        $spk->save();
+        $success_ = '-$spk->created_at, finished_at updated-';
+        return back()->with('success_', $success_);
     }
 }

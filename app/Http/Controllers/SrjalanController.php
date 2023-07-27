@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\NotaSrjalan;
 use App\Models\Produk;
 use App\Models\Spk;
+use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
@@ -22,6 +24,7 @@ class SrjalanController extends Controller
         // JUMLAH PADA NOTA YANG SUDAH ADA, MASIH BOLEH 0 TAPI TIDAK BOLEH < 0
         // kalau 0 masih gapapa, semisal sempet salah input, sebenarnya item ini belum selesai, maka reset ke 0.
         $jumlah_input = 0;
+        // DI DALAM LOOPING VALIDASI SEKALIGUS CONVERT MENJADI INTEGER
         for ($i=0; $i < count($post['jumlah']); $i++) {
             if ($post['jumlah'][$i] === null) {
                 $post['jumlah'][$i] = '0';
@@ -38,80 +41,125 @@ class SrjalanController extends Controller
             $request->validate(['error'=>'required'],['error.required'=>'jumlah_input > spk_produk_nota->jumlah']);
         }
         // END - VALIDASI
-        // MULAI CERATE/EDIT SRJALAN
+        // MULAI CREATE/EDIT SRJALAN
         $success_ = '';
         $user = Auth::user();
         $produk = Produk::find($spk_produk->produk_id);
         for ($i=0; $i < count($post['srjalan_id']); $i++) {
-            $srjalan = null;
-            if ($post['srjalan_id'][$i] === 'new') {
-                $srjalan = Srjalan::create_from_spk_produk_nota($spk, $nota, $produk, $spk_produk, $spk_produk_nota, $post['jumlah'][$i]);
-                $success_ .= '- new sj -';
-            } else {
-                $srjalan = Srjalan::find($post['srjalan_id'][$i]);
-                $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::where('spk_produk_nota_id',$spk_produk_nota->id)->where('srjalan_id',$post['srjalan_id'][$i])->first();
-                // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
-                // BERARTI BIKIN SPK_PRODUK_NOTA_SRJALAN BARU
-                if ($spk_produk_nota_srjalan === null) {
-                    $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::create([
-                        'spk_id' => $spk->id,
-                        'produk_id' => $spk_produk->produk_id,
-                        'nota_id' => $nota->id,
-                        'srjalan_id' => $srjalan->id,
-                        'spk_produk_id' => $spk_produk->id,
-                        'spk_produk_nota_id' => $spk_produk_nota->id,
-                        'tipe_packing' => $produk->tipe_packing,
-                        'jumlah' => $post['jumlah'][$i],
-                        'jumlah_packing' => round($post['jumlah'][$i] / $produk->aturan_packing),
-                    ]);
-                    $success_ .= '- new spk_produk_nota_srjalan -';
-                // END - BERARTI BIKIN SPK_PRODUK_NOTA_SRJALAN BARU
+            if ($post['jumlah'][$i] > 0) {
+                $srjalan = null;
+                if ($post['srjalan_id'][$i] === 'new') {
+                    $srjalan = Srjalan::create_from_spk_produk_nota($spk, $nota, $produk, $spk_produk, $spk_produk_nota, $post['jumlah'][$i]);
+                    $success_ .= '- new sj -';
                 } else {
-                    $spk_produk_nota_srjalan->jumlah = $post['jumlah'][$i];
-                    $spk_produk_nota_srjalan->jumlah_packing = round($post['jumlah'][$i] / $produk->aturan_packing);
-                    $spk_produk_nota_srjalan->save();
-                    $success_ .= '- update spk_produk_nota_srjalan -';
-                }
-                // MEMASTIKAN DATA SRJALAN TERUPDATE MELALUI LOOPING SPK_PRODUK_NOTA_SRJALANS
-                $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
-                $jumlah_packing = array();
-                $tipe_packings = TipePacking::all();
-                foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
-                    if (count($jumlah_packing) === 0) {
-                        $jumlah_packing[] = ["tipe_packing"=>$spk_produk_nota_srjalan->tipe_packing, "jumlah"=>$spk_produk_nota_srjalan->jumlah, "jumlah_packing"=>$spk_produk_nota_srjalan->jumlah_packing];
+                    // Strateginya adalah, apabila jumlah lebih dari 0 baru dia akan input ke surat jalan terkait
+                    $srjalan = Srjalan::find($post['srjalan_id'][$i]);
+                    $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::where('spk_produk_nota_id',$spk_produk_nota->id)->where('srjalan_id',$post['srjalan_id'][$i])->first();
+                    // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
+                    // BERARTI BIKIN SPK_PRODUK_NOTA_SRJALAN BARU
+                    if ($spk_produk_nota_srjalan === null) {
+                        $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::create([
+                            'spk_id' => $spk->id,
+                            'produk_id' => $spk_produk->produk_id,
+                            'nota_id' => $nota->id,
+                            'srjalan_id' => $srjalan->id,
+                            'spk_produk_id' => $spk_produk->id,
+                            'spk_produk_nota_id' => $spk_produk_nota->id,
+                            'tipe_packing' => $produk->tipe_packing,
+                            'jumlah' => $post['jumlah'][$i],
+                            'jumlah_packing' => round($post['jumlah'][$i] / $produk->aturan_packing),
+                        ]);
+                        $success_ .= '- new spk_produk_nota_srjalan -';
+                    // END - BERARTI BIKIN SPK_PRODUK_NOTA_SRJALAN BARU
                     } else {
-                        $is_tipe_packing_exist = false;
-                        foreach ($jumlah_packing as $jml_packing) {
-                            foreach ($tipe_packings as $tipe_packing) {
-                                if ($tipe_packing->name === $spk_produk_nota_srjalan->tipe_packing) {
-                                    if ($jml_packing['tipe_packing'] === $spk_produk_nota_srjalan->tipe_packing) {
-                                        $jml_packing['jumlah'] += $spk_produk_nota_srjalan->jumlah;
-                                        $jml_packing['jumlah_packing'] += $spk_produk_nota_srjalan->jumlah_packing;
-                                        $is_tipe_packing_exist = true;
-                                    }
-                                }
-                            }
-                        }
-                        if (!$is_tipe_packing_exist) {
-                            $jumlah_packing[] = ["tipe_packing"=>$spk_produk_nota_srjalan->tipe_packing, "jumlah"=>$spk_produk_nota_srjalan->jumlah, "jumlah_packing"=>$spk_produk_nota_srjalan->jumlah_packing];
-                        }
+                        $spk_produk_nota_srjalan->jumlah = $post['jumlah'][$i];
+                        $spk_produk_nota_srjalan->jumlah_packing = round($post['jumlah'][$i] / $produk->aturan_packing);
+                        $spk_produk_nota_srjalan->save();
+                        $success_ .= '- update spk_produk_nota_srjalan -';
                     }
+                    // MEMASTIKAN DATA SRJALAN TERUPDATE MELALUI LOOPING SPK_PRODUK_NOTA_SRJALANS
+                    Srjalan::update_jumlah_packing_srjalan($srjalan);
+                    $success_ .= '- update srjalan -';
+                    // END - MEMASTIKAN DATA SRJALAN TERUPDATE MELALUI LOOPING SPK_PRODUK_NOTA_SRJALANS
                 }
-                if (count($jumlah_packing) === 0) {
-                    $jumlah_packing = null;
-                } else {
-                    $jumlah_packing = json_encode($jumlah_packing);
-                }
-                // dump($srjalan);
-                // dd($jumlah_packing);
-                $srjalan->jumlah_packing = $jumlah_packing;
-                $srjalan->updated_by = $user->username;
-                $srjalan->save();
-                $success_ .= '- update srjalan -';
-                // END - MEMASTIKAN DATA SRJALAN TERUPDATE MELALUI LOOPING SPK_PRODUK_NOTA_SRJALANS
             }
         }
         // END - MULAI CREATE/EDIT SRJALAN
         return back()->with('success_', $success_);
+    }
+
+    function edit_tanggal(Srjalan $srjalan, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($srjalan);
+        // VALIDASI
+        if ($post['created_day'] === null || $post['created_month'] === null || $post['created_year'] === null) {
+            $request->validate(['error'=>'required'],['error.required'=>'created_at?']);
+        }
+        if ($post['finished_day'] !== null) {
+            if ($post['finished_month'] === null || $post['finished_year'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        } elseif ($post['finished_month'] !== null) {
+            if ($post['finished_day'] === null || $post['finished_year'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        } elseif ($post['finished_year'] !== null) {
+            if ($post['finished_day'] === null || $post['finished_month'] === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
+            }
+        }
+        // END - VALIDASI
+        $user = Auth::user();
+        $created_at = date('Y-m-d', strtotime("$post[created_year]-$post[created_month]-$post[created_day]")) . " " . date("H:i:s");
+        $finished_at = null;
+        if ($post['finished_day'] !== null) {
+            $finished_at = date('Y-m-d', strtotime("$post[finished_year]-$post[finished_month]-$post[finished_day]")) . " " . date("H:i:s");
+        }
+
+        $srjalan->created_at = $created_at;
+        $srjalan->finished_at = $finished_at;
+        $srjalan->updated_by = $user->username;
+        $srjalan->save();
+        $success_ = '-$srjalan->created_at, finished_at updated-';
+        return back()->with('success_', $success_);
+    }
+
+    function edit_jumlah_packing(Srjalan $srjalan, SpkProdukNotaSrjalan $spk_produk_nota_srjalan, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dump($srjalan);
+        // dd($spk_produk_nota_srjalan);
+        $success_ = '';
+        $spk_produk_nota_srjalan->jumlah_packing = $post['jumlah_packing'];
+        $spk_produk_nota_srjalan->save();
+        $success_ .= '-spk_produk_nota_srjalan updated-';
+
+        // UPDATE SRJALAN: JUMLAH_PACKING
+        Srjalan::update_jumlah_packing_srjalan($srjalan);
+        $success_ .= '-srjalan: jumlah_packing updated-';
+        // END - UPDATE SRJALAN: JUMLAH_PACKING
+        $feedback = [
+            'success_' => $success_
+        ];
+        return back()->with($feedback);
+    }
+
+    function delete(Spk $spk, Srjalan $srjalan) {
+        // dump($spk);
+        // dd($srjalan);
+        $danger_ = '';
+        $success_ = '';
+        $srjalan->delete();
+        $danger_ .= '-srjalan deleted-';
+        // SPK: kaji ulang jumlah_sudah_srjalan
+        Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
+        $success_ .= '-spk: jumlah_sudah_srjalan, status - kaji ulang-';
+        // END - SPK: kaji ulang jumlah_sudah_srjalan
+        $feedback = [
+            'danger_' => $danger_,
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
     }
 }

@@ -7,7 +7,7 @@
   </header>
   <main class="mx-1 max-w-7xl py-1 sm:px-6 lg:px-8 text-xs">
     <div class="flex justify-center">
-        <form action="{{ route('spks.store') }}" method="POST">
+        <form action="{{ route('spks.store') }}" method="POST" class="lg:w-1/2 md:w-3/4">
             @csrf
             <div class="border rounded p-2">
                 <div class="border-b pb-3">
@@ -48,7 +48,7 @@
                         </tr>
                         <tr>
                             <td>Ket. (opt.)</td><td><div class="mx-2">:</div></td>
-                            <td class="py-1"><input type="text" name="judul" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></td>
+                            <td class="py-1"><input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></td>
                         </tr>
                     </table>
                 </div>
@@ -129,7 +129,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                     </button>
-                    <input type="text" name="produk_nama[]" id="produk_nama-${index_spk_item}" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400" placeholder="nama item...">
+                    <input type="text" name="produk_nama[]" id="produk_nama-${index_spk_item}" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400 w-full" placeholder="nama item...">
                     <input type="hidden" name="produk_id[]" id="produk_id-${index_spk_item}">
                 </div>
                 <div class="mt-1 hidden" id="produk_keterangan-${index_spk_item}">

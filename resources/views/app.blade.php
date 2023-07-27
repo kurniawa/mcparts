@@ -8,6 +8,7 @@
   <main>
     {{-- SEARCH / FILTER --}}
     <x-errors-any></x-errors-any>
+    <x-validation-feedback></x-validation-feedback>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="flex">
             <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggleFilter(this.id,'filter-content')">Filter</button>

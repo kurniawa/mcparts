@@ -44,7 +44,7 @@ class Pelanggan extends Model
     static function data($pelanggan_id) {
         // Data Pelanggan
         $pelanggan=Pelanggan::find($pelanggan_id);
-        // $pelanggan_nama=$pelanggan['nama'];
+        $nama = $pelanggan->nama;
 
         // Data Pelanggan - Alamat
         $alamat_id=$long=$short=null;
@@ -62,6 +62,7 @@ class Pelanggan extends Model
         }
 
         return [
+            "nama" => $nama,
             "alamat_id" => $alamat_id,
             "long" => $long,
             "short" => $short,

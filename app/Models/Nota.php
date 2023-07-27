@@ -95,4 +95,33 @@ class Nota extends Model
             'harga_t'=>$spk_produk->harga * $jumlah_total,
         ]);
     }
+
+    static function kaji_ulang_spk_dan_spk_produk($spk) {
+        $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        $jumlah_sudah_nota_gabungan = 0;
+        foreach ($spk_produks as $spk_produk) {
+            $spk_produk_notas = SpkProdukNota::where('spk_produk_id', $spk_produk->id)->get();
+            $jumlah_sudah_nota = 0;
+            foreach ($spk_produk_notas as $spk_produk_nota) {
+                $jumlah_sudah_nota += $spk_produk_nota->jumlah;
+            }
+            $spk_produk->jumlah_sudah_nota = $jumlah_sudah_nota;
+            $spk_produk->save();
+
+            $jumlah_sudah_nota_gabungan += $jumlah_sudah_nota;
+        }
+
+        $status_nota = 'BELUM';
+        if ($spk->jumlah_total === $jumlah_sudah_nota_gabungan) {
+            $status_nota = 'SEMUA';
+        } elseif ($jumlah_sudah_nota_gabungan > 0) {
+            $status_nota = 'SEBAGIAN';
+        } elseif ($jumlah_sudah_nota_gabungan <= 0) {
+            $status_nota = 'BELUM';
+        }
+
+        $spk->status_nota = $status_nota;
+        $spk->jumlah_sudah_nota = $jumlah_sudah_nota_gabungan;
+        $spk->save();
+    }
 }

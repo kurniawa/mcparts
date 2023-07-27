@@ -173,4 +173,71 @@ class Srjalan extends Model
 
         return $srjalan;
     }
+
+    static function update_jumlah_packing_srjalan($srjalan) {
+        $user = Auth::user();
+        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
+        $jumlah_packing = array();
+        $tipe_packings = TipePacking::all();
+        foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+            if (count($jumlah_packing) === 0) {
+                $jumlah_packing[] = ["tipe_packing"=>$spk_produk_nota_srjalan->tipe_packing, "jumlah"=>$spk_produk_nota_srjalan->jumlah, "jumlah_packing"=>$spk_produk_nota_srjalan->jumlah_packing];
+            } else {
+                $is_tipe_packing_exist = false;
+                foreach ($jumlah_packing as $jml_packing) {
+                    foreach ($tipe_packings as $tipe_packing) {
+                        if ($tipe_packing->name === $spk_produk_nota_srjalan->tipe_packing) {
+                            if ($jml_packing['tipe_packing'] === $spk_produk_nota_srjalan->tipe_packing) {
+                                $jml_packing['jumlah'] += $spk_produk_nota_srjalan->jumlah;
+                                $jml_packing['jumlah_packing'] += $spk_produk_nota_srjalan->jumlah_packing;
+                                $is_tipe_packing_exist = true;
+                            }
+                        }
+                    }
+                }
+                if (!$is_tipe_packing_exist) {
+                    $jumlah_packing[] = ["tipe_packing"=>$spk_produk_nota_srjalan->tipe_packing, "jumlah"=>$spk_produk_nota_srjalan->jumlah, "jumlah_packing"=>$spk_produk_nota_srjalan->jumlah_packing];
+                }
+            }
+        }
+        if (count($jumlah_packing) === 0) {
+            $jumlah_packing = null;
+        } else {
+            $jumlah_packing = json_encode($jumlah_packing);
+        }
+        // dump($srjalan);
+        // dd($jumlah_packing);
+        $srjalan->jumlah_packing = $jumlah_packing;
+        $srjalan->updated_by = $user->username;
+        $srjalan->save();
+    }
+
+    static function kaji_ulang_spk_dan_spk_produk($spk) {
+        $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        $jumlah_sudah_srjalan_gabungan = 0;
+        foreach ($spk_produks as $spk_produk) {
+            $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('spk_produk_id', $spk_produk->id)->get();
+            $jumlah_sudah_srjalan = 0;
+            foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+                $jumlah_sudah_srjalan += $spk_produk_nota_srjalan->jumlah;
+            }
+            $spk_produk->jumlah_sudah_srjalan = $jumlah_sudah_srjalan;
+            $spk_produk->save();
+
+            $jumlah_sudah_srjalan_gabungan += $jumlah_sudah_srjalan;
+        }
+
+        $status_srjalan = 'BELUM';
+        if ($spk->jumlah_total === $jumlah_sudah_srjalan_gabungan) {
+            $status_srjalan = 'SEMUA';
+        } elseif ($jumlah_sudah_srjalan_gabungan > 0) {
+            $status_srjalan = 'SEBAGIAN';
+        } elseif ($jumlah_sudah_srjalan_gabungan <= 0) {
+            $status_srjalan = 'BELUM';
+        }
+
+        $spk->jumlah_sudah_srjalan = $jumlah_sudah_srjalan_gabungan;
+        $spk->status_srjalan = $status_srjalan;
+        $spk->save();
+    }
 }

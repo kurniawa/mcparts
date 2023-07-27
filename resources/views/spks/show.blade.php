@@ -15,40 +15,172 @@
                     <tr>
                         <td>Tgl.</td><td>:</td>
                         <td>
-                            <div class="flex items-center">
-                                <div class="flex">
-                                    @if ($spk->finished_at === null)
-                                    <div>
-                                        <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
-                                            <div>{{ date('d',strtotime($spk->created_at)) }}</div>
-                                            <div>{{ date('m-y',strtotime($spk->created_at)) }}</div>
+                            <div class="w-fit">
+                                <div class="flex items-center" onclick="toggle_element('form_edit_tanggal')">
+                                    <div class="flex">
+                                        @if ($spk->finished_at === null)
+                                        <div>
+                                            <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
+                                                <div>{{ date('d',strtotime($spk->created_at)) }}</div>
+                                                <div>{{ date('m-y',strtotime($spk->created_at)) }}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    @else
-                                    <div>
-                                        <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
-                                            <div>{{ date('d',strtotime($spk->created_at)) }}</div>
-                                            <div>{{ date('m-y',strtotime($spk->created_at)) }}</div>
+                                        @else
+                                        <div>
+                                            <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
+                                                <div>{{ date('d',strtotime($spk->created_at)) }}</div>
+                                                <div>{{ date('m-y',strtotime($spk->created_at)) }}</div>
+                                            </div>
                                         </div>
+                                        @endif
                                     </div>
-                                    @endif
-                                </div>
-                                <div class="flex ml-1">
-                                    @if ($spk->finished_at !== null)
-                                    <div>
-                                        <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
-                                            <div>{{ date('d',strtotime($spk->finished_at)) }}</div>
-                                            <div>{{ date('m-y',strtotime($spk->finished_at)) }}</div>
+                                    <div class="flex ml-1">
+                                        @if ($spk->finished_at !== null)
+                                        <div>
+                                            <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
+                                                <div>{{ date('d',strtotime($spk->finished_at)) }}</div>
+                                                <div>{{ date('m-y',strtotime($spk->finished_at)) }}</div>
+                                            </div>
                                         </div>
+                                        @else
+                                        <span class="font-bold">---</span>
+                                        @endif
                                     </div>
-                                    @else
-                                    <span class="font-bold">---</span>
-                                    @endif
                                 </div>
                             </div>
                         </td>
                     </tr>
-                    <tr><td>Untuk</td><td>:</td><td><a href="" class="text-indigo-500 font-semibold text-lg">{{ $nama_pelanggan }}</a></td></tr>
+                    <tr class="hidden" id="form_edit_tanggal">
+                        <td></td><td></td>
+                        <td>
+                            <form action="{{ route('spks.edit_tanggal', $spk->id) }}" method="POST" class="w-fit">
+                                @csrf
+                                <div>tgl. pembuatan:</div>
+                                <div class="flex items-center">
+                                    <div class="flex">
+                                        <select name="created_day" id="created_day" class="rounded text-xs pl-0 pr-7">
+                                            <option value="{{ date('d',strtotime($spk->created_at)) }}">{{ date('d',strtotime($spk->created_at)) }}</option>
+                                            <option value="">-</option>
+                                            @for ($i = 1; $i < 32; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <select name="created_month" id="created_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                            <option value="{{ date('m',strtotime($spk->created_at)) }}">{{ date('m',strtotime($spk->created_at)) }}</option>
+                                            <option value="">-</option>
+                                            @for ($i = 1; $i < 13; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <select name="created_year" id="created_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                            <option value="{{ date('Y',strtotime($spk->created_at)) }}">{{ date('Y',strtotime($spk->created_at)) }}</option>
+                                            <option value="">-</option>
+                                            @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-1">tgl. selesai:</div>
+                                @if ($spk->finished_at !== null)
+                                <div class="flex">
+                                    <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
+                                        <option value="{{ date('d',strtotime($spk->finished_at)) }}">{{ date('d',strtotime($spk->finished_at)) }}</option>
+                                        <option value="">-</option>
+                                        @for ($i = 1; $i < 32; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                    <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                        <option value="{{ date('m',strtotime($spk->finished_at)) }}">{{ date('m',strtotime($spk->finished_at)) }}</option>
+                                        <option value="">-</option>
+                                        @for ($i = 1; $i < 13; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                    <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                        <option value="{{ date('Y',strtotime($spk->finished_at)) }}">{{ date('Y',strtotime($spk->finished_at)) }}</option>
+                                        <option value="">-</option>
+                                        @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                @else
+                                <div class="flex">
+                                    <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
+                                        <option value="">-</option>
+                                        @for ($i = 1; $i < 32; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                    <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                        <option value="">-</option>
+                                        @for ($i = 1; $i < 13; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                    <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                        <option value="">-</option>
+                                        @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                @endif
+                                <div class="text-end mt-1">
+                                    <button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Untuk</td><td>:</td>
+                        <td>
+                            <div class="flex items-center">
+                                <a href="" class="text-indigo-500 font-semibold text-lg">{{ $nama_pelanggan }}</a>
+                                <button type="button" class="border border-slate-300 text-slate-400 rounded ml-1" id="btn_edit_pelanggan" onclick="toggle_light(this.id, 'form_edit_pelanggan', ['border', 'border-slate-300'], ['bg-slate-200'], 'table-row')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="form_edit_pelanggan" class="hidden">
+                        <td></td><td></td>
+                        <td>
+                            <form action="{{ route('spks.edit_pelanggan', $spk->id) }}" method="POST" onsubmit="return confirm('Data pelanggan pada Nota dan Srjalan(apabila sudah dibuat) akan berubah!')">
+                                @csrf
+                                @if ($spk->reseller_id !== null)
+                                <input type="text" name="pelanggan_nama" id="pelanggan_nama" placeholder="nama pelanggan..." value="{{ $spk->reseller_nama }} - {{ $spk->pelanggan_nama }}" class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                                @else
+                                <input type="text" name="pelanggan_nama" id="pelanggan_nama" placeholder="nama pelanggan..." value="{{ $spk->pelanggan_nama }}" class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                                @endif
+                                <input type="hidden" name="pelanggan_id" id="pelanggan_id" value="{{ $spk->pelanggan_id }}">
+                                <input type="hidden" name="reseller_id" id="reseller_id" value="{{ $spk->reseller_id }}">
+                                <button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Ket.</td><td>:</td>
+                        <td>
+                            <div class="inline-block" onclick="toggle_element('form_edit_keterangan')">{{ $spk->keterangan }}</div>
+                        </td>
+                    </tr>
+                    <tr id="form_edit_keterangan" class="hidden">
+                        <td></td><td></td>
+                        <td>
+                            <form action="{{ route('spks.edit_keterangan', $spk->id) }}" method="POST">
+                                @csrf
+                                <div class="flex items-center">
+                                    <input type="text" name="keterangan" value="{{ $spk->keterangan }}" placeholder="keterangan..." class="text-xs rounded px-1 py-0">
+                                    <button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1 ml-1">confirm</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
                 </table>
 
                 {{-- SPK Items --}}
@@ -59,6 +191,7 @@
                                 <div class="flex items-center justify-center">
                                     <span>Item Produksi</span>
                                     <button type="button" id="spk_produk_detail_button" class="ml-1 border rounded border-yellow-500 text-yellow-500 p-1" onclick="toggle_detail_classes(this.id,'spk_produk_detail')">D</button>
+
                                 </div>
                             </th>
                             <th>Jumlah</th>
@@ -158,12 +291,19 @@
                 {{-- END - SPK Items --}}
                 {{-- OPSI SPK --}}
                 <div class="flex justify-end mt-1 items-center">
-                    <form action="{{ route('spks.selesai_all',$spk->id) }}" method="POST" onsubmit="return confirm('Yakin menetapkan semua item pada SPK menjadi SELESAI?')">
+                    {{-- <form action="{{ route('spks.edit', $spk->id) }}" method="GET" class="ml-1 flex">
+                        <button class="border border-slate-300 text-slate-400 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                            </svg>
+                        </button>
+                    </form> --}}
+                    <form action="{{ route('spks.selesai_all',$spk->id) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Yakin menetapkan semua item pada SPK menjadi SELESAI?')">
                         @csrf
                         <button type="submit" class="bg-violet-200 text-violet-500 rounded font-bold text-md px-1" name="spk_id" value="{{ $spk->id }}">S</button>
                     </form>
                     <button type="button" class="ml-1 border border-emerald-200 text-emerald-500 rounded font-bold text-md px-1" id="btn_pilihan_nota" value="{{ $spk->id }}" onclick="toggle_light(this.id,'pilihan_nota',[],['bg-emerald-200'], 'block')">N</button>
-                    <form action="{{ route('spks.delete',$spk->id) }}" method="POST" class="ml-1" onsubmit="return confirm('Warning: Hapus SPK akan menghapus Nota dan Surat Jalan terkait!')">
+                    <form action="{{ route('spks.delete',$spk->id) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Warning: Hapus SPK akan menghapus Nota dan Surat Jalan terkait!')">
                         @csrf
                         <button type="submit" class="bg-red-200 text-red-500 rounded" name="spk_id" value="{{ $spk->id }}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -199,9 +339,9 @@
             {{-- END - SPK --}}
             <div>
                 @if (count($notas) === 0)
-                <div class="flex border-t pt-1 justify-center">
+                {{-- <div class="flex border-t pt-1 justify-center">
                     <div>none</div>
-                </div>
+                </div> --}}
                 @else
                 @foreach ($notas as $key_nota => $nota)
                 <div class="border-t-4 pt-2">
@@ -213,37 +353,122 @@
                             <tr>
                                 <td>Tgl.</td><td>:</td>
                                 <td>
-                                    <div class="flex">
-                                        <div class="flex">
-                                            @if ($nota->finished_at === null)
-                                            <div>
-                                                <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
-                                                    <div>{{ date('d',strtotime($nota->created_at)) }}</div>
-                                                    <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                    <div class="w-fit">
+                                        <div class="flex" onclick="toggle_element('form_edit_tanggal_nota')">
+                                            <div class="flex">
+                                                @if ($nota->finished_at === null)
+                                                <div>
+                                                    <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
+                                                        <div>{{ date('d',strtotime($nota->created_at)) }}</div>
+                                                        <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            @else
-                                            <div>
-                                                <div class="rounded p-1 bg-pink-500 text-white font-bold text-center">
-                                                    <div>{{ date('d',strtotime($nota->created_at)) }}</div>
-                                                    <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                                @else
+                                                <div>
+                                                    <div class="rounded p-1 bg-pink-500 text-white font-bold text-center">
+                                                        <div>{{ date('d',strtotime($nota->created_at)) }}</div>
+                                                        <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                                    </div>
                                                 </div>
+                                                @endif
                                             </div>
-                                            @endif
-                                        </div>
-                                        <div class="flex ml-1 items-center">
-                                            @if ($nota->finished_at !== null)
-                                            <div>
-                                                <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
-                                                    <div>{{ date('d',strtotime($nota->finished_at)) }}</div>
-                                                    <div>{{ date('m-y',strtotime($nota->finished_at)) }}</div>
+                                            <div class="flex ml-1 items-center">
+                                                @if ($nota->finished_at !== null)
+                                                <div>
+                                                    <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
+                                                        <div>{{ date('d',strtotime($nota->finished_at)) }}</div>
+                                                        <div>{{ date('m-y',strtotime($nota->finished_at)) }}</div>
+                                                    </div>
                                                 </div>
+                                                @else
+                                                <span class="font-bold">---</span>
+                                                @endif
                                             </div>
-                                            @else
-                                            <span class="font-bold">---</span>
-                                            @endif
                                         </div>
                                     </div>
+                                </td>
+                            </tr>
+                            <tr class="hidden" id="form_edit_tanggal_nota">
+                                <td colspan="3">
+                                    <form action="{{ route('notas.edit_tanggal', $nota->id) }}" method="POST" class="w-fit">
+                                        @csrf
+                                        <div>tgl. pembuatan:</div>
+                                        <div class="flex items-center">
+                                            <div class="flex">
+                                                <select name="created_day" id="created_day" class="rounded text-xs pl-0 pr-7">
+                                                    <option value="{{ date('d',strtotime($nota->created_at)) }}">{{ date('d',strtotime($nota->created_at)) }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = 1; $i < 32; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <select name="created_month" id="created_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                    <option value="{{ date('m',strtotime($nota->created_at)) }}">{{ date('m',strtotime($nota->created_at)) }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = 1; $i < 13; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <select name="created_year" id="created_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                    <option value="{{ date('Y',strtotime($nota->created_at)) }}">{{ date('Y',strtotime($nota->created_at)) }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mt-1">tgl. selesai:</div>
+                                        @if ($nota->finished_at !== null)
+                                        <div class="flex">
+                                            <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
+                                                <option value="{{ date('d',strtotime($nota->finished_at)) }}">{{ date('d',strtotime($nota->finished_at)) }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 32; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="{{ date('m',strtotime($nota->finished_at)) }}">{{ date('m',strtotime($nota->finished_at)) }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 13; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="{{ date('Y',strtotime($nota->finished_at)) }}">{{ date('Y',strtotime($nota->finished_at)) }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                        @else
+                                        <div class="flex">
+                                            <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 32; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 13; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="">-</option>
+                                                @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                        @endif
+                                        <div class="text-end mt-1">
+                                            <button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button>
+                                        </div>
+                                    </form>
                                 </td>
                             </tr>
                         </table>
@@ -290,12 +515,12 @@
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div></td>
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga_t,0,',','.') }}</div></td>
                             </tr>
-                            {{-- SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
+                            {{-- SPK_PRODUK_NOTA_DETAIL --}}
                             <tr class="spk_produk_nota_detail-{{ $key_nota }} hidden">
                                 <td colspan="3">
                                     <div class="flex">
                                         <div>
-                                            <div class="border rounded border-orange-400 p-1 text-orange-400" onclick="toggle_element('spk_produk_nota_srjalan-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
+                                            <div class="border rounded border-orange-400 p-1 text-orange-400" onclick="toggle_element('spk_produk_nota-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
                                                 {{-- {{ dump($data_spk_produk_notas) }} --}}
                                                 {{-- {{ dd($data_spk_produk_notas[$key_nota]) }} --}}
                                                 @foreach ($data_spk_produk_notas[$key_nota][$key_spk_produk_nota] as $data_srjalan)
@@ -306,7 +531,7 @@
                                                 @endforeach
                                             </div>
                                             {{-- FORM INPUT NOTA ITEM KE SJ --}}
-                                            <div class="mt-1 hidden" id="spk_produk_nota_srjalan-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
+                                            <div class="mt-1 hidden" id="spk_produk_nota-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
                                                 <form action="{{ route('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan', [$spk->id, $nota->id, $spk_produk_nota->spk_produk_id, $spk_produk_nota->id]) }}" method="POST" class="border rounded p-1">
                                                     @csrf
                                                     <table class="text-xs">
@@ -337,7 +562,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            {{-- END - SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
+                            {{-- END - SPK_PRODUK_NOTA_DETAIL --}}
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td></td><td><div class="text-center">---</div></td></tr>
                             <tr><th></th><th>Total</th><th></th><th>{{ number_format($nota->harga_total,0,',','.') }}</th></tr>
@@ -346,7 +571,7 @@
                     {{-- END - Nota Items --}}
                     {{-- OPSI NOTA --}}
                     <div class="flex justify-end mt-1 mb-2">
-                        <form action="{{ route('notas.delete',$nota->id) }}" method="POST" onsubmit="return confirm('Warning: Hapus Nota akan menghapus Surat Jalan terkait!')">
+                        <form action="{{ route('notas.delete',[$spk->id, $nota->id]) }}" method="POST" onsubmit="return confirm('Warning: Hapus Nota akan menghapus Surat Jalan terkait!')">
                             @csrf
                             <button type="submit" class="bg-red-200 text-red-500 rounded" name="nota_id" value="{{ $nota->id }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -364,9 +589,9 @@
             <div>
                 @foreach ($notas as $key2 => $nota)
                 @if (count($col_srjalans[$key2]) === 0)
-                <div class="flex border-b pt-1 justify-center">
+                {{-- <div class="flex border-b pt-1 justify-center">
                     <div>none</div>
-                </div>
+                </div> --}}
                 @else
                 @foreach ($col_srjalans[$key2] as $key_srjalan => $srjalan)
                 <div class="border-t-4 pt-2">
@@ -378,37 +603,122 @@
                             <tr>
                                 <td>Tgl.</td><td>:</td>
                                 <td>
-                                    <div class="flex">
-                                        <div class="flex">
-                                            @if ($srjalan->finished_at === null)
-                                            <div>
-                                                <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
-                                                    <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
-                                                    <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
+                                    <div class="w-fit">
+                                        <div class="flex" onclick="toggle_element('form_edit_tanggal_srjalan')">
+                                            <div class="flex">
+                                                @if ($srjalan->finished_at === null)
+                                                <div>
+                                                    <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
+                                                        <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
+                                                        <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            @else
-                                            <div>
-                                                <div class="rounded p-1 bg-pink-500 text-white font-bold text-center">
-                                                    <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
-                                                    <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
+                                                @else
+                                                <div>
+                                                    <div class="rounded p-1 bg-pink-500 text-white font-bold text-center">
+                                                        <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
+                                                        <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
+                                                    </div>
                                                 </div>
+                                                @endif
                                             </div>
-                                            @endif
-                                        </div>
-                                        <div class="flex ml-1 items-center">
-                                            @if ($srjalan->finished_at !== null)
-                                            <div>
-                                                <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
-                                                    <div>{{ date('d',strtotime($srjalan->finished_at)) }}</div>
-                                                    <div>{{ date('m-y',strtotime($srjalan->finished_at)) }}</div>
+                                            <div class="flex ml-1 items-center">
+                                                @if ($srjalan->finished_at !== null)
+                                                <div>
+                                                    <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
+                                                        <div>{{ date('d',strtotime($srjalan->finished_at)) }}</div>
+                                                        <div>{{ date('m-y',strtotime($srjalan->finished_at)) }}</div>
+                                                    </div>
                                                 </div>
+                                                @else
+                                                <span class="font-bold">---</span>
+                                                @endif
                                             </div>
-                                            @else
-                                            <span class="font-bold">---</span>
-                                            @endif
                                         </div>
                                     </div>
+                                </td>
+                            </tr>
+                            <tr class="hidden" id="form_edit_tanggal_srjalan">
+                                <td colspan="3">
+                                    <form action="{{ route('sjs.edit_tanggal', $srjalan->id) }}" method="POST" class="w-fit">
+                                        @csrf
+                                        <div>tgl. pembuatan:</div>
+                                        <div class="flex items-center">
+                                            <div class="flex">
+                                                <select name="created_day" id="created_day" class="rounded text-xs pl-0 pr-7">
+                                                    <option value="{{ date('d',strtotime($srjalan->created_at)) }}">{{ date('d',strtotime($srjalan->created_at)) }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = 1; $i < 32; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <select name="created_month" id="created_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                    <option value="{{ date('m',strtotime($srjalan->created_at)) }}">{{ date('m',strtotime($srjalan->created_at)) }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = 1; $i < 13; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <select name="created_year" id="created_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                    <option value="{{ date('Y',strtotime($srjalan->created_at)) }}">{{ date('Y',strtotime($srjalan->created_at)) }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mt-1">tgl. selesai:</div>
+                                        @if ($srjalan->finished_at !== null)
+                                        <div class="flex">
+                                            <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
+                                                <option value="{{ date('d',strtotime($srjalan->finished_at)) }}">{{ date('d',strtotime($srjalan->finished_at)) }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 32; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="{{ date('m',strtotime($srjalan->finished_at)) }}">{{ date('m',strtotime($srjalan->finished_at)) }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 13; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="{{ date('Y',strtotime($srjalan->finished_at)) }}">{{ date('Y',strtotime($srjalan->finished_at)) }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                        @else
+                                        <div class="flex">
+                                            <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 32; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="">-</option>
+                                                @for ($i = 1; $i < 13; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
+                                                <option value="">-</option>
+                                                @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                        @endif
+                                        <div class="text-end mt-1">
+                                            <button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button>
+                                        </div>
+                                    </form>
                                 </td>
                             </tr>
                         </table>
@@ -439,12 +749,33 @@
                     </div>
 
                     {{-- Srjalan Items --}}
-                    <div class="border rounded px-1 py-2 my-2" id="srjalan-items-{{ $key2 }}-{{ $key_srjalan }}">
+                    <div class="border rounded px-1 py-2 mt-2" id="srjalan-items-{{ $key2 }}-{{ $key_srjalan }}">
                         <table class="w-full text-xs">
-                            <tr><th>jml.</th><th>nama barang</th><th>jml.p</th></tr>
+                            <tr>
+                                <th>jml.</th>
+                                <th>nama barang</th>
+                                <th>jml.p</th>
+                            </tr>
                             <tr><td><div class="text-center">---</div></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
-                            @foreach ($col_col_spk_produk_nota_srjalans[$key2][$key_srjalan] as $spk_produk_nota_srjalan)
-                            <tr><td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div></td><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah_packing }} {{ $spk_produk_nota_srjalan->tipe_packing }}</div></td></tr>
+                            @foreach ($col_col_spk_produk_nota_srjalans[$key2][$key_srjalan] as $key_spk_produk_nota_srjalan => $spk_produk_nota_srjalan)
+                            <tr>
+                                <td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div></td><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td>
+                                <td>
+                                    <div class="text-center" onclick="toggle_element('spk_produk_nota_srjalan_colly-{{ $key_srjalan }}-{{ $key_spk_produk_nota_srjalan }}')">{{ $spk_produk_nota_srjalan->jumlah_packing }} {{ $spk_produk_nota_srjalan->tipe_packing }}</div>
+                                    {{-- SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
+                                    <form action="{{ route('sjs.edit_jumlah_packing', [$srjalan->id, $spk_produk_nota_srjalan->id]) }}" method="POST" id="spk_produk_nota_srjalan_colly-{{ $key_srjalan }}-{{ $key_spk_produk_nota_srjalan }}" class="border border-orange-400 rounded hidden">
+                                        @csrf
+                                        <table>
+                                            <tr>
+                                                <td><input type="number" name="jumlah_packing" value="{{ $spk_produk_nota_srjalan->jumlah_packing }}" class="rounded p-0 text-xs w-9"></td>
+                                            </tr>
+                                            <tr><td><button type="submit" class="bg-emerald-300 text-emerald-500 rounded px-1">confirm</button></td></tr>
+                                        </table>
+                                    </form>
+                                    {{-- END - SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
+                                </td>
+                            </tr>
+
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                             <tr>
@@ -466,6 +797,18 @@
                     </div>
                     {{-- END - Srjalan Items --}}
                 </div>
+                {{-- OPSI SRJALAN --}}
+                <div class="flex justify-end mt-1 mb-2">
+                    <form action="{{ route('sjs.delete',[$spk->id, $srjalan->id]) }}" method="POST" onsubmit="return confirm('Warning: Hapus Srjalan akan reset Item Nota(jumlah_sudah_srjalan) terkait!')">
+                        @csrf
+                        <button type="submit" class="bg-red-200 text-red-500 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+                {{-- END - OPSI SRJALAN --}}
                 @endforeach
                 @endif
                 @endforeach
@@ -517,6 +860,18 @@
             }
         }, 500);
     }
+
+    const label_pelanggans = {!! json_encode($label_pelanggans, JSON_HEX_TAG) !!}
+    $("#pelanggan_nama").autocomplete({
+        source: label_pelanggans,
+        select: function(event, ui) {
+            // console.log(ui);
+            $("#pelanggan_id").val(ui.item.id);
+            $("#reseller_id").val(ui.item.reseller_id);
+            // console.log(event);
+            // alert(ui.item.name);
+        }
+    });
 </script>
 @endsection
 {{-- <a href="https://www.flaticon.com/free-icons/fox" title="fox icons">Fox icons created by Freepik - Flaticon</a> --}}

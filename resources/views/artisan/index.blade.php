@@ -78,14 +78,15 @@
     <div class="ml-2 mt-5 flex">
         <div class="border-2 border-sky-600 rounded p-1">
             @csrf
-            <p>o) hapus column spks: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id, status_nota, status_sj, status_tree</p>
-            <p>-- Sisa column spks: 18</p>
-            <p>o) ganti nama column pada spk_produk: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
-            <p>-- hilangkan data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
-            <p>-- sisa column spk_produks: 17</p>
-            <p>o) ganti nama column pada notas: cust_long, reseller_alamat, reseller_kontak, dll</p>
-            <p>o) ganti nama column pada srjalans: cust_long, reseller_alamat, reseller_kontak, dll</p>
-            <p>o) ganti nama column pada spk_produk_nota_srjalan: jml_packing->jumlah_packing</p>
+            <p>o) spks - hapus column: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id, status_tree, harga_total</p>
+            <p>-- spks - sisa column: 19</p>
+            <p>-- spks - ganti: judul->keterangan, status_sj->status_srjalan, jumlah_sudah_sj->jumlah_sudah_srjalan</p>
+            <p>o) spk_produks - ganti nama column: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
+            <p>-- spk_produks - hapus column: data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
+            <p>-- spk_produks - sisa column: 17</p>
+            <p>o) notas - ganti nama column: cust_long, reseller_alamat, reseller_kontak, dll</p>
+            <p>o) srjalans - ganti nama column: cust_long, reseller_alamat, reseller_kontak, dll</p>
+            <p>o) spk_produk_nota_srjalans - ganti nama column: jml_packing->jumlah_packing</p>
             <p>o) spk_produks column jumlah_sudah_nota dan jumlah_sudah_srjalan, siap2 dihapus</p>
         </div>
     </div>
