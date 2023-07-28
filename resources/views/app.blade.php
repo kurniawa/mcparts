@@ -204,7 +204,7 @@
                                 </div>
                                 @else
                                 <div>
-                                    <div class="rounded p-1 bg-pink-400 text-white font-bold text-center">
+                                    <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
                                         <div>{{ date('d',strtotime($nota->created_at)) }}</div>
                                         <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
                                     </div>
@@ -214,7 +214,7 @@
                             <div class="flex ml-1 items-center">
                                 @if ($nota->finished_at !== null)
                                 <div>
-                                    <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
+                                    <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
                                         <div>{{ date('d',strtotime($nota->finished_at)) }}</div>
                                         <div>{{ date('m-y',strtotime($nota->finished_at)) }}</div>
                                     </div>
@@ -271,7 +271,7 @@
                                 </div>
                                 @else
                                 <div>
-                                    <div class="rounded p-1 bg-violet-400 text-white font-bold text-center">
+                                    <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
                                         <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
                                         <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
                                     </div>
@@ -281,7 +281,7 @@
                             <div class="flex ml-1 items-center">
                                 @if ($srjalan->finished_at !== null)
                                 <div>
-                                    <div class="rounded p-1 bg-sky-500 text-white font-bold text-center">
+                                    <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
                                         <div>{{ date('d',strtotime($srjalan->finished_at)) }}</div>
                                         <div>{{ date('m-y',strtotime($srjalan->finished_at)) }}</div>
                                     </div>

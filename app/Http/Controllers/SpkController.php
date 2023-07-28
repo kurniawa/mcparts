@@ -99,11 +99,11 @@ class SpkController extends Controller
             'created_at'=>$created_at,
             'pelanggan_nama'=>$pelanggan->nama,
             // 'cust_long'=>$cust_long,
-            // 'cust_short'=>$cust_short,
+            'cust_short'=>$cust_short,
             // 'cust_kontak'=>$cust_kontak,
             'reseller_nama'=>$reseller_nama,
             // 'reseller_long'=>$reseller_long,
-            // 'reseller_short'=>$reseller_short,
+            'reseller_short'=>$reseller_short,
             // 'reseller_kontak'=>$reseller_kontak,
         ]);
         // LANGSUNG UPDATE NO_SPK
@@ -179,9 +179,12 @@ class SpkController extends Controller
             'col_col_spk_produk_nota_srjalans' => $data_spk_nota_srjalans['col_col_spk_produk_nota_srjalans'],
             'data_spk_produks' => $data_spk_nota_srjalans['data_spk_produks'],
             'data_spk_produk_notas' => $data_spk_nota_srjalans['data_spk_produk_notas'],
+            'pilihan_srjalans' => $data_spk_nota_srjalans['pilihan_srjalans'],
             'label_pelanggans' => $label_pelanggans,
             'label_produks' => $label_produks,
         ];
+        // dump($data_spk_nota_srjalans['notas']);
+        // dd($data_spk_nota_srjalans['col_srjalans']);
         return view('spks.show', $data);
     }
 
@@ -473,5 +476,19 @@ class SpkController extends Controller
         $spk->save();
         $success_ = '-$spk->created_at, finished_at updated-';
         return back()->with('success_', $success_);
+    }
+
+    function print_out(Spk $spk) {
+        // dd($spk);
+        $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'spks.print_out',
+            'profile_menus' => Menu::get_profile_menus(),
+            'spk' => $spk,
+            'spk_produks' => $spk_produks,
+        ];
+
+        return view('spks.print_out', $data);
     }
 }

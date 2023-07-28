@@ -298,6 +298,11 @@
                             </svg>
                         </button>
                     </form> --}}
+                    <a href="{{ route('spks.print_out', $spk->id) }}" class="border border-slate-300 rounded text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+                        </svg>
+                    </a>
                     <form action="{{ route('spks.selesai_all',$spk->id) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Yakin menetapkan semua item pada SPK menjadi SELESAI?')">
                         @csrf
                         <button type="submit" class="bg-violet-200 text-violet-500 rounded font-bold text-md px-1" name="spk_id" value="{{ $spk->id }}">S</button>
@@ -365,7 +370,7 @@
                                                 </div>
                                                 @else
                                                 <div>
-                                                    <div class="rounded p-1 bg-pink-500 text-white font-bold text-center">
+                                                    <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
                                                         <div>{{ date('d',strtotime($nota->created_at)) }}</div>
                                                         <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
                                                     </div>
@@ -375,7 +380,7 @@
                                             <div class="flex ml-1 items-center">
                                                 @if ($nota->finished_at !== null)
                                                 <div>
-                                                    <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
+                                                    <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
                                                         <div>{{ date('d',strtotime($nota->finished_at)) }}</div>
                                                         <div>{{ date('m-y',strtotime($nota->finished_at)) }}</div>
                                                     </div>
@@ -570,8 +575,14 @@
                     </div>
                     {{-- END - Nota Items --}}
                     {{-- OPSI NOTA --}}
-                    <div class="flex justify-end mt-1 mb-2">
-                        <form action="{{ route('notas.delete',[$spk->id, $nota->id]) }}" method="POST" onsubmit="return confirm('Warning: Hapus Nota akan menghapus Surat Jalan terkait!')">
+                    <div class="flex justify-end mt-1 mb-2 items-center">
+                        <a href="{{ route('notas.print_out', $nota->id) }}" class="border border-slate-300 rounded text-slate-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+                            </svg>
+                        </a>
+                        <button type="button" class="ml-1 border border-yellow-200 text-yellow-500 rounded font-bold text-md px-1" id="btn_pilihan_srjalan-{{ $key_nota }}" onclick="toggle_light(this.id,'pilihan_srjalan-{{ $key_nota }}',[],['bg-yellow-200'], 'block')">SJ</button>
+                        <form action="{{ route('notas.delete',[$spk->id, $nota->id]) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Warning: Hapus Nota akan menghapus Surat Jalan terkait!')">
                             @csrf
                             <button type="submit" class="bg-red-200 text-red-500 rounded" name="nota_id" value="{{ $nota->id }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -581,6 +592,28 @@
                         </form>
                     </div>
                     {{-- END - OPSI NOTA --}}
+                    {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}
+                    <div class="hidden" id="pilihan_srjalan-{{ $key_nota }}">
+                        <div class="mt-1 flex justify-end">
+                            <form action="{{ route('sjs.srjalan_all', [$spk->id, $nota->id]) }}" method="POST" class="border border-yellow-300 rounded p-1 text-yellow-500" onsubmit="return confirm('Yakin input semua item pada SPK ke Srjalan terpilih?')">
+                                @csrf
+                                @foreach ($pilihan_srjalans as $key_pilih_srjalan => $srjalan_id)
+                                <div class="flex items-center mt-1">
+                                    <input type="radio" name="srjalan_id" id="pilih_srjalan_id-{{ $key_pilih_srjalan }}" value="{{ $srjalan_id }}">
+                                    <label for="pilih_srjalan_id-{{ $key_pilih_srjalan }}" class="ml-1">SJ-{{ $srjalan_id }}</label>
+                                </div>
+                                @endforeach
+                                <div class="flex items-center mt-1">
+                                    <input type="radio" name="srjalan_id" id="pilih_srjalan_id-new" value="new">
+                                    <label for="pilih_srjalan_id-new" class="ml-1">new</label>
+                                </div>
+                                <div class="text-center mt-1">
+                                    <button type="submit" class="bg-emerald-300 text-emerald-700 rounded p-1">confirm</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {{-- END - SRJALAN_ALL -> PILIHAN SRJALAN --}}
                 </div>
                 @endforeach
                 @endif
@@ -615,7 +648,7 @@
                                                 </div>
                                                 @else
                                                 <div>
-                                                    <div class="rounded p-1 bg-pink-500 text-white font-bold text-center">
+                                                    <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
                                                         <div>{{ date('d',strtotime($srjalan->created_at)) }}</div>
                                                         <div>{{ date('m-y',strtotime($srjalan->created_at)) }}</div>
                                                     </div>
@@ -625,7 +658,7 @@
                                             <div class="flex ml-1 items-center">
                                                 @if ($srjalan->finished_at !== null)
                                                 <div>
-                                                    <div class="rounded p-1 bg-blue-500 text-white font-bold text-center">
+                                                    <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
                                                         <div>{{ date('d',strtotime($srjalan->finished_at)) }}</div>
                                                         <div>{{ date('m-y',strtotime($srjalan->finished_at)) }}</div>
                                                     </div>
@@ -798,8 +831,13 @@
                     {{-- END - Srjalan Items --}}
                 </div>
                 {{-- OPSI SRJALAN --}}
-                <div class="flex justify-end mt-1 mb-2">
-                    <form action="{{ route('sjs.delete',[$spk->id, $srjalan->id]) }}" method="POST" onsubmit="return confirm('Warning: Hapus Srjalan akan reset Item Nota(jumlah_sudah_srjalan) terkait!')">
+                <div class="flex justify-end mt-1 mb-2 items-center">
+                    <a href="{{ route('sjs.print_out', $srjalan->id) }}" class="border border-slate-300 rounded text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+                        </svg>
+                    </a>
+                    <form action="{{ route('sjs.delete',[$spk->id, $srjalan->id]) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Warning: Hapus Srjalan akan reset Item Nota(jumlah_sudah_srjalan) terkait!')">
                         @csrf
                         <button type="submit" class="bg-red-200 text-red-500 rounded">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

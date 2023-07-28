@@ -78,8 +78,8 @@
     <div class="ml-2 mt-5 flex">
         <div class="border-2 border-sky-600 rounded p-1">
             @csrf
-            <p>o) spks - hapus column: cust_long_ala, cust_short, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_short, reseller_kontak, reseller_kontak_id, status_tree, harga_total</p>
-            <p>-- spks - sisa column: 19</p>
+            <p>o) spks - hapus column: cust_long_ala, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_kontak, reseller_kontak_id, status_tree, harga_total</p>
+            <p>-- spks - sisa column: 22</p>
             <p>-- spks - ganti: judul->keterangan, status_sj->status_srjalan, jumlah_sudah_sj->jumlah_sudah_srjalan</p>
             <p>o) spk_produks - ganti nama column: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
             <p>-- spk_produks - hapus column: data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>

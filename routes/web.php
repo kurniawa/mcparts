@@ -48,6 +48,7 @@ Route::controller(UserController::class)->group(function(){
 Route::controller(SpkController::class)->group(function(){
     // Route::get('/spks','index')->name('spks.index')->middleware('auth');
     Route::get('/spks/{spk}/show','show')->name('spks.show')->middleware('auth');
+    Route::get('/spks/{spk}/print_out','print_out')->name('spks.print_out')->middleware('auth');
     Route::get('/spks/create','create')->name('spks.create')->middleware('auth');
     Route::post('/spks/{spk}/edit_keterangan','edit_keterangan')->name('spks.edit_keterangan')->middleware('auth');
     Route::post('/spks/{spk}/edit_pelanggan','edit_pelanggan')->name('spks.edit_pelanggan')->middleware('auth');
@@ -59,7 +60,7 @@ Route::controller(SpkController::class)->group(function(){
 });
 
 Route::controller(NotaController::class)->group(function(){
-    // Route::get('/notas','index')->name('notas.index');
+    Route::get('/notas/{nota}/print_out','print_out')->name('notas.print_out');
     Route::post('/notas/{spk}/{spk_produk}/create_or_edit_jumlah_spk_produk_nota','create_or_edit_jumlah_spk_produk_nota')->name('notas.create_or_edit_jumlah_spk_produk_nota')->middleware('auth');
     Route::post('/notas/{spk}/{nota}/delete','delete')->name('notas.delete')->middleware('auth');
     Route::post('/notas/{spk}/nota_all','nota_all')->name('notas.nota_all')->middleware('auth');
@@ -67,11 +68,12 @@ Route::controller(NotaController::class)->group(function(){
 });
 
 Route::controller(SrjalanController::class)->group(function(){
-    // Route::get('/sjs','index')->name('sjs.index');
+    Route::get('/sjs/{srjalan}/print_out','print_out')->name('sjs.print_out');
     Route::post('/sjs/{spk}/{nota}/{spk_produk}/{spk_produk_nota}/create_or_edit_jumlah_spk_produk_nota_srjalan','create_or_edit_jumlah_spk_produk_nota_srjalan')->name('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan')->middleware('auth');
     Route::post('/sjs/{srjalan}/edit_tanggal','edit_tanggal')->name('sjs.edit_tanggal')->middleware('auth');
     Route::post('/sjs/{srjalan}/{spk_produk_nota_srjalan}/edit_jumlah_packing','edit_jumlah_packing')->name('sjs.edit_jumlah_packing')->middleware('auth');
     Route::post('/sjs/{spk}/{srjalan}/delete','delete')->name('sjs.delete')->middleware('auth');
+    Route::post('/sjs/{spk}/{nota}/srjalan_all','srjalan_all')->name('sjs.srjalan_all')->middleware('auth');
 });
 
 Route::controller(AccountingController::class)->group(function(){

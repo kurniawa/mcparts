@@ -227,6 +227,13 @@ class Spk extends Model
             $data_spk_produk_notas->push($data_spk_produk_notas_2);
         }
         // dd($data_spk_produk_notas);
+        // PILIHAN SRJALAN
+        $pilihan_srjalans = array();
+        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::select('srjalan_id')->groupBy('srjalan_id')->where('spk_id', $spk->id)->get();
+        foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+            $pilihan_srjalans[] = $spk_produk_nota_srjalan->srjalan_id;
+        }
+        // END - PILIHAN SRJALAN
 
         // END - DATA TAMBAHAN SPK_PRODUK_NOTAS
 
@@ -241,8 +248,9 @@ class Spk extends Model
             'spk_produks' => $spk_produks,
             'data_spk_produks' => $data_spk_produks,
             'data_spk_produk_notas' => $data_spk_produk_notas,
+            'pilihan_srjalans' => $pilihan_srjalans,
         ];
-        // dump($data_spk_produk_notas);
+        // dd($pilihan_srjalans);
         return $data;
     }
 }
