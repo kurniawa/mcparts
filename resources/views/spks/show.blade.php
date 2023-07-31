@@ -280,12 +280,44 @@
                                             @endforeach
                                         </div>
                                     </div>
+                                    <form action="{{ route('spks.delete_item', [$spk->id, $spk_produk->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus spk_item akan merubah data nota_items dan srjalan_items!')">
+                                        @csrf
+                                        <button class="text-red-400" type="submit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                         @endforeach
                         <tr><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                         <tr><th>Total</th><th>{{ $spk->jumlah_total }}</th></tr>
+                        {{-- TR ADD_SPK_ITEMS --}}
+                        <tr>
+                            <td colspan="2">
+                                <form action="{{ route('spks.add_item', $spk->id) }}" method="POST">
+                                    @csrf
+                                    <table class="w-full" id="table_new_spk_items">
+                                        <tr id="tr_add_item">
+                                            <td>
+                                                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="addSPKItem('tr_add_item','table_new_spk_items')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                    <div class="text-center hidden" id="btn_confirm_add_spk_items">
+                                        <button class="bg-emerald-200 text-emerald-500 rounded px-1" type="submit">confirm</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {{-- END - TR ADD_SPK_ITEMS --}}
                     </table>
                 </div>
                 {{-- END - SPK Items --}}
@@ -845,6 +877,9 @@
                             </svg>
                         </button>
                     </form>
+                    <form action="" method="POST" class="ml-1 flex">
+                        <button type="submit" class="px-1 bg-orange-200 text-orange-500 rounded">update colly</button>
+                    </form>
                 </div>
                 {{-- END - OPSI SRJALAN --}}
                 @endforeach
@@ -910,6 +945,67 @@
             // alert(ui.item.name);
         }
     });
+
+    let index_spk_item = 0;
+    function addSPKItem(tr_id, parent_id) {
+        document.getElementById(tr_id).remove();
+        let parent = document.getElementById(parent_id);
+        parent.insertAdjacentHTML('beforeend',
+        `<tr class="tr_add_items">
+            <td style="width:75%">
+                <div class="flex items-center mt-1">
+                    <button id="toggle_produk_keterangan-${index_spk_item}" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggle_light(this.id,'produk_keterangan-${index_spk_item}',[],['bg-yellow-300'],'block')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                    </button>
+                    <input type="text" name="produk_nama[]" id="produk_nama-${index_spk_item}" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400 w-full" placeholder="nama item...">
+                    <input type="hidden" name="produk_id[]" id="produk_id-${index_spk_item}">
+                </div>
+                <div class="mt-1 hidden" id="produk_keterangan-${index_spk_item}">
+                    <textarea name="produk_keterangan[]" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
+                </div>
+            </td>
+            <td><div class="text-center"><input type="number" name="produk_jumlah[]" id="produk_jumlah" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-1/2"></div></td>
+        </tr>
+        <tr id="tr_add_item">
+            <td>
+                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="addSPKItem('tr_add_item', 'table_new_spk_items')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </button>
+            </td>
+        </tr>
+        `);
+        setTimeout(() => {
+            setAutocompleteSPKItem(`produk_nama-${index_spk_item}`, `produk_nama-${index_spk_item}`, `produk_id-${index_spk_item}`);
+            index_spk_item++;
+            toggle_btn_confirm_add_spk_items();
+        }, 100);
+    }
+
+    const label_produks = {!! json_encode($label_produks, JSON_HEX_TAG) !!};
+
+    function setAutocompleteSPKItem(input_id, label_id, value_id) {
+        $(`#${input_id}`).autocomplete({
+            source: label_produks,
+            select: function (event, ui) {
+                // console.log(ui.item);
+                document.getElementById(label_id).value = ui.item.value;
+                document.getElementById(value_id).value = ui.item.id;
+            }
+        });
+    }
+
+    function toggle_btn_confirm_add_spk_items() {
+        const tr_add_items = document.querySelectorAll('.tr_add_items');
+        if (tr_add_items.length > 0) {
+            $('#btn_confirm_add_spk_items').show(300);
+        } else {
+            $('#btn_confirm_add_spk_items').hide(300);
+        }
+    }
 </script>
 @endsection
 {{-- <a href="https://www.flaticon.com/free-icons/fox" title="fox icons">Fox icons created by Freepik - Flaticon</a> --}}

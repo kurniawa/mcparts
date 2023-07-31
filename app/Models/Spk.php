@@ -253,4 +253,17 @@ class Spk extends Model
         // dd($pilihan_srjalans);
         return $data;
     }
+
+    static function update_data_SPK($spk) { // UPDATE jumlah_selesai, jumlah_total
+        $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        $jumlah_selesai = 0;
+        $jumlah_total = 0;
+        foreach ($spk_produks as $spk_produk) {
+            $jumlah_selesai += $spk_produk->jumlah_selesai;
+            $jumlah_total += $spk_produk->jumlah_total;
+        }
+        $spk->jumlah_selesai = $jumlah_selesai;
+        $spk->jumlah_total = $jumlah_total;
+        $spk->save();
+    }
 }

@@ -84,6 +84,7 @@ class Nota extends Model
         ]);
         // CREATE SPK_PRODUK_NOTA
         $produk = Produk::find($spk_produk->produk_id);
+        $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
         $spk_produk_nota = SpkProdukNota::create([
             'spk_id'=>$spk->id,
             'produk_id'=>$spk_produk->produk_id,
@@ -91,8 +92,8 @@ class Nota extends Model
             'nota_id'=>$nota->id,
             'jumlah'=>$jumlah_total,
             'nama_nota'=>$produk->nama_nota,
-            'harga'=>$spk_produk->harga,
-            'harga_t'=>$spk_produk->harga * $jumlah_total,
+            'harga'=>$harga_produk,
+            'harga_t'=>$harga_produk * $jumlah_total,
         ]);
     }
 
@@ -123,5 +124,28 @@ class Nota extends Model
         $spk->status_nota = $status_nota;
         $spk->jumlah_sudah_nota = $jumlah_sudah_nota_gabungan;
         $spk->save();
+    }
+
+    static function update_data_nota_srjalan($spk) {
+        $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
+        foreach ($spk_notas as $spk_nota) {
+            $nota = Nota::find($spk_nota->nota_id);
+            $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
+            $harga_total = 0;
+            $jumlah_total = 0;
+            foreach ($spk_produk_notas as $spk_produk_nota) {
+                $harga_total += $spk_produk_nota->harga_t;
+                $jumlah_total += $spk_produk_nota->jumlah;
+            }
+            $nota->jumlah_total = $jumlah_total;
+            $nota->harga_total = $harga_total;
+            $nota->save();
+
+            $nota_srjalans = NotaSrjalan::where('nota_id', $nota->id)->get();
+            foreach ($nota_srjalans as $nota_srjalan) {
+                $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+                Srjalan::update_jumlah_packing_srjalan($srjalan);
+            }
+        }
     }
 }

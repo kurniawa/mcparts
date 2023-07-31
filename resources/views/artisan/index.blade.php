@@ -79,11 +79,11 @@
         <div class="border-2 border-sky-600 rounded p-1">
             @csrf
             <p>o) spks - hapus column: cust_long_ala, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_kontak, reseller_kontak_id, status_tree, harga_total</p>
-            <p>-- spks - sisa column: 22</p>
+            <p>-- spks - sisa column: 21</p>
             <p>-- spks - ganti: judul->keterangan, status_sj->status_srjalan, jumlah_sudah_sj->jumlah_sudah_srjalan</p>
             <p>o) spk_produks - ganti nama column: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
-            <p>-- spk_produks - hapus column: data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai</p>
-            <p>-- spk_produks - sisa column: 17</p>
+            <p>-- spk_produks - hapus column: data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai, harga</p>
+            <p>-- spk_produks - sisa column: 16</p>
             <p>o) notas - ganti nama column: cust_long, reseller_alamat, reseller_kontak, dll</p>
             <p>o) srjalans - ganti nama column: cust_long, reseller_alamat, reseller_kontak, dll</p>
             <p>o) spk_produk_nota_srjalans - ganti nama column: jml_packing->jumlah_packing</p>
@@ -91,12 +91,19 @@
         </div>
     </div>
 
-
     <div class="ml-2 mt-5">
         <form action="{{ route('artisan.create_table_tipe_packing') }}" method="post">
             @csrf
             <button class="bg-orange-400 text-white font-semibold rounded px-3 py-2">create_table_tipe_packing</button>
         </form>
+    </div>
+
+    <div class="ml-2 mt-5 flex">
+        <div class="border-2 border-sky-600 rounded p-1">
+            @csrf
+            <p>o) produk_harga - edit column status -> VARCHAR 20, not null, default: DEFAULT</p>
+            <p>o) pelanggan_produk - edit column status -> VARCHAR 20, not null, default: DEFAULT</p>
+        </div>
     </div>
   </main>
 </div>

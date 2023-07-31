@@ -57,6 +57,8 @@ Route::controller(SpkController::class)->group(function(){
     Route::post('/spks/{spk_produk}/spk_item_tetapkan_selesai','spk_item_tetapkan_selesai')->name('spks.spk_item_tetapkan_selesai')->middleware('auth');
     Route::post('/spks/{spk}/delete','delete')->name('spks.delete')->middleware('auth');
     Route::post('/spks/{spk}/selesai_all','selesai_all')->name('spks.selesai_all')->middleware('auth');
+    Route::post('/spks/{spk}/add_item','add_item')->name('spks.add_item')->middleware('auth');
+    Route::post('/spks/{spk}/{spk_produk}/delete_item','delete_item')->name('spks.delete_item')->middleware('auth');
 });
 
 Route::controller(NotaController::class)->group(function(){

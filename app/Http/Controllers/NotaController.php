@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
+use App\Models\PelangganProduk;
 use App\Models\Produk;
+use App\Models\ProdukHarga;
 use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
@@ -77,7 +79,9 @@ class NotaController extends Controller
                     $spk_produk_nota = SpkProdukNota::where('spk_produk_id',$spk_produk->id)->where('nota_id',$post['nota_id'][$i])->first();
                     // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
                     // BERARTI BIKIN SPK_PRODUK_NOTA BARU
+
                     if ($spk_produk_nota === null) {
+                        $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
                         $spk_produk_nota = SpkProdukNota::create([
                             'spk_id'=>$spk->id,
                             'produk_id'=>$spk_produk->produk_id,
@@ -85,8 +89,8 @@ class NotaController extends Controller
                             'nota_id'=>$post['nota_id'][$i],
                             'jumlah'=>$post['jumlah'][$i],
                             'nama_nota'=>$produk->nama_nota,
-                            'harga'=>$spk_produk->harga,
-                            'harga_t'=>$spk_produk->harga * $post['jumlah'][$i],
+                            'harga'=>$harga_produk,
+                            'harga_t'=>$harga_produk * $post['jumlah'][$i],
                         ]);
                         $success_ .= '- new spk_produk_nota -';
                     // END - BERARTI BIKIN SPK_PRODUK_NOTA BARU
@@ -230,6 +234,7 @@ class NotaController extends Controller
             $jumlah_belum_nota = $spk_produk->jumlah_selesai - $jumlah_sudah_nota;
             if ($jumlah_belum_nota > 0) {
                 $produk = Produk::find($spk_produk->produk_id);
+                $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
                 SpkProdukNota::create([
                     'spk_id'=>$spk->id,
                     'produk_id'=>$spk_produk->produk_id,
@@ -237,8 +242,8 @@ class NotaController extends Controller
                     'nota_id'=>$nota->id,
                     'jumlah'=>$jumlah_belum_nota,
                     'nama_nota'=>$produk->nama_nota,
-                    'harga'=>$spk_produk->harga,
-                    'harga_t'=>$spk_produk->harga * $jumlah_belum_nota,
+                    'harga'=>$harga_produk,
+                    'harga_t'=>$harga_produk * $jumlah_belum_nota,
                 ]);
             }
             $spk_produk->jumlah_sudah_nota = $spk_produk->jumlah_selesai;

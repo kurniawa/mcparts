@@ -17,6 +17,7 @@ use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
+use App\Models\SpkProdukNotaSrjalan;
 use App\Models\Srjalan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -115,14 +116,14 @@ class SpkController extends Controller
         // SPK PRODUKS
         $jumlah_total = 0;
         foreach ($post['produk_id'] as $key => $produk_id) {
-            $pelanggan_produk = PelangganProduk::where('pelanggan_id', $pelanggan->id)->where('produk_id', $produk_id)->latest()->first();
-            $harga = null;
-            if ($pelanggan_produk !== null) {
-                $harga = $pelanggan_produk->harga_khusus;
-            } else {
-                $produk_harga = ProdukHarga::where('produk_id', $produk_id)->latest()->first();
-                $harga = $produk_harga->harga;
-            }
+            // $pelanggan_produk = PelangganProduk::where('pelanggan_id', $pelanggan->id)->where('produk_id', $produk_id)->latest()->first();
+            // $harga = null;
+            // if ($pelanggan_produk !== null) {
+            //     $harga = $pelanggan_produk->harga_khusus;
+            // } else {
+            //     $produk_harga = ProdukHarga::where('produk_id', $produk_id)->latest()->first();
+            //     $harga = $produk_harga->harga;
+            // }
             // dd($post['produk_nama'][$key]);
             SpkProduk::create([
                 'spk_id' => $new_spk->id,
@@ -130,7 +131,7 @@ class SpkController extends Controller
                 'jumlah' => $post['produk_jumlah'][$key],
                 // 'jml_blm_sls' => $post['produk_jumlah'][$key],
                 'jumlah_total' => $post['produk_jumlah'][$key],
-                'harga' => $harga,
+                // 'harga' => $harga,
                 'keterangan' => $post['produk_keterangan'][$key],
                 'status' => 'PROSES',
                 'nama_produk' => $post['produk_nama'][$key],
@@ -490,5 +491,65 @@ class SpkController extends Controller
         ];
 
         return view('spks.print_out', $data);
+    }
+
+    function add_item(Spk $spk, Request $request) {
+        $post = $request->post();
+        // dd($post);
+        // dd($spk);
+        $success_ = '';
+        for ($i=0; $i < count($post['produk_id']); $i++) {
+            // VALIDASI
+            if ($post['produk_id'][$i] !== null) {
+                if ($post['produk_jumlah'][$i] === null || $post['produk_jumlah'][$i] <= 0) {
+                    $request->validate(['error'=>'required'],['error.required'=>'produk_jumlah?']);
+                }
+            }
+            // END - VALIDASI
+            SpkProduk::create([
+                'spk_id' => $spk->id,
+                'produk_id' => $post['produk_id'][$i],
+                'jumlah' => $post['produk_jumlah'][$i],
+                // 'jml_blm_sls' => $post['produk_jumlah'][$i],
+                'jumlah_total' => $post['produk_jumlah'][$i],
+                // 'harga' => $harga,
+                'keterangan' => $post['produk_keterangan'][$i],
+                'status' => 'PROSES',
+                'nama_produk' => $post['produk_nama'][$i],
+            ]);
+            $success_ .= '-new spk_produk-';
+        }
+        Spk::update_data_SPK($spk);
+        $success_ .= '-Data SPK updated-';
+        $feedback = [
+            'success_' => $success_
+        ];
+        return back()->with($feedback);
+    }
+
+    function delete_item(Spk $spk, SpkProduk $spk_produk) {
+        // dump($spk);
+        // dd($spk_produk);
+        $danger_ = '';
+        $success_ = '';
+        $spk_produk_notas = SpkProdukNota::where('spk_produk_id', $spk_produk->id)->get();
+        foreach ($spk_produk_notas as $spk_produk_nota) {
+            $spk_produk_nota->delete();
+            $danger_ .= '-spk_produk_nota deleted-';
+        }
+        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('spk_produk_id', $spk_produk->id)->get();
+        foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+            $spk_produk_nota_srjalan->delete();
+            $danger_ .= '-spk_produk_nota_srjalan deleted-';
+        }
+        $spk_produk->delete();
+        $danger_ .= '-spk_produk deleted-';
+        Spk::update_data_SPK($spk);
+        Nota::kaji_ulang_spk_dan_spk_produk($spk);
+        Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
+        Nota::update_data_nota_srjalan($spk);
+        $success_ .= '-Data SPK, Nota dan Srjalan updated-';
+        $feedback = ['danger_' => $danger_, 'success_' => $success_];
+        return back()->with($feedback);
     }
 }
