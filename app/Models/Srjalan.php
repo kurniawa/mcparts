@@ -180,16 +180,18 @@ class Srjalan extends Model
         $jumlah_packing = array();
         $tipe_packings = TipePacking::all();
         foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+            // dump($jumlah_packing);
+            // dump($spk_produk_nota_srjalan->jumlah_packing);
             if (count($jumlah_packing) === 0) {
                 $jumlah_packing[] = ["tipe_packing"=>$spk_produk_nota_srjalan->tipe_packing, "jumlah"=>$spk_produk_nota_srjalan->jumlah, "jumlah_packing"=>$spk_produk_nota_srjalan->jumlah_packing];
             } else {
                 $is_tipe_packing_exist = false;
-                foreach ($jumlah_packing as $jml_packing) {
+                for ($i=0; $i < count($jumlah_packing); $i++) {
                     foreach ($tipe_packings as $tipe_packing) {
                         if ($tipe_packing->name === $spk_produk_nota_srjalan->tipe_packing) {
-                            if ($jml_packing['tipe_packing'] === $spk_produk_nota_srjalan->tipe_packing) {
-                                $jml_packing['jumlah'] += $spk_produk_nota_srjalan->jumlah;
-                                $jml_packing['jumlah_packing'] += $spk_produk_nota_srjalan->jumlah_packing;
+                            if ($jumlah_packing[$i]['tipe_packing'] === $spk_produk_nota_srjalan->tipe_packing) {
+                                $jumlah_packing[$i]['jumlah'] += $spk_produk_nota_srjalan->jumlah;
+                                $jumlah_packing[$i]['jumlah_packing'] += $spk_produk_nota_srjalan->jumlah_packing;
                                 $is_tipe_packing_exist = true;
                             }
                         }
@@ -198,6 +200,7 @@ class Srjalan extends Model
                 if (!$is_tipe_packing_exist) {
                     $jumlah_packing[] = ["tipe_packing"=>$spk_produk_nota_srjalan->tipe_packing, "jumlah"=>$spk_produk_nota_srjalan->jumlah, "jumlah_packing"=>$spk_produk_nota_srjalan->jumlah_packing];
                 }
+                // dump($jumlah_packing);
             }
         }
         if (count($jumlah_packing) === 0) {
@@ -239,5 +242,42 @@ class Srjalan extends Model
         $spk->jumlah_sudah_srjalan = $jumlah_sudah_srjalan_gabungan;
         $spk->status_srjalan = $status_srjalan;
         $spk->save();
+    }
+
+    static function get_data_packing($jumlah_packing) {
+        $data_packing = collect();
+        $tipe_packings = TipePacking::all();
+        if ($jumlah_packing !== null) {
+            $jumlah_packing = json_decode($jumlah_packing, true);
+            foreach ($tipe_packings as $tipe_packing) {
+                $is_tipe_packing_exist = false;
+                for ($i=0; $i < count($jumlah_packing); $i++) {
+                    if ($tipe_packing->name === $jumlah_packing[$i]['tipe_packing']) {
+                        $data_packing->push([
+                            'tipe_packing' => $tipe_packing->name,
+                            'jumlah' => $jumlah_packing[$i]['jumlah'],
+                            'jumlah_packing' => $jumlah_packing[$i]['jumlah_packing'],
+                        ]);
+                        $is_tipe_packing_exist = true;
+                    }
+                }
+                if (!$is_tipe_packing_exist) {
+                    $data_packing->push([
+                        'tipe_packing' => $tipe_packing->name,
+                        'jumlah' => 0,
+                        'jumlah_packing' => 0,
+                    ]);
+                }
+            }
+        } else {
+            foreach ($tipe_packings as $tipe_packing) {
+                $data_packing->push([
+                    'tipe_packing' => $tipe_packing->name,
+                    'jumlah' => 0,
+                    'jumlah_packing' => 0,
+                ]);
+            }
+        }
+        return $data_packing;
     }
 }

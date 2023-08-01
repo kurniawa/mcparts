@@ -52,6 +52,10 @@ class Nota extends Model
                 $reseller_kontak = $reseller_data['kontak'];
             }
         }
+        $produk = Produk::find($spk_produk->produk_id);
+        $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
+        // dump($harga_produk);
+        // $harga_total =
         $user = Auth::user();
         $nota = Nota::create([
             'pelanggan_id'=>$spk->pelanggan_id,
@@ -59,7 +63,7 @@ class Nota extends Model
             'pelanggan_nama'=>$spk->pelanggan_nama,
             'reseller_nama'=>$spk->reseller_nama,
             'jumlah_total'=>$jumlah_total,
-            'harga_total'=>$spk_produk->harga * $jumlah_total,
+            'harga_total'=>$harga_produk * $jumlah_total,
             //
             'alamat_id'=>$alamat_id,
             'reseller_alamat_id'=>$reseller_alamat_id,
@@ -83,8 +87,7 @@ class Nota extends Model
             'nota_id' => $nota->id,
         ]);
         // CREATE SPK_PRODUK_NOTA
-        $produk = Produk::find($spk_produk->produk_id);
-        $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
+
         $spk_produk_nota = SpkProdukNota::create([
             'spk_id'=>$spk->id,
             'produk_id'=>$spk_produk->produk_id,

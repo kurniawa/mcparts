@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
@@ -80,8 +81,9 @@ class NotaController extends Controller
                     // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
                     // BERARTI BIKIN SPK_PRODUK_NOTA BARU
 
+                    $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
                     if ($spk_produk_nota === null) {
-                        $harga_produk = Produk::get_harga_pelanggan($produk->id, $spk->pelanggan_id);
+                        // dd($harga_produk);
                         $spk_produk_nota = SpkProdukNota::create([
                             'spk_id'=>$spk->id,
                             'produk_id'=>$spk_produk->produk_id,
@@ -96,7 +98,7 @@ class NotaController extends Controller
                     // END - BERARTI BIKIN SPK_PRODUK_NOTA BARU
                     } else {
                         $spk_produk_nota->jumlah = $post['jumlah'][$i];
-                        $spk_produk_nota->harga_t = $post['jumlah'][$i] * $spk_produk->harga;
+                        $spk_produk_nota->harga_t = $post['jumlah'][$i] * $harga_produk;
                         $spk_produk_nota->save();
                         $success_ .= '- update spk_produk_nota -';
                     }
@@ -143,6 +145,8 @@ class NotaController extends Controller
             if (count($spk_produk_nota_srjalans) === 0) {
                 $srjalan->delete();
                 $danger_ .= '-srjalan deleted-';
+            } else {
+                Srjalan::update_jumlah_packing_srjalan($srjalan);
             }
         }
         // END - KAJI ULANG SRJALAN TERKAIT
@@ -302,5 +306,64 @@ class NotaController extends Controller
         $nota->save();
         $success_ = '-$nota->created_at, finished_at updated-';
         return back()->with('success_', $success_);
+    }
+
+    function delete_item(Spk $spk, SpkProdukNota $spk_produk_nota) {
+        // dump($spk);
+        // dd($spk_produk_nota);
+        $danger_ = '';
+        $success_ = '';
+        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('spk_produk_nota_id',$spk_produk_nota->id)->get();
+        foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
+            $spk_produk_nota_srjalan->delete();
+            $danger_ .= '-spk_produk_nota_srjalan deleted-';
+        }
+        $spk_produk_nota->delete();
+        $danger_ .= '-spk_produk_nota deleted-';
+        Spk::update_data_SPK($spk);
+        Nota::kaji_ulang_spk_dan_spk_produk($spk);
+        Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
+        Nota::update_data_nota_srjalan($spk);
+        // Update colly Srjalan
+        $nota_srjalans = NotaSrjalan::where('nota_id', $spk_produk_nota->nota_id)->get();
+        foreach ($nota_srjalans as $nota_srjalan) {
+            $srjalan = Srjalan::find($spk_produk_nota_srjalan->srjalan_id);
+            Srjalan::update_jumlah_packing_srjalan($srjalan);
+        }
+        // End - Update colly Srjalan
+        $success_ .= '-Data SPK, Nota & Srjalan updated-';
+        $feedback = [
+            'danger_' => $danger_,
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
+    }
+
+    function print_out(Nota $nota) {
+        // dd($nota);
+        $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
+        $rest_row = 16 - count($spk_produk_notas);
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'notas.print_out',
+            'profile_menus' => Menu::get_profile_menus(),
+            'nota' => $nota,
+            'spk_produk_notas' => $spk_produk_notas,
+            'rest_row' => $rest_row,
+        ];
+
+        return view('notas.print_out', $data);
+    }
+
+    function edit_alamat(Spk $spk, Request $request) {
+        $post = $request->post();
+        dump($post);
+        dd($spk);
+        $success_ = '';
+
+        $feedback = [
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
     }
 }

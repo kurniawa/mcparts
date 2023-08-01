@@ -19,6 +19,7 @@ use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
 use App\Models\Srjalan;
+use App\Models\TipePacking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -165,6 +166,26 @@ class SpkController extends Controller
         // dd($data_spk_nota_srjalans);
         $label_pelanggans = Pelanggan::label_pelanggans();
         $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
+        // DATA PACKING
+        $data_packings = collect();
+        $srjalan_ids = SpkProdukNotaSrjalan::where('spk_id', $spk->id)->select('srjalan_id')->groupBy('srjalan_id')->get();
+        foreach ($srjalan_ids as $item) {
+            $srjalan = Srjalan::find($item->srjalan_id);
+            $data_packings->push(Srjalan::get_data_packing($srjalan->jumlah_packing));
+        }
+        // END - DATA PACKING
+        // PILIHAN ALAMAT PELANGGAN
+        $pelanggan_alamats = PelangganAlamat::where('pelanggan_id', $spk->pelanggan_id)->get();
+        $pilihan_alamat = collect();
+        $alamat_id_terpilih = null;
+        if (count($data_spk_nota_srjalans['notas']) !== 0) {
+            $alamat_id_terpilih = $data_spk_nota_srjalans['notas'][0]->alamat_id;
+        }
+        foreach ($pelanggan_alamats as $pelanggan_alamat) {
+            $alamat = Alamat::find($pelanggan_alamat->alamat_id);
+            $pilihan_alamat->push($alamat);
+        }
+        // END - PILIHAN ALAMAT PELANGGAN
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'spks.create',
@@ -183,9 +204,13 @@ class SpkController extends Controller
             'pilihan_srjalans' => $data_spk_nota_srjalans['pilihan_srjalans'],
             'label_pelanggans' => $label_pelanggans,
             'label_produks' => $label_produks,
+            'data_packings' => $data_packings,
+            'alamat_id_terpilih' => $alamat_id_terpilih,
+            'pilihan_alamat' => $pilihan_alamat,
         ];
         // dump($data_spk_nota_srjalans['notas']);
         // dd($data_spk_nota_srjalans['col_srjalans']);
+        // dd($data_spk_nota_srjalans['notas'][0]);
         return view('spks.show', $data);
     }
 
@@ -520,7 +545,10 @@ class SpkController extends Controller
             $success_ .= '-new spk_produk-';
         }
         Spk::update_data_SPK($spk);
-        $success_ .= '-Data SPK updated-';
+        Nota::kaji_ulang_spk_dan_spk_produk($spk);
+        Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
+        Nota::update_data_nota_srjalan($spk);
+        $success_ .= '-Data SPK, Nota & Srjalan updated-';
         $feedback = [
             'success_' => $success_
         ];
@@ -548,6 +576,11 @@ class SpkController extends Controller
         Nota::kaji_ulang_spk_dan_spk_produk($spk);
         Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
         Nota::update_data_nota_srjalan($spk);
+        $srjalan_ids = SpkProdukNotaSrjalan::select('srjalan_id')->where('spk_id', $spk->id)->groupBy('srjalan_id')->get();
+        foreach ($srjalan_ids as $srjalan) {
+            $srjalan = Srjalan::find($srjalan->srjalan_id);
+            Srjalan::update_jumlah_packing_srjalan($srjalan);
+        }
         $success_ .= '-Data SPK, Nota dan Srjalan updated-';
         $feedback = ['danger_' => $danger_, 'success_' => $success_];
         return back()->with($feedback);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
 use App\Models\Produk;
@@ -58,6 +59,9 @@ class SrjalanController extends Controller
                     // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
                     // BERARTI BIKIN SPK_PRODUK_NOTA_SRJALAN BARU
                     if ($spk_produk_nota_srjalan === null) {
+                        // dump($post['jumlah'][$i]);
+                        // dump($produk->aturan_packing);
+                        // dd(round($post['jumlah'][$i] / $produk->aturan_packing));
                         $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::create([
                             'spk_id' => $spk->id,
                             'produk_id' => $spk_produk->produk_id,
@@ -158,6 +162,90 @@ class SrjalanController extends Controller
         // END - SPK: kaji ulang jumlah_sudah_srjalan
         $feedback = [
             'danger_' => $danger_,
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
+    }
+
+    function delete_item(Spk $spk, SpkProdukNotaSrjalan $spk_produk_nota_srjalan) {
+        // dump($spk);
+        // dd($spk_produk_nota_srjalan);
+        $danger_ = '';
+        $success_ = '';
+        $spk_produk_nota_srjalan->delete();
+        $danger_ .= '-spk_produk_nota_srjalan deleted-';
+        Spk::update_data_SPK($spk);
+        Nota::kaji_ulang_spk_dan_spk_produk($spk);
+        Srjalan::kaji_ulang_spk_dan_spk_produk($spk);
+        Nota::update_data_nota_srjalan($spk);
+        $srjalan = Srjalan::find($spk_produk_nota_srjalan->srjalan_id);
+        Srjalan::update_jumlah_packing_srjalan($srjalan);
+        $success_ .= '-Data SPK, Nota & Srjalan updated-';
+        $feedback = [
+            'danger_' => $danger_,
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
+    }
+
+    function update_packing(Srjalan $srjalan, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($srjalan);
+        $data_packing = collect();
+        for ($i=0; $i < count($post['tipe_packing']); $i++) {
+            if ($post['jumlah_packing'][$i] > 0) {
+                $data_packing->push([
+                    'tipe_packing' => $post['tipe_packing'][$i],
+                    'jumlah' => $post['jumlah'][$i],
+                    'jumlah_packing' => $post['jumlah_packing'][$i],
+                ]);
+            }
+        }
+        $srjalan->jumlah_packing = json_encode($data_packing);
+        $srjalan->save();
+        $success_ = '-data_packing updated-';
+        $feedback = [
+            'success_' => $success_
+        ];
+        return back()->with($feedback);
+    }
+
+    function print_out(Srjalan $srjalan) {
+        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
+
+        if ($srjalan->cust_kontak !== null) {
+            $srjalan->cust_kontak = json_decode($srjalan->cust_kontak);
+        }
+        if ($srjalan->reseller_kontak !== null) {
+            $srjalan->reseller_kontak = json_decode($srjalan->reseller_kontak);
+        }
+        if ($srjalan->ekspedisi_kontak !== null) {
+            $srjalan->ekspedisi_kontak = json_decode($srjalan->ekspedisi_kontak);
+        }
+        if ($srjalan->transit_kontak !== null) {
+            $srjalan->transit_kontak = json_decode($srjalan->transit_kontak);
+        }
+
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'sjs.print_out',
+            'profile_menus' => Menu::get_profile_menus(),
+            'srjalan' => $srjalan,
+            'spk_produk_nota_srjalans' => $spk_produk_nota_srjalans,
+        ];
+
+        // dd($srjalan->cust_kontak['nomor']);
+        return view('srjalans.print_out', $data);
+    }
+
+    function edit_jenis_barang(Srjalan $srjalan, Request $request) {
+        $post = $request->post();
+        $success_ = '';
+        $srjalan->jenis_barang = $post['jenis_barang'];
+        $srjalan->save();
+        $success_ .= '-srjalan: jenis_barang updated-';
+        $feedback = [
             'success_' => $success_,
         ];
         return back()->with($feedback);

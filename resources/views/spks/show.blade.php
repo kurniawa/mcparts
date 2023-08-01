@@ -166,7 +166,13 @@
                     <tr>
                         <td>Ket.</td><td>:</td>
                         <td>
-                            <div class="inline-block" onclick="toggle_element('form_edit_keterangan')">{{ $spk->keterangan }}</div>
+                            <div class="inline-block" onclick="toggle_element('form_edit_keterangan')">
+                                @if ($spk->keterangan === null)
+                                -
+                                @else
+                                {{ $spk->keterangan }}
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     <tr id="form_edit_keterangan" class="hidden">
@@ -199,7 +205,7 @@
                         <tr><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                         @foreach ($spk_produks as $key_spk_produk => $spk_produk)
                         <tr>
-                            <td>{{ $spk_produk->nama_produk }}</td>
+                            <td onclick="toggle_element('spk_produk_detail-{{ $key_spk_produk }}')">{{ $spk_produk->nama_produk }}</td>
                             <td>
                                 <div class="text-center">
                                     {{ $spk_produk->jumlah }}
@@ -211,7 +217,7 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr class="spk_produk_detail hidden">
+                        <tr class="spk_produk_detail hidden" id="spk_produk_detail-{{ $key_spk_produk }}">
                             <td colspan="2">
                                 <div class="flex">
                                     <div>
@@ -280,7 +286,7 @@
                                             @endforeach
                                         </div>
                                     </div>
-                                    <form action="{{ route('spks.delete_item', [$spk->id, $spk_produk->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus spk_item akan merubah data nota_items dan srjalan_items!')">
+                                    <form action="{{ route('spks.delete_item', [$spk->id, $spk_produk->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus spk_item akan merubah data Nota dan Srjalan!')">
                                         @csrf
                                         <button class="text-red-400" type="submit">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -330,7 +336,7 @@
                             </svg>
                         </button>
                     </form> --}}
-                    <a href="{{ route('spks.print_out', $spk->id) }}" class="border border-slate-300 rounded text-slate-500">
+                    <a href="{{ route('spks.print_out', $spk->id) }}" class="rounded text-slate-500">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                         </svg>
@@ -380,6 +386,48 @@
                     <div>none</div>
                 </div> --}}
                 @else
+                {{-- PILIHAN ALAMAT --}}
+                <div class="border rounded p-1 grid grid-cols-2">
+                    <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}" onsubmit="return confirm('Akan mengubah data alamat pada Nota dan Srjalan terkait!')">
+                        @csrf
+                        <div class="font-bold">Pilihan Alamat:</div>
+                        <div class="flex">
+                            @foreach ($pilihan_alamat as $key_alamat => $alamat)
+                            @if ($alamat->id === $alamat_id_terpilih)
+                            <input type="radio" name="alamat_id" id="pilihan_alamat-{{ $key_alamat }}" checked>
+                            @else
+                            <input type="radio" name="alamat_id" id="pilihan_alamat-{{ $key_alamat }}">
+                            @endif
+                            <label for="pilihan_alamat-{{ $key_alamat }}" class="ml-1">
+                                @if ($alamat->long !== null)
+                                @foreach (json_decode($alamat->long, true) as $long)
+                                <div>{{ $long }}</div>
+                                @endforeach
+                                @endif
+                            </label>
+                            @endforeach
+                        </div>
+                        <div class="font-semibold">Untuk:</div>
+                        <div class="flex">
+                            <div class="flex item-center">
+                                <input type="radio" name="nota_id" id="nota_id-semua" checked>
+                                <label for="nota_id-semua" class="ml-1">semua</label>
+                            </div>
+                            @foreach ($notas as $key_nota => $nota)
+                            <div class="flex item-center ml-2">
+                                <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}">
+                                <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
+                    </form>
+                    <div>
+                        <div class="font-bold">Pilihan Kontak:</div>
+
+                    </div>
+                </div>
+                {{-- END - PILIHAN ALAMAT --}}
                 @foreach ($notas as $key_nota => $nota)
                 <div class="border-t-4 pt-2">
                     <div class="grid grid-cols-2">
@@ -531,6 +579,7 @@
                         </table>
                     </div>
 
+
                     {{-- Nota Items --}}
                     <div class="border rounded px-1 py-2" id="nota-items-{{ $key_nota }}">
                         <table class="w-full text-xs">
@@ -548,12 +597,12 @@
                             @foreach ($col_spk_produk_notas[$key_nota] as $key_spk_produk_nota => $spk_produk_nota)
                             <tr>
                                 <td><div class="text-center">{{ $spk_produk_nota->jumlah }}</div></td>
-                                <td>{{ $spk_produk_nota->nama_nota }}</td>
+                                <td onclick="toggle_element('spk_produk_nota_detail-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">{{ $spk_produk_nota->nama_nota }}</td>
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div></td>
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga_t,0,',','.') }}</div></td>
                             </tr>
                             {{-- SPK_PRODUK_NOTA_DETAIL --}}
-                            <tr class="spk_produk_nota_detail-{{ $key_nota }} hidden">
+                            <tr class="spk_produk_nota_detail-{{ $key_nota }} hidden" id="spk_produk_nota_detail-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
                                 <td colspan="3">
                                     <div class="flex">
                                         <div>
@@ -595,6 +644,14 @@
                                                 </form>
                                             </div>
                                         </div>
+                                        <form action="{{ route('notas.delete_item', [$spk->id, $spk_produk_nota->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus nota_item akan merubah data SPK dan Srjalan!')">
+                                            @csrf
+                                            <button class="text-red-400" type="submit">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                </svg>
+                                            </button>
+                                        </form>
                                         {{-- END - FORM INPUT NOTA ITEM KE SJ --}}
                                     </div>
                                 </td>
@@ -608,7 +665,7 @@
                     {{-- END - Nota Items --}}
                     {{-- OPSI NOTA --}}
                     <div class="flex justify-end mt-1 mb-2 items-center">
-                        <a href="{{ route('notas.print_out', $nota->id) }}" class="border border-slate-300 rounded text-slate-500">
+                        <a href="{{ route('notas.print_out', $nota->id) }}" class="rounded text-slate-500">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                             </svg>
@@ -817,14 +874,19 @@
                     <div class="border rounded px-1 py-2 mt-2" id="srjalan-items-{{ $key2 }}-{{ $key_srjalan }}">
                         <table class="w-full text-xs">
                             <tr>
-                                <th>jml.</th>
-                                <th>nama barang</th>
-                                <th>jml.p</th>
+                                <th>Jml.</th>
+                                <th>Nama Barang</th>
+                                <th>Jml. P</th>
                             </tr>
                             <tr><td><div class="text-center">---</div></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                             @foreach ($col_col_spk_produk_nota_srjalans[$key2][$key_srjalan] as $key_spk_produk_nota_srjalan => $spk_produk_nota_srjalan)
                             <tr>
-                                <td><div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div></td><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td>
+                                <td>
+                                    <div class="text-center">{{ $spk_produk_nota_srjalan->jumlah }}</div>
+                                </td>
+                                <td onclick="toggle_element('spk_produk_nota_srjalan_detail-{{ $key2 }}-{{ $key_srjalan }}-{{ $key_spk_produk_nota_srjalan }}')">
+                                    {{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}
+                                </td>
                                 <td>
                                     <div class="text-center" onclick="toggle_element('spk_produk_nota_srjalan_colly-{{ $key_srjalan }}-{{ $key_spk_produk_nota_srjalan }}')">{{ $spk_produk_nota_srjalan->jumlah_packing }} {{ $spk_produk_nota_srjalan->tipe_packing }}</div>
                                     {{-- SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
@@ -840,23 +902,54 @@
                                     {{-- END - SPK_PRODUK_NOTA_SRJALAN_DETAIL --}}
                                 </td>
                             </tr>
-
+                            {{-- SPK_PRODUK_NOTA_DETAIL --}}
+                            <tr class="spk_produk_nota_srjalan_detail-{{ $key2 }}-{{ $key_srjalan }} hidden" id="spk_produk_nota_srjalan_detail-{{ $key2 }}-{{ $key_srjalan }}-{{ $key_spk_produk_nota_srjalan }}">
+                                <td colspan="3">
+                                    <div class="flex">
+                                        <form action="{{ route('sjs.delete_item', [$spk->id, $spk_produk_nota_srjalan->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus nota_item akan merubah data SPK dan Nota!')">
+                                            @csrf
+                                            <button class="text-red-400" type="submit">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                        {{-- END - FORM INPUT NOTA ITEM KE SJ --}}
+                                    </div>
+                                </td>
+                            </tr>
+                            {{-- END - SPK_PRODUK_NOTA_DETAIL --}}
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                             <tr>
-                                <th></th><th>total</th>
-                                <th>
-                                    {{-- {{ dump(json_decode('["nama"=>"nama1"],["nama"=>"nama2"]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('[["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16]]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('["Semabung Baru No 50", "Pangkalpinang - Bangka"]', true)) }} --}}
-                                    {{-- {{ dump(json_decode('{"tipe_packing":"colly","jumlah":2406,"jumlah_packing":16}', true)) }} --}}
-                                    {{-- {{ dump($srjalan->jumlah_packing) }} --}}
-                                    {{-- {{ dd(json_decode($srjalan->jumlah_packing)) }} --}}
-                                    @foreach (json_decode($srjalan->jumlah_packing, true) as $jumlah_packing)
-                                    {{ $jumlah_packing['jumlah_packing'] }} {{ $jumlah_packing['tipe_packing'] }}
-                                    @endforeach
-                                </th>
+                                <th></th><th>Total</th>
+                                <td>
+                                    @if ($srjalan->jumlah_packing !== null)
+                                    <div onclick="toggle_element('total_jumlah_packing-{{ $key2 }}-{{ $key_srjalan }}')" class="text-center font-bold">
+                                        @foreach (json_decode($srjalan->jumlah_packing, true) as $jumlah_packing)
+                                        <div>{{ $jumlah_packing['jumlah_packing'] }} {{ $jumlah_packing['tipe_packing'] }}</div>
+                                        @endforeach
+                                    </div>
+                                    @endif
+                                    <form id="total_jumlah_packing-{{ $key2 }}-{{ $key_srjalan }}" action="{{ route('sjs.update_packing', $srjalan->id) }}" method="POST" class="border rounded mt-1 hidden">
+                                        @csrf
+                                        <table class="text-xs">
+                                        @foreach ($data_packings[$key_srjalan] as $data_packing)
+                                        <tr>
+                                            <td>{{ $data_packing['tipe_packing'] }}</td><td>:</td>
+                                            <td>
+                                                <input type="number" name="jumlah_packing[]" value="{{ $data_packing['jumlah_packing'] }}" class="p-0 rounded text-xs w-9">
+                                                <input type="hidden" name="jumlah[]" value="{{ $data_packing['jumlah'] }}">
+                                                <input type="hidden" name="tipe_packing[]" value="{{ $data_packing['tipe_packing'] }}">
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                        </table>
+                                        <div class="text-center mt-1 pb-1">
+                                            <button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button>
+                                        </div>
+                                    </form>
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -864,7 +957,7 @@
                 </div>
                 {{-- OPSI SRJALAN --}}
                 <div class="flex justify-end mt-1 mb-2 items-center">
-                    <a href="{{ route('sjs.print_out', $srjalan->id) }}" class="border border-slate-300 rounded text-slate-500">
+                    <a href="{{ route('sjs.print_out', $srjalan->id) }}" class="rounded text-slate-500">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                         </svg>
@@ -877,9 +970,10 @@
                             </svg>
                         </button>
                     </form>
-                    <form action="" method="POST" class="ml-1 flex">
+                    {{-- <form action="{{ route('sjs.update_packing',$srjalan->id) }}" method="POST" class="ml-1 flex">
+                        @csrf
                         <button type="submit" class="px-1 bg-orange-200 text-orange-500 rounded">update colly</button>
-                    </form>
+                    </form> --}}
                 </div>
                 {{-- END - OPSI SRJALAN --}}
                 @endforeach
