@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alamat;
+use App\Models\Ekspedisi;
+use App\Models\EkspedisiAlamat;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
@@ -178,14 +180,52 @@ class SpkController extends Controller
         $pelanggan_alamats = PelangganAlamat::where('pelanggan_id', $spk->pelanggan_id)->get();
         $pilihan_alamat = collect();
         $alamat_id_terpilih = null;
+        $kontak_id_terpilih = null;
         if (count($data_spk_nota_srjalans['notas']) !== 0) {
             $alamat_id_terpilih = $data_spk_nota_srjalans['notas'][0]->alamat_id;
+            $kontak_id_terpilih = $data_spk_nota_srjalans['notas'][0]->kontak_id;
         }
         foreach ($pelanggan_alamats as $pelanggan_alamat) {
             $alamat = Alamat::find($pelanggan_alamat->alamat_id);
             $pilihan_alamat->push($alamat);
         }
         // END - PILIHAN ALAMAT PELANGGAN
+        // PILIHAN_KONTAK_PELANGGAN
+        $pilihan_kontak = PelangganKontak::where('pelanggan_id', $spk->pelanggan_id)->get();
+        $pilihan_kontak = collect();
+        // dd($pelanggan_kontaks);
+        // END - PILIHAN_KONTAK_PELANGGAN
+        // PILIHAN_EKSPEDISI
+        $pelanggan_ekspedisis = PelangganEkspedisi::where('pelanggan_id', $spk->pelanggan_id)->where('is_transit','no')->get();
+        $pilihan_ekspedisi = collect();
+        foreach ($pelanggan_ekspedisis as $pelanggan_ekspedisi) {
+            $ekspedisi = Ekspedisi::find($pelanggan_ekspedisi->ekspedisi_id);
+            $ekspedisi_alamat = EkspedisiAlamat::where('ekspedisi_id', $ekspedisi->id)->where('tipe','UTAMA')->first();
+            $alamat = Alamat::find($ekspedisi_alamat->alamat_id);
+            $pilihan_ekspedisi->push([
+                'id' => $ekspedisi->id,
+                'nama' => $ekspedisi->nama,
+                'alamat' => $alamat,
+                'tipe' => $pelanggan_ekspedisi->tipe,
+            ]);
+        }
+        $pelanggan_transits = PelangganEkspedisi::where('pelanggan_id', $spk->pelanggan_id)->where('is_transit','yes')->get();
+        $pilihan_transit = collect();
+        foreach ($pelanggan_transits as $pelanggan_transit) {
+            $transit = Ekspedisi::find($pelanggan_transit->ekspedisi_id);
+            $transit_alamat = EkspedisiAlamat::where('ekspedisi_id', $ekspedisi->id)->where('tipe','UTAMA')->first();
+            $alamat = Alamat::find($transit_alamat->alamat_id);
+            $pilihan_transit->push([
+                'id' => $transit->id,
+                'nama' => $transit->nama,
+                'alamat' => $alamat,
+                'tipe' => $pelanggan_transit->tipe,
+            ]);
+        }
+        $pilihan_srjalan = SpkProdukNotaSrjalan::where('spk_id', $spk->id)->select('srjalan_id as id')->groupBy('srjalan_id')->get();
+        dump($pilihan_ekspedisi);
+        dd($pilihan_transit);
+        // END - PILIHAN_EKSPEDISI
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'spks.create',
@@ -207,10 +247,15 @@ class SpkController extends Controller
             'data_packings' => $data_packings,
             'alamat_id_terpilih' => $alamat_id_terpilih,
             'pilihan_alamat' => $pilihan_alamat,
+            'pilihan_kontak' => $pilihan_kontak,
+            'kontak_id_terpilih' => $kontak_id_terpilih,
+            'pilihan_ekspedisi' => $pilihan_ekspedisi,
+            'pilihan_transit' => $pilihan_transit,
         ];
         // dump($data_spk_nota_srjalans['notas']);
         // dd($data_spk_nota_srjalans['col_srjalans']);
         // dd($data_spk_nota_srjalans['notas'][0]);
+        // dd($pilihan_kontak);
         return view('spks.show', $data);
     }
 

@@ -386,48 +386,81 @@
                     <div>none</div>
                 </div> --}}
                 @else
-                {{-- PILIHAN ALAMAT --}}
-                <div class="border rounded p-1 grid grid-cols-2">
-                    <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}" onsubmit="return confirm('Akan mengubah data alamat pada Nota dan Srjalan terkait!')">
-                        @csrf
-                        <div class="font-bold">Pilihan Alamat:</div>
-                        <div class="flex">
-                            @foreach ($pilihan_alamat as $key_alamat => $alamat)
-                            @if ($alamat->id === $alamat_id_terpilih)
-                            <input type="radio" name="alamat_id" id="pilihan_alamat-{{ $key_alamat }}" checked>
-                            @else
-                            <input type="radio" name="alamat_id" id="pilihan_alamat-{{ $key_alamat }}">
-                            @endif
-                            <label for="pilihan_alamat-{{ $key_alamat }}" class="ml-1">
-                                @if ($alamat->long !== null)
-                                @foreach (json_decode($alamat->long, true) as $long)
-                                <div>{{ $long }}</div>
-                                @endforeach
+                {{-- PILIHAN ALAMAT/KONTAK --}}
+                <div class="text-right"><button id="btn_opsi_alamat_kontak" class="border rounded border-emerald-300 text-emerald-500" onclick="toggle_light(this.id, 'pilihan_alamat_kontak', [], ['bg-emerald-200'], 'block')">Opsi Alamat/Kontak</button></div>
+                <div id="pilihan_alamat_kontak" class="hidden">
+                    <div class="border rounded p-1 grid grid-cols-2 mt-1">
+                        <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}" onsubmit="return confirm('Akan mengubah data alamat pada Nota dan Srjalan terkait!')">
+                            @csrf
+                            <div class="font-bold">Pilihan Alamat:</div>
+                            <div class="flex">
+                                @foreach ($pilihan_alamat as $key_alamat => $alamat)
+                                @if ($alamat->id === $alamat_id_terpilih)
+                                <input type="radio" name="alamat_id" id="pilihan_alamat-{{ $key_alamat }}" value="{{ $alamat->id }}" checked>
+                                @else
+                                <input type="radio" name="alamat_id" id="pilihan_alamat-{{ $key_alamat }}" value="{{ $alamat->id }}">
                                 @endif
-                            </label>
-                            @endforeach
-                        </div>
-                        <div class="font-semibold">Untuk:</div>
-                        <div class="flex">
-                            <div class="flex item-center">
-                                <input type="radio" name="nota_id" id="nota_id-semua" checked>
-                                <label for="nota_id-semua" class="ml-1">semua</label>
+                                <label for="pilihan_alamat-{{ $key_alamat }}" class="ml-1">
+                                    @if ($alamat->long !== null)
+                                    @foreach (json_decode($alamat->long, true) as $long)
+                                    <div>{{ $long }}</div>
+                                    @endforeach
+                                    @endif
+                                </label>
+                                @endforeach
                             </div>
-                            @foreach ($notas as $key_nota => $nota)
-                            <div class="flex item-center ml-2">
-                                <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}">
-                                <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                            <div class="font-semibold">Untuk:</div>
+                            <div class="flex">
+                                <div class="flex item-center">
+                                    <input type="radio" name="nota_id" id="nota_id-semua" checked>
+                                    <label for="nota_id-semua" class="ml-1">semua</label>
+                                </div>
+                                @foreach ($notas as $key_nota => $nota)
+                                <div class="flex item-center ml-2">
+                                    <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}">
+                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                </div>
+                                @endforeach
                             </div>
-                            @endforeach
-                        </div>
-                        <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
-                    </form>
-                    <div>
-                        <div class="font-bold">Pilihan Kontak:</div>
-
+                            <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
+                        </form>
+                        <form action="{{ route('notas.edit_kontak', $spk->id) }}" method="POST" onsubmit="return confirm('Akan mengubah data kontak pada Nota dan Srjalan terkait!')">
+                            @csrf
+                            <div class="font-bold">Pilihan Kontak:</div>
+                            <div class="flex">
+                                @foreach ($pilihan_kontak as $key_kontak => $kontak)
+                                @if ($kontak->id === $kontak_id_terpilih)
+                                <input type="radio" name="kontak_id" id="pilihan_kontak-{{ $key_kontak }}" value="{{ $kontak->id }}" checked>
+                                @else
+                                <input type="radio" name="kontak_id" id="pilihan_kontak-{{ $key_kontak }}" value="{{ $kontak->id }}">
+                                @endif
+                                <label for="pilihan_kontak-{{ $key_kontak }}" class="ml-1">
+                                    @if ($kontak->tipe === 'seluler')
+                                    {{ $kontak->nomor }}
+                                    @elseif ($kontak->kodearea !== null)
+                                    ({{ $kontak->kodearea }}) {{ $kontak->nomor }}
+                                    @endif
+                                </label>
+                                @endforeach
+                            </div>
+                            <div class="font-semibold">Untuk:</div>
+                            <div class="flex">
+                                <div class="flex item-center">
+                                    <input type="radio" name="nota_id" id="nota_id_kontak-semua" checked>
+                                    <label for="nota_id_kontak-semua" class="ml-1">semua</label>
+                                </div>
+                                @foreach ($notas as $key_nota => $nota)
+                                <div class="flex item-center ml-2">
+                                    <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}">
+                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
+                        </form>
                     </div>
                 </div>
-                {{-- END - PILIHAN ALAMAT --}}
+                {{-- END - PILIHAN ALAMAT/KONTAK --}}
                 @foreach ($notas as $key_nota => $nota)
                 <div class="border-t-4 pt-2">
                     <div class="grid grid-cols-2">
@@ -709,6 +742,81 @@
             </div>
             {{-- SJ --}}
             <div>
+                {{-- PILIHAN EKSPEDISI/TRANSIT --}}
+                <div class="text-right"><button id="btn_opsi_ekspedisi_transit" class="border rounded border-orange-300 text-orange-500" onclick="toggle_light(this.id, 'pilihan_ekspedisi_transit', [], ['bg-orange-200'], 'block')">Opsi Ekspedisi/Transit</button></div>
+                <div id="pilihan_ekspedisi_transit" class="hidden">
+                    <div class="border rounded p-1 grid grid-cols-2 mt-1">
+                        <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}">
+                            @csrf
+                            <div class="font-bold">Pilihan Ekspedisi:</div>
+                            <div class="flex">
+                                @foreach ($pilihan_ekspedisi as $key_ekspedisi => $p_ekspedisi)
+                                @if ($p_ekspedisi['tipe'] === 'UTAMA')
+                                <input type="radio" name="ekspedisi_id" id="pilihan_ekspedisi-{{ $key_ekspedisi }}" value="{{ $p_ekspedisi->id }}" checked>
+                                @else
+                                <input type="radio" name="ekspedisi_id" id="pilihan_ekspedisi-{{ $key_ekspedisi }}" value="{{ $p_ekspedisi->id }}">
+                                @endif
+                                <label for="pilihan_ekspedisi-{{ $key_ekspedisi }}" class="ml-1">
+                                    @if ($p_ekspedisi->alamat->long !== null)
+                                    @foreach (json_decode($p_ekspedisi->alamat->long, true) as $long)
+                                    <div>{{ $long }}</div>
+                                    @endforeach
+                                    @endif
+                                </label>
+                                @endforeach
+                            </div>
+                            <div class="font-semibold">Untuk:</div>
+                            <div class="flex">
+                                <div class="flex item-center">
+                                    <input type="radio" name="srjalan_id" id="srjalan_id-semua" checked>
+                                    <label for="srjalan_id-semua" class="ml-1">semua</label>
+                                </div>
+                                @foreach ($notas as $key_srjalan => $nota)
+                                <div class="flex item-center ml-2">
+                                    <input type="radio" name="srjalan_id" id="srjalan_id-{{ $key_srjalan }}">
+                                    <label for="srjalan_id-{{ $key_srjalan }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
+                        </form>
+                        <form action="{{ route('notas.edit_kontak', $spk->id) }}" method="POST">
+                            @csrf
+                            <div class="font-bold">Pilihan Transit:</div>
+                            <div class="flex">
+                                @foreach ($pilihan_kontak as $key_transit => $kontak)
+                                @if ($kontak->id === $kontak_id_terpilih)
+                                <input type="radio" name="kontak_id" id="pilihan_transit-{{ $key_transit }}" value="{{ $kontak->id }}" checked>
+                                @else
+                                <input type="radio" name="kontak_id" id="pilihan_transit-{{ $key_transit }}" value="{{ $kontak->id }}">
+                                @endif
+                                <label for="pilihan_transit-{{ $key_transit }}" class="ml-1">
+                                    @if ($kontak->tipe === 'seluler')
+                                    {{ $kontak->nomor }}
+                                    @elseif ($kontak->kodearea !== null)
+                                    ({{ $kontak->kodearea }}) {{ $kontak->nomor }}
+                                    @endif
+                                </label>
+                                @endforeach
+                            </div>
+                            <div class="font-semibold">Untuk:</div>
+                            <div class="flex">
+                                <div class="flex item-center">
+                                    <input type="radio" name="srjalan_id" id="srjalan_id_kontak-semua" checked>
+                                    <label for="srjalan_id_kontak-semua" class="ml-1">semua</label>
+                                </div>
+                                @foreach ($notas as $key_srjalan => $nota)
+                                <div class="flex item-center ml-2">
+                                    <input type="radio" name="srjalan_id" id="srjalan_id_kontak-{{ $key_srjalan }}">
+                                    <label for="srjalan_id_kontak-{{ $key_srjalan }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
+                        </form>
+                    </div>
+                </div>
+                {{-- END - PILIHAN EKSPEDISI/TRANSIT --}}
                 @foreach ($notas as $key2 => $nota)
                 @if (count($col_srjalans[$key2]) === 0)
                 {{-- <div class="flex border-b pt-1 justify-center">

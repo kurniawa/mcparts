@@ -366,4 +366,16 @@ class NotaController extends Controller
         ];
         return back()->with($feedback);
     }
+
+    function edit_kontak(Spk $spk, Request $request) {
+        $post = $request->post();
+        dump($post);
+        dd($spk);
+        $success_ = '';
+
+        $feedback = [
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
+    }
 }
