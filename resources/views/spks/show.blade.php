@@ -207,18 +207,18 @@
                         <tr>
                             <td onclick="toggle_element('spk_produk_detail-{{ $key_spk_produk }}')">{{ $spk_produk->nama_produk }}</td>
                             <td>
-                                <div class="text-center">
-                                    {{ $spk_produk->jumlah }}
+                                <div class="text-center" onclick="toggle_element('jumlah_deviasi-{{ $key_spk_produk }}')">
+                                    <span>{{ $spk_produk->jumlah }}</span>
                                     @if ($spk_produk->deviasi_jumlah > 0)
                                     <span class="text-emerald-500"> +{{ $spk_produk->deviasi_jumlah }}</span>
                                     @elseif ($spk_produk->deviasi_jumlah < 0)
-                                    <span class="text-pink-500"> -{{ $spk_produk->deviasi_jumlah }}</span>
+                                    <span class="text-pink-500"> {{ $spk_produk->deviasi_jumlah }}</span>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                         <tr class="spk_produk_detail hidden" id="spk_produk_detail-{{ $key_spk_produk }}">
-                            <td colspan="2">
+                            <td>
                                 <div class="flex">
                                     <div>
                                         <div class="border rounded border-violet-500 p-1 text-violet-500" onclick="toggle_element('spk_produk_selesai-{{ $key_spk_produk }}')">S: {{ $spk_produk->jumlah_selesai }}</div>
@@ -296,6 +296,18 @@
                                     </form>
                                 </div>
                             </td>
+                            <td class="hidden" id="jumlah_deviasi-{{ $key_spk_produk }}">
+                                <form action="{{ route('spks.edit_jumlah_deviasi',[$spk->id, $spk_produk->id]) }}" method="POST" class="border rounded">
+                                    @csrf
+                                    <table>
+                                        <tr><td>Jml.</td><td>:</td><td><input type="number" class="text-xs p-0 rounded w-12" name="jumlah" value="{{ $spk_produk->jumlah }}"></td></tr>
+                                        <tr><td>+/-</td><td>:</td><td><input type="number" class="text-xs p-0 rounded w-12" name="deviasi" value="{{ $spk_produk->deviasi_jumlah }}"></td></tr>
+                                    </table>
+                                    <div class="text-center my-1">
+                                        <button type="submit" class="px-1 bg-emerald-200 text-emerald-500 rounded">confirm</button>
+                                    </div>
+                                </form>
+                            </td>
                         </tr>
                         @endforeach
                         <tr><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
@@ -341,7 +353,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                         </svg>
                     </a>
-                    <form action="{{ route('spks.selesai_all',$spk->id) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Yakin menetapkan semua item pada SPK menjadi SELESAI?')">
+                    <form action="{{ route('spks.selesai_all',$spk->id) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Yakin menetapkan semua item SPK menjadi SELESAI?')">
                         @csrf
                         <button type="submit" class="bg-violet-200 text-violet-500 rounded font-bold text-md px-1" name="spk_id" value="{{ $spk->id }}">S</button>
                     </form>
@@ -358,7 +370,7 @@
                 {{-- NOTA ALL -> PILIHAN NOTA --}}
                 <div class="hidden" id="pilihan_nota">
                     <div class="mt-1 flex justify-end">
-                        <form action="{{ route('notas.nota_all', $spk->id) }}" method="POST" class="border border-emerald-300 rounded p-1 text-emerald-500" onsubmit="return confirm('Yakin input semua item pada SPK ke Nota terpilih?')">
+                        <form action="{{ route('notas.nota_all', $spk->id) }}" method="POST" class="border border-emerald-300 rounded p-1 text-emerald-500" onsubmit="return confirm('Yakin input semua item SPK ke Nota terpilih?')">
                             @csrf
                             @foreach ($notas as $key_pilih_nota => $nota)
                             <div class="flex items-center mt-1">
@@ -390,7 +402,7 @@
                 <div class="text-right"><button id="btn_opsi_alamat_kontak" class="border rounded border-emerald-300 text-emerald-500" onclick="toggle_light(this.id, 'pilihan_alamat_kontak', [], ['bg-emerald-200'], 'block')">Opsi Alamat/Kontak</button></div>
                 <div id="pilihan_alamat_kontak" class="hidden">
                     <div class="border rounded p-1 grid grid-cols-2 mt-1">
-                        <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}" onsubmit="return confirm('Akan mengubah data alamat pada Nota dan Srjalan terkait!')">
+                        <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}" onsubmit="return confirm('Akan mengubah data alamat Nota dan Srjalan terkait!')">
                             @csrf
                             <div class="font-bold">Pilihan Alamat:</div>
                             <div class="flex">
@@ -412,19 +424,19 @@
                             <div class="font-semibold">Untuk:</div>
                             <div class="flex">
                                 <div class="flex item-center">
-                                    <input type="radio" name="nota_id" id="nota_id-semua" checked>
+                                    <input type="radio" name="nota_id" id="nota_id-semua" value="semua" checked>
                                     <label for="nota_id-semua" class="ml-1">semua</label>
                                 </div>
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
-                                    <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}">
+                                    <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}" value="{{ $nota->id }}">
                                     <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
                                 </div>
                                 @endforeach
                             </div>
                             <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
                         </form>
-                        <form action="{{ route('notas.edit_kontak', $spk->id) }}" method="POST" onsubmit="return confirm('Akan mengubah data kontak pada Nota dan Srjalan terkait!')">
+                        <form action="{{ route('notas.edit_kontak', $spk->id) }}" method="POST" onsubmit="return confirm('Akan mengubah data kontak Nota dan Srjalan terkait!')">
                             @csrf
                             <div class="font-bold">Pilihan Kontak:</div>
                             <div class="flex">
@@ -446,12 +458,12 @@
                             <div class="font-semibold">Untuk:</div>
                             <div class="flex">
                                 <div class="flex item-center">
-                                    <input type="radio" name="nota_id" id="nota_id_kontak-semua" checked>
+                                    <input type="radio" name="nota_id" id="nota_id_kontak-semua" value="semua" checked>
                                     <label for="nota_id_kontak-semua" class="ml-1">semua</label>
                                 </div>
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
-                                    <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}">
+                                    <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}" value="{{ $nota->id }}">
                                     <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
                                 </div>
                                 @endforeach
@@ -717,12 +729,12 @@
                     {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}
                     <div class="hidden" id="pilihan_srjalan-{{ $key_nota }}">
                         <div class="mt-1 flex justify-end">
-                            <form action="{{ route('sjs.srjalan_all', [$spk->id, $nota->id]) }}" method="POST" class="border border-yellow-300 rounded p-1 text-yellow-500" onsubmit="return confirm('Yakin input semua item pada SPK ke Srjalan terpilih?')">
+                            <form action="{{ route('sjs.srjalan_all', [$spk->id, $nota->id]) }}" method="POST" class="border border-yellow-300 rounded p-1 text-yellow-500" onsubmit="return confirm('Yakin input semua item Nota ke Srjalan terpilih?')">
                                 @csrf
-                                @foreach ($pilihan_srjalans as $key_pilih_srjalan => $srjalan_id)
+                                @foreach ($pilihan_srjalan as $key_pilih_srjalan => $srjalan)
                                 <div class="flex items-center mt-1">
-                                    <input type="radio" name="srjalan_id" id="pilih_srjalan_id-{{ $key_pilih_srjalan }}" value="{{ $srjalan_id }}">
-                                    <label for="pilih_srjalan_id-{{ $key_pilih_srjalan }}" class="ml-1">SJ-{{ $srjalan_id }}</label>
+                                    <input type="radio" name="srjalan_id" id="pilih_srjalan_id-{{ $key_nota }}-{{ $key_pilih_srjalan }}" value="{{ $srjalan['id'] }}">
+                                    <label for="pilih_srjalan_id-{{ $key_nota }}-{{ $key_pilih_srjalan }}" class="ml-1">SJ-{{ $srjalan['id'] }}</label>
                                 </div>
                                 @endforeach
                                 <div class="flex items-center mt-1">
@@ -746,19 +758,20 @@
                 <div class="text-right"><button id="btn_opsi_ekspedisi_transit" class="border rounded border-orange-300 text-orange-500" onclick="toggle_light(this.id, 'pilihan_ekspedisi_transit', [], ['bg-orange-200'], 'block')">Opsi Ekspedisi/Transit</button></div>
                 <div id="pilihan_ekspedisi_transit" class="hidden">
                     <div class="border rounded p-1 grid grid-cols-2 mt-1">
-                        <form method="POST" action="{{ route('notas.edit_alamat', $spk->id) }}">
+                        <form method="POST" action="{{ route('sjs.edit_ekspedisi', $spk->id) }}">
                             @csrf
                             <div class="font-bold">Pilihan Ekspedisi:</div>
                             <div class="flex">
                                 @foreach ($pilihan_ekspedisi as $key_ekspedisi => $p_ekspedisi)
                                 @if ($p_ekspedisi['tipe'] === 'UTAMA')
-                                <input type="radio" name="ekspedisi_id" id="pilihan_ekspedisi-{{ $key_ekspedisi }}" value="{{ $p_ekspedisi->id }}" checked>
+                                <input type="radio" name="ekspedisi_id" id="pilihan_ekspedisi-{{ $key_ekspedisi }}" value="{{ $p_ekspedisi['id'] }}" checked>
                                 @else
-                                <input type="radio" name="ekspedisi_id" id="pilihan_ekspedisi-{{ $key_ekspedisi }}" value="{{ $p_ekspedisi->id }}">
+                                <input type="radio" name="ekspedisi_id" id="pilihan_ekspedisi-{{ $key_ekspedisi }}" value="{{ $p_ekspedisi['id'] }}">
                                 @endif
                                 <label for="pilihan_ekspedisi-{{ $key_ekspedisi }}" class="ml-1">
-                                    @if ($p_ekspedisi->alamat->long !== null)
-                                    @foreach (json_decode($p_ekspedisi->alamat->long, true) as $long)
+                                    <div class="font-semibold">{{ $p_ekspedisi['nama'] }}</div>
+                                    @if ($p_ekspedisi['alamat']->long !== null)
+                                    @foreach (json_decode($p_ekspedisi['alamat']->long, true) as $long)
                                     <div>{{ $long }}</div>
                                     @endforeach
                                     @endif
@@ -771,30 +784,31 @@
                                     <input type="radio" name="srjalan_id" id="srjalan_id-semua" checked>
                                     <label for="srjalan_id-semua" class="ml-1">semua</label>
                                 </div>
-                                @foreach ($notas as $key_srjalan => $nota)
+                                @foreach ($pilihan_srjalan as $key_p_srjalan => $p_srjalan)
                                 <div class="flex item-center ml-2">
-                                    <input type="radio" name="srjalan_id" id="srjalan_id-{{ $key_srjalan }}">
-                                    <label for="srjalan_id-{{ $key_srjalan }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                    <input type="radio" name="srjalan_id" id="srjalan_id-{{ $key_p_srjalan }}" value="{{ $p_srjalan['id'] }}">
+                                    <label for="srjalan_id-{{ $key_p_srjalan }}" class="ml-1">SJ-{{ $p_srjalan['id'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
                             <div class="text-center mt-3"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
                         </form>
-                        <form action="{{ route('notas.edit_kontak', $spk->id) }}" method="POST">
+                        <form action="{{ route('sjs.edit_transit', $spk->id) }}" method="POST">
                             @csrf
                             <div class="font-bold">Pilihan Transit:</div>
                             <div class="flex">
-                                @foreach ($pilihan_kontak as $key_transit => $kontak)
-                                @if ($kontak->id === $kontak_id_terpilih)
-                                <input type="radio" name="kontak_id" id="pilihan_transit-{{ $key_transit }}" value="{{ $kontak->id }}" checked>
+                                @foreach ($pilihan_transit as $key_transit => $transit)
+                                @if ($transit['tipe'] === 'UTAMA')
+                                <input type="radio" name="transit_id" id="pilihan_transit-{{ $key_transit }}" value="{{ $transit['id'] }}" checked>
                                 @else
-                                <input type="radio" name="kontak_id" id="pilihan_transit-{{ $key_transit }}" value="{{ $kontak->id }}">
+                                <input type="radio" name="transit_id" id="pilihan_transit-{{ $key_transit }}" value="{{ $transit['id'] }}">
                                 @endif
                                 <label for="pilihan_transit-{{ $key_transit }}" class="ml-1">
-                                    @if ($kontak->tipe === 'seluler')
-                                    {{ $kontak->nomor }}
-                                    @elseif ($kontak->kodearea !== null)
-                                    ({{ $kontak->kodearea }}) {{ $kontak->nomor }}
+                                    <div class="font-semibold">{{ $transit['nama'] }}</div>
+                                    @if ($transit['alamat']->long !== null)
+                                    @foreach (json_decode($transit['alamat']->long, true) as $long)
+                                    <div>{{ $long }}</div>
+                                    @endforeach
                                     @endif
                                 </label>
                                 @endforeach
@@ -802,13 +816,13 @@
                             <div class="font-semibold">Untuk:</div>
                             <div class="flex">
                                 <div class="flex item-center">
-                                    <input type="radio" name="srjalan_id" id="srjalan_id_kontak-semua" checked>
-                                    <label for="srjalan_id_kontak-semua" class="ml-1">semua</label>
+                                    <input type="radio" name="srjalan_id" id="srjalan_id_transit-semua" checked>
+                                    <label for="srjalan_id_transit-semua" class="ml-1">semua</label>
                                 </div>
-                                @foreach ($notas as $key_srjalan => $nota)
+                                @foreach ($pilihan_srjalan as $key_p_srjalan => $p_srjalan)
                                 <div class="flex item-center ml-2">
-                                    <input type="radio" name="srjalan_id" id="srjalan_id_kontak-{{ $key_srjalan }}">
-                                    <label for="srjalan_id_kontak-{{ $key_srjalan }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                    <input type="radio" name="srjalan_id" id="srjalan_id_transit-{{ $key_p_srjalan }}" value="{{ $p_srjalan['id'] }}">
+                                    <label for="srjalan_id_transit-{{ $key_p_srjalan }}" class="ml-1">SJ-{{ $p_srjalan['id'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -952,29 +966,61 @@
                                 </td>
                             </tr>
                         </table>
-                        <div class="border rounded border-sky-400">
-                            <div class="text-center"><h3>Data Ekspedisi</h3></div>
-                            <table class="w-full text-xs">
-                                <tr><td>Ekspedisi</td><td>:</td><td>{{ $srjalan->ekspedisi_nama }}</td></tr>
-                                <tr>
-                                    <td class="align-top">Alamat</td><td class="align-top">:</td>
-                                    <td class="align-top">
-                                        @if ($srjalan->eks_long_ala!==null)
-                                        @foreach (json_decode($srjalan->eks_long_ala,true) as $long)
-                                        <div>{{ $long }}</div>
-                                        @endforeach
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Kontak</td><td>:</td>
-                                    <td>
-                                        @if ($col_ekspedisi_kontaks[$key2][$key_srjalan] !==null)
-                                        {{ $col_ekspedisi_kontaks[$key2][$key_srjalan] }}
-                                        @else-@endif
-                                    </td>
-                                </tr>
-                            </table>
+                        <div>
+                            <div class="border rounded border-sky-400">
+                                <div class="text-center"><h3>Data Ekspedisi</h3></div>
+                                <table class="w-full text-xs">
+                                    <tr><td></td><td></td><td>{{ $srjalan->ekspedisi_nama }}</td></tr>
+                                    <tr>
+                                        <td class="align-top">Alamat</td><td class="align-top">:</td>
+                                        <td class="align-top">
+                                            @if ($srjalan->ekspedisi_long!==null)
+                                            @foreach (json_decode($srjalan->ekspedisi_long,true) as $long)
+                                            <div>{{ $long }}</div>
+                                            @endforeach
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kontak</td><td>:</td>
+                                        <td>
+                                            {{-- @if ($col_ekspedisi_kontaks[$key2][$key_srjalan] !==null)
+                                            {{ $col_ekspedisi_kontaks[$key2][$key_srjalan] }}
+                                            @else-@endif --}}
+                                            @if ($srjalan->ekspedisi_kontak !==null)
+                                            {{ json_decode($srjalan->ekspedisi_kontak, true)['nomor'] }}
+                                            @else-@endif
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="border rounded border-pink-400 mt-1">
+                                <div class="text-center text-red-500"><h3>transit via:</h3></div>
+                                <table class="w-full text-xs">
+                                    <tr><td></td><td></td><td>{{ $srjalan->transit_nama }}</td></tr>
+                                    <tr>
+                                        <td class="align-top">Alamat</td><td class="align-top">:</td>
+                                        <td class="align-top">
+                                            @if ($srjalan->transit_long!==null)
+                                            @foreach (json_decode($srjalan->transit_long,true) as $long)
+                                            <div>{{ $long }}</div>
+                                            @endforeach
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kontak</td><td>:</td>
+                                        <td>
+                                            @if ($srjalan->transit_kontak !==null)
+                                            @if (json_decode($srjalan->transit_kontak,true)['kodearea'] !== null)
+                                            ({{ json_decode($srjalan->transit_kontak, true)['kodearea'] }}) {{ json_decode($srjalan->transit_kontak, true)['nomor'] }}
+                                            @endif
+                                            {{ json_decode($srjalan->transit_kontak, true)['nomor'] }}
+                                            @else-@endif
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -1014,7 +1060,7 @@
                             <tr class="spk_produk_nota_srjalan_detail-{{ $key2 }}-{{ $key_srjalan }} hidden" id="spk_produk_nota_srjalan_detail-{{ $key2 }}-{{ $key_srjalan }}-{{ $key_spk_produk_nota_srjalan }}">
                                 <td colspan="3">
                                     <div class="flex">
-                                        <form action="{{ route('sjs.delete_item', [$spk->id, $spk_produk_nota_srjalan->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus nota_item akan merubah data SPK dan Nota!')">
+                                        <form action="{{ route('sjs.delete_item', [$spk->id, $srjalan->id, $spk_produk_nota_srjalan->id]) }}" class="ml-1 flex" method="POST" onsubmit="return confirm('Menghapus nota_item akan merubah data SPK dan Nota!')">
                                             @csrf
                                             <button class="text-red-400" type="submit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -1108,30 +1154,6 @@
                 detail_button.classList.remove('text-yellow-700');
                 detail_button.classList.remove('bg-yellow-500');
                 detail_button.classList.add('text-yellow-500');
-            }
-        }, 500);
-    }
-
-    function toggle_light(btn_id, id, classes_to_remove, classes_to_add, display_ref) {
-        $(`#${id}`).toggle(300);
-        setTimeout(() => {
-            let display = $(`#${id}`).css('display');
-            // console.log(display);
-            let detail_button = document.getElementById(btn_id)
-            if (display === display_ref) {
-                classes_to_remove.forEach(element => {
-                    detail_button.classList.remove(element);
-                });
-                classes_to_add.forEach(element => {
-                    detail_button.classList.add(element);
-                });
-            } else {
-                classes_to_remove.forEach(element => {
-                    detail_button.classList.add(element);
-                });
-                classes_to_add.forEach(element => {
-                    detail_button.classList.remove(element);
-                });
             }
         }, 500);
     }

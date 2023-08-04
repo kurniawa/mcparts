@@ -13,6 +13,30 @@ function toggle_element(element_id) {
     $(`#${element_id}`).toggle(300);
 }
 
+function toggle_light(btn_id, id, classes_to_remove, classes_to_add, display_ref) {
+    $(`#${id}`).toggle(300);
+    setTimeout(() => {
+        let display = $(`#${id}`).css('display');
+        // console.log(display);
+        let detail_button = document.getElementById(btn_id)
+        if (display === display_ref) {
+            classes_to_remove.forEach(element => {
+                detail_button.classList.remove(element);
+            });
+            classes_to_add.forEach(element => {
+                detail_button.classList.add(element);
+            });
+        } else {
+            classes_to_remove.forEach(element => {
+                detail_button.classList.add(element);
+            });
+            classes_to_add.forEach(element => {
+                detail_button.classList.remove(element);
+            });
+        }
+    }, 500);
+}
+
 function formatHarga(harga) {
     // console.log(harga);
     let harga_ohne_titik = harga.replace(".", "");

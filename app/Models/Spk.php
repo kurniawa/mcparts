@@ -72,8 +72,8 @@ class Spk extends Model
                 // EKSPEDISI_KONTAK
                 $ekspedisi_kontak = null;
                 $json_ekspedisi_kontak = null;
-                if ($srjalan->eks_kontak !== null) {
-                    $json_ekspedisi_kontak = json_decode($srjalan->eks_kontak, true);
+                if ($srjalan->ekspedisi_kontak !== null) {
+                    $json_ekspedisi_kontak = json_decode($srjalan->ekspedisi_kontak, true);
                 }
                 if ($json_ekspedisi_kontak !== null) {
                     if ($json_ekspedisi_kontak['kodearea'] !== null) {
@@ -227,13 +227,6 @@ class Spk extends Model
             $data_spk_produk_notas->push($data_spk_produk_notas_2);
         }
         // dd($data_spk_produk_notas);
-        // PILIHAN SRJALAN
-        $pilihan_srjalans = array();
-        $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::select('srjalan_id')->groupBy('srjalan_id')->where('spk_id', $spk->id)->get();
-        foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
-            $pilihan_srjalans[] = $spk_produk_nota_srjalan->srjalan_id;
-        }
-        // END - PILIHAN SRJALAN
 
         // END - DATA TAMBAHAN SPK_PRODUK_NOTAS
 
@@ -248,7 +241,6 @@ class Spk extends Model
             'spk_produks' => $spk_produks,
             'data_spk_produks' => $data_spk_produks,
             'data_spk_produk_notas' => $data_spk_produk_notas,
-            'pilihan_srjalans' => $pilihan_srjalans,
         ];
         // dd($pilihan_srjalans);
         return $data;
@@ -256,6 +248,7 @@ class Spk extends Model
 
     static function update_data_SPK($spk) { // UPDATE jumlah_selesai, jumlah_total
         $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
+        // dd($spk_produks);
         $jumlah_selesai = 0;
         $jumlah_total = 0;
         foreach ($spk_produks as $spk_produk) {

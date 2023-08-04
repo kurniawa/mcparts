@@ -5,6 +5,7 @@ use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotaController;
+use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\SrjalanController;
 use App\Http\Controllers\UserController;
@@ -59,6 +60,7 @@ Route::controller(SpkController::class)->group(function(){
     Route::post('/spks/{spk}/selesai_all','selesai_all')->name('spks.selesai_all')->middleware('auth');
     Route::post('/spks/{spk}/add_item','add_item')->name('spks.add_item')->middleware('auth');
     Route::post('/spks/{spk}/{spk_produk}/delete_item','delete_item')->name('spks.delete_item')->middleware('auth');
+    Route::post('/spks/{spk}/{spk_produk}/edit_jumlah_deviasi','edit_jumlah_deviasi')->name('spks.edit_jumlah_deviasi')->middleware('auth');
 });
 
 Route::controller(NotaController::class)->group(function(){
@@ -79,9 +81,15 @@ Route::controller(SrjalanController::class)->group(function(){
     Route::post('/sjs/{srjalan}/{spk_produk_nota_srjalan}/edit_jumlah_packing','edit_jumlah_packing')->name('sjs.edit_jumlah_packing')->middleware('auth');
     Route::post('/sjs/{spk}/{srjalan}/delete','delete')->name('sjs.delete')->middleware('auth');
     Route::post('/sjs/{spk}/{nota}/srjalan_all','srjalan_all')->name('sjs.srjalan_all')->middleware('auth');
-    Route::post('/sjs/{spk}/{spk_produk_nota_srjalan}/delete_item','delete_item')->name('sjs.delete_item')->middleware('auth');
+    Route::post('/sjs/{spk}/{srjalan}/{spk_produk_nota_srjalan}/delete_item','delete_item')->name('sjs.delete_item')->middleware('auth');
     Route::post('/sjs/{srjalan}/update_packing','update_packing')->name('sjs.update_packing')->middleware('auth');
     Route::post('/sjs/{srjalan}/edit_jenis_barang','edit_jenis_barang')->name('sjs.edit_jenis_barang')->middleware('auth');
+    Route::post('/sjs/{srjalan}/edit_ekspedisi','edit_ekspedisi')->name('sjs.edit_ekspedisi')->middleware('auth');
+    Route::post('/sjs/{srjalan}/edit_transit','edit_transit')->name('sjs.edit_transit')->middleware('auth');
+});
+
+Route::controller(PelangganController::class)->group(function(){
+    Route::get('/pelanggans','index')->name('pelanggans.index');
 });
 
 Route::controller(AccountingController::class)->group(function(){

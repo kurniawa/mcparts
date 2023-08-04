@@ -159,6 +159,10 @@ class Srjalan extends Model
             'srjalan_id' => $srjalan->id,
         ]);
         // CREATE SPK_PRODUK_NOTA_SRJALAN
+        $jumlah_packing = (int)round($jumlah / $produk->aturan_packing);
+        if ($jumlah_packing === 0) {
+            $jumlah_packing = 1;
+        }
         $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::create([
             'spk_id' => $spk->id,
             'produk_id' => $spk_produk->produk_id,
@@ -168,7 +172,7 @@ class Srjalan extends Model
             'spk_produk_nota_id' => $spk_produk_nota->id,
             'tipe_packing' => $produk->tipe_packing,
             'jumlah' => $jumlah,
-            'jumlah_packing' => round($jumlah / $produk->aturan_packing),
+            'jumlah_packing' => $jumlah_packing,
         ]);
 
         return $srjalan;
@@ -279,5 +283,63 @@ class Srjalan extends Model
             }
         }
         return $data_packing;
+    }
+
+    static function new($nota) {
+        $data = Pelanggan::data_pelanggan_reseller_ekspedisi_transit($nota);
+        $user = Auth::user();
+        // $jumlah_packing = [[
+        //     'tipe_packing' => $produk->tipe_packing,
+        //     'jumlah_packing' => round($jumlah / $produk->aturan_packing),
+        // ]];
+        // $jumlah_packing = json_encode($jumlah_packing);
+        $srjalan = Srjalan::create([
+            // PELANGGAN
+            'pelanggan_id'=>$nota->pelanggan_id,
+            'pelanggan_nama'=>$nota->pelanggan_nama,
+            'alamat_id'=>$data['alamat_id'],
+            'kontak_id'=>$data['kontak_id'],
+            'cust_long'=>$data['cust_long'],
+            'cust_short'=>$data['cust_short'],
+            'cust_kontak'=>$data['cust_kontak'],
+            // RESELLER
+            'reseller_id'=>$nota->reseller_id,
+            'reseller_nama'=>$nota->reseller_nama,
+            'reseller_alamat_id'=>$data['reseller_alamat_id'],
+            'reseller_kontak_id'=>$data['reseller_kontak_id'],
+            'reseller_long'=>$data['reseller_long'],
+            'reseller_short'=>$data['reseller_short'],
+            'reseller_kontak'=>$data['reseller_kontak'],
+            // EKSPEDISI
+            'ekspedisi_id' => $data['ekspedisi_id'],
+            'ekspedisi_nama' => $data['ekspedisi_nama'],
+            'ekspedisi_alamat_id' => $data['ekspedisi_alamat_id'],
+            'ekspedisi_kontak_id' => $data['ekspedisi_kontak_id'],
+            'ekspedisi_long' => $data['ekspedisi_long'],
+            'ekspedisi_short' => $data['ekspedisi_short'],
+            'ekspedisi_kontak' => $data['ekspedisi_kontak'],
+            // TRANSIT
+            'transit_id' => $data['transit_id'],
+            'transit_nama' => $data['transit_nama'],
+            'transit_alamat_id' => $data['transit_alamat_id'],
+            'transit_kontak_id' => $data['transit_kontak_id'],
+            'transit_long' => $data['transit_long'],
+            'transit_short' => $data['transit_short'],
+            'transit_kontak' => $data['transit_kontak'],
+            //
+            // 'jumlah_packing'=>$jumlah_packing,
+            'created_by'=>$user->username,
+            'updated_by'=>$user->username,
+        ]);
+        // UPDATE NO_SRJALAN
+        $srjalan->no_srjalan = "SJ-$srjalan->id";
+        $srjalan->save();
+        // CREATE NOTA_SRJALAN
+        $nota_srjalan = NotaSrjalan::create([
+            'nota_id' => $nota->id,
+            'srjalan_id' => $srjalan->id,
+        ]);
+
+        return $srjalan;
     }
 }
