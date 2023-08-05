@@ -90,6 +90,13 @@ Route::controller(SrjalanController::class)->group(function(){
 
 Route::controller(PelangganController::class)->group(function(){
     Route::get('/pelanggans','index')->name('pelanggans.index');
+    Route::get('/pelanggans/{pelanggan}/show','show')->name('pelanggans.show')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/create_kontak','create_kontak')->name('pelanggans.create_kontak')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/edit_kontak','edit_kontak')->name('pelanggans.edit_kontak')->middleware('auth');
+    Route::get('/pelanggans/{pelanggan}/add_alamat','add_alamat')->name('pelanggans.add_alamat')->middleware('auth');
+    Route::get('/pelanggans/{pelanggan}/{alamat}/edit_alamat','edit_alamat')->name('pelanggans.edit_alamat')->middleware('auth');
+    Route::get('/pelanggans/{pelanggan}/add_ekspedisi','add_ekspedisi')->name('pelanggans.add_ekspedisi')->middleware('auth');
+    Route::get('/pelanggans/{pelanggan}/add_transit','add_transit')->name('pelanggans.add_transit')->middleware('auth');
 });
 
 Route::controller(AccountingController::class)->group(function(){
