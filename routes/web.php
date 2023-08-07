@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
@@ -70,7 +71,7 @@ Route::controller(NotaController::class)->group(function(){
     Route::post('/notas/{spk}/nota_all','nota_all')->name('notas.nota_all')->middleware('auth');
     Route::post('/notas/{nota}/edit_tanggal','edit_tanggal')->name('notas.edit_tanggal')->middleware('auth');
     Route::post('/notas/{spk}/{spk_produk_nota}/delete_item','delete_item')->name('notas.delete_item')->middleware('auth');
-    Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.edit_alamat')->middleware('auth');
+    Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.alamat_edit')->middleware('auth');
     Route::post('/notas/{spk}/edit_kontak','edit_kontak')->name('notas.edit_kontak')->middleware('auth');
 });
 
@@ -91,12 +92,27 @@ Route::controller(SrjalanController::class)->group(function(){
 Route::controller(PelangganController::class)->group(function(){
     Route::get('/pelanggans','index')->name('pelanggans.index');
     Route::get('/pelanggans/{pelanggan}/show','show')->name('pelanggans.show')->middleware('auth');
-    Route::post('/pelanggans/{pelanggan}/create_kontak','create_kontak')->name('pelanggans.create_kontak')->middleware('auth');
-    Route::post('/pelanggans/{pelanggan}/edit_kontak','edit_kontak')->name('pelanggans.edit_kontak')->middleware('auth');
-    Route::get('/pelanggans/{pelanggan}/add_alamat','add_alamat')->name('pelanggans.add_alamat')->middleware('auth');
-    Route::get('/pelanggans/{pelanggan}/{alamat}/edit_alamat','edit_alamat')->name('pelanggans.edit_alamat')->middleware('auth');
-    Route::get('/pelanggans/{pelanggan}/add_ekspedisi','add_ekspedisi')->name('pelanggans.add_ekspedisi')->middleware('auth');
-    Route::get('/pelanggans/{pelanggan}/add_transit','add_transit')->name('pelanggans.add_transit')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/kontak_add','kontak_add')->name('pelanggans.kontak_add')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan_kontak}/kontak_edit','kontak_edit')->name('pelanggans.kontak_edit')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan_kontak}/kontak_delete','kontak_delete')->name('pelanggans.kontak_delete')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/{pelanggan_kontak}/kontak_utama','kontak_utama')->name('pelanggans.kontak_utama')->middleware('auth');
+    Route::get('/pelanggans/{pelanggan}/alamat_add','alamat_add')->name('pelanggans.alamat_add')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/alamat_add','alamat_add_post')->name('pelanggans.alamat_add_post')->middleware('auth');
+    Route::post('/pelanggans/{alamat}/delete_alamat','delete_alamat')->name('pelanggans.delete_alamat')->middleware('auth');
+    Route::get('/pelanggans/{pelanggan}/{alamat}/alamat_edit','alamat_edit')->name('pelanggans.alamat_edit')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/{alamat}/alamat_edit','alamat_edit_post')->name('pelanggans.alamat_edit_post')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/{alamat}/alamat_utama','alamat_utama')->name('pelanggans.alamat_utama')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/ekspedisi_add','ekspedisi_add')->name('pelanggans.ekspedisi_add')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan_ekspedisi}/ekspedisi_delete','ekspedisi_delete')->name('pelanggans.ekspedisi_delete')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/{pelanggan_ekspedisi}/ekspedisi_utama','ekspedisi_utama')->name('pelanggans.ekspedisi_utama')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/transit_add','transit_add')->name('pelanggans.transit_add')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan_ekspedisi}/transit_delete','transit_delete')->name('pelanggans.transit_delete')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/{pelanggan_ekspedisi}/transit_utama','transit_utama')->name('pelanggans.transit_utama')->middleware('auth');
+});
+
+Route::controller(EkspedisiController::class)->group(function(){
+    Route::get('/ekspedisis','index')->name('ekspedisis.index');
+    Route::get('/ekspedisis/{ekspedisi}/show','show')->name('ekspedisis.show');
 });
 
 Route::controller(AccountingController::class)->group(function(){
