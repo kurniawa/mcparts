@@ -131,6 +131,17 @@ class PelangganController extends Controller
         return view('pelanggans.show', $data);
     }
 
+    function create() {
+
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'pelanggans.create',
+            'profile_menus' => Menu::get_profile_menus(),
+        ];
+
+        return view('pelanggans.create', $data);
+    }
+
     function alamat_add(Pelanggan $pelanggan) {
         $data = [
             'menus' => Menu::get(),

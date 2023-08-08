@@ -12,7 +12,7 @@
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="flex">
             <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button>
-            <form action="{{ route('spks.create') }}" method="GET" class="flex ml-2">
+            <form action="{{ route('pelanggans.create') }}" method="GET" class="flex ml-2">
                 <button type="submit" class="rounded bg-emerald-500 text-white font-semibold px-3 py-1">+ Pelanggan</button>
             </form>
         </div>

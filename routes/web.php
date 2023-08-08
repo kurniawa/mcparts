@@ -91,6 +91,8 @@ Route::controller(SrjalanController::class)->group(function(){
 
 Route::controller(PelangganController::class)->group(function(){
     Route::get('/pelanggans','index')->name('pelanggans.index');
+    Route::get('/pelanggans/create','create')->name('pelanggans.create');
+    Route::post('/pelanggans/store','store')->name('pelanggans.store');
     Route::get('/pelanggans/{pelanggan}/show','show')->name('pelanggans.show')->middleware('auth');
     Route::post('/pelanggans/{pelanggan}/kontak_add','kontak_add')->name('pelanggans.kontak_add')->middleware('auth');
     Route::post('/pelanggans/{pelanggan_kontak}/kontak_edit','kontak_edit')->name('pelanggans.kontak_edit')->middleware('auth');
