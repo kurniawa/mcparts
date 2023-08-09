@@ -199,4 +199,7 @@ class Pelanggan extends Model
         ];
     }
 
+    static function bentuks() {
+        return ['individu', 'PT', 'CV', 'Toko', 'Gudang'];
+    }
 }

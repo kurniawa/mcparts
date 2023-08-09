@@ -106,6 +106,15 @@
             <p>o) pelanggan_produk - edit column status -> VARCHAR 20, not null, default: DEFAULT</p>
         </div>
     </div>
+
+    <div class="ml-2 mt-5 flex">
+        <div class="border-2 border-sky-600 rounded p-1">
+            @csrf
+            <h3 class="text-bold font-md">Table: pelanggans</h3>
+            <p>o) hapus: nama_organisasi, nama_toko, nama_pemilik, alias</p>
+            <p>o) sisa column: 18</p>
+        </div>
+    </div>
   </main>
 </div>
 @endsection

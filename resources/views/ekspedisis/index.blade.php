@@ -12,10 +12,90 @@
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="flex">
             <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button>
-            <form action="{{ route('spks.create') }}" method="GET" class="flex ml-2">
-                <button type="submit" class="rounded bg-emerald-500 text-white font-semibold px-3 py-1">+ Ekspedisi</button>
-            </form>
+            <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_ekspedisi" onclick="toggle_light(this.id, 'form_new_ekspedisi', [], ['bg-emerald-200'], 'block')">+ Ekspedisi</button>
         </div>
+        {{-- FORM NEW EKSPEDISI --}}
+        <div id="form_new_ekspedisi" class="hidden">
+            <div class="flex justify-center">
+                <form action="{{ route('ekspedisis.store') }}" method="POST" class="border rounded border-emerald-300 p-1 mt-1 lg:w-1/2 md:w-3/4">
+                    @csrf
+                    <div class="grid grid-cols-2">
+                        <table>
+                            <tr>
+                                <td>Bentuk (*)</td><td>:</td>
+                                <td>
+                                    <select name="bentuk" id="bentuk" class="rounded py-0">
+                                        @foreach ($bentuks as $bentuk)
+                                        <option value="{{ $bentuk }}">{{ $bentuk }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr><td>Nama (*)</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="nama"></td></tr>
+                            <tr>
+                                <td class="align-top">Keterangan (opt.)</td><td class="align-top">:</td><td><textarea name="keterangan" id="" cols="30" rows="5" class="text-xs rounded"></textarea></td>
+                            </tr>
+                        </table>
+                        {{-- KONTAK --}}
+                        <div>
+                            <div class="flex justify-center mt-1">
+                                <div class="flex items-center bg-white rounded p-1 shadow drop-shadow">
+                                    <h5 class="font-semibold ml-2">Kontak:</h5>
+                                </div>
+                            </div>
+                            <table class="mt-2">
+                                <tr>
+                                    <td>Tipe</td><td>:</td>
+                                    <td>
+                                        <select class="border rounded py-0 ml-1" name="tipe">
+                                            <option value="">-</option>
+                                            @foreach ($tipe_kontaks as $tipe_kontak)
+                                            <option value="{{ $tipe_kontak }}">{{ $tipe_kontak }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr><td>Kode Area</td><td>:</td><td><input type="text" name="kodearea" class="p-1 text-xs rounded ml-1 w-1/2"></td></tr>
+                                <tr><td>Nomor</td><td>:</td><td><input type="text" name="nomor" class="p-1 text-xs rounded ml-1"></td></tr>
+                            </table>
+                        </div>
+                        {{-- END - KONTAK --}}
+                    </div>
+                    <div class="flex justify-center mt-2">
+                        <div class="flex items-center bg-white rounded p-1 shadow drop-shadow">
+                            <h5 class="font-semibold ml-2">Alamat:</h5>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2">
+                        <table class="mt-1">
+                            <tr><td>jalan</td><td>:</td><td><input type="text" name="jalan" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>komplek</td><td>:</td><td><input type="text" name="komplek" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>rt</td><td>:</td><td><input type="text" name="rt" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>desa</td><td>:</td><td><input type="text" name="desa" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>kecamatan</td><td>:</td><td><input type="text" name="kecamatan" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>kodepos</td><td>:</td><td><input type="text" name="kodepos" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>kabupaten</td><td>:</td><td><input type="text" name="kabupaten" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>pulau</td><td>:</td><td><input type="text" name="pulau" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>(*)short(daerah)</td><td>:</td><td><input type="text" name="short" class="text-xs p-1 rounded"></td></tr>
+                        </table>
+                        <table>
+                            <tr><td>rw</td><td>:</td><td><input type="text" name="rw" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>kelurahan</td><td>:</td><td><input type="text" name="kelurahan" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>kota</td><td>:</td><td><input type="text" name="kota" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>provinsi</td><td>:</td><td><input type="text" name="provinsi" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded"></td></tr>
+                            <tr><td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded"></td></tr>
+                            <td>(*)long</td><td>:</td><td><textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs"></textarea></td>
+                        </table>
+                    </div>
+
+                    <div class="text-center mt-2">
+                        <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">Tambah Ekspedisi Baru</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {{-- END - FORM NEW EKSPEDISI --}}
         <div class="hidden" id="filter-content">
             <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1">
                 <form action="" method="GET">

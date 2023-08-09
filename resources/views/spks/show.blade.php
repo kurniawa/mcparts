@@ -994,6 +994,7 @@
                                     </tr>
                                 </table>
                             </div>
+                            @if ($srjalan->transit_nama)
                             <div class="border rounded border-pink-400 mt-1">
                                 <div class="text-center text-red-500"><h3>transit via:</h3></div>
                                 <table class="w-full text-xs">
@@ -1021,6 +1022,7 @@
                                     </tr>
                                 </table>
                             </div>
+                            @endif
                         </div>
                     </div>
 

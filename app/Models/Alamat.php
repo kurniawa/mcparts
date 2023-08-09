@@ -9,4 +9,8 @@ class Alamat extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+
+    static function tipe_kontaks() {
+        return ['seluler', 'kantor', 'rumah'];
+    }
 }

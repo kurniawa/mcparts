@@ -71,7 +71,7 @@ Route::controller(NotaController::class)->group(function(){
     Route::post('/notas/{spk}/nota_all','nota_all')->name('notas.nota_all')->middleware('auth');
     Route::post('/notas/{nota}/edit_tanggal','edit_tanggal')->name('notas.edit_tanggal')->middleware('auth');
     Route::post('/notas/{spk}/{spk_produk_nota}/delete_item','delete_item')->name('notas.delete_item')->middleware('auth');
-    Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.alamat_edit')->middleware('auth');
+    Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.edit_alamat')->middleware('auth');
     Route::post('/notas/{spk}/edit_kontak','edit_kontak')->name('notas.edit_kontak')->middleware('auth');
 });
 
@@ -93,6 +93,7 @@ Route::controller(PelangganController::class)->group(function(){
     Route::get('/pelanggans','index')->name('pelanggans.index');
     Route::get('/pelanggans/create','create')->name('pelanggans.create');
     Route::post('/pelanggans/store','store')->name('pelanggans.store');
+    Route::post('/pelanggans/{pelanggan}/delete','delete')->name('pelanggans.delete');
     Route::get('/pelanggans/{pelanggan}/show','show')->name('pelanggans.show')->middleware('auth');
     Route::post('/pelanggans/{pelanggan}/kontak_add','kontak_add')->name('pelanggans.kontak_add')->middleware('auth');
     Route::post('/pelanggans/{pelanggan_kontak}/kontak_edit','kontak_edit')->name('pelanggans.kontak_edit')->middleware('auth');
@@ -114,6 +115,9 @@ Route::controller(PelangganController::class)->group(function(){
 
 Route::controller(EkspedisiController::class)->group(function(){
     Route::get('/ekspedisis','index')->name('ekspedisis.index');
+    Route::post('/ekspedisis/store','store')->name('ekspedisis.store');
+    Route::post('/ekspedisis/{ekspedisi}/delete','delete')->name('ekspedisis.delete');
+    Route::post('/ekspedisis/{ekspedisi}/alamat_add','alamat_add')->name('ekspedisis.alamat_add');
     Route::get('/ekspedisis/{ekspedisi}/show','show')->name('ekspedisis.show');
 });
 

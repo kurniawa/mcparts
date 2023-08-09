@@ -11,6 +11,7 @@ use App\Models\PelangganAlamat;
 use App\Models\PelangganEkspedisi;
 use App\Models\PelangganKontak;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PelangganController extends Controller
 {
@@ -37,7 +38,10 @@ class PelangganController extends Controller
             }
             $resellers->push($reseller);
             $pelanggan_alamat = PelangganAlamat::where('pelanggan_id', $pelanggan->id)->where('tipe', 'UTAMA')->first();
-            $alamat = Alamat::find($pelanggan_alamat->alamat_id);
+            $alamat = null;
+            if ($pelanggan_alamat !== null) {
+                $alamat = Alamat::find($pelanggan_alamat->alamat_id);
+            }
             $pelanggan_kontak = PelangganKontak::where('pelanggan_id', $pelanggan->id)->where('is_aktual', 'yes')->first();
             $alamats->push($alamat);
             $pelanggan_kontaks->push($pelanggan_kontak);
@@ -125,6 +129,7 @@ class PelangganController extends Controller
             'alamat_ekspedisis' => $alamat_ekspedisis,
             'alamat_transits' => $alamat_transits,
             'label_ekspedisis' => $label_ekspedisis,
+            'tipe_kontaks' => Alamat::tipe_kontaks(),
         ];
         // dd($alamats);
         // dd($alamat_ekspedisis);
@@ -137,9 +142,102 @@ class PelangganController extends Controller
             'menus' => Menu::get(),
             'route_now' => 'pelanggans.create',
             'profile_menus' => Menu::get_profile_menus(),
+            'tipe_kontaks' => Alamat::tipe_kontaks(),
+            'bentuks' => Pelanggan::bentuks(),
         ];
 
         return view('pelanggans.create', $data);
+    }
+
+    function store(Request $request) {
+        $post = $request->post();
+        // dd($post);
+        // VALIDASI
+        // VALIDASI DATA PELANGGAN
+        $request->validate(['nama'=>'required']);
+        if ($post['initial'] !== null) {
+            $request->validate(['initial'=>'max:5']);
+        }
+        // VALIDASI KONTAK
+        if ($post['tipe'] !== null) {
+            $request->validate(['nomor'=>'required']);
+        }elseif ($post['nomor'] !== null) {
+            $request->validate(['tipe'=>'required']);
+        }
+
+        // VALIDASI ALAMAT
+        if ($post['short'] !== null) {
+            $request->validate(['long'=>'required']);
+        } elseif ($post['long'] !== null) {
+            $request->validate(['short'=>'required']);
+        }
+        // END - VALIDASI
+        $success_ = '';
+        // STORE DATA_PELANGGAN
+        $tanggal_lahir = null;
+        if ($post['day'] !== null && $post['month'] !== null && $post['year'] !== null) {
+            $tanggal_lahir = date('Y-m-d', strtotime("$post[year]-$post[month]-$post[day]"));
+        }
+        $user = Auth::user();
+        $pelanggan = Pelanggan::create([
+            'bentuk' => $post['bentuk'],
+            'nama' => $post['nama'],
+            'gender' => $post['gender'],
+            'nik' => $post['nik'],
+            'sapaan' => $post['sapaan'],
+            'gelar' => $post['gelar'],
+            'initial' => $post['initial'],
+            'tanggal_lahir' => $tanggal_lahir,
+            'keterangan' => $post['keterangan'],
+            'creator' => $user->username,
+            'updater' => $user->username,
+        ]);
+        $success_ .= '-pelanggan created-';
+        // END - STORE DATA_PELANGGAN
+        // STORE KONTAK
+        if ($post['tipe'] !== null && $post['nomor'] !== null) {
+            PelangganKontak::create([
+                'pelanggan_id' => $pelanggan->id,
+                'tipe' => $post['tipe'],
+                'kodearea' => $post['kodearea'],
+                'nomor' => $post['nomor'],
+                'is_aktual' => 'yes',
+            ]);
+        }
+        // END - STORE KONTAK
+        // STORE ALAMAT
+        if ($post['short'] !== null && $post['long'] !== null) {
+            $post['long'] = json_encode(preg_split("/\r\n|\n|\r/", $post['long']));
+            $alamat = Alamat::create([
+                'jalan' => $post['jalan'],
+                'komplek' => $post['komplek'],
+                'rt' => $post['rt'],
+                'rw' => $post['rw'],
+                'desa' => $post['desa'],
+                'kelurahan' => $post['kelurahan'],
+                'kecamatan' => $post['kecamatan'],
+                'kota' => $post['kota'],
+                'kodepos' => $post['kodepos'],
+                'kabupaten' => $post['kabupaten'],
+                'provinsi' => $post['provinsi'],
+                'pulau' => $post['pulau'],
+                'negara' => $post['negara'],
+                'short' => $post['short'],
+                'long' => $post['long'],
+            ]);
+
+            PelangganAlamat::create([
+                'pelanggan_id' => $pelanggan->id,
+                'alamat_id' => $alamat->id,
+                'tipe' => 'UTAMA',
+            ]);
+            $success_ .= '-alamat, pelanggan_alamat created-';
+        }
+        // END - STORE ALAMAT
+        $feedback = [
+            'success_' => $success_
+        ];
+        return redirect()->route('pelanggans.index')->with($feedback);
     }
 
     function alamat_add(Pelanggan $pelanggan) {
@@ -417,5 +515,28 @@ class PelangganController extends Controller
 
         return back()->with($feedback);
 
+    }
+
+    function delete(Pelanggan $pelanggan) {
+        $danger_ = '';
+        $warnings_ = '';
+        $pelanggan_alamats = PelangganAlamat::where('pelanggan_id', $pelanggan->id)->get();
+        foreach ($pelanggan_alamats as $pelanggan_alamat) {
+            $alamat = Alamat::find($pelanggan_alamat->alamat_id);
+            $pelanggan_alamat_other = PelangganAlamat::where('alamat_id', $alamat->id)->where('pelanggan_id', '!=', $pelanggan->id)->first();
+            if ($pelanggan_alamat_other === null) {
+                $alamat->delete();
+                $danger_ .= '-alamat deleted!-';
+            } else {
+                $warnings_ = '-alamat used together-';
+            }
+        }
+        $pelanggan->delete();
+        $danger_ .= '-pelanggan deleted!-';
+        $feedback = [
+            'danger_' => $danger_,
+            'warnings_' => $warnings_,
+        ];
+        return redirect()->route('pelanggans.index')->with($feedback);
     }
 }
