@@ -89,7 +89,7 @@ class PenjualanController extends Controller
         }
         $data = [
             'menus' => Menu::get(),
-            'route_now' => 'ekspedisis.index',
+            'route_now' => 'penjualans.index',
             'profile_menus' => Menu::get_profile_menus(),
             'total_penjualan_pelanggan_all' => $total_penjualan_pelanggan_all,
             'nota_subtotal_all' => $nota_subtotal_all,

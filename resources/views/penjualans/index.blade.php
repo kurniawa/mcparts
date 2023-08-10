@@ -10,7 +10,7 @@
     <x-validation-feedback></x-validation-feedback>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="flex">
-            <button id="btn_filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button>
+            <button id="btn_filter" class="border rounded border-yellow-300 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button>
         </div>
         {{-- SEARCH / FILTER --}}
         <div class="mt-1 hidden" id="filter-content">
@@ -24,11 +24,13 @@
                         </div>
                     </div>
                     <div class="flex items-center ml-2">
-                        <div><input type="radio" name="timerange" value="today" id="now" onclick="setTimeRange('now')"><label for="now" class="ml-1">now</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="setTimeRange('7d')"><label for="7d" class="ml-1">7d</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="setTimeRange('30d')"><label for="30d" class="ml-1">30d</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="setTimeRange('tahun_ini')"><label for="tahun_ini" class="ml-1">tahun ini</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="setTimeRange('tahun_lalu')"><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
+                        <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1">now</label></div>
+                        <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
+                        {{-- <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1">30d</label></div> --}}
+                        <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1">bulan ini</label></div>
+                        <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
+                        <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')"><label for="tahun_ini" class="ml-1">tahun ini</label></div>
+                        <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')"><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
                     </div>
                 </div>
                 <div class="flex mt-2">
@@ -36,19 +38,19 @@
                         <div>
                             <label>Dari:</label>
                             <div class="flex">
-                                <select name="from_day" id="from_day" class="rounded">
+                                <select name="from_day" id="from_day" class="rounded text-xs py-1">
                                     <option value="">-</option>
                                     @for ($i = 1; $i < 32; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
-                                <select name="from_month" id="from_month" class="rounded ml-1">
+                                <select name="from_month" id="from_month" class="rounded text-xs py-1 ml-1">
                                     <option value="">-</option>
                                     @for ($i = 1; $i < 13; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
-                                <select name="from_year" id="from_year" class="rounded ml-1">
+                                <select name="from_year" id="from_year" class="rounded text-xs py-1 ml-1">
                                     <option value="{{ date('Y') }}">{{ date('Y') }}</option>
                                     <option value="">-</option>
                                     @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
@@ -60,19 +62,19 @@
                         <div class="ml-3">
                             <label>Sampai:</label>
                             <div class="flex items-center">
-                                <select name="to_day" id="to_day" class="rounded">
+                                <select name="to_day" id="to_day" class="rounded text-xs py-1">
                                     <option value="">-</option>
                                     @for ($i = 1; $i < 32; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
-                                <select name="to_month" id="to_month" class="rounded ml-1">
+                                <select name="to_month" id="to_month" class="rounded text-xs py-1 ml-1">
                                     <option value="">-</option>
                                     @for ($i = 1; $i < 13; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
-                                <select name="to_year" id="to_year" class="rounded ml-1">
+                                <select name="to_year" id="to_year" class="rounded text-xs py-1 ml-1">
                                     <option value="{{ date('Y') }}">{{ date('Y') }}</option>
                                     <option value="">-</option>
                                     @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
@@ -80,7 +82,7 @@
                                     @endfor
                                 </select>
                                 <button type="submit" class="ml-2 flex items-center bg-orange-500 text-white py-1 px-3 rounded hover:bg-orange-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                                     </svg>
                                     <span class="ml-1">Search</span>
@@ -236,65 +238,10 @@
     </table>
     {{-- END - VERSI UNTUK DOWNLOAD --}}
     <div class="bg-orange-50"></div>
+    <div class="bg-sky-100"></div>
 </main>
 
 <script>
-    function setTimeRange(timerange) {
-        // console.log(timerange);
-        let from_day, from_month, from_year;
-        let to_day, to_month, to_year;
-        if (timerange === 'now') {
-            const date = new Date();
-            from_day = date.getDate();
-            from_month = date.getMonth()+1;
-            from_year = date.getFullYear();
-            to_day = from_day;
-            to_month = from_month;
-            to_year = from_year;
-        } else if (timerange === '7d') {
-            const to_date = new Date();
-            const from_date = new Date(new Date().setDate(to_date.getDate() - 7));
-            from_day = from_date.getDate();
-            from_month = from_date.getMonth()+1;
-            from_year = from_date.getFullYear();
-            to_day = to_date.getDate();
-            to_month = to_date.getMonth()+1;
-            to_year = to_date.getFullYear();
-        } else if (timerange === '30d') {
-            const to_date = new Date();
-            const from_date = new Date(new Date().setDate(to_date.getDate() - 30));
-            from_day = from_date.getDate();
-            from_month = from_date.getMonth()+1;
-            from_year = from_date.getFullYear();
-            to_day = to_date.getDate();
-            to_month = to_date.getMonth()+1;
-            to_year = to_date.getFullYear();
-        } else if (timerange === 'tahun_ini') {
-            const date = new Date();
-            from_day = 1;
-            from_month = 1;
-            from_year = date.getFullYear();
-            to_day = date.getDate();
-            to_month = date.getMonth()+1;
-            to_year = date.getFullYear();
-        } else if (timerange === 'tahun_lalu') {
-            const date = new Date();
-            from_day = 1;
-            from_month = 1;
-            from_year = date.getFullYear() - 1;
-            to_day = 31;
-            to_month = 12;
-            to_year = from_year;
-        }
-
-        document.getElementById('from_day').value = from_day;
-        document.getElementById('from_month').value = from_month;
-        document.getElementById('from_year').value = from_year;
-        document.getElementById('to_day').value = to_day;
-        document.getElementById('to_month').value = to_month;
-        document.getElementById('to_year').value = to_year;
-    }
-
     function table_to_excel(table_id) {
         $(`#${table_id}`).table2excel({
             filename:`${table_id}.xls`

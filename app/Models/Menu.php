@@ -18,6 +18,7 @@ class Menu extends Model
             ['name'=>'Pelanggan','route'=>'pelanggans.index'],
             ['name'=>'Ekspedisi','route'=>'ekspedisis.index'],
             ['name'=>'Penjualan','route'=>'penjualans.index'],
+            ['name'=>'Pembelian','route'=>'pembelians.index'],
             ['name'=>'Accounting','route'=>'accounting.index'],
             ['name'=>'Artisan','route'=>'artisan.index'],
         ]);

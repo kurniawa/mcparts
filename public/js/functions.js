@@ -13,28 +13,113 @@ function toggle_element(element_id) {
     $(`#${element_id}`).toggle(300);
 }
 
-function toggle_light(btn_id, id, classes_to_remove, classes_to_add, display_ref) {
+function toggle_light(
+    btn_id,
+    id,
+    classes_to_remove,
+    classes_to_add,
+    display_ref
+) {
     $(`#${id}`).toggle(300);
     setTimeout(() => {
-        let display = $(`#${id}`).css('display');
+        let display = $(`#${id}`).css("display");
         // console.log(display);
-        let detail_button = document.getElementById(btn_id)
+        let detail_button = document.getElementById(btn_id);
         if (display === display_ref) {
-            classes_to_remove.forEach(element => {
+            classes_to_remove.forEach((element) => {
                 detail_button.classList.remove(element);
             });
-            classes_to_add.forEach(element => {
+            classes_to_add.forEach((element) => {
                 detail_button.classList.add(element);
             });
         } else {
-            classes_to_remove.forEach(element => {
+            classes_to_remove.forEach((element) => {
                 detail_button.classList.add(element);
             });
-            classes_to_add.forEach(element => {
+            classes_to_add.forEach((element) => {
                 detail_button.classList.remove(element);
             });
         }
     }, 500);
+}
+
+function set_time_range(timerange) {
+    // console.log(timerange);
+    let from_day, from_month, from_year;
+    let to_day, to_month, to_year;
+    if (timerange === "now") {
+        const date = new Date();
+        from_day = date.getDate();
+        from_month = date.getMonth() + 1;
+        from_year = date.getFullYear();
+        to_day = from_day;
+        to_month = from_month;
+        to_year = from_year;
+    } else if (timerange === "7d") {
+        const to_date = new Date();
+        const from_date = new Date(new Date().setDate(to_date.getDate() - 7));
+        from_day = from_date.getDate();
+        from_month = from_date.getMonth() + 1;
+        from_year = from_date.getFullYear();
+        to_day = to_date.getDate();
+        to_month = to_date.getMonth() + 1;
+        to_year = to_date.getFullYear();
+    } else if (timerange === "30d") {
+        const to_date = new Date();
+        const from_date = new Date(new Date().setDate(to_date.getDate() - 30));
+        from_day = from_date.getDate();
+        from_month = from_date.getMonth() + 1;
+        from_year = from_date.getFullYear();
+        to_day = to_date.getDate();
+        to_month = to_date.getMonth() + 1;
+        to_year = to_date.getFullYear();
+    } else if (timerange === "bulan_ini") {
+        const date = new Date();
+        from_day = 1;
+        from_month = date.getMonth() + 1;
+        from_year = date.getFullYear();
+        to_day = date.getDate();
+        to_month = date.getMonth() + 1;
+        to_year = date.getFullYear();
+    } else if (timerange === "bulan_lalu") {
+        const date = new Date();
+        from_day = 1;
+        from_month = date.getMonth();
+        from_year = date.getFullYear();
+        to_month = date.getMonth();
+        to_year = date.getFullYear();
+        to_day = new Date(to_year, to_month, 0).getDate();
+        console.log(to_day);
+    } else if (timerange === "tahun_ini") {
+        const date = new Date();
+        from_day = 1;
+        from_month = 1;
+        from_year = date.getFullYear();
+        to_day = date.getDate();
+        to_month = date.getMonth() + 1;
+        to_year = date.getFullYear();
+    } else if (timerange === "tahun_lalu") {
+        const date = new Date();
+        from_day = 1;
+        from_month = 1;
+        from_year = date.getFullYear() - 1;
+        to_day = 31;
+        to_month = 12;
+        to_year = from_year;
+    }
+
+    document.getElementById("from_day").value = from_day;
+    document.getElementById("from_month").value = from_month;
+    document.getElementById("from_year").value = from_year;
+    document.getElementById("to_day").value = to_day;
+    document.getElementById("to_month").value = to_month;
+    document.getElementById("to_year").value = to_year;
+}
+
+function table_to_excel(table_id) {
+    $(`#${table_id}`).table2excel({
+        filename: `${table_id}.xls`,
+    });
 }
 
 function formatHarga(harga) {

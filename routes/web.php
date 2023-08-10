@@ -7,6 +7,7 @@ use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\SrjalanController;
@@ -131,6 +132,10 @@ Route::controller(EkspedisiController::class)->group(function(){
 
 Route::controller(PenjualanController::class)->group(function(){
     Route::get('/penjualans','index')->name('penjualans.index');
+});
+
+Route::controller(PembelianController::class)->group(function(){
+    Route::get('/pembelians','index')->name('pembelians.index');
 });
 
 Route::controller(AccountingController::class)->group(function(){
