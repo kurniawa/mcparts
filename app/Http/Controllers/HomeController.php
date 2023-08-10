@@ -75,7 +75,7 @@ class HomeController extends Controller
                 } else {
                     // Filter hanya rentang waktu, tanpa nama_pelanggan
                     if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {
-                        $request->validate(['error'=>'required'],['error.required'=>'customer,time_range']);
+                        $request->validate(['error'=>'required'],['error.required'=>'customer || time_range']);
                     } else {
                         // Filter Berdasarkan Tanggal
                         $start_date = "$get[from_year]-$get[from_month]-$get[from_day]";

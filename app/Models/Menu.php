@@ -17,6 +17,7 @@ class Menu extends Model
             // ['name'=>'SJ','route'=>'sjs.index'],
             ['name'=>'Pelanggan','route'=>'pelanggans.index'],
             ['name'=>'Ekspedisi','route'=>'ekspedisis.index'],
+            ['name'=>'Penjualan','route'=>'penjualans.index'],
             ['name'=>'Accounting','route'=>'accounting.index'],
             ['name'=>'Artisan','route'=>'artisan.index'],
         ]);

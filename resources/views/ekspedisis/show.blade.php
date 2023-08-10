@@ -27,16 +27,16 @@
             </div>
             <form id="form_alamat_add" class="border rounded p-1 mt-1 hidden" action="{{ route('ekspedisis.alamat_add', $ekspedisi->id) }}" method="POST">
                 @csrf
-                <table>
-                    <tr><th>jalan</th><th>:</th><td><input type="text" name="jalan" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>komplek</th><th>:</th><td><input type="text" name="komplek" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>rt</th><th>:</th><td><input type="text" name="rt" class="text-xs p-1 rounded"></td><th>rw</th><th>:</th><td><input type="text" name="rw" class="text-xs p-1 rounded" ></td></tr>
-                    <tr><th>desa</th><th>:</th><td><input type="text" name="desa" class="text-xs p-1 rounded"></td><th>kelurahan</th><th>:</th><td><input type="text" name="kelurahan" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>kecamatan</th><th>:</th><td><input type="text" name="kecamatan" class="text-xs p-1 rounded"></td><th>kota</th><th>:</th><td><input type="text" name="kota" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>kodepos</th><th>:</th><td><input type="text" name="kodepos" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>kabupaten</th><th>:</th><td><input type="text" name="kabupaten" class="text-xs p-1 rounded"></td><th>provinsi</th><th>:</th><td><input type="text" name="provinsi" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>pulau</th><th>:</th><td><input type="text" name="pulau" class="text-xs p-1 rounded"></td><th>negara</th><th>:</th><td><input type="text" name="negara" class="text-xs p-1 rounded"></td></tr>
-                    <tr><th>(*)short(daerah)</th><th>:</th><td><input type="text" name="short" class="text-xs p-1 rounded"></td><th>(*)long</th><th>:</th><td><textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs"></textarea></td></tr>
+                <table class="w-full">
+                    <tr><td>jalan</td><td>:</td><td><input type="text" name="jalan" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>komplek</td><td>:</td><td><input type="text" name="komplek" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>rt</td><td>:</td><td><input type="text" name="rt" class="text-xs p-1 rounded"></td><td>rw</td><td>:</td><td><input type="text" name="rw" class="text-xs p-1 rounded" ></td></tr>
+                    <tr><td>desa</td><td>:</td><td><input type="text" name="desa" class="text-xs p-1 rounded"></td><td>kelurahan</td><td>:</td><td><input type="text" name="kelurahan" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>kecamatan</td><td>:</td><td><input type="text" name="kecamatan" class="text-xs p-1 rounded"></td><td>kota</td><td>:</td><td><input type="text" name="kota" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>kodepos</td><td>:</td><td><input type="text" name="kodepos" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>kabupaten</td><td>:</td><td><input type="text" name="kabupaten" class="text-xs p-1 rounded"></td><td>provinsi</td><td>:</td><td><input type="text" name="provinsi" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>pulau</td><td>:</td><td><input type="text" name="pulau" class="text-xs p-1 rounded"></td><td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded"></td></tr>
+                    <tr><td>(*)short(daerah)</td><td>:</td><td><input type="text" name="short" class="text-xs p-1 rounded"></td><td>(*)long</td><td>:</td><td><textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs"></textarea></td></tr>
                 </table>
                 <div class="text-center mt-2">
                     <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">Tambah Alamat Baru</button>
@@ -63,7 +63,7 @@
                     <span class="block text-slate-400 font-semibold">{{ $alamat['short'] }}</span>
                     <div class="flex justify-end items-center">
                         @if ($ekspedisi_alamats[$key_alamat]->tipe !== 'UTAMA')
-                        <form action="{{ route('pelanggans.alamat_utama', [$ekspedisi->id, $alamat->id]) }}" method="POST" class="m-0 flex items-center mr-1" onsubmit="return confirm('Jadikan sebagai alamat UTAMA?')">
+                        <form action="{{ route('ekspedisis.alamat_utama', [$ekspedisi->id, $alamat->id]) }}" method="POST" class="m-0 flex items-center mr-1" onsubmit="return confirm('Jadikan sebagai alamat UTAMA?')">
                             @csrf
                             <button type="submit" class="text-slate-300">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -72,13 +72,13 @@
                             </button>
                         </form>
                         @endif
-                        <a href="{{ route('pelanggans.alamat_edit', [$ekspedisi['id'], $alamat['id']]) }}" class="bg-slate-400 rounded text-white p-1">
+                        <button class="border rounded text-slate-500" id="btn_alamat_edit-{{ $key_alamat }}" onclick="toggle_light(this.id, 'form_alamat_edit-{{ $key_alamat }}', [], ['bg-slate-200'], 'block')">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
                                 <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
                                 <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
                             </svg>
-                        </a>
-                        <form action="{{ route('pelanggans.delete_alamat', $alamat->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus alamat ini?')" class="m-0 ml-1 flex items-center">
+                        </button>
+                        <form action="{{ route('ekspedisis.alamat_delete', [$ekspedisi->id, $alamat->id]) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus alamat ini?')" class="m-0 ml-1 flex items-center">
                             @csrf
                             <button type="submit" class="bg-red-500 text-white rounded p-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
@@ -87,6 +87,30 @@
                             </button>
                         </form>
                     </div>
+                    <form action="{{ route('ekspedisis.alamat_edit', [$ekspedisi['id'], $alamat['id']]) }}" method="POST" class="border rounded p-1 mt-1 hidden" id="form_alamat_edit-{{ $key_alamat }}">
+                        @csrf
+                        <table>
+                            <tr><td>jalan</td><td>:</td><td><input type="text" name="jalan" class="text-xs p-1 rounded" value="{{ $alamat->jalan }}"></td></tr>
+                            <tr><td>komplek</td><td>:</td><td><input type="text" name="komplek" class="text-xs p-1 rounded" value="{{ $alamat->komplek }}"></td></tr>
+                            <tr><td>rt</td><td>:</td><td><input type="text" name="rt" class="text-xs p-1 rounded" value="{{ $alamat->rt }}"></td><td>rw</td><td>:</td><td><input type="text" name="rw" class="text-xs p-1 rounded" value="{{ $alamat->rw }}" ></td></tr>
+                            <tr><td>desa</td><td>:</td><td><input type="text" name="desa" class="text-xs p-1 rounded" value="{{ $alamat->desa }}"></td><td>kelurahan</td><td>:</td><td><input type="text" name="kelurahan" class="text-xs p-1 rounded" value="{{ $alamat->kelurahan }}"></td></tr>
+                            <tr><td>kecamatan</td><td>:</td><td><input type="text" name="kecamatan" class="text-xs p-1 rounded" value="{{ $alamat->kecamatan }}"></td><td>kota</td><td>:</td><td><input type="text" name="kota" class="text-xs p-1 rounded" value="{{ $alamat->kota }}"></td></tr>
+                            <tr><td>kodepos</td><td>:</td><td><input type="text" name="kodepos" class="text-xs p-1 rounded" value="{{ $alamat->kodepos }}"></td></tr>
+                            <tr><td>kabupaten</td><td>:</td><td><input type="text" name="kabupaten" class="text-xs p-1 rounded" value="{{ $alamat->kabupaten }}"></td><td>provinsi</td><td>:</td><td><input type="text" name="provinsi" class="text-xs p-1 rounded" value="{{ $alamat->provinsi }}"></td></tr>
+                            <tr><td>pulau</td><td>:</td><td><input type="text" name="pulau" class="text-xs p-1 rounded" value="{{ $alamat->pulau }}"></td><td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded" value="{{ $alamat->negara }}"></td></tr>
+                            <tr>
+                                <td>(*)short(daerah)</td><td>:</td><td><input type="text" name="short" class="text-xs p-1 rounded" value="{{ $alamat->short }}"></td><td>(*)long</td><td>:</td>
+                                <td>
+                                    <textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs">@foreach(json_decode($alamat->long, true) as $long)
+{{ $long }}
+@endforeach</textarea>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="text-center mt-2">
+                            <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">Confirm</button>
+                        </div>
+                    </form>
                 </div>
                 @endforeach
             </div>
@@ -110,7 +134,7 @@
             {{-- TAMBAH_KONTAK --}}
             <div class="hidden" id="form_tambah_kontak">
                 <div class="inline-block border rounded p-2 mt-1">
-                    <form action="{{ route('pelanggans.kontak_add', $ekspedisi->id) }}" class="flex items-center" method="POST">
+                    <form action="{{ route('ekspedisis.kontak_add', $ekspedisi->id) }}" class="flex items-center" method="POST">
                         @csrf
                         <span>Tipe:</span>
                         <select class="border rounded py-0 ml-1" name="tipe">
@@ -152,7 +176,7 @@
                     </span>
                     <div class="flex justify-end items-center">
                         @if ($kontak->is_aktual !== 'yes')
-                        <form action="{{ route('pelanggans.kontak_utama', [$ekspedisi->id, $ekspedisi_kontaks[$key_kontak]->id]) }}" method="POST" class="m-0 flex items-center mr-1" onsubmit="return confirm('Jadikan sebagai kontak UTAMA?')">
+                        <form action="{{ route('ekspedisis.kontak_utama', [$ekspedisi->id, $ekspedisi_kontaks[$key_kontak]->id]) }}" method="POST" class="m-0 flex items-center mr-1" onsubmit="return confirm('Jadikan sebagai kontak UTAMA?')">
                             @csrf
                             <button type="submit" class="text-slate-300">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -168,7 +192,7 @@
                                 <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
                             </svg>
                         </button>
-                        <form action="{{ route('pelanggans.kontak_delete', $ekspedisi_kontaks[$key_kontak]->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kontak ini?')" class="m-0">
+                        <form action="{{ route('ekspedisis.kontak_delete', $ekspedisi_kontaks[$key_kontak]->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kontak ini?')" class="m-0">
                             @csrf
                             <button type="submit" class="bg-red-500 text-white rounded p-1 ml-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
@@ -178,7 +202,7 @@
                         </form>
                     </div>
                     {{-- EDIT_KONTAK --}}
-                    <form action="{{ route('pelanggans.kontak_edit', $ekspedisi_kontaks[$key_kontak]->id) }}" method="POST" class="mt-1 border rounded p-1 hidden" id="form_kontak_edit-{{ $key_kontak }}">
+                    <form action="{{ route('ekspedisis.kontak_edit', $ekspedisi_kontaks[$key_kontak]->id) }}" method="POST" class="mt-1 border rounded p-1 hidden" id="form_kontak_edit-{{ $key_kontak }}">
                         @csrf
                         <table>
                             <tr>

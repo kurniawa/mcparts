@@ -66,28 +66,35 @@
                             <h5 class="font-semibold ml-2">Alamat:</h5>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2">
-                        <table class="mt-1">
-                            <tr><td>jalan</td><td>:</td><td><input type="text" name="jalan" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>komplek</td><td>:</td><td><input type="text" name="komplek" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>rt</td><td>:</td><td><input type="text" name="rt" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>desa</td><td>:</td><td><input type="text" name="desa" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>kecamatan</td><td>:</td><td><input type="text" name="kecamatan" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>kodepos</td><td>:</td><td><input type="text" name="kodepos" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>kabupaten</td><td>:</td><td><input type="text" name="kabupaten" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>pulau</td><td>:</td><td><input type="text" name="pulau" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>(*)short(daerah)</td><td>:</td><td><input type="text" name="short" class="text-xs p-1 rounded"></td></tr>
-                        </table>
-                        <table>
-                            <tr><td>rw</td><td>:</td><td><input type="text" name="rw" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>kelurahan</td><td>:</td><td><input type="text" name="kelurahan" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>kota</td><td>:</td><td><input type="text" name="kota" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>provinsi</td><td>:</td><td><input type="text" name="provinsi" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded"></td></tr>
-                            <tr><td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded"></td></tr>
+                    <table class="mt-1 w-full">
+                        <tr><td>jalan</td><td>:</td><td><input type="text" name="jalan" class="text-xs p-1 rounded"></td></tr>
+                        <tr><td>komplek</td><td>:</td><td><input type="text" name="komplek" class="text-xs p-1 rounded"></td></tr>
+                        <tr>
+                            <td>rt</td><td>:</td><td><input type="text" name="rt" class="text-xs p-1 rounded"></td>
+                            <td>rw</td><td>:</td><td><input type="text" name="rw" class="text-xs p-1 rounded"></td>
+                        </tr>
+                        <tr>
+                            <td>desa</td><td>:</td><td><input type="text" name="desa" class="text-xs p-1 rounded"></td>
+                            <td>kelurahan</td><td>:</td><td><input type="text" name="kelurahan" class="text-xs p-1 rounded">
+                        </tr>
+                        <tr>
+                            <td>kecamatan</td><td>:</td><td><input type="text" name="kecamatan" class="text-xs p-1 rounded"></td>
+                            <td>kota</td><td>:</td><td><input type="text" name="kota" class="text-xs p-1 rounded">
+                        </tr>
+                        <tr><td>kodepos</td><td>:</td><td><input type="text" name="kodepos" class="text-xs p-1 rounded"></td></tr>
+                        <tr>
+                            <td>kabupaten</td><td>:</td><td><input type="text" name="kabupaten" class="text-xs p-1 rounded"></td>
+                            <td>provinsi</td><td>:</td><td><input type="text" name="provinsi" class="text-xs p-1 rounded"></td>
+                        </tr>
+                        <tr>
+                            <td>pulau</td><td>:</td><td><input type="text" name="pulau" class="text-xs p-1 rounded"></td>
+                            <td>negara</td><td>:</td><td><input type="text" name="negara" class="text-xs p-1 rounded"></td>
+                        </tr>
+                        <tr>
+                            <td>(*)short(daerah)</td><td>:</td><td><input type="text" name="short" class="text-xs p-1 rounded"></td>
                             <td>(*)long</td><td>:</td><td><textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs"></textarea></td>
-                        </table>
-                    </div>
+                        </tr>
+                    </table>
 
                     <div class="text-center mt-2">
                         <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">Tambah Ekspedisi Baru</button>

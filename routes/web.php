@@ -7,6 +7,7 @@ use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\SrjalanController;
 use App\Http\Controllers\UserController;
@@ -115,10 +116,21 @@ Route::controller(PelangganController::class)->group(function(){
 
 Route::controller(EkspedisiController::class)->group(function(){
     Route::get('/ekspedisis','index')->name('ekspedisis.index');
+    Route::get('/ekspedisis/{ekspedisi}/show','show')->name('ekspedisis.show');
     Route::post('/ekspedisis/store','store')->name('ekspedisis.store');
     Route::post('/ekspedisis/{ekspedisi}/delete','delete')->name('ekspedisis.delete');
     Route::post('/ekspedisis/{ekspedisi}/alamat_add','alamat_add')->name('ekspedisis.alamat_add');
-    Route::get('/ekspedisis/{ekspedisi}/show','show')->name('ekspedisis.show');
+    Route::post('/ekspedisis/{ekspedisi}/{alamat}/alamat_utama','alamat_utama')->name('ekspedisis.alamat_utama');
+    Route::post('/ekspedisis/{ekspedisi}/{alamat}/alamat_edit','alamat_edit')->name('ekspedisis.alamat_edit')->middleware('auth');
+    Route::post('/ekspedisis/{ekspedisi}/{alamat}/alamat_delete','alamat_delete')->name('ekspedisis.alamat_delete')->middleware('auth');
+    Route::post('/ekspedisis/{ekspedisi}/kontak_add','kontak_add')->name('ekspedisis.kontak_add')->middleware('auth');
+    Route::post('/ekspedisis/{ekspedisi_kontak}/kontak_edit','kontak_edit')->name('ekspedisis.kontak_edit')->middleware('auth');
+    Route::post('/ekspedisis/{ekspedisi_kontak}/kontak_delete','kontak_delete')->name('ekspedisis.kontak_delete')->middleware('auth');
+    Route::post('/ekspedisis/{ekspedisi}/{ekspedisi_kontak}/kontak_utama','kontak_utama')->name('ekspedisis.kontak_utama')->middleware('auth');
+});
+
+Route::controller(PenjualanController::class)->group(function(){
+    Route::get('/penjualans','index')->name('penjualans.index');
 });
 
 Route::controller(AccountingController::class)->group(function(){
