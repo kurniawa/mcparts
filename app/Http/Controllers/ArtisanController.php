@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barang;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
+use App\Models\Pembelian;
 use App\Models\Produk;
 use App\Models\Spk;
 use App\Models\SpkNota;
@@ -12,6 +14,7 @@ use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
 use App\Models\Srjalan;
+use App\Models\Supplier;
 use App\Models\TipePacking;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -241,5 +244,99 @@ class ArtisanController extends Controller
 
         $tipe_packings = TipePacking::all();
         dd($tipe_packings);
+    }
+
+    function create_supplier_alamat_kontak_pembelian_items() {
+        Schema::dropIfExists('supplier_kontaks');
+        Schema::dropIfExists('supplier_alamats');
+        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('pembelian_barangs');
+        Schema::dropIfExists('barangs');
+
+        Schema::create('suppliers', function (Blueprint $table) {
+            $table->id();
+            $table->string("bentuk", 10)->nullable(); // PT, CV, Yayasan, Sekolah, dll.
+            $table->string("nama", 100);
+            $table->string("nama_pemilik", 100)->nullable();
+            $table->string("initial", 10)->nullable();
+            $table->string("keterangan")->nullable();
+            $table->string('creator', 50)->nullable();
+            $table->string('updater', 50)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('supplier_alamats', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('supplier_id')->constrained()->onDelete('CASCADE');// hapus mah hapus aja, supaya ga menuh2 in database
+            $table->foreignId('alamat_id')->constrained()->onDelete('CASCADE');
+            $table->enum('tipe',['UTAMA','CADANGAN'])->default('CADANGAN');
+            $table->timestamps();
+        });
+
+        Schema::create('supplier_kontaks', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('supplier_id')->constrained()->onDelete('CASCADE');
+            $table->string('tipe', 20)->nullable(); // kantor, rumah, hp
+            $table->string('kodearea', 10)->nullable();
+            $table->string('nomor', 20)->nullable();
+            $table->enum('is_aktual',['yes','no'])->nullable()->default('no'); // ini untuk tujuan bila nomor terakhir belum tentu itu yang seharusnya otomatis tercantum di nota
+            $table->string('lokasi',20)->nullable();// keterangan lokasi apabila di perlukan, terutama apabila nomor ini ber relasi dengan alamat.
+            $table->timestamps();
+        });
+
+
+        Schema::create('barangs', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_barang');
+            $table->string('satuan_1')->nullable();
+            $table->string('satuan_2')->nullable();
+            $table->string('harga_per_satuan_1')->nullable();
+            $table->string('harga_per_satuan_2')->nullable();
+            $table->string('keterangan')->nullable();
+            $table->timestamps();
+        });
+
+
+        Schema::create('pembelian_barangs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('pembelian_id')->nullable();
+            $table->foreignId('supplier_id')->nullable();
+            $table->string('supplier_nama');
+            $table->string('barang_id')->constrained()->onDelete('set null');
+            $table->string('barang_nama');
+            $table->string('jumlah');
+            $table->string('satuan')->nullable();
+            $table->string('harga_per_satuan')->nullable();
+            $table->string('harga_t');
+            $table->string('keterangan')->nullable();
+            $table->timestamps();
+        });
+
+        // Pengambilan data supplier dari semua pembelian yang sudah dibuat
+        // Pengisian Table suppliers
+        $suppliers = Pembelian::select('supplier')->orderBy('supplier')->groupBy('supplier')->get();
+        dd($suppliers);
+        $user = Auth::user();
+        foreach ($suppliers as $supplier) {
+            Supplier::create([
+                'nama' => $supplier->supplier,
+                'creator' => $user->username,
+                'updater' => $user->username,
+            ]);
+        }
+        // END - Supplier
+
+        // Pengisian Table barangs
+        $barangs = Pembelian::select('nama_barang', 'satuan_rol', 'satuan_meter', 'harga_meter', 'harga_total')->orderBy('nama_barang')->groupBy('nama_barang')->get();
+        foreach ($barangs as $barang) {
+            $satuan_1 = null;
+            $satuan_2 = null;
+            $harga_per_satuan_1 = null;
+            $harga_per_satuan_2 = null;
+            Barang::create([
+                'barang_nama' => $barang->nama_barang
+            ]);
+        }
+        // END - Pengisian Table barangs
     }
 }

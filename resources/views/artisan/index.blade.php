@@ -115,6 +115,26 @@
             <p>o) sisa column: 18</p>
         </div>
     </div>
+    {{-- SUPPLIER --}}
+    {{-- END - SUPPLIER --}}
+    <div class="flex items-center bg-white rounded shadow drop-shadow p-1">
+        <h5 class="font-semibold ml-2">Supplier</h5>
+    </div>
+    <div class="ml-2 mt-5">
+        <li>
+            <ol>1. Pembelian add column: nomor_nota -> varchar(20) -> nullable</ol>
+        </li>
+        <form action="{{ route('artisan.create_supplier_alamat_kontak_pembelian_items') }}" method="post">
+            @csrf
+            <button class="bg-orange-400 text-white font-semibold rounded px-3 py-2">create_supplier_alamat_kontak_pembelian_items</button>
+        </form>
+        <li>
+            <ol>1. Create table suppliers</ol>
+            <ol>2. Create table supplier_alamats</ol>
+            <ol>3. Create table supplier_kontaks</ol>
+            <ol>4. Create table pembelian_items (mirip spk_produks atau spk_produk_notas)</ol>
+        </li>
+    </div>
   </main>
 </div>
 @endsection
