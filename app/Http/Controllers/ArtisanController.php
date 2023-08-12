@@ -249,9 +249,11 @@ class ArtisanController extends Controller
     function create_supplier_alamat_kontak_pembelian_items() {
         Schema::dropIfExists('supplier_kontaks');
         Schema::dropIfExists('supplier_alamats');
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('pembelian_temps');
         Schema::dropIfExists('pembelian_barangs');
         Schema::dropIfExists('barangs');
+        Schema::dropIfExists('suppliers');
+        dump('drop tables: supplier_kontaks, supplier_alamats, pembelian_barangs, barangs, suppliers');
 
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
@@ -287,15 +289,37 @@ class ArtisanController extends Controller
 
         Schema::create('barangs', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_barang');
+            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('barang_nama');
             $table->string('satuan_1')->nullable();
             $table->string('satuan_2')->nullable();
             $table->string('harga_per_satuan_1')->nullable();
             $table->string('harga_per_satuan_2')->nullable();
+            $table->integer('jumlah_satuan_1')->nullable();
+            $table->bigInteger('harga_t_satuan_1')->nullable();
             $table->string('keterangan')->nullable();
             $table->timestamps();
         });
 
+        Schema::create('pembelian_temps', function (Blueprint $table) {
+            $table->id();
+            $table->string('nomor_nota', 20)->nullable();
+            $table->string('supplier')->nullable();
+            $table->string('nama_barang');
+            $table->string('keterangan')->nullable();
+            $table->string('satuan_rol', 50)->nullable();
+            $table->string('satuan_meter', 50);
+            $table->decimal('jumlah_rol', 6, 2)->nullable();
+            $table->decimal('jumlah_meter', 10, 2);
+            $table->decimal('harga_meter', 21, 2);
+            $table->decimal('harga_total', 21, 2);
+            $table->enum('status_pembayaran', ['BELUM', 'SEBAGIAN', 'LUNAS'])->nullable();
+            $table->string('keterangan_pembayaran')->nullable();
+            $table->timestamp('tanggal_lunas')->nullable();
+            $table->timestamps();
+            $table->string('created_by', 100)->nullable();
+            $table->string('updated_by', 100)->nullable();
+        });
 
         Schema::create('pembelian_barangs', function (Blueprint $table) {
             $table->id();
@@ -311,11 +335,18 @@ class ArtisanController extends Controller
             $table->string('keterangan')->nullable();
             $table->timestamps();
         });
+        dump('create tables: supplier_kontaks, supplier_alamats, pembelian_barangs, barangs, suppliers');
+
+        $pembelians = Pembelian::all()->each(function ($pembelian) {
+            $pembelian_temp = $pembelian->replicate();
+            $pembelian_temp->setTable('pembelian_temps');
+            $pembelian_temp->save();
+        });
 
         // Pengambilan data supplier dari semua pembelian yang sudah dibuat
         // Pengisian Table suppliers
         $suppliers = Pembelian::select('supplier')->orderBy('supplier')->groupBy('supplier')->get();
-        dd($suppliers);
+        // dd($suppliers);
         $user = Auth::user();
         foreach ($suppliers as $supplier) {
             Supplier::create([
@@ -327,16 +358,103 @@ class ArtisanController extends Controller
         // END - Supplier
 
         // Pengisian Table barangs
-        $barangs = Pembelian::select('nama_barang', 'satuan_rol', 'satuan_meter', 'harga_meter', 'harga_total')->orderBy('nama_barang')->groupBy('nama_barang')->get();
-        foreach ($barangs as $barang) {
+        $barangs = Pembelian::orderBy('nama_barang')->get();
+        // dd($barangs->groupBy('nama_barang')['AMPLAS (RY) 137']);
+        $barangs_grouped = $barangs->groupBy('nama_barang');
+        $barangs_grouped_filtered = collect();
+        foreach ($barangs_grouped as $barang) {
+            // dd($barang);
+            $barangs_grouped_filtered->push($barang[0]);
+        }
+        // dd($barangs_grouped_filtered);
+        foreach ($barangs_grouped_filtered as $barang) {
             $satuan_1 = null;
             $satuan_2 = null;
             $harga_per_satuan_1 = null;
             $harga_per_satuan_2 = null;
+            $jumlah_satuan_1 = null;
+            $harga_t_satuan_1 = null;
+            if ($barang->satuan_rol !== null && $barang->satuan_meter !== null) {
+                $satuan_1 = 'meter';
+                $satuan_2 = 'rol';
+                $harga_per_satuan_1 = $barang->harga_meter;
+                $jumlah_satuan_1 = $barang->jumlah_meter;
+                $harga_t_satuan_1 = $barang->harga_meter * $barang->jumlah_meter;
+            } elseif ($barang->satuan_rol === null && $barang->satuan_meter !== null) {
+                $satuan_1 = 'meter';
+                $harga_per_satuan_1 = $barang->harga_meter;
+                $jumlah_satuan_1 = $barang->jumlah_meter;
+                $harga_t_satuan_1 = $barang->harga_meter * $barang->jumlah_meter;
+            } elseif ($barang->satuan_rol !== null && $barang->satuan_meter === null) {
+                $satuan_1 = 'rol';
+                $harga_per_satuan_1 = $barang->harga_total / $barang->jumlah_rol;
+                $jumlah_satuan_1 = 1;
+                $harga_t_satuan_1 = $$harga_per_satuan_1;
+            }
+            $supplier_id = null;
+            $supplier = Supplier::where('nama', $barang->supplier)->first();
             Barang::create([
-                'barang_nama' => $barang->nama_barang
+                'supplier_id' => $supplier->id,
+                'barang_nama' => $barang->nama_barang,
+                'satuan_1' => $satuan_1,
+                'satuan_2' => $satuan_2,
+                'harga_per_satuan_1' => $harga_per_satuan_1,
+                'harga_per_satuan_2' => $harga_per_satuan_2,
+                'jumlah_satuan_1' => $jumlah_satuan_1,
+                'harga_t_satuan_1' => $harga_t_satuan_1,
             ]);
         }
         // END - Pengisian Table barangs
+
+        // Pengelompokkan Pembelian yang sudah ada
+        // $pembelian = Pembelian::first();
+        // dd($pembelian);
+        $from = null;
+        $until = null;
+        $pembelians = Pembelian::orderBy('created_at')->get();
+        $a = 0;
+        // dump(count($pembelians));
+        while ($a < count($pembelians)) {
+            // dump($a);
+            if ($a === 0) {
+                $pembelian = Pembelian::first();
+                $from = date('Y-m-d', strtotime($pembelian->created_at));
+                $from .= ' 23:59:59';
+                // dump($from);
+                $until = $from;
+                $pembelian_tanggal_terkaits = Pembelian::where('created_at', '<=', $from)->get();
+            } else {
+                // dump($from);
+                $pembelian_tanggal_terkaits = Pembelian::where('created_at', '>', $from)->where('created_at', '<=', $until)->orderBy('created_at')->get();
+            }
+            // dump($pembelian_tanggal_terkaits);
+            foreach ($pembelian_tanggal_terkaits as $key => $pembelian_tanggal_terkait) {
+                // if ($key === 0) {
+                //     dump(date('Y-m-d', strtotime($pembelian_tanggal_terkait->created_at)));
+                // }
+                // dump($count_pembelians++);
+            }
+            $pembelian_tanggal_selanjutnya = Pembelian::where('created_at', '>', $until)->orderBy('created_at')->first();
+            // if ($until > date('Y-m-d H:i:s', strtotime('2023-05-08 23:59:59'))) {
+            //     dump('anomali');
+            //     dump($until);
+            //     dump($pembelian_tanggal_selanjutnya);
+            // }
+            if ($pembelian_tanggal_selanjutnya === null) {
+                // dd($a);
+                break;
+            }
+            // dump($pembelian_tanggal_selanjutnya->created_at);
+            $until = date('Y-m-d', strtotime($pembelian_tanggal_selanjutnya->created_at));
+            $until .= ' 23:59:59';
+            $from = date('Y-m-d', strtotime($pembelian_tanggal_selanjutnya->created_at));
+            $from .= ' 00:00:00';
+            // $pembelian_tanggal_terkaits = Pembelian::where('created_at', '>', $from)->where('created_at', '<=', $until)->get();
+            // dd($pembelian_tanggal_selanjutnya);
+            // dump(count($pembelian_tanggal_terkaits));
+            $a += count($pembelian_tanggal_terkaits);
+        }
+
+        // END - Pengelompokkan Pembelian yang sudah ada
     }
 }
