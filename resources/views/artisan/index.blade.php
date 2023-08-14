@@ -78,13 +78,15 @@
     <div class="ml-2 mt-5 flex">
         <div class="border-2 border-sky-600 rounded p-1">
             @csrf
-            <p>o) spks - hapus column: cust_long_ala, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_kontak, reseller_kontak_id, status_tree, harga_total</p>
-            <p>-- spks - sisa column: 21</p>
+            <p>o) spks - hapus column: cust_long_ala, cust_kontak, cust_kontak_id, reseller_long_ala, reseller_kontak, reseller_kontak_id, status_tree</p>
+            <p>o) spks - jangan salah hapus column: cust_short, reseller_short, harga_total</p>
+            <p>-- spks - sisa column: 22</p>
             <p>-- spks - ganti: judul->keterangan, status_sj->status_srjalan, jumlah_sudah_sj->jumlah_sudah_srjalan</p>
             <p>o) spk_produks - ganti nama column: jml_sdh_nota menjadi jumlah_sudah_nota, deviasi_jml menjadi deviasi_jumlah, jml_t menjadi jumlah_total, jml_selesai menjadi jumlah_selesai,dll</p>
-            <p>-- spk_produks - hapus column: data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai, harga</p>
+            <p>-- spk_produks - hapus column: data_selesai, data_nota, data_srjalan, status_nota, status_srjalan, jml_blm_selesai, harga</p>
             <p>-- spk_produks - sisa column: 16</p>
             <p>o) notas - ganti nama column: cust_long, reseller_alamat, reseller_kontak, dll</p>
+            <p>-- notas - sisa column tetap: 25</p>
             <p>o) srjalans - ganti nama column: cust_long, reseller_alamat, reseller_kontak, dll</p>
             <p>-- srjalans - sisa column: 39</p>
             <p>o) spk_produk_nota_srjalans - ganti nama column: jml_packing->jumlah_packing</p>
@@ -102,8 +104,8 @@
     <div class="ml-2 mt-5 flex">
         <div class="border-2 border-sky-600 rounded p-1">
             @csrf
-            <p>o) produk_harga - edit column status -> VARCHAR 20, not null, default: DEFAULT</p>
-            <p>o) pelanggan_produk - edit column status -> VARCHAR 20, not null, default: DEFAULT</p>
+            <p>o) produk_harga - edit column status -> VARCHAR 20, not null, default: default, comment: default, lama</p>
+            <p>o) pelanggan_produk - edit column status -> VARCHAR 20, not null, default: default, comment: default, lama</p>
         </div>
     </div>
 
@@ -121,20 +123,28 @@
         <h5 class="font-semibold ml-2">Supplier</h5>
     </div>
     <div class="ml-2 mt-5">
-        <li>
-            <ol>1. Pembelian add column: nomor_nota -> varchar(20) -> nullable</ol>
-        </li>
-        <form action="{{ route('artisan.create_supplier_alamat_kontak_pembelian_items') }}" method="post">
+        <form action="{{ route('artisan.duplicate_pembelian_temps') }}" method="post">
             @csrf
-            <button class="bg-orange-400 text-white font-semibold rounded px-3 py-2">create_supplier_alamat_kontak_pembelian_items</button>
+            <button class="bg-violet-400 text-white font-semibold rounded px-3 py-2">duplicate_pembelian_temps</button>
         </form>
-        <li>
-            <ol>1. Create table suppliers</ol>
-            <ol>2. Create table supplier_alamats</ol>
-            <ol>3. Create table supplier_kontaks</ol>
-            <ol>4. Create table pembelian_items (mirip spk_produks atau spk_produk_notas)</ol>
-        </li>
+        <form action="{{ route('artisan.create_table_supplier_barang') }}" method="post" class="mt-1">
+            @csrf
+            <button class="bg-orange-400 text-white font-semibold rounded px-3 py-2">create_table_supplier_barang</button>
+        </form>
+        <form action="{{ route('artisan.reset_schema_table_pembelian') }}" method="post" class="mt-1">
+            @csrf
+            <button class="bg-emerald-400 text-white font-semibold rounded px-3 py-2">reset_schema_table_pembelian</button>
+        </form>
+        <form action="{{ route('artisan.create_table_pembelian_barangs') }}" method="post" class="mt-1">
+            @csrf
+            <button class="bg-pink-400 text-white font-semibold rounded px-3 py-2">create_table_pembelian_barangs</button>
+        </form>
+        <form action="{{ route('artisan.filling_pembelian_barang') }}" method="post" class="mt-1">
+            @csrf
+            <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">filling_pembelian_barang</button>
+        </form>
     </div>
+    <div class="h-16"></div>
   </main>
 </div>
 @endsection
