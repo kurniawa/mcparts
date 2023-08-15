@@ -17,11 +17,14 @@
         {{-- FORM_NEW_PEMBELIAN --}}
         <div id="form_new_pembelian" class="hidden">
             <div class="flex justify-center">
-                <form action="{{ route('pembelians.store') }}" method="POST" class="border rounded border-emerald-300 p-1 mt-1 lg:w-1/2 md:w-3/4">
+                <form action="{{ route('pembelians.store') }}" method="POST" class="border rounded border-emerald-300 p-1 mt-1 lg:w-3/5 md:w-3/4">
                     @csrf
                     <div class="border rounded p-2">
                         <div class="border-b pb-3">
                             <table>
+                                <tr>
+                                    <td>Nomor</td><td><div class="mx-2">:</div></td><td><input type="text" name="nomor_nota" class="rounded p-1 text-xs" placeholder="nomor nota ..."></td>
+                                </tr>
                                 <tr>
                                     <td>Tanggal</td><td><div class="mx-2">:</div></td>
                                     <td class="py-1">
@@ -47,9 +50,9 @@
                                             </select>
                                         </div> --}}
                                         <div class="flex">
-                                            <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd">
-                                            <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm">
-                                            <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy">
+                                            <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
+                                            <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
+                                            <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
                                         </div>
                                     </td>
                                 </tr>
@@ -79,8 +82,14 @@
                                     </td>
                                 </tr>
                             </table>
-                            <div class="flex justify-end">
-                                <div id="harga_total_new"></div>
+                            <div class="flex justify-end items-center">
+                                <span class="font-bold">Total</span>
+                                <div class="flex font-bold ml-2 items-center text-pink-500">
+                                    <span>Rp</span>
+                                    <input type="text" id="harga_total_pembelian" class="border-none p-1 w-28 ml-2" readonly>
+                                    <span class="ml-1">,-</span>
+                                </div>
+                                <input type="hidden" name="harga_total" id="harga_total_pembelian_real">
                             </div>
                         </div>
                     </div>
@@ -385,7 +394,7 @@
                 <div class="text-center">
                     <div class="flex">
                         <input type="text" id="harga_t-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" oninput="formatNumber(this, 'harga_t_real-${index_item}');">
-                        <input type="hidden" name="harga_t[]" id="harga_t_real-${index_item}">
+                        <input type="hidden" name="harga_t[]" id="harga_t_real-${index_item}" class="harga_t_real">
                     </div>
                 </div>
             </td>
@@ -434,6 +443,7 @@
                 document.getElementById(`harga_t_real-${index}`).value = ui.item.harga_standar;
                 formatNumber(harga_main, `harga_main_real-${index}`);
                 formatNumber(harga_t, `harga_t_real-${index}`);
+                count_harga_total(index);
             }
         });
     }
@@ -442,9 +452,20 @@
         let jumlah_sub = document.getElementById(`jumlah_sub-${index}`).value;
         let jumlah_main = document.getElementById(`jumlah_main-${index}`).value;
         let harga_main = document.getElementById(`harga_main_real-${index}`).value;
-        let harga_total_el = document.getElementById(`harga_total-${index}`);
+        let harga_total_el = document.getElementById(`harga_t-${index}`);
         let harga_total = jumlah_sub * jumlah_main * harga_main;
-        console.log(harga_total);
+        // console.log(harga_total);
+        harga_total_el.value = harga_total;
+        formatNumber(harga_total_el, `harga_t_real-${index}`);
+        let harga_t_real_all = document.querySelectorAll('.harga_t_real');
+
+        let harga_total_pembelian = 0;
+        harga_t_real_all.forEach(harga_t => {
+            harga_total_pembelian += parseInt(harga_t.value);
+        });
+        let harga_total_pembelian_el = document.getElementById('harga_total_pembelian');
+        harga_total_pembelian_el.value = harga_total_pembelian;
+        formatNumber(harga_total_pembelian_el, 'harga_total_pembelian_real');
     }
 </script>
 
