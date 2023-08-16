@@ -40,8 +40,8 @@ class PembelianController extends Controller
             $kontaks->push($supplier_kontak);
         }
 
-        $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->get();
-        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_standar', 'harga_standar')->get();
+        $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
 
         $data = [
             'menus' => Menu::get(),
@@ -82,7 +82,8 @@ class PembelianController extends Controller
         ]);
 
         $user = Auth::user();
-        $isi = collect();
+        // $isi = collect();
+        $isi = array();
         $success_ = '';
 
         for ($i=0; $i < count($post['barang_id']); $i++) {
@@ -113,32 +114,62 @@ class PembelianController extends Controller
             $exist_satuan_main = false;
             $exist_satuan_sub = false;
             if (count($isi) !== 0) {
-                foreach ($isi as $isi_item) {
-                    if ($isi_item['satuan'] === $pembelian_barang->satuan_main) {
-                        $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_main * 100);
+                for ($i=0; $i < count($isi); $i++) {
+                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_main) {
+                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_main);
+                        // dump($isi[$i]['jumlah']);
+                        // dump($pembelian_barang->jumlah_main);
+                        // dump('isi:');
+                        // dump($isi);
                         $exist_satuan_main = true;
                     }
-                    if ($isi_item['satuan'] === $pembelian_barang->satuan_sub) {
-                        $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_sub * 100);
+                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_sub) {
+                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
                         $exist_satuan_sub = true;
                     }
                 }
+                // foreach ($isi as $isi_item) {
+                //     if ($isi_item['satuan'] === $pembelian_barang->satuan_main) {
+                //         $isi_item['jumlah'] = (int)$isi_item['jumlah'] + (int)($pembelian_barang->jumlah_main);
+                //         dump($isi_item['jumlah']);
+                //         dump($pembelian_barang->jumlah_main);
+                //         dump('isi:');
+                //         dump($isi);
+                //         $exist_satuan_main = true;
+                //     }
+                //     if ($isi_item['satuan'] === $pembelian_barang->satuan_sub) {
+                //         $isi_item['jumlah'] = (int)$isi_item['jumlah'] + (int)($pembelian_barang->jumlah_sub);
+                //         $exist_satuan_sub = true;
+                //     }
+                // }
             }
             if (!$exist_satuan_main) {
-                $isi->push([
+                // $isi->push([
+                //     'satuan' => $pembelian_barang->satuan_main,
+                //     'jumlah' => (int)($pembelian_barang->jumlah_main),
+                // ]);
+                $isi[]=[
                     'satuan' => $pembelian_barang->satuan_main,
-                    'jumlah' => (int)($pembelian_barang->jumlah_main * 100),
-                ]);
+                    'jumlah' => (int)($pembelian_barang->jumlah_main),
+                ];
+                // dump('first isi:');
+                // dump((int)($pembelian_barang->jumlah_main));
             }
             if (!$exist_satuan_sub) {
                 if ($pembelian_barang->satuan_sub !== null) {
-                    $isi->push([
+                    // $isi->push([
+                    //     'satuan' => $pembelian_barang->satuan_sub,
+                    //     'jumlah' => (int)($pembelian_barang->jumlah_sub),
+                    // ]);
+                    $isi[]=[
                         'satuan' => $pembelian_barang->satuan_sub,
-                        'jumlah' => (int)($pembelian_barang->jumlah_sub * 100),
-                    ]);
+                        'jumlah' => (int)($pembelian_barang->jumlah_sub),
+                    ];
                 }
             }
         }
+        // dump('isi:');
+        // dump($isi);
 
         $nomor_nota = "N-$pembelian_new->id";
         if ($post['nomor_nota'] !== null) {
@@ -160,6 +191,15 @@ class PembelianController extends Controller
             'success_' => $success_,
         ];
 
+        return back()->with($feedback);
+    }
+
+    function delete(Pembelian $pembelian) {
+        // dd($pembelian);
+        $pembelian->delete();
+        $feedback = [
+            'danger_' => '-pembelian deleted!-'
+        ];
         return back()->with($feedback);
     }
 }

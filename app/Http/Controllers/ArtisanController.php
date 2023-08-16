@@ -336,8 +336,10 @@ class ArtisanController extends Controller
             $table->string('satuan_sub')->nullable();
             $table->bigInteger('harga_main')->nullable();
             $table->bigInteger('harga_sub')->nullable();
-            $table->integer('jumlah_standar')->nullable();
-            $table->bigInteger('harga_standar')->nullable();
+            $table->integer('jumlah_main')->nullable();
+            $table->integer('jumlah_sub')->nullable();
+            $table->integer('harga_total_main')->nullable();
+            $table->bigInteger('harga_total_sub')->nullable();
             $table->string('keterangan')->nullable();
             $table->timestamps();
         });
@@ -392,30 +394,35 @@ class ArtisanController extends Controller
         foreach ($barangs_grouped_filtered as $barang) {
             // satuan_main, harga_main adalah acuan yang digunakan nantinya untuk menghitung harga_total
             // misal satuan_sub: rol, jumlah_sub: 5, satuan_main: meter, 1 rol berapa meter? -> jumlah_main: 20 meter, harga_main: 20000
-            // jumlah_main dan harga_main adalah harga acuan/utama untuk penentu harga_total/ harga_standar
+            // jumlah_main dan harga_main adalah harga acuan/utama untuk penentu harga_total/ harga_total_main
             //
             $satuan_main = null;
             $satuan_sub = null;
             $harga_main = null;
             $harga_sub = null;
-            $jumlah_standar = null;
-            $harga_standar = null;
+            $jumlah_main = null;
+            $jumlah_sub = null;
+            $harga_total_main = null;
+            $harga_total_sub = null;
             if ($barang->satuan_rol !== null && $barang->satuan_meter !== null) {
                 $satuan_main = 'meter';
                 $satuan_sub = 'rol';
+                $jumlah_sub = 1;
                 $harga_main = (int)$barang->harga_meter;
-                $jumlah_standar = (int)($barang->jumlah_meter * 100);
-                $harga_standar = $barang->harga_meter * $barang->jumlah_meter;
+                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
+                $harga_sub = $harga_total_main;
+                $harga_total_sub = $harga_sub;
             } elseif ($barang->satuan_rol === null && $barang->satuan_meter !== null) {
                 $satuan_main = 'meter';
                 $harga_main = (int)$barang->harga_meter;
-                $jumlah_standar = (int)($barang->jumlah_meter * 100);
-                $harga_standar = $barang->harga_meter * $barang->jumlah_meter;
+                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
             } elseif ($barang->satuan_rol !== null && $barang->satuan_meter === null) {
                 $satuan_main = 'rol';
                 $harga_main = (int)($barang->harga_total / $barang->jumlah_rol);
-                $jumlah_standar = 1;
-                $harga_standar = $harga_main;
+                $jumlah_main = 1;
+                $harga_total_main = $harga_main;
             }
             $supplier = Supplier::where('nama', $barang->supplier)->first();
             if ($supplier === null) {
@@ -439,8 +446,10 @@ class ArtisanController extends Controller
                 'satuan_sub' => $satuan_sub,
                 'harga_main' => $harga_main,
                 'harga_sub' => $harga_sub,
-                'jumlah_standar' => $jumlah_standar,
-                'harga_standar' => $harga_standar,
+                'jumlah_sub' => $jumlah_sub,
+                'jumlah_main' => $jumlah_main,
+                'harga_total_main' => $harga_total_main,
+                'harga_total_sub' => $harga_total_sub,
             ]);
         }
         // END - Pengisian Table barangs
@@ -482,7 +491,7 @@ class ArtisanController extends Controller
 
         Schema::create('pembelian_barangs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pembelian_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('pembelian_id')->constrained()->onDelete('cascade');
             // $table->foreignId('supplier_id')->nullable(); // tidak butuh data ini, karena sudah ada pada table pembelians
             // $table->string('supplier_nama');
             $table->foreignId('barang_id')->nullable()->constrained()->onDelete('set null');
@@ -562,7 +571,7 @@ class ArtisanController extends Controller
                     'supplier_nama' => $supplier->nama,
                 ]);
 
-                $isi = collect();
+                $isi = array();
                 $harga_total = 0;
                 $status_bayar = 'BELUM';
                 $jumlah_lunas = 0;
@@ -599,29 +608,47 @@ class ArtisanController extends Controller
                     $exist_satuan_main = false;
                     $exist_satuan_sub = false;
                     if (count($isi) !== 0) {
-                        foreach ($isi as $isi_item) {
-                            if ($isi_item['satuan'] === $pembelian_barang->satuan_meter) {
-                                $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_meter * 100);
+                        for ($i=0; $i < count($isi); $i++) {
+                            if ($isi[$i]['satuan'] === $pembelian_barang->satuan_meter) {
+                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_meter);
                                 $exist_satuan_main = true;
                             }
-                            if ($isi_item['satuan'] === $pembelian_barang->satuan_rol) {
-                                $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_rol * 100);
+                            if ($isi[$i]['satuan'] === $pembelian_barang->satuan_rol) {
+                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_rol);
                                 $exist_satuan_sub = true;
                             }
                         }
+                        // foreach ($isi as $isi_item) {
+                        //     if ($isi_item['satuan'] === $pembelian_barang->satuan_meter) {
+                        //         $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_meter);
+                        //         $exist_satuan_main = true;
+                        //     }
+                        //     if ($isi_item['satuan'] === $pembelian_barang->satuan_rol) {
+                        //         $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_rol);
+                        //         $exist_satuan_sub = true;
+                        //     }
+                        // }
                     }
                     if (!$exist_satuan_main) {
-                        $isi->push([
+                        // $isi->push([
+                        //     'satuan' => $pembelian_barang->satuan_meter,
+                        //     'jumlah' => (int)($pembelian_barang->jumlah_meter),
+                        // ]);
+                        $isi[] = [
                             'satuan' => $pembelian_barang->satuan_meter,
-                            'jumlah' => (int)($pembelian_barang->jumlah_meter * 100),
-                        ]);
+                            'jumlah' => (int)($pembelian_barang->jumlah_meter),
+                        ];
                     }
                     if (!$exist_satuan_sub) {
                         if ($pembelian_barang->satuan_rol !== null) {
-                            $isi->push([
+                            $isi[] = [
                                 'satuan' => $pembelian_barang->satuan_rol,
-                                'jumlah' => (int)($pembelian_barang->jumlah_rol * 100),
-                            ]);
+                                'jumlah' => (int)($pembelian_barang->jumlah_rol),
+                            ];
+                            // $isi->push([
+                            //     'satuan' => $pembelian_barang->satuan_rol,
+                            //     'jumlah' => (int)($pembelian_barang->jumlah_rol),
+                            // ]);
                         }
                     }
                     if ($pembelian_barang->status_pembayaran === 'LUNAS') {

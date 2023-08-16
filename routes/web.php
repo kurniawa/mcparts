@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BarangController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotaController;
@@ -138,6 +139,14 @@ Route::controller(PembelianController::class)->group(function(){
     Route::get('/pembelians','index')->name('pembelians.index');
     Route::get('/pembelians/{pembelian}/show','show')->name('pembelians.show');
     Route::post('/pembelians','store')->name('pembelians.store');
+    Route::post('/pembelians/{pembelian}/delete','delete')->name('pembelians.delete');
+});
+
+Route::controller(BarangController::class)->group(function(){
+    // Route::get('/barangs','index')->name('barangs.index');
+    // Route::get('/barangs/{barang}/show','show')->name('barangs.show');
+    Route::post('/barangs','store')->name('barangs.store');
+    // Route::post('/barangs/{barang}/delete','delete')->name('barangs.delete');
 });
 
 Route::controller(AccountingController::class)->group(function(){
