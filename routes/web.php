@@ -12,6 +12,7 @@ use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\SrjalanController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -143,10 +144,17 @@ Route::controller(PembelianController::class)->group(function(){
 });
 
 Route::controller(BarangController::class)->group(function(){
-    // Route::get('/barangs','index')->name('barangs.index');
-    // Route::get('/barangs/{barang}/show','show')->name('barangs.show');
+    Route::get('/barangs','index')->name('barangs.index');
+    Route::get('/barangs/{barang}/show','show')->name('barangs.show');
     Route::post('/barangs','store')->name('barangs.store');
-    // Route::post('/barangs/{barang}/delete','delete')->name('barangs.delete');
+    Route::post('/barangs/{barang}/delete','delete')->name('barangs.delete');
+});
+
+Route::controller(SupplierController::class)->group(function(){
+    Route::get('/suppliers','index')->name('suppliers.index');
+    Route::get('/suppliers/{supplier}/show','show')->name('suppliers.show');
+    Route::post('/suppliers','store')->name('suppliers.store');
+    Route::post('/suppliers/{supplier}/delete','delete')->name('suppliers.delete');
 });
 
 Route::controller(AccountingController::class)->group(function(){

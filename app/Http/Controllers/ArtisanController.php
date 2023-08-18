@@ -405,21 +405,21 @@ class ArtisanController extends Controller
             $harga_total_main = null;
             $harga_total_sub = null;
             if ($barang->satuan_rol !== null && $barang->satuan_meter !== null) {
-                $satuan_main = 'meter';
-                $satuan_sub = 'rol';
-                $jumlah_sub = 1;
+                $satuan_main = $barang->satuan_meter;
+                $satuan_sub = $barang->satuan_rol;
+                $jumlah_sub = 100;
                 $harga_main = (int)$barang->harga_meter;
                 $jumlah_main = (int)($barang->jumlah_meter * 100);
                 $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
                 $harga_sub = $harga_total_main;
                 $harga_total_sub = $harga_sub;
             } elseif ($barang->satuan_rol === null && $barang->satuan_meter !== null) {
-                $satuan_main = 'meter';
+                $satuan_main = $barang->satuan_meter;
                 $harga_main = (int)$barang->harga_meter;
                 $jumlah_main = (int)($barang->jumlah_meter * 100);
                 $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
             } elseif ($barang->satuan_rol !== null && $barang->satuan_meter === null) {
-                $satuan_main = 'rol';
+                $satuan_main = $barang->satuan_rol;
                 $harga_main = (int)($barang->harga_total / $barang->jumlah_rol);
                 $jumlah_main = 1;
                 $harga_total_main = $harga_main;
@@ -610,11 +610,11 @@ class ArtisanController extends Controller
                     if (count($isi) !== 0) {
                         for ($i=0; $i < count($isi); $i++) {
                             if ($isi[$i]['satuan'] === $pembelian_barang->satuan_meter) {
-                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_meter);
+                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_meter * 100);
                                 $exist_satuan_main = true;
                             }
                             if ($isi[$i]['satuan'] === $pembelian_barang->satuan_rol) {
-                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_rol);
+                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_rol * 100);
                                 $exist_satuan_sub = true;
                             }
                         }
@@ -636,14 +636,14 @@ class ArtisanController extends Controller
                         // ]);
                         $isi[] = [
                             'satuan' => $pembelian_barang->satuan_meter,
-                            'jumlah' => (int)($pembelian_barang->jumlah_meter),
+                            'jumlah' => (int)($pembelian_barang->jumlah_meter * 100),
                         ];
                     }
                     if (!$exist_satuan_sub) {
                         if ($pembelian_barang->satuan_rol !== null) {
                             $isi[] = [
                                 'satuan' => $pembelian_barang->satuan_rol,
-                                'jumlah' => (int)($pembelian_barang->jumlah_rol),
+                                'jumlah' => (int)($pembelian_barang->jumlah_rol * 100),
                             ];
                             // $isi->push([
                             //     'satuan' => $pembelian_barang->satuan_rol,

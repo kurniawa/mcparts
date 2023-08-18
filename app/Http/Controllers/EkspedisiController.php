@@ -45,6 +45,8 @@ class EkspedisiController extends Controller
             'menus' => Menu::get(),
             'route_now' => 'ekspedisis.index',
             'profile_menus' => Menu::get_profile_menus(),
+            'parent_route' => 'home',
+            'spk_menus' => Menu::get_spk_menus(),
             'ekspedisis' => $ekspedisis,
             'alamats' => $alamats,
             'ekspedisi_kontaks' => $ekspedisi_kontaks,

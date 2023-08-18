@@ -17,11 +17,46 @@ class PembelianController extends Controller
 {
     function index(Request $request) {
         $get = $request->query();
-        $from = date('Y') . "-" . date('m') . "-01";
-        $until = date('Y') . "-" . date('m') . "-" . date('m') . " 23:59:59";
 
-        $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->get();
-        $pembelians = Pembelian::latest()->limit(100)->get();
+        $from = date('Y') . "-" . date('m') . "-01";
+        $until = date('Y') . "-" . date('m') . "-" . date('d') . " 23:59:59";
+
+        $pembelians = collect();
+
+        if (count($get) !== 0) {
+            // dd($get);
+            if ($get['supplier_nama'] && $get['supplier_id']) {
+                if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {
+                    // Filter Berdasarkan Nama Pelanggan - Tanpa Tanggal
+                    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->latest()->limit(500)->get();
+                    // End - Filter Berdasarkan Nama Pelanggan - Tanpa Tanggal
+                } else {
+                    // Filter Berdasarkan Nama Pelanggan + Tanggal
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->latest()->get();
+                    // End - Filter Berdasarkan Nama Pelanggan + Tanggal
+                }
+            } else {
+                // Filter hanya rentang waktu, tanpa nama_pelanggan
+                if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {
+                    $request->validate(['error'=>'required'],['error.required'=>'customer,time_range']);
+                } else {
+                    // Filter Berdasarkan Tanggal
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->latest()->get();
+                    // End - Filter Berdasarkan Tanggal
+                }
+                // END - Filter hanya rentang waktu, tanpa nama_pelanggan
+            }
+        } else {
+            $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+            // $pembelians = Pembelian::latest()->limit(100)('created_at')->get();
+            // dump($from, $until);
+            // dd($pembelians);
+        }
+
 
         $pembelian_barangs_all = collect();
         $alamats = collect();
@@ -46,7 +81,9 @@ class PembelianController extends Controller
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'pembelians.index',
+            'parent_route' => 'pembelians.index',
             'profile_menus' => Menu::get_profile_menus(),
+            'pembelian_menus' => Menu::get_pembelian_menus(),
             'pembelians' => $pembelians,
             'pembelian_barangs_all' => $pembelian_barangs_all,
             'alamats' => $alamats,

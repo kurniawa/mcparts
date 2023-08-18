@@ -54,10 +54,14 @@ class PelangganController extends Controller
             'menus' => Menu::get(),
             'route_now' => 'pelanggans.index',
             'profile_menus' => Menu::get_profile_menus(),
+            'parent_route' => 'home',
+            'spk_menus' => Menu::get_spk_menus(),
             'pelanggans' => $pelanggans,
             'alamats' => $alamats,
             'pelanggan_kontaks' => $pelanggan_kontaks,
             'resellers' => $resellers,
+            'tipe_kontaks' => Alamat::tipe_kontaks(),
+            'bentuks' => Pelanggan::bentuks(),
         ];
 
         // dd($data);

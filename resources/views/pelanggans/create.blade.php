@@ -125,7 +125,7 @@
             </div>
 
             <div class="text-center mt-2">
-                <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">Tambah Pelanggan Baru</button>
+                <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">+ Pelanggan Baru</button>
             </div>
         </form>
     </div>

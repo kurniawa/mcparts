@@ -27,10 +27,18 @@
                   <div class="ml-10 flex items-baseline space-x-4">
                     <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
                     @foreach ($menus as $menu)
-                    @if ($route_now === $menu['route'])
-                    <a href="{{ route($menu['route']) }}" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                    @if (isset($parent_route))
+                        @if ($parent_route === $menu['route'])
+                        <a href="{{ route($menu['route']) }}" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                        @else
+                        <a href="{{ route($menu['route']) }}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                        @endif
                     @else
-                    <a href="{{ route($menu['route']) }}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                        @if ($route_now === $menu['route'])
+                        <a href="{{ route($menu['route']) }}" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                        @else
+                        <a href="{{ route($menu['route']) }}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">{{ $menu['name'] }}</a>
+                        @endif
                     @endif
                     @endforeach
                     {{-- <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Dashboard</a>

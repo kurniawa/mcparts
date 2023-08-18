@@ -135,13 +135,16 @@ class HomeController extends Controller
 
         // dump($col_notas);
         // dd($col_srjalans);
-        $label_pelanggans = Pelanggan::select('id','nama as label', 'nama as value')->get();
+        $label_pelanggans = Pelanggan::label_pelanggans();
+        $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
         $data = [
             // 'goback' => 'home',
             // 'user_role' => $user_role,
             'menus' => Menu::get(),
             'route_now' => 'home',
             'profile_menus' => Menu::get_profile_menus(),
+            'parent_route' => 'home',
+            'spk_menus' => Menu::get_spk_menus(),
             'spks' => $spks,
             'nama_pelanggans' => $nama_pelanggans,
             'col_notas' => $col_notas,
@@ -150,6 +153,7 @@ class HomeController extends Controller
             'col_spk_produk_notas' => $col_spk_produk_notas,
             'col_spk_produk_nota_srjalans' => $col_spk_produk_nota_srjalans,
             'label_pelanggans' => $label_pelanggans,
+            'label_produks' => $label_produks,
         ];
         // dump($user_role);
         // dump($spks);

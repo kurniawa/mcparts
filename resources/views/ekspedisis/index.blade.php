@@ -8,6 +8,23 @@
 <main>
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
+    <div class="flex justify-center">
+        @foreach ($spk_menus as $key_spk_menu => $spk_menu)
+        @if ($route_now === $spk_menu['route'])
+        @if ($key_spk_menu !== 0)
+        <div class="border rounded-t-lg bg-white px-1 border-b-4 font-bold ml-2">{{ $spk_menu['name'] }}</div>
+        @else
+        <div class="border rounded-t-lg bg-white px-1 border-b-4 font-bold">{{ $spk_menu['name'] }}</div>
+        @endif
+        @else
+        @if ($key_spk_menu !== 0)
+        <a href="{{ route($spk_menu['route']) }}" class="border rounded-t-lg bg-white px-1 hover:bg-slate-100 ml-2">{{ $spk_menu['name'] }}</a>
+        @else
+        <a href="{{ route($spk_menu['route']) }}" class="border rounded-t-lg bg-white px-1 hover:bg-slate-100">{{ $spk_menu['name'] }}</a>
+        @endif
+        @endif
+        @endforeach
+    </div>
     {{-- SEARCH / FILTER --}}
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="flex">

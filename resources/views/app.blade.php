@@ -6,23 +6,39 @@
     </div>
   </header> --}}
   <main>
-    {{-- SEARCH / FILTER --}}
-    <x-errors-any></x-errors-any>
-    <x-validation-feedback></x-validation-feedback>
-    <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
-        <div class="flex">
-            <button id="btn_filter" class="border rounded border-yellow-300 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content', [], ['bg-yellow-200'], 'inline-block')">Filter</button>
-            <form action="{{ route('spks.create') }}" method="GET" class="flex ml-2">
-                <button type="submit" class="rounded bg-emerald-200 text-emerald-500 font-semibold px-3 py-1">+ SPK</button>
-            </form>
-        </div>
+      <x-errors-any></x-errors-any>
+      <x-validation-feedback></x-validation-feedback>
+    <div class="flex justify-center">
+        @foreach ($spk_menus as $key_spk_menu => $spk_menu)
+        @if ($route_now === $spk_menu['route'])
+        @if ($key_spk_menu !== 0)
+        <div class="border rounded-t-lg bg-white px-1 border-b-4 font-bold ml-2">{{ $spk_menu['name'] }}</div>
+        @else
+        <div class="border rounded-t-lg bg-white px-1 border-b-4 font-bold">{{ $spk_menu['name'] }}</div>
+        @endif
+        @else
+        @if ($key_spk_menu !== 0)
+        <a href="{{ route($spk_menu['route']) }}" class="border rounded-t-lg bg-white px-1 hover:bg-slate-100 ml-2">{{ $spk_menu['name'] }}</a>
+        @else
+        <a href="{{ route($spk_menu['route']) }}" class="border rounded-t-lg bg-white px-1 hover:bg-slate-100">{{ $spk_menu['name'] }}</a>
+        @endif
+        @endif
+        @endforeach
+    </div>
+      <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
+            <div class="flex">
+                <button id="btn_filter" class="border rounded border-yellow-300 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content', [], ['bg-yellow-200'], 'inline-block')">Filter</button>
+                <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_spk" onclick="toggle_light(this.id, 'form_new_spk', [], ['bg-emerald-200'], 'block')">+ SPK</button>
+            </div>
+        {{-- SEARCH / FILTER --}}
         <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1" id="filter-content">
             <form action="" method="GET">
-                <div class="flex items-center">
+                {{-- <div class="flex items-center">
                     <div><input type="radio" name="tipe_filter" value="spk" id="radio_spk" checked><label for="radio_spk" class="ml-1">SPK</label></div>
                     <div class="ml-3"><input type="radio" name="tipe_filter" value="nota" id="radio_nota"><label for="radio_nota" class="ml-1">Nota</label></div>
                     <div class="ml-3"><input type="radio" name="tipe_filter" value="sj" id="radio_sj"><label for="radio_sj" class="ml-1">SJ</label></div>
-                </div>
+                </div> --}}
+                <input type="hidden" name="tipe_filter" value="spk">
                 <div class="ml-1 mt-2 flex">
                     <div>
                         <label>Customer:</label>
@@ -101,8 +117,95 @@
                 </div>
             </form>
         </div>
+        {{-- END - SEARCH / FILTER --}}
+
+        {{-- FORM_NEW_SPK --}}
+        <div class="hidden" id="form_new_spk">
+            <div class="flex justify-center mt-1">
+                <form action="{{ route('spks.store') }}" method="POST" class="lg:w-1/2 md:w-3/4">
+                    @csrf
+                    <div class="border rounded p-2">
+                        <div class="border-b pb-3">
+                            <table>
+                                <tr>
+                                    <td>Tanggal</td><td><div class="mx-2">:</div></td>
+                                    <td class="py-1">
+                                        <div class="flex">
+                                            <select name="day" id="day" class="rounded text-xs">
+                                                <option value="{{ date('d') }}">{{ date('d') }}</option>
+                                                @for ($i = 1; $i < 32; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="month" id="month" class="rounded text-xs ml-1">
+                                                <option value="{{ date('m') }}">{{ date('m') }}</option>
+                                                @for ($i = 1; $i < 13; $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <select name="year" id="year" class="rounded text-xs ml-1">
+                                                <option value="{{ date('Y') }}">{{ date('Y') }}</option>
+                                                <option value="">-</option>
+                                                @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Untuk</td><td><div class="mx-2">:</div></td>
+                                    <td class="py-1">
+                                        <input type="text" name="pelanggan_nama" id="new_spk-pelanggan_nama" placeholder="nama pelanggan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                                        <input type="hidden" name="pelanggan_id" id="new_spk-pelanggan_id">
+                                        <input type="hidden" name="reseller_id" id="new_spk-reseller_id">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Ket. (opt.)</td><td><div class="mx-2">:</div></td>
+                                    <td class="py-1"><input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="mt-2">
+                            <table id="table_spk_items" class="text-slate-500 w-full">
+                                <tr><th>Nama Item</th><th>Jumlah</th></tr>
+                                <tr id="tr_add_item">
+                                    <td>
+                                        <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="addSPKItem('tr_add_item','table_spk_items')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {{-- <tr>
+                                    <td>
+                                        <div class="flex items-center">
+                                            <button id="toggle_produk_keterangan" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggleButton(this.id,'produk_keterangan',['bg-yellow-300'],null)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                            </button>
+                                            <input type="text" name="produk_nama[]" id="produk_nama" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400" placeholder="nama item...">
+                                        </div>
+                                        <div class="mt-1" id="produk_keterangan">
+                                            <textarea name="produk_keterangan[]" id="produk_keterangan" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
+                                        </div>
+                                    </td>
+                                    <td><div class="text-center"><input type="number" name="produk_jumlah[]" id="produk_jumlah" class="border-slate-300 rounded-lg text-xs p-1 w-1/2"></div></td>
+                                </tr> --}}
+                            </table>
+                        </div>
+                    </div>
+                    <div class="flex justify-center mt-3">
+                        <button type="submit" class="border-2 border-emerald-300 bg-emerald-200 text-emerald-600 rounded-lg font-semibold py-1 px-3 hover:bg-emerald-300">Proses/Konfirmasi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {{-- END - FORM_NEW_SPK --}}
     </div>
-    {{-- END - SEARCH / FILTER --}}
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="grid grid-cols-3 gap-1">
             <div class="text-center bg-violet-200 rounded-t font-bold text-slate-700 py-1">SPK</div>
@@ -345,6 +448,70 @@
         }
     });
     // END - SET AUTOCOMPLETE PELANGGAN
+
+    // FUNGSI SPK
+    $('#new_spk-pelanggan_nama').autocomplete({
+        source: label_pelanggans,
+        select: function (event, ui) {
+            // console.log(ui.item);
+            document.getElementById('new_spk-pelanggan_id').value = ui.item.id;
+            document.getElementById('new_spk-pelanggan_nama').value = ui.item.value;
+            $("#new_spk-reseller_id").val(ui.item.reseller_id);
+            // console.log(reseller_id);
+        }
+    });
+
+    let index_spk_item = 0;
+    function addSPKItem(tr_id, parent_id) {
+        document.getElementById(tr_id).remove();
+        let parent = document.getElementById(parent_id);
+        parent.insertAdjacentHTML('beforeend',
+        `<tr>
+            <td>
+                <div class="flex items-center mt-1">
+                    <button id="toggle_produk_keterangan-${index_spk_item}" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggleButton(this.id,'produk_keterangan-${index_spk_item}',['bg-yellow-300'],null)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                    </button>
+                    <input type="text" name="produk_nama[]" id="produk_nama-${index_spk_item}" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400 w-full" placeholder="nama item...">
+                    <input type="hidden" name="produk_id[]" id="produk_id-${index_spk_item}">
+                </div>
+                <div class="mt-1 hidden" id="produk_keterangan-${index_spk_item}">
+                    <textarea name="produk_keterangan[]" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
+                </div>
+            </td>
+            <td><div class="text-center"><input type="number" name="produk_jumlah[]" id="produk_jumlah" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-1/2"></div></td>
+        </tr>
+        <tr id="tr_add_item">
+            <td>
+                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="addSPKItem('tr_add_item', 'table_spk_items')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </button>
+            </td>
+        </tr>
+        `);
+        setTimeout(() => {
+            setAutocompleteSPKItem(`produk_nama-${index_spk_item}`, `produk_nama-${index_spk_item}`, `produk_id-${index_spk_item}`);
+            index_spk_item++;
+        }, 100);
+    }
+
+    const label_produks = {!! json_encode($label_produks, JSON_HEX_TAG) !!};
+
+    function setAutocompleteSPKItem(input_id, label_id, value_id) {
+        $(`#${input_id}`).autocomplete({
+            source: label_produks,
+            select: function (event, ui) {
+                // console.log(ui.item);
+                document.getElementById(label_id).value = ui.item.value;
+                document.getElementById(value_id).value = ui.item.id;
+            }
+        });
+    }
+    // END - FUNGSI SPK
 </script>
 @endsection
 {{-- <a href="https://www.flaticon.com/free-icons/fox" title="fox icons">Fox icons created by Freepik - Flaticon</a> --}}

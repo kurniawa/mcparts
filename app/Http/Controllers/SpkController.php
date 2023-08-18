@@ -151,7 +151,8 @@ class SpkController extends Controller
         $feedback = [
             'success_' => $success_
         ];
-        return redirect()->route('spks.show', $new_spk->id)->with($feedback);
+        return back()->with($feedback);
+        // return redirect()->route('spks.show', $new_spk->id)->with($feedback);
     }
 
     function show(Spk $spk) {
