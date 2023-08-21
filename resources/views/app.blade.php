@@ -131,7 +131,7 @@
                                     <td>Tanggal</td><td><div class="mx-2">:</div></td>
                                     <td class="py-1">
                                         <div class="flex">
-                                            <select name="day" id="day" class="rounded text-xs">
+                                            {{-- <select name="day" id="day" class="rounded text-xs">
                                                 <option value="{{ date('d') }}">{{ date('d') }}</option>
                                                 @for ($i = 1; $i < 32; $i++)
                                                 <option value="{{ $i }}">{{ $i }}</option>
@@ -149,7 +149,10 @@
                                                 @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
                                                 <option value="{{ $i }}">{{ $i }}</option>
                                                 @endfor
-                                            </select>
+                                            </select> --}}
+                                            <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
+                                            <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
+                                            <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
                                         </div>
                                     </td>
                                 </tr>

@@ -167,15 +167,18 @@
                                             <input type="hidden" name="supplier_id" id="pembelian_new-supplier_id">
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="align-top">
                                         <td>Ket. (opt.)</td><td><div class="mx-2">:</div></td>
-                                        <td class="py-1"><input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></td>
+                                        <td class="py-1">
+                                            {{-- <input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"> --}}
+                                            <textarea name="keterangan" id="" cols="30" rows="5" class="border rounded p-1 text-xs" placeholder="keterangan (opt.)"></textarea>
+                                        </td>
                                     </tr>
                                 </table>
                             </div>
                             <div class="mt-2">
                                 <table id="table_pembelian_items" class="text-slate-500 w-full">
-                                    <tr><th>Nama Item</th><th>Jml. Sub</th><th>Jml. Main</th><th>Hrg.</th><th>Hrg. t</th></tr>
+                                    <tr><th>Nama Item</th><th>Jml. Sub</th><th>Jml. Main</th><th>Hrg.</th><th>Hrg. t</th><th></th></tr>
                                     <tr id="tr_add_item">
                                         <td>
                                             <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_item('tr_add_item','table_pembelian_items')">
@@ -282,6 +285,30 @@
             <div class="flex justify-center">
                 <div class='pb-1 text-xs lg:w-1/2 md:w-3/4'>
                     <table class="table-nice w-full">
+                        <tr>
+                            <th>Grand Total</th>
+                            <th>
+                                <div class="flex justify-between bg-pink-200">
+                                    <span>Rp</span>
+                                    <span>{{ number_format(($grand_total - $lunas_total), 0,',','.') }}</span>
+                                    <span> ,-</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="flex justify-between bg-emerald-200">
+                                    <span>Rp</span>
+                                    <span>{{ number_format($lunas_total, 0,',','.') }}</span>
+                                    <span> ,-</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="flex justify-between">
+                                    <span>Rp</span>
+                                    <span>{{ number_format($grand_total, 0,',','.') }}</span>
+                                    <span> ,-</span>
+                                </div>
+                            </th>
+                        </tr>
                         @for ($i = 0; $i < count($pembelians); $i++)
                         <tr class="border-b">
                             <td>
@@ -329,12 +356,12 @@
                                 </a>
                             </td>
                             <td><a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-indigo-500">{{ $pembelians[$i]->nomor_nota }}</a></td>
-                            <td>
+                            {{-- <td>
                                 <div>{{ $pembelian_barangs_all[$i][0]->barang_nama }}</div>
                                 @if (count($pembelian_barangs_all[$i]) > 1)
                                 <div class="text-blue-500">+{{ count($pembelian_barangs_all[$i]) - 1 }} barang lainnya</div>
                                 @endif
-                            </td>
+                            </td> --}}
                             <td>
                                 <div class="flex justify-between font-semibold">
                                     <span>Rp</span>
@@ -351,7 +378,7 @@
                             </td>
                         </tr>
                         <tr class="hidden" id="detail_pembelian-{{ $i }}">
-                            <td colspan="5">
+                            <td colspan="4">
                                 {{-- <table>
                                     <tr>
                                         <td>
@@ -434,7 +461,16 @@
                                 </table>
                                 {{-- END - PEMBELIAN_ITEMS --}}
                             </td>
-                            <td>
+                            <td class="align-bottom">
+                                <div>
+                                    <a href="{{ route('pembelians.edit', $pembelians[$i]->id) }}">
+                                        <button class="rounded bg-slate-200 text-slate-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                        </button>
+                                    </a>
+                                </div>
                                 <form action="{{ route('pembelians.delete', $pembelians[$i]->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pembelian ini?')">
                                     @csrf
                                     <button type="submit" class="text-red-500 bg-red-200 rounded">
@@ -443,8 +479,49 @@
                                         </svg>
                                     </button>
                                 </form>
+                                <div>
+                                    <button id="btn_form_pelunasan" class="text-emerald-500 border border-emerald-300 rounded" onclick="toggle_light(this.id, 'form_pelunasan-{{ $i }}', [], ['bg-emerald-200'], 'table-row')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
+                        {{-- FORM PELUNASAN --}}
+                        <tr class="hidden" id="form_pelunasan-{{ $i }}">
+                            <td colspan="7">
+                                <form action="{{ route('pembelians.pelunasan', $pembelians[$i]->id) }}" method="POST" class="flex justify-end">
+                                    @csrf
+                                    <table>
+                                        <tr>
+                                            <td>Tanggal Lunas</td><td>:</td>
+                                            <td>
+                                                <div class="flex">
+                                                    @if ($pembelians[$i]->status_bayar === 'LUNAS')
+                                                    <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d', strtotime($pembelians[$i]->tanggal_lunas)) }}">
+                                                    <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m'), strtotime($pembelians[$i]->tanggal_lunas) }}">
+                                                    <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y'), strtotime($pembelians[$i]->tanggal_lunas) }}">
+                                                    @else
+                                                    <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
+                                                    <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
+                                                    <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="text-end">
+                                                    <button class="border-2 border-emerald-300 bg-emerald-100 rounded text-emerald-500 px-1">Confirm</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </td>
+                        </tr>
+                        {{-- FORM PELUNASAN --}}
                         @endfor
                     </table>
                 </div>
@@ -484,7 +561,7 @@
         document.getElementById(tr_id).remove();
         let parent = document.getElementById(parent_id);
         parent.insertAdjacentHTML('beforeend',
-        `<tr>
+        `<tr id="tr_barang-${index_item}">
             <td>
                 <div class="flex items-center mt-1">
                     <button id="toggle_barang_keterangan-${index_item}" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggle_light(this.id,'barang_keterangan-${index_item}', [], ['bg-yellow-300'], 'block')">
@@ -530,6 +607,13 @@
                         <input type="hidden" name="harga_t[]" id="harga_t_real-${index_item}" class="harga_t_real">
                     </div>
                 </div>
+            </td>
+            <td>
+                <button type="button" class="text-red-500" onclick="remove_item(${index_item})">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
             </td>
         </tr>
         <tr id="tr_add_item">
@@ -654,6 +738,11 @@
         }
     }
     // END - FUNGSI BARANG
+
+    function remove_item(index) {
+        // console.log(index);
+        document.getElementById(`tr_barang-${index}`).remove();
+    }
 </script>
 
 @endsection

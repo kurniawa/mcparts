@@ -139,13 +139,18 @@ Route::controller(PenjualanController::class)->group(function(){
 Route::controller(PembelianController::class)->group(function(){
     Route::get('/pembelians','index')->name('pembelians.index');
     Route::get('/pembelians/{pembelian}/show','show')->name('pembelians.show');
+    Route::get('/pembelians/{pembelian}/edit','edit')->name('pembelians.edit');
+    Route::post('/pembelians/{pembelian}/update','update')->name('pembelians.update');
     Route::post('/pembelians','store')->name('pembelians.store');
     Route::post('/pembelians/{pembelian}/delete','delete')->name('pembelians.delete');
+    Route::post('/pembelians/{pembelian}/pelunasan','pelunasan')->name('pembelians.pelunasan');
 });
 
 Route::controller(BarangController::class)->group(function(){
     Route::get('/barangs','index')->name('barangs.index');
     Route::get('/barangs/{barang}/show','show')->name('barangs.show');
+    Route::get('/barangs/{barang}/edit','edit')->name('barangs.edit');
+    Route::post('/barangs/{barang}/update','update')->name('barangs.update');
     Route::post('/barangs','store')->name('barangs.store');
     Route::post('/barangs/{barang}/delete','delete')->name('barangs.delete');
 });

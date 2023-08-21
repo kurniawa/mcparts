@@ -146,4 +146,14 @@ class BarangController extends Controller
         $barang->delete();
         return back()->with('danger_', '-barang deleted!-');
     }
+
+    function edit(Barang $barang) {
+        dd($barang);
+    }
+
+    function update(Barang $barang, Request $request) {
+        $post = $request->post();
+        dump($barang);
+        dump($post);
+    }
 }
