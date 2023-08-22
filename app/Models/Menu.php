@@ -56,6 +56,7 @@ class Menu extends Model
             ['name'=>'SPK','route'=>'home'],
             ['name'=>'Pelanggan','route'=>'pelanggans.index'],
             ['name'=>'Ekspedisi','route'=>'ekspedisis.index'],
+            ['name'=>'Produk','route'=>'produks.index'],
         ]);
 
         return $menus;

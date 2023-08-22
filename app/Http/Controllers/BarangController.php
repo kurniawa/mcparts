@@ -109,7 +109,11 @@ class BarangController extends Controller
         $harga_total_sub = null;
 
         if ($satuan_sub !== null) {
-            $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+            if ($post['jumlah_sub'] === null || $post['jumlah_sub'] === 0) {
+                $jumlah_sub = 100;
+            } else {
+                $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+            }
             $harga_sub = $post['harga_sub'];
             $harga_total_sub = $post['harga_total_sub'];
         }
@@ -148,12 +152,78 @@ class BarangController extends Controller
     }
 
     function edit(Barang $barang) {
-        dd($barang);
+        $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
+
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'barangs.index',
+            'parent_route' => 'pembelians.index',
+            'profile_menus' => Menu::get_profile_menus(),
+            'pembelian_menus' => Menu::get_pembelian_menus(),
+            'label_supplier' => $label_supplier,
+            'label_barang' => $label_barang,
+            'barang' => $barang,
+        ];
+
+        return view('barangs.edit', $data);
     }
 
     function update(Barang $barang, Request $request) {
         $post = $request->post();
-        dump($barang);
-        dump($post);
+        // dump($barang);
+        // dump($post);
+
+        $post = $request->post();
+        // dd($post);
+        $request->validate([
+            'supplier_nama' => 'required',
+            'supplier_id' => 'required',
+            'barang_nama' => 'required',
+            'satuan_main' => 'required',
+            'jumlah_main' => 'required',
+            'harga_main' => 'required',
+            'harga_total_main' => 'required',
+        ]);
+
+        $success_ = '';
+
+        $satuan_sub = $post['satuan_sub'];
+        $jumlah_sub = null;
+        $harga_sub = null;
+        $harga_total_sub = null;
+
+        if ($satuan_sub !== null) {
+            if ($post['jumlah_sub'] === null || $post['jumlah_sub'] === 0) {
+                $jumlah_sub = 100;
+            } else {
+                $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+            }
+            $harga_sub = $post['harga_sub'];
+            $harga_total_sub = $post['harga_total_sub'];
+        }
+
+        $barang->update([
+            'supplier_id' => $post['supplier_id'],
+            'supplier_nama' => $post['supplier_nama'],
+            'nama' => $post['barang_nama'],
+            'satuan_main' => $post['satuan_main'],
+            'satuan_sub' => $satuan_sub,
+            'harga_main' => $post['harga_main'],
+            'harga_sub' => $harga_sub,
+            'jumlah_main' => (int)($post['jumlah_main'] * 100),
+            'jumlah_sub' => $jumlah_sub,
+            'harga_total_main' => $post['harga_total_main'],
+            'harga_total_sub' => $harga_total_sub,
+            'keterangan' => $post['keterangan'],
+        ]);
+
+        $success_ .= '-barang updated-';
+
+        $feedback = [
+            'success_' => $success_,
+        ];
+        return back()->with($feedback);
+
     }
 }

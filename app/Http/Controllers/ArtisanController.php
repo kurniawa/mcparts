@@ -10,6 +10,7 @@ use App\Models\Pembelian;
 use App\Models\PembelianBarang;
 use App\Models\PembelianTemp;
 use App\Models\Produk;
+use App\Models\ProdukDuplicate;
 use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
@@ -723,5 +724,37 @@ class ArtisanController extends Controller
     }
     // END - SUPPLIER
 
+    // FUNGSI PRODUK
+    // function duplicate_produk() {
+    //     Schema::dropIfExists('produks_duplicate');
 
+    //     Schema::create('produks_duplicate', function (Blueprint $table) {
+    //         $table->id();
+    //         $table->string('tipe', 50);
+    //         $table->string('nama');
+    //         $table->string('nama_nota');
+    //         $table->string('tipe_packing', 20)->nullable();
+    //         $table->smallInteger('aturan_packing')->nullable();
+    //         $table->string('keterangan')->nullable();
+    //         $table->timestamps();
+    //         $table->string('creator', 50)->nullable();
+    //         $table->string('updater', 50)->nullable();
+    //     });
+
+    //     $produks = Produk::all()->each(function ($produk) {
+    //         $produk_temp = $produk->replicate();
+    //         $produk_temp->setTable('produks_duplicate');
+    //         $produk_temp->save();
+    //     });
+
+    //     $produks_duplicate = ProdukDuplicate::all();
+    //     for ($i=0; $i < count($produks); $i++) {
+    //         $produks_duplicate[$i]->created_at = $produks[$i]->created_at;
+    //         $produks_duplicate[$i]->updated_at = $produks[$i]->updated_at;
+    //         $produks_duplicate[$i]->save();
+    //     }
+    //     dump($produks_duplicate);
+    // }
+
+    // END - FUNGSI PRODUK
 }

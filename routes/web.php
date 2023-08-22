@@ -10,6 +10,7 @@ use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\SrjalanController;
 use App\Http\Controllers\SupplierController;
@@ -132,6 +133,13 @@ Route::controller(EkspedisiController::class)->group(function(){
     Route::post('/ekspedisis/{ekspedisi}/{ekspedisi_kontak}/kontak_utama','kontak_utama')->name('ekspedisis.kontak_utama')->middleware('auth');
 });
 
+Route::controller(ProdukController::class)->group(function(){
+    Route::get('/produks','index')->name('produks.index');
+    Route::get('/produks/{produk}/show','show')->name('produks.show');
+    Route::post('/produks/store','store')->name('produks.store');
+    Route::post('/produks/{produk}/delete','delete')->name('produks.delete');
+});
+
 Route::controller(PenjualanController::class)->group(function(){
     Route::get('/penjualans','index')->name('penjualans.index');
 });
@@ -160,6 +168,14 @@ Route::controller(SupplierController::class)->group(function(){
     Route::get('/suppliers/{supplier}/show','show')->name('suppliers.show');
     Route::post('/suppliers','store')->name('suppliers.store');
     Route::post('/suppliers/{supplier}/delete','delete')->name('suppliers.delete');
+    Route::post('/suppliers/{supplier}/alamat_add','alamat_add')->name('suppliers.alamat_add');
+    Route::post('/suppliers/{supplier}/{alamat}/alamat_utama','alamat_utama')->name('suppliers.alamat_utama');
+    Route::post('/suppliers/{supplier}/{alamat}/alamat_edit','alamat_edit')->name('suppliers.alamat_edit')->middleware('auth');
+    Route::post('/suppliers/{supplier}/{alamat}/alamat_delete','alamat_delete')->name('suppliers.alamat_delete')->middleware('auth');
+    Route::post('/suppliers/{supplier}/kontak_add','kontak_add')->name('suppliers.kontak_add')->middleware('auth');
+    Route::post('/suppliers/{supplier_kontak}/kontak_edit','kontak_edit')->name('suppliers.kontak_edit')->middleware('auth');
+    Route::post('/suppliers/{supplier_kontak}/kontak_delete','kontak_delete')->name('suppliers.kontak_delete')->middleware('auth');
+    Route::post('/suppliers/{supplier}/{supplier_kontak}/kontak_utama','kontak_utama')->name('suppliers.kontak_utama')->middleware('auth');
 });
 
 Route::controller(AccountingController::class)->group(function(){

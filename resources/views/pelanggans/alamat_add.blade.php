@@ -2,7 +2,7 @@
 @section('content')
 <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold tracking-tight text-gray-900">Alamat Baru - Pelanggan: {{ $pelanggan->nama }}</h1>
+      <h1 class="text-xl font-bold tracking-tight text-gray-900">Alamat Baru - Pelanggan: {{ $pelanggan->nama }}</h1>
     </div>
   </header>
 <main>
@@ -22,7 +22,7 @@
                     <tr><th>(*)short(daerah)</th><th>:</th><td><input type="text" name="short" class="text-xs p-1 rounded"></td><th>(*)long</th><th>:</th><td><textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs"></textarea></td></tr>
                 </table>
                 <div class="text-center mt-2">
-                    <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">Tambah Alamat Baru</button>
+                    <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-semibold">+ Alamat</button>
                 </div>
             </form>
         </div>

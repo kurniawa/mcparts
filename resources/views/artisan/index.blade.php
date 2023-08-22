@@ -2,7 +2,7 @@
 @section('content')
 <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold tracking-tight text-gray-900">Artisan Command Center</h1>
+      <h1 class="text-xl font-bold tracking-tight text-gray-900">Artisan Command Center</h1>
     </div>
   </header>
   <x-errors-any></x-errors-any>
@@ -118,7 +118,6 @@
         </div>
     </div>
     {{-- SUPPLIER --}}
-    {{-- END - SUPPLIER --}}
     <div class="flex items-center bg-white rounded shadow drop-shadow p-1">
         <h5 class="font-semibold ml-2">Supplier</h5>
     </div>
@@ -144,6 +143,19 @@
             <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">filling_pembelian_barang</button>
         </form>
     </div>
+    {{-- END - SUPPLIER --}}
+    {{-- PRODUK --}}
+    <div class="flex items-center bg-white rounded shadow drop-shadow p-1 mt-5">
+        <h5 class="font-semibold ml-2">Produk</h5>
+    </div>
+    <div class="ml-2 mt-1">
+        tambah column pada table produks:
+        <ul>
+            <li>supplier_nama : varchar(50)->nullable()</li>
+            <li>supplier_id : foreignId, nullable, constrained, ondelete set null, unsigned</li>
+        </ul>
+    </div>
+    {{-- END - PRODUK --}}
     <div class="h-16"></div>
   </main>
 </div>

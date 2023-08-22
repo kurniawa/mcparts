@@ -2,7 +2,7 @@
 @section('content')
 {{-- <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold tracking-tight text-gray-900">App</h1>
+      <h1 class="text-xl font-bold tracking-tight text-gray-900">App</h1>
     </div>
   </header> --}}
 <main>
@@ -121,7 +121,7 @@
                                 <h5 class="font-semibold ml-2">Alamat:</h5>
                             </div>
                         </div>
-                        <table class="mt-1 w-full">
+                        <table class="mt-1 w-full text-xs">
                             <tr><td>jalan</td><td>:</td><td><input type="text" name="jalan" class="text-xs p-1 rounded"></td></tr>
                             <tr><td>komplek</td><td>:</td><td><input type="text" name="komplek" class="text-xs p-1 rounded"></td></tr>
                             <tr>

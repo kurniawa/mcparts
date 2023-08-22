@@ -25,4 +25,31 @@ class Produk extends Model
 
         return $harga_produk;
     }
+
+    static function get_tipe() {
+        return [
+            ['tipe'=>'SJ-Variasi', 'initial'=>'var'],
+            ['tipe'=>'SJ-Kombinasi', 'initial'=>'kom'],
+            ['tipe'=>'SJ-Motif', 'initial'=>'mot'],
+            ['tipe'=>'SJ-T.Sixpack', 'initial'=>'t-sp'],
+            ['tipe'=>'SJ-Japstyle', 'initial'=>'jap'],
+            ['tipe'=>'SJ-Standar', 'initial'=>'std'],
+            ['tipe'=>'Jok Assy', 'initial'=>'ass'],
+            ['tipe'=>'Stiker', 'initial'=>'sti'],
+            ['tipe'=>'Rol', 'initial'=>'rol'],
+            ['tipe'=>'Rotan', 'initial'=>'rot'],
+            ['tipe'=>'Tankpad', 'initial'=>'tp'],
+            ['tipe'=>'Busa', 'initial'=>'bus'],
+            ['tipe'=>'Dll', 'initial'=>'dll'],
+        ];
+    }
+
+    static function get_tipe_packing() {
+        return [
+            'bal',
+            'colly',
+            'dus',
+            'rol',
+        ];
+    }
 }
