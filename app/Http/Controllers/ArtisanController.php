@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Accounting;
 use App\Models\Barang;
 use App\Models\Menu;
 use App\Models\Nota;
@@ -20,6 +21,7 @@ use App\Models\Srjalan;
 use App\Models\Supplier;
 use App\Models\TipePacking;
 use App\Models\User;
+use App\Models\UserInstance;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -191,43 +193,43 @@ class ArtisanController extends Controller
         return back()->with('success_','srjalan fix jumlah_packing');
     }
 
-    function create_table_accounting() {
-        Schema::dropIfExists('accounting_adis');
-        Schema::dropIfExists('accounting_alberts');
-        Schema::dropIfExists('accounting_dians');
-        Schema::dropIfExists('accounting_demardis');
+    // function create_table_accounting() {
+    //     Schema::dropIfExists('accounting_adis');
+    //     Schema::dropIfExists('accounting_alberts');
+    //     Schema::dropIfExists('accounting_dians');
+    //     Schema::dropIfExists('accounting_demardis');
 
-        Schema::create('accounting_adis', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('tipe',['pengeluaran','pemasukan']);
-            $table->string('keterangan');
-            $table->string('kode',20);
-            $table->bigInteger('jumlah');
-            $table->bigInteger('saldo');
-            $table->string('created_by');
-            $table->string('updated_by');
-            // Tanggal sudah diatur pada timestamps: created_at, updated_at
-        });
-        $spks = Spk::all();
-        // $spks = Spk::where('id',28)->get();
-        $grouped_spk_produk_notas = collect();
-        foreach ($spks as $spk) {
-            $spk_produk_notas = SpkProdukNota::where('spk_id', $spk->id)->get();
-            $grouped = $spk_produk_notas->groupBy('nota_id');
-            $grouped_spk_produk_notas->push($grouped);
-        }
-        foreach ($grouped_spk_produk_notas as $arr_spk_produk_notas) {
-            foreach ($arr_spk_produk_notas as $spk_produk_notas) {
-                SpkNota::create([
-                    'spk_id' => $spk_produk_notas[0]->spk_id,
-                    'nota_id' => $spk_produk_notas[0]->nota_id,
-                ]);
-            }
-        }
-        $spk_notas = SpkNota::limit(10)->get();
-        dd($spk_notas);
-    }
+    //     Schema::create('accounting_adis', function (Blueprint $table) {
+    //         $table->id();
+    //         $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    //         $table->enum('tipe',['pengeluaran','pemasukan']);
+    //         $table->string('keterangan');
+    //         $table->string('kode',20);
+    //         $table->bigInteger('jumlah');
+    //         $table->bigInteger('saldo');
+    //         $table->string('created_by');
+    //         $table->string('updated_by');
+    //         // Tanggal sudah diatur pada timestamps: created_at, updated_at
+    //     });
+    //     $spks = Spk::all();
+    //     // $spks = Spk::where('id',28)->get();
+    //     $grouped_spk_produk_notas = collect();
+    //     foreach ($spks as $spk) {
+    //         $spk_produk_notas = SpkProdukNota::where('spk_id', $spk->id)->get();
+    //         $grouped = $spk_produk_notas->groupBy('nota_id');
+    //         $grouped_spk_produk_notas->push($grouped);
+    //     }
+    //     foreach ($grouped_spk_produk_notas as $arr_spk_produk_notas) {
+    //         foreach ($arr_spk_produk_notas as $spk_produk_notas) {
+    //             SpkNota::create([
+    //                 'spk_id' => $spk_produk_notas[0]->spk_id,
+    //                 'nota_id' => $spk_produk_notas[0]->nota_id,
+    //             ]);
+    //         }
+    //     }
+    //     $spk_notas = SpkNota::limit(10)->get();
+    //     dd($spk_notas);
+    // }
 
     function create_table_tipe_packing() {
         Schema::dropIfExists('tipe_packings');
@@ -757,4 +759,44 @@ class ArtisanController extends Controller
     // }
 
     // END - FUNGSI PRODUK
+
+    function create_tables_for_accounting() {
+        Schema::dropIfExists('accountings');
+        Schema::dropIfExists('user_instances');
+
+        Schema::create('user_instances', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('username', 50);
+            $table->string('instance_type', 50);
+            $table->string('instance_name', 50);
+            $table->string('branch', 50)->nullable();
+            $table->string('account_number', 50)->nullable();
+            $table->string('timerange', 50)->default('triwulan')->nullable(); // bulan, triwulan, caturwulan, semester
+            $table->timestamps();
+        });
+
+        Schema::create('accountings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('username', 50);
+            $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('related_username', 50)->nullable();
+            $table->foreignId('user_instance_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('instance_type', 50);
+            $table->string('instance_name', 50);
+            $table->string('branch', 50)->nullable();
+            $table->string('account_number', 50)->nullable();
+            $table->string('kode', 20)->nullable();
+            $table->string('transaction_type', 50); // pemasukan, pengeluaran
+            $table->string('transaction_name');
+            $table->bigInteger('jumlah');
+            $table->bigInteger('saldo');
+            $table->string('status', 20); // read or not read yet by other user
+            $table->timestamps();
+        });
+
+        dump(Accounting::limit(100)->get());
+        dd(UserInstance::all());
+    }
 }

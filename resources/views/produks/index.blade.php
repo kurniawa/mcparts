@@ -84,7 +84,7 @@
                                         <td>Tipe Produk</td><td><div class="mx-2">:</div></td>
                                         <td>
                                             <select name="tipe" id="tipe" class="text-xs py-0 rounded">
-                                                @foreach ($tipes as $tipe)
+                                                @foreach ($types as $tipe)
                                                 <option value="{{ $tipe['tipe'] }}">{{ $tipe['tipe'] }}</option>
                                                 @endforeach
                                             </select>
@@ -135,15 +135,16 @@
                 <div class='pb-1 text-xs lg:w-1/2 md:w-3/4'>
                     <div class="flex">
                         <button id="btn_all" class="btn-tipe border border-violet-300 text-violet-500 px-1 rounded ml-1" onclick="toggle_light_class(this.id, 'btn-tipe', 'produk-tipe', 'all', [], ['bg-violet-200'])">all</button>
-                        @foreach ($tipes as $key_tipe => $tipe)
+                        @foreach ($types as $key_tipe => $tipe)
                         <button id="btn_{{ $tipe['initial'] }}" class="btn-tipe border border-violet-300 text-violet-500 px-1 rounded ml-1" onclick="toggle_light_class(this.id, 'btn-tipe', 'produk-tipe', '{{ $tipe['initial'] }}', [], ['bg-violet-200'])">{{ $tipe['initial'] }}</button>
                         @endforeach
                     </div>
 
-                    @for ($i = 0; $i < count($tipes); $i++)
-                    <table id="{{ $tipes[$i]['initial'] }}" class="produk-tipe table-nice w-full mt-1">
+                    @for ($i = 0; $i < count($types); $i++)
+                    {{-- TABLE PRODUKS --}}
+                    <table id="{{ $types[$i]['initial'] }}" class="produk-tipe table-nice w-full mt-1">
                         <tr>
-                            <td class="font-bold">{{ $tipes[$i]['tipe'] }}</td>
+                            <td class="font-bold">{{ $types[$i]['tipe'] }}</td>
                         </tr>
                         @for ($j = 0; $j < count($produks[$i]); $j++)
                         <tr class="border-b">
@@ -153,6 +154,17 @@
                                         {{ $produks[$i][$j]['nama'] }}
                                     </div>
                                 </a>
+                            </td>
+                            <td>
+                                @if ($produks[$i][$j]->supplier_nama !== null)
+                                @if ($produks[$i][$j]->supplier_id !== null)
+                                <a href="{{ route('suppliers.show', $produks[$i][$j]->supplier_id) }}" class="text-indigo-500">{{ $produks[$i][$j]->supplier_nama }}</a>
+                                @else
+                                <span>{{ $produks[$i][$j]->supplier_nama }}</span>
+                                @endif
+                                @else
+                                --
+                                @endif
                             </td>
                             <td>
                                 @if ($hargas[$i][$j])
@@ -166,6 +178,7 @@
                         </tr>
                         @endfor
                     </table>
+                    {{-- END - TABLE PRODUKS --}}
                     @endfor
                 </div>
             </div>

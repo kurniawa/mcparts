@@ -15,7 +15,7 @@ class PenjualanController extends Controller
         // Set di awal tanpa filter -> tanggal bulan ini
 
         $date_start = date('Y') . "-" . date('m') . "-01";
-        $date_end = date('Y') . "-" . date('m') . "-" . date('m') . " 23:59:59";
+        $date_end = date('Y') . "-" . date('m') . "-" . date('d') . " 23:59:59";
 
         if (isset($get['from_month'])) {
             if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {

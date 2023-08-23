@@ -156,6 +156,17 @@
         </ul>
     </div>
     {{-- END - PRODUK --}}
+    {{-- ACCOUNTING --}}
+    <div class="flex items-center bg-white rounded shadow drop-shadow p-1 mt-5">
+        <h5 class="font-semibold ml-2">ACCOUNTING</h5>
+    </div>
+    <div class="ml-2 mt-1">
+        <form action="{{ route('artisan.create_tables_for_accounting') }}" method="post">
+            @csrf
+            <button class="bg-violet-400 text-white font-semibold rounded px-3 py-2">create_tables_for_accounting</button>
+        </form>
+    </div>
+    {{-- END - ACCOUNTING --}}
     <div class="h-16"></div>
   </main>
 </div>

@@ -137,6 +137,7 @@ Route::controller(ProdukController::class)->group(function(){
     Route::get('/produks','index')->name('produks.index');
     Route::get('/produks/{produk}/show','show')->name('produks.show');
     Route::post('/produks/store','store')->name('produks.store');
+    Route::post('/produks/{produk}/update','update')->name('produks.update');
     Route::post('/produks/{produk}/delete','delete')->name('produks.delete');
 });
 
@@ -180,6 +181,9 @@ Route::controller(SupplierController::class)->group(function(){
 
 Route::controller(AccountingController::class)->group(function(){
     Route::get('/accounting','index')->name('accounting.index');
+    Route::post('/accounting/create_kas','create_kas')->name('accounting.create_kas');
+    Route::get('/accounting/{user_instance}/show_transactions','show_transactions')->name('accounting.show_transactions');
+    Route::post('/accounting/store_transactions','store_transactions')->name('accounting.store_transactions');
 });
 
 Route::controller(ArtisanController::class)->group(function(){
@@ -199,4 +203,5 @@ Route::controller(ArtisanController::class)->group(function(){
     Route::post('/artisan-command/reset_schema_table_pembelian','reset_schema_table_pembelian')->name('artisan.reset_schema_table_pembelian')->middleware('developer');
     Route::post('/artisan-command/create_table_pembelian_barangs','create_table_pembelian_barangs')->name('artisan.create_table_pembelian_barangs')->middleware('developer');
     Route::post('/artisan-command/filling_pembelian_barang','filling_pembelian_barang')->name('artisan.filling_pembelian_barang')->middleware('developer');
+    Route::post('/artisan-command/create_tables_for_accounting','create_tables_for_accounting')->name('artisan.create_tables_for_accounting')->middleware('developer');
 });

@@ -26,7 +26,7 @@ class Produk extends Model
         return $harga_produk;
     }
 
-    static function get_tipe() {
+    static function get_types() {
         return [
             ['tipe'=>'SJ-Variasi', 'initial'=>'var'],
             ['tipe'=>'SJ-Kombinasi', 'initial'=>'kom'],
