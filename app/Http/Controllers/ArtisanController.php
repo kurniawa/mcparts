@@ -760,6 +760,7 @@ class ArtisanController extends Controller
 
     // END - FUNGSI PRODUK
 
+    // FUNGSI - ACCOUNTING
     function create_tables_for_accounting() {
         Schema::dropIfExists('accountings');
         Schema::dropIfExists('user_instances');
@@ -790,6 +791,7 @@ class ArtisanController extends Controller
             $table->string('kode', 20)->nullable();
             $table->string('transaction_type', 50); // pemasukan, pengeluaran
             $table->string('transaction_name');
+            $table->string('keterangan')->nullable(); // keterangan tambahan akan ditulis dalam tanda kurung
             $table->bigInteger('jumlah');
             $table->bigInteger('saldo');
             $table->string('status', 20); // read or not read yet by other user
@@ -797,6 +799,37 @@ class ArtisanController extends Controller
         });
 
         dump(Accounting::limit(100)->get());
-        dd(UserInstance::all());
+        dump(UserInstance::all());
     }
+
+    function create_table_transaction_names() {
+        Schema::dropIfExists('transaction_names');
+
+        Schema::create('transaction_names', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('username', 50);
+            $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('related_username', 50)->nullable();
+            $table->string('name');
+            $table->string('related_name')->nullable();
+        });
+
+        $list_of_transaction_names = [
+            ['user_id'=>7,'username'=>'Albert21','name'=>'CASHBON MINGGUAN'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'UPAH MINGGUAN'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'DLL'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'MUTASI DARI KAS KANTOR AK', 'related_user_id'=>2, 'related_name'=>'MUTASI KE KAS KANTOR ALBERT'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'PBK TLP'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'PRIVE DMD'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.MKN'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.BEROBAT'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.KESEHATAN'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.TRANSPORT'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'SISA GAJI'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'UPAH MINGGUAN AKHIR'],
+            ['user_id'=>7,'username'=>'Albert21','name'=>'UPAH BULANAN'],
+        ];
+    }
+    // END - FUNGSI - ACCOUNTING
 }

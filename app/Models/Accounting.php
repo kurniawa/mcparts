@@ -9,7 +9,7 @@ class Accounting extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
-    static function get_instances_types() {
+    static function get_instance_types() {
         return [
             'safe',
             'bank',
@@ -17,7 +17,7 @@ class Accounting extends Model
         ];
     }
 
-    static function get_instances_names() {
+    static function get_instance_names() {
         return [
             'BCA',
             'BRI',

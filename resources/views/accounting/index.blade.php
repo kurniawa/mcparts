@@ -26,10 +26,10 @@
                         <tr>
                             <td>Tipe Kas/Instansi</td><td>:</td>
                             <td>
-                                {{-- <input type="text" name="instances_type" class="border rounded text-xs p-1"> --}}
-                                <select name="instances_type" id="" class="py-1 rounded text-xs">
-                                    @foreach ($instances_types as $instances_type)
-                                    <option value="{{ $instances_type }}">{{ $instances_type }}</option>
+                                {{-- <input type="text" name="instance_type" class="border rounded text-xs p-1"> --}}
+                                <select name="instance_type" id="" class="py-1 rounded text-xs">
+                                    @foreach ($instance_types as $instance_type)
+                                    <option value="{{ $instance_type }}">{{ $instance_type }}</option>
                                     @endforeach
                                 </select>
                             </td>
@@ -37,11 +37,11 @@
                         <tr>
                             <td>Nama Kas/Instansi</td><td>:</td>
                             <td>
-                                {{-- <input type="text" name="instances_name" class="border rounded text-xs p-1"> --}}
-                                <select name="instances_name" id="" class="py-1 rounded text-xs">
+                                {{-- <input type="text" name="instance_name" class="border rounded text-xs p-1"> --}}
+                                <select name="instance_name" id="" class="py-1 rounded text-xs">
                                     <option value=""></option>
-                                    @foreach ($instances_names as $instances_name)
-                                    <option value="{{ $instances_name }}">{{ $instances_name }}</option>
+                                    @foreach ($instance_names as $instance_name)
+                                    <option value="{{ $instance_name }}">{{ $instance_name }}</option>
                                     @endforeach
                                 </select>
                             </td>
@@ -62,11 +62,11 @@
         {{-- FORM NEW_KAS --}}
 
         <div class="border border-sky-300 rounded text-xs p-2 mt-2">
-            @if (count($user_instances) === 0)
+            @if (count($user_instance) === 0)
             Anda belum memiliki database kas.
             @else
             <table>
-                @foreach ($user_instances as $key_user_instance => $user_instance)
+                @foreach ($user_instance as $key_user_instance => $user_instance)
                 <tr>
                     <td>{{ $key_user_instance + 1 }}.</td>
                     <td>

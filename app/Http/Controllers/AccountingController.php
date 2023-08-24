@@ -16,7 +16,7 @@ class AccountingController extends Controller
     function index() {
         $user = Auth::user();
 
-        $user_instances = UserInstance::where('user_id', $user->id)->get();
+        $user_instance = UserInstance::where('user_id', $user->id)->get();
 
         $data = [
             'menus' => Menu::get(),
@@ -25,9 +25,9 @@ class AccountingController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'spk_menus' => Menu::get_spk_menus(),
             'user' => $user,
-            'instances_types' => Accounting::get_instances_types(),
-            'instances_names' => Accounting::get_instances_names(),
-            'user_instances' => $user_instances,
+            'instance_types' => Accounting::get_instance_types(),
+            'instance_names' => Accounting::get_instance_names(),
+            'user_instance' => $user_instance,
         ];
 
         return view('accounting.index', $data);
@@ -35,7 +35,7 @@ class AccountingController extends Controller
 
     function create_kas(Request $request) {
         $post = $request->post();
-        dump($post);
+        // dd($post);
 
         $request->validate([
             // 'table_name' => 'required',
@@ -73,7 +73,7 @@ class AccountingController extends Controller
             'account_number' => $post['account_number'],
         ]);
 
-        return back()->with('success_', '-user_instances created-');
+        return back()->with('success_', '-user_instance created-');
     }
 
     function show_transactions(UserInstance $user_instance) {
@@ -127,8 +127,8 @@ class AccountingController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'spk_menus' => Menu::get_spk_menus(),
             'user' => $user,
-            'instances_types' => Accounting::get_instances_types(),
-            'instances_names' => Accounting::get_instances_names(),
+            'instance_types' => Accounting::get_instance_types(),
+            'instance_names' => Accounting::get_instance_names(),
             'accountings' => $accountings,
             'user_instance' => $user_instance,
             'keluar_total' => $keluar_total,

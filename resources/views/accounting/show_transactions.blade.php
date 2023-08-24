@@ -85,12 +85,13 @@
             <form action="{{ route('accounting.store_transactions') }}" method="POST" class="mt-1 inline-block min-w-max">
                 @csrf
                 <table class="text-xs min-w-max" id="table_add_transactions">
-                    <tr class="text-slate-600"><th>tanggal</th><th>kode</th><th>keterangan</th><th>keluar</th><th>masuk</th><th>saldo</th><th>related_user</th><th>keterangan u. related_user</th></tr>
+                    <tr class="text-slate-600"><th>tanggal</th><th>kode</th><th>keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th><th>saldo</th><th>related_user</th><th>keterangan u. related_user</th></tr>
                     @for ($i = 0; $i < 7; $i++)
                     <tr>
                         <td><input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28"></td>
                         <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-16"></td>
                         <td><input type="text" name="transaction_name[]" id="transaction_name-{{ $i }}" class="border p-1 text-xs w-60"></td>
+                        <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full"></td>
                         <td><input type="text" name="keluar[]" id="keluar-{{ $i }}" class="border p-1 text-xs w-36"></td>
                         <td><input type="text" name="masuk[]" id="masuk-{{ $i }}" class="border p-1 text-xs w-36"></td>
                         <td><input type="text" name="saldo[]" id="saldo-{{ $i }}" class="border p-1 text-xs w-36"></td>
@@ -115,6 +116,9 @@
                         </td>
                     </tr>
                 </table>
+                <div class="mt-3 text-xs border rounded p-1 inline-block border-yellow-500">
+                    <p>*) Keterangan Tambahan akan tertulis dalam tanda kurung pada laporan.</p>
+                </div>
                 <div class="mt-3 text-center text-xs">
                     <button type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2">CONFIRM</button>
                 </div>
