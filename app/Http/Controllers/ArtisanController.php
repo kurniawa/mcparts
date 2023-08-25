@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Accounting;
 use App\Models\Barang;
+use App\Models\Kategori;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
@@ -11,7 +12,6 @@ use App\Models\Pembelian;
 use App\Models\PembelianBarang;
 use App\Models\PembelianTemp;
 use App\Models\Produk;
-use App\Models\ProdukDuplicate;
 use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
@@ -790,7 +790,13 @@ class ArtisanController extends Controller
             $table->string('account_number', 50)->nullable();
             $table->string('kode', 20)->nullable();
             $table->string('transaction_type', 50); // pemasukan, pengeluaran
-            $table->string('transaction_name');
+            $table->string('transaction_desc');
+            $table->string('related_desc')->nullable();
+            $table->string('kategori_type',50)->nullable();
+            $table->string('kategori_level_one',100)->nullable();
+            $table->string('kategori_level_two',100)->nullable();
+            $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('pelanggan_nama')->nullable();
             $table->string('keterangan')->nullable(); // keterangan tambahan akan ditulis dalam tanda kurung
             $table->bigInteger('jumlah');
             $table->bigInteger('saldo');
@@ -803,6 +809,7 @@ class ArtisanController extends Controller
     }
 
     function create_table_transaction_names() {
+        Schema::dropIfExists('kategoris');
         Schema::dropIfExists('transaction_names');
 
         Schema::create('transaction_names', function (Blueprint $table) {
@@ -811,24 +818,467 @@ class ArtisanController extends Controller
             $table->string('username', 50);
             $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('related_username', 50)->nullable();
-            $table->string('name');
-            $table->string('related_name')->nullable();
+            $table->string('desc');
+            $table->string('kategori_type',50)->nullable();
+            $table->string('kategori_level_one',100)->nullable();
+            $table->string('kategori_level_two',100)->nullable();
+            $table->string('related_desc')->nullable();
+            $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('pelanggan_nama')->nullable();
         });
 
-        $list_of_transaction_names = [
-            ['user_id'=>7,'username'=>'Albert21','name'=>'CASHBON MINGGUAN'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'UPAH MINGGUAN'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'DLL'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'MUTASI DARI KAS KANTOR AK', 'related_user_id'=>2, 'related_name'=>'MUTASI KE KAS KANTOR ALBERT'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'PBK TLP'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'PRIVE DMD'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.MKN'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.BEROBAT'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.KESEHATAN'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'REIMBURSE U.TRANSPORT'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'SISA GAJI'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'UPAH MINGGUAN AKHIR'],
-            ['user_id'=>7,'username'=>'Albert21','name'=>'UPAH BULANAN'],
+        Schema::create('kategoris', function (Blueprint $table) {
+            $table->id();
+            $table->string('type', 50);
+            $table->string('kategori_level_one', 100);
+            $table->string('kategori_level_two', 100);
+        });
+
+        $kategoris = [
+            [
+                'type' => 'UANG MASUK', 'kategori_level_one'=>
+                    [
+                        ['name'=>'PENJUALAN CASH'],
+                        ['name'=>'PENERIMAAN PIUTANG'],
+                        ['name'=>'MUTASI DARI KAS KANTOR 1'],
+                        ['name'=>'MUTASI DARI KAS KANTOR AKHUN'],
+                        ['name'=>'MUTASI DARI KAS BCA MCP'],
+                        ['name'=>'MUTASI DARI KAS BCA DMD'],
+                        ['name'=>'MUTASI DARI KAS DANAMON MCP'],
+                        ['name'=>'MUTASI DARI KAS BRI DMD'],
+                        ['name'=>'MUTASI DARI KAS BG'],
+                        ['name'=>'BUNGA TABUNGAN'],
+                        ['name'=>'TITIPAN TRF'],
+                        ['name'=>'PENGGANTI GIRO KOSONG/TOLAKAN KLIRING'],
+                        ['name'=>'PENERIMAAN LAIN-LAIN'],
+                        ['name'=>'UTANG LAIN-LAIN']
+                    ],
+            ],
+            [
+                'type' => 'UANG KELUAR', 'kategori_level_one'=>
+                    [
+                        ['name'=>'BAYAR HUTANG BAHAN BAKU'],
+                        ['name'=>'BELI BAHAN BAKU CASH'],
+                        ['name'=>'BAYAR HUTANG BAHAN PENDUKUNG'],
+                        ['name'=>'BELI BAHAN PENDUKUNG CASH'],
+                        ['name'=>'MUTASI KE KAS KANTOR 1'],
+                        ['name'=>'MUTASI KE KAS KANTOR DMD'],
+                        ['name'=>'MUTASI KE KAS KANTOR DIAN'],
+                        ['name'=>'MUTASI KE KAS KANTOR AKHUN'],
+                        ['name'=>'MUTASI KE KAS BCA MCP'],
+                        ['name'=>'MUTASI KE KAS BCA DMD'],
+                        ['name'=>'MUTASI KE KAS DANAMON MCP'],
+                        ['name'=>'MUTASI KE KAS BRI DMD'],
+                        ['name'=>'PRIVE'],
+                        ['name'=>'CASHBON KARYAWAN'],
+                        ['name'=>'REFUND - KELEBIHAN PEMBAYARAN'],
+                        ['name'=>'TITIP SIMPAN GAJI KARYAWAN'],
+                        ['name'=>'AMBIL TITIPAN TRF'],
+                        ['name'=>'PAJAK BUNGA TABUNGAN'],
+                        ['name'=>'BIAYA TENAGA KERJA LANGSUNG', 'kategori_level_two'=>
+                            ['name'=>'GAJI DAN UPAH'],
+                            ['name'=>'LEMBUR'],
+                            ['name'=>'TUNJANGAN KARYAWAN'],
+                            ['name'=>'KOMISI PENJUALAN'],
+                        ],
+                        ['name'=>'BIAYA BAHAN PENDUKUNG', 'kategori_level_two'=>
+                            ['name'=>'PERLENGKAPAN SABLON'],
+                            ['name'=>'PERLENGKAPAN JAHIT'],
+                            ['name'=>'POLIMAS'],
+                            ['name'=>'PACKING'],
+                            ['name'=>'JASA BORDIR'],
+                        ],
+                        ['name'=>'BIAYA PENGIRIMAN BARANG', 'kategori_level_two'=>
+                            ['name'=>'OPERASIONAL PENGIRIMAN'],
+                        ],
+                        ['name'=>'BIAYA UTILITAS', 'kategori_level_two'=>
+                            ['name'=>'LISTRIK'],
+                            ['name'=>'TELEPON'],
+                            ['name'=>'INTERNET'],
+                        ],
+                        ['name'=>'PAJAK', 'kategori_level_two'=>
+                            ['name'=>'PPH PASAL 21'],
+                            ['name'=>'PPH PASAL 25 DAN 29'],
+                        ],
+                        ['name'=>'BIAYA INVENTARIS (PERALATAN DAN PERLENGKAPAN)', 'kategori_level_two'=>
+                            ['name'=>'ATK'],
+                            ['name'=>'PERALATAN DAN PERLENGKAPAN PRODUKSI'],
+                            ['name'=>'CICILAN MOBIL TRAGA'],
+                        ],
+                        ['name'=>'BIAYA MAINTENANCE', 'kategori_level_two'=>
+                            ['name'=>'PERAWATAN KENDARAAN'],
+                            ['name'=>'PERAWATAN MESIN'],
+                            ['name'=>'PERAWATAN INVENTARIS'],
+                        ],
+                        ['name'=>'BIAYA LAIN-LAIN', 'kategori_level_two'=>
+                            ['name'=>'ADMINISTRASI BANK'],
+                            ['name'=>'ENTERTAIN PELANGGAN'],
+                            ['name'=>'KUNJUNGAN KE DAERAH'],
+                            ['name'=>'LAIN-LAIN'],
+                        ],
+                    ],
+            ],
+        ];
+
+        foreach ($kategoris as $kategori_types) {
+            foreach ($kategori_types['kategori_level_one'] as $kategori_level_one) {
+                if (isset($kategori_level_one['kategori_level_two'])) {
+                    foreach ($kategori_level_one['kategori_level_two'] as $kategori_level_two) {
+                        Kategori::create([
+                            'type'=>$kategori_types['type'],
+                            'kategori_level_one'=>$kategori_level_one['name'],
+                            'kategori_level_two' => $kategori_level_two['name']
+                        ]);
+                    }
+                } else {
+                    Kategori::create([
+                        'type'=>$kategori_types['type'],
+                        'kategori_level_one'=>$kategori_level_one['name'],
+                        'kategori_level_two' => null
+                    ]);
+                }
+            }
+        }
+
+        $list_of_transaction_names_albert = [
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'CASHBON MINGGUAN',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'GAJI DAN UPAH',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'UPAH MINGGUAN',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'GAJI DAN UPAH',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'DLL',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA LAIN-LAIN',
+                'kategori_level_two'=>'LAIN-LAIN',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'MUTASI DARI KAS KANTOR AK',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'BIAYA LAIN-LAIN',
+                'kategori_level_two'=>'LAIN-LAIN',
+                'related_user_id'=>2,
+                'related_username'=>'kuruniawa',
+                'related_desc'=>'MUTASI KE KAS KANTOR ALBERT'
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'PBK TLP',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA UTILITAS',
+                'kategori_level_two'=>'TELEPON',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'name'=>'PRIVE DMD',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'PRIVE',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'REIMBURSE U.MKN',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'TUNJANGAN KARYAWAN',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'REIMBURSE U.BEROBAT',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'TUNJANGAN KARYAWAN',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'REIMBURSE U.KESEHATAN',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'TUNJANGAN KARYAWAN',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'REIMBURSE U.TRANSPORT',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'TUNJANGAN KARYAWAN',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'SISA GAJI',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'GAJI DAN UPAH',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'UPAH MINGGUAN AKHIR',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'GAJI DAN UPAH',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'UPAH BULANAN',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'GAJI DAN UPAH',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'PPH PS 21',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'PAJAK',
+                'kategori_level_two'=>'PPH PASAL 21',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'PPH PS 25',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'PAJAK',
+                'kategori_level_two'=>'PPH PASAL 25 DAN 29',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'MAKAN SIANG',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA TENAGA KERJA LANGSUNG',
+                'kategori_level_two'=>'GAJI DAN UPAH',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'desc'=>'INDIHOME MCP',
+                'kategori_type'=>'UANG KELUAR',
+                'kategori_level_one'=>'BIAYA UTILITAS',
+                'kategori_level_two'=>'INTERNET',
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+            ],
+        ];
+
+        $list_of_transaction_names_bca_dmd = [
+            // PIUTANG
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG 3M - SURABAYA',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>2,
+                'pelanggan_nama'=>'3M',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'BERJAYA MOTOR',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>17,
+                'pelanggan_nama'=>'Berjaya Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG BUDI STIKER - MEDAN',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>20,
+                'pelanggan_nama'=>'Budi Stiker',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG DARWIS MOTOR',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>26,
+                'pelanggan_nama'=>'Darwis Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG GLOBAL STIKER',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>33,
+                'pelanggan_nama'=>'Global Stiker',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG HOKKY MOTOR - MANADO',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>37,
+                'pelanggan_nama'=>'Hokky Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG IPM',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>42,
+                'pelanggan_nama'=>'Indo Putra Mandiri',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG JAYA MOTOR - MANADO',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>45,
+                'pelanggan_nama'=>'Jaya Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG KMS Motor',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>55,
+                'pelanggan_nama'=>'KMS Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG MILLENIUM MOTOR - PALEMBANG',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>58,
+                'pelanggan_nama'=>'Millenium Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG NAGATA - SINTANG',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>64,
+                'pelanggan_nama'=>'Nagata Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG NGK MOTOR - JAMBI',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>65,
+                'pelanggan_nama'=>'NGK Motor',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG WA - MAKASSAR',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>100,
+                'pelanggan_nama'=>'WA',
+            ],
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG WK MOTOR - SEI PINYUH',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>101,
+                'pelanggan_nama'=>'WK Motor',
+            ],
+            // END - PIUTANG
+        ];
+
+        $list_of_transaction_names_bri_dmd = [
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG JHON MOTOR - MAKASSAR',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>48,
+                'pelanggan_nama'=>'Jhon Motor',
+            ],[
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'desc'=>'PIUTANG ZONA MOTOR',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'PENERIMAAN PIUTANG',
+                'pelanggan_id'=>104,
+                'pelanggan_nama'=>'Zona Motor',
+            ],
         ];
     }
     // END - FUNGSI - ACCOUNTING
