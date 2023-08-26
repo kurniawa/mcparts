@@ -166,6 +166,12 @@
             <button class="bg-violet-400 text-white font-semibold rounded px-3 py-2">create_tables_for_accounting</button>
         </form>
     </div>
+    <div class="ml-2 mt-1">
+        <form action="{{ route('artisan.create_table_for_transaction_names') }}" method="post">
+            @csrf
+            <button class="bg-violet-400 text-white font-semibold rounded px-3 py-2">create_table_for_transaction_names</button>
+        </form>
+    </div>
     {{-- END - ACCOUNTING --}}
     <div class="h-16"></div>
   </main>
