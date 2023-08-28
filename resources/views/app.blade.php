@@ -445,7 +445,7 @@
     $('#nama_pelanggan').autocomplete({
         source: label_pelanggans,
         select: function (event, ui) {
-            console.log(ui.item);
+            // console.log(ui.item);
             document.getElementById('pelanggan_id').value = ui.item.id;
             document.getElementById('nama_pelanggan').value = ui.item.value;
         }

@@ -782,8 +782,6 @@ class ArtisanController extends Controller
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('username', 50);
-            $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('related_username', 50)->nullable();
             $table->foreignId('user_instance_id')->nullable()->constrained()->onDelete('set null');
             $table->string('instance_type', 50);
             $table->string('instance_name', 50);
@@ -792,16 +790,22 @@ class ArtisanController extends Controller
             $table->string('kode', 20)->nullable();
             $table->string('transaction_type', 50); // pemasukan, pengeluaran
             $table->string('transaction_desc');
-            $table->string('related_desc')->nullable();
             $table->string('kategori_type',50)->nullable();
             $table->string('kategori_level_one',100)->nullable();
             $table->string('kategori_level_two',100)->nullable();
+            $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('related_username', 50)->nullable();
+            $table->string('related_desc')->nullable();
+            $table->foreignId('related_user_instance_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('related_user_instance_type', 50)->nullable();
+            $table->string('related_user_instance_name', 50)->nullable();
+            $table->string('related_user_instance_branch', 50)->nullable();
             $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
             $table->string('pelanggan_nama')->nullable();
             $table->string('keterangan')->nullable(); // keterangan tambahan akan ditulis dalam tanda kurung
             $table->bigInteger('jumlah');
             $table->bigInteger('saldo');
-            $table->string('status', 20); // read or not read yet by other user
+            $table->string('status', 20)->nullable(); // read or not read yet by other user
             $table->timestamps();
         });
 
@@ -857,8 +861,10 @@ class ArtisanController extends Controller
 
         foreach ($kategoris as $kategori_types) {
             foreach ($kategori_types['kategori_level_one'] as $kategori_level_one) {
-                if (isset($kategori_types['kategori_level_two'])) {
-                    foreach ($kategori_types['kategori_level_two'] as $kategori_level_two) {
+                // dump($kategori_types);
+                if (isset($kategori_level_one['kategori_level_two'])) {
+                    // dump($kategori_types['kategori_level_two']);
+                    foreach ($kategori_level_one['kategori_level_two'] as $kategori_level_two) {
                         try {
                             Kategori::create([
                                 'type'=>$kategori_types['type'],
@@ -866,6 +872,7 @@ class ArtisanController extends Controller
                                 'kategori_level_two' => $kategori_level_two['name']
                             ]);
                         } catch (\Throwable $th) {
+                            dump('error');
                             dump($kategori_types);
                             dump($kategori_level_one['kategori_level_two']);
                             dd($kategori_level_two);
@@ -900,6 +907,46 @@ class ArtisanController extends Controller
                 'related_user_instance_type'=>$transaction_name_albert['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_albert['related_user_instance_name'],
                 'related_user_instance_branch'=>$transaction_name_albert['related_user_instance_branch'],
+            ]);
+        }
+
+        foreach ($list_of_transaction_names_bca_dmd as $transaction_name_bca_dmd) {
+            TransactionName::create([
+                'user_id'=>$transaction_name_bca_dmd['user_id'],
+                'username'=>$transaction_name_bca_dmd['username'],
+                'related_user_id'=>$transaction_name_bca_dmd['related_user_id'],
+                'related_username'=>$transaction_name_bca_dmd['related_username'],
+                'desc'=>$transaction_name_bca_dmd['desc'],
+                'kategori_type'=>$transaction_name_bca_dmd['kategori_type'],
+                'kategori_level_one'=>$transaction_name_bca_dmd['kategori_level_one'],
+                'kategori_level_two'=>$transaction_name_bca_dmd['kategori_level_two'],
+                'related_desc'=>$transaction_name_bca_dmd['related_desc'],
+                'pelanggan_id'=>$transaction_name_bca_dmd['pelanggan_id'],
+                'pelanggan_nama'=>$transaction_name_bca_dmd['pelanggan_nama'],
+                'related_user_instance_id'=>$transaction_name_bca_dmd['related_user_instance_id'],
+                'related_user_instance_type'=>$transaction_name_bca_dmd['related_user_instance_type'],
+                'related_user_instance_name'=>$transaction_name_bca_dmd['related_user_instance_name'],
+                'related_user_instance_branch'=>$transaction_name_bca_dmd['related_user_instance_branch'],
+            ]);
+        }
+
+        foreach ($list_of_transaction_names_bri_dmd as $transaction_name_bri_dmd) {
+            TransactionName::create([
+                'user_id'=>$transaction_name_bri_dmd['user_id'],
+                'username'=>$transaction_name_bri_dmd['username'],
+                'related_user_id'=>$transaction_name_bri_dmd['related_user_id'],
+                'related_username'=>$transaction_name_bri_dmd['related_username'],
+                'desc'=>$transaction_name_bri_dmd['desc'],
+                'kategori_type'=>$transaction_name_bri_dmd['kategori_type'],
+                'kategori_level_one'=>$transaction_name_bri_dmd['kategori_level_one'],
+                'kategori_level_two'=>$transaction_name_bri_dmd['kategori_level_two'],
+                'related_desc'=>$transaction_name_bri_dmd['related_desc'],
+                'pelanggan_id'=>$transaction_name_bri_dmd['pelanggan_id'],
+                'pelanggan_nama'=>$transaction_name_bri_dmd['pelanggan_nama'],
+                'related_user_instance_id'=>$transaction_name_bri_dmd['related_user_instance_id'],
+                'related_user_instance_type'=>$transaction_name_bri_dmd['related_user_instance_type'],
+                'related_user_instance_name'=>$transaction_name_bri_dmd['related_user_instance_name'],
+                'related_user_instance_branch'=>$transaction_name_bri_dmd['related_user_instance_branch'],
             ]);
         }
 

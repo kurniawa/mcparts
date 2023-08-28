@@ -54,45 +54,45 @@ class Kategori extends Model
                         ['name'=>'AMBIL TITIPAN TRF'],
                         ['name'=>'PAJAK BUNGA TABUNGAN'],
                         ['name'=>'BIAYA TENAGA KERJA LANGSUNG', 'kategori_level_two'=>
-                            ['name'=>'GAJI DAN UPAH'],
+                            [['name'=>'GAJI DAN UPAH'],
                             ['name'=>'LEMBUR'],
                             ['name'=>'TUNJANGAN KARYAWAN'],
-                            ['name'=>'KOMISI PENJUALAN'],
+                            ['name'=>'KOMISI PENJUALAN'],]
                         ],
                         ['name'=>'BIAYA BAHAN PENDUKUNG', 'kategori_level_two'=>
-                            ['name'=>'PERLENGKAPAN SABLON'],
+                            [['name'=>'PERLENGKAPAN SABLON'],
                             ['name'=>'PERLENGKAPAN JAHIT'],
                             ['name'=>'POLIMAS'],
                             ['name'=>'PACKING'],
-                            ['name'=>'JASA BORDIR'],
+                            ['name'=>'JASA BORDIR'],]
                         ],
                         ['name'=>'BIAYA PENGIRIMAN BARANG', 'kategori_level_two'=>
-                            ['name'=>'OPERASIONAL PENGIRIMAN'],
+                            [['name'=>'OPERASIONAL PENGIRIMAN'],]
                         ],
                         ['name'=>'BIAYA UTILITAS', 'kategori_level_two'=>
-                            ['name'=>'LISTRIK'],
+                            [['name'=>'LISTRIK'],
                             ['name'=>'TELEPON'],
-                            ['name'=>'INTERNET'],
+                            ['name'=>'INTERNET'],]
                         ],
                         ['name'=>'PAJAK', 'kategori_level_two'=>
-                            ['name'=>'PPH PASAL 21'],
-                            ['name'=>'PPH PASAL 25 DAN 29'],
+                            [['name'=>'PPH PASAL 21'],
+                            ['name'=>'PPH PASAL 25 DAN 29'],]
                         ],
                         ['name'=>'BIAYA INVENTARIS (PERALATAN DAN PERLENGKAPAN)', 'kategori_level_two'=>
-                            ['name'=>'ATK'],
+                            [['name'=>'ATK'],
                             ['name'=>'PERALATAN DAN PERLENGKAPAN PRODUKSI'],
-                            ['name'=>'CICILAN MOBIL TRAGA'],
+                            ['name'=>'CICILAN MOBIL TRAGA'],]
                         ],
                         ['name'=>'BIAYA MAINTENANCE', 'kategori_level_two'=>
-                            ['name'=>'PERAWATAN KENDARAAN'],
+                            [['name'=>'PERAWATAN KENDARAAN'],
                             ['name'=>'PERAWATAN MESIN'],
-                            ['name'=>'PERAWATAN INVENTARIS'],
+                            ['name'=>'PERAWATAN INVENTARIS'],]
                         ],
                         ['name'=>'BIAYA LAIN-LAIN', 'kategori_level_two'=>
-                            ['name'=>'ADMINISTRASI BANK'],
+                            [['name'=>'ADMINISTRASI BANK'],
                             ['name'=>'ENTERTAIN PELANGGAN'],
                             ['name'=>'KUNJUNGAN KE DAERAH'],
-                            ['name'=>'LAIN-LAIN'],
+                            ['name'=>'LAIN-LAIN'],]
                         ],
                     ],
             ],

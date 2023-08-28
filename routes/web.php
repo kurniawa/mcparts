@@ -183,7 +183,8 @@ Route::controller(AccountingController::class)->group(function(){
     Route::get('/accounting','index')->name('accounting.index');
     Route::post('/accounting/create_kas','create_kas')->name('accounting.create_kas');
     Route::get('/accounting/{user_instance}/show_transactions','show_transactions')->name('accounting.show_transactions');
-    Route::post('/accounting/store_transactions','store_transactions')->name('accounting.store_transactions');
+    Route::post('/accounting/{user_instance}/store_transactions','store_transactions')->name('accounting.store_transactions');
+    Route::get('/accounting/transactions_relations','transactions_relations')->name('accounting.transactions_relations');
 });
 
 Route::controller(ArtisanController::class)->group(function(){

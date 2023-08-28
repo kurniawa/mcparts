@@ -8,7 +8,6 @@
 <main>
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
-    {{-- SEARCH / FILTER --}}
     <div class="relative rounded mt-9">
         <div class="flex absolute -top-6 left-1/2 -translate-x-1/2 z-20">
             @foreach ($pembelian_menus as $key_pembelian_menu => $pembelian_menu)
@@ -34,6 +33,7 @@
                     <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_pembelian" onclick="toggle_light(this.id, 'form_new_pembelian', [], ['bg-emerald-200'], 'block')">+ Pembelian</button>
                     <button type="submit" class="border rounded border-indigo-300 text-indigo-500 font-semibold px-3 py-1 ml-1" id="btn_new_barang" onclick="toggle_light(this.id, 'form_new_barang', [], ['bg-indigo-200'], 'block')">+ Barang</button>
                 </div>
+                {{-- SEARCH / FILTER --}}
                 <div class="hidden" id="filter-content">
                     <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1">
                         <form action="" method="GET">
@@ -116,8 +116,8 @@
                         </form>
                     </div>
                 </div>
+                {{-- END - SEARCH / FILTER --}}
             </div>
-            {{-- END - SEARCH / FILTER --}}
             {{-- FORM_NEW_PEMBELIAN --}}
             <div id="form_new_pembelian" class="hidden">
                 <div class="flex justify-center">

@@ -61,4 +61,11 @@ class Menu extends Model
 
         return $menus;
     }
+
+    public static function get_accounting_menus() {
+        return [
+            ['name'=>'Instansi','route'=>'accounting.index'],
+            ['name'=>'Relasi Transaksi','route'=>'accounting.transactions_relations'],
+        ];
+    }
 }
