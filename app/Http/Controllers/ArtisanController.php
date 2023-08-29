@@ -763,6 +763,8 @@ class ArtisanController extends Controller
 
     // FUNGSI - ACCOUNTING
     function create_tables_for_accounting() {
+        Schema::dropIfExists('kategoris');
+        Schema::dropIfExists('transaction_names');
         Schema::dropIfExists('accountings');
         Schema::dropIfExists('user_instances');
 
@@ -796,7 +798,7 @@ class ArtisanController extends Controller
             $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('related_username', 50)->nullable();
             $table->string('related_desc')->nullable();
-            $table->foreignId('related_user_instance_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('related_user_instance_id')->nullable()->constrained('user_instances')->onDelete('set null');
             $table->string('related_user_instance_type', 50)->nullable();
             $table->string('related_user_instance_name', 50)->nullable();
             $table->string('related_user_instance_branch', 50)->nullable();

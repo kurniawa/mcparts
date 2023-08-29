@@ -51,7 +51,7 @@ class Kategori extends Model
                         ['name'=>'CASHBON KARYAWAN'],
                         ['name'=>'REFUND - KELEBIHAN PEMBAYARAN'],
                         ['name'=>'TITIP SIMPAN GAJI KARYAWAN'],
-                        ['name'=>'AMBIL TITIPAN TRF'],
+                        ['name'=>'TITIP TRF KELUAR'],
                         ['name'=>'PAJAK BUNGA TABUNGAN'],
                         ['name'=>'BIAYA TENAGA KERJA LANGSUNG', 'kategori_level_two'=>
                             [['name'=>'GAJI DAN UPAH'],
