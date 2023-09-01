@@ -99,3 +99,7 @@ class Kategori extends Model
         ];
     }
 }
+// Cangcimen AQUATIC & TERRESTRIAL INDONESIA
+// CangciMen AQUATIC & TERRESTRIAL INDONESIA
+// CangciMEN AQUATIC & TERRESTRIAL INDONESIA
+// CibinongGuy AQUATIC & TERRESTRIAL INDONESIA
