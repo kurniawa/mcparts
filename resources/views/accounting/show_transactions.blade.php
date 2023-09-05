@@ -27,7 +27,7 @@
 
         {{-- TRANSACTIONS --}}
         <div class="mt-2">
-            <table class="text-xs w-full">
+            <table class="text-xs table-border w-full">
                 <tr>
                     <th></th><th></th><th></th>
                     <th>
@@ -48,7 +48,7 @@
                         <div class="flex justify-between bg-emerald-300">
                             <span>Rp</span>
                             @if (count($accountings) !== 0)
-                            <span>{{ number_format($accountings[count($accountings) - 1],0,',','.') }}</span>
+                            <span>{{ number_format($accountings[count($accountings) - 1]->saldo,0,',','.') }}</span>
                             @else
                             <span>0</span>
                             @endif
@@ -57,22 +57,46 @@
                     </th>
                 </tr>
                 <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>SALDO</th></tr>
+
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>SALDO AWAL</td>
+                    <td></td><td></td>
+                    <td>
+                        <div class="flex justify-between">
+                            <span>Rp.</span>
+                            <span>{{ number_format($saldo_awal,0,',','.') }} ,-</span>
+                        </div>
+                    </td>
+                </tr>
                 @foreach ($accountings as $accounting)
                 <tr>
                     <td>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
                     <td>{{ $accounting->kode }}</td>
-                    <td>{{ $accounting->transaction_name }}</td>
+                    <td>{{ $accounting->transaction_desc }}</td>
                     <td>
                         @if ($accounting->transaction_type === 'pengeluaran')
-                        {{ number_format($accounting->jumlah,0,',','.') }}
+                        <div class="flex justify-between">
+                            <span>Rp</span>
+                            <span>{{ number_format($accounting->jumlah,0,',','.') }} ,-</span>
+                        </div>
                         @endif
                     </td>
                     <td>
                         @if ($accounting->transaction_type === 'pemasukan')
-                        {{ number_format($accounting->jumlah,0,',','.') }}
+                        <div class="flex justify-between">
+                            <span>Rp</span>
+                            <span>{{ number_format($accounting->jumlah,0,',','.') }} ,-</span>
+                        </div>
                         @endif
                     </td>
-                    <td>{{ number_format($accounting->saldo,0,',','.') }}</td>
+                    <td>
+                        <div class="flex justify-between">
+                            <span>Rp</span>
+                            <span>{{ number_format($accounting->saldo,0,',','.') }} ,-</span>
+                        </div>
+                    </td>
                 </tr>
                 @endforeach
             </table>
@@ -80,23 +104,30 @@
         {{-- END - TRANSACTIONS --}}
 
         {{-- STORE NEW TRANSACTIONS --}}
+        @if ($user_instance->user_id === $user->id)
         <div class="border rounded p-1 mt-3">
             <h2 class="font-bold">Tambah Transaksi :</h2>
             <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
                 @csrf
                 <table class="text-xs min-w-max" id="table_add_transactions">
-                    <tr class="text-slate-600"><th>tanggal</th><th>kode</th><th>deskripsi/keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th><th>saldo</th></tr>
+                    <tr class="text-slate-600">
+                        <th>tanggal</th><th>kode</th><th>deskripsi/keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th>
+                        {{-- <th>saldo</th> --}}
+                    </tr>
                     @for ($i = 0; $i < 7; $i++)
                     <tr>
-                        <td><input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs mt-2 w-28"></td>
+                        <td><input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs mt-2 w-28" placeholder="dd-mm-yyyy"></td>
                         <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs mt-2 w-16"></td>
                         <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs mt-2 w-60"></td>
                         <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs mt-2 w-full"></td>
                         <td><input type="text" name="keluar[]" id="keluar-{{ $i }}" class="border p-1 text-xs mt-2 w-36"></td>
-                        <td><input type="text" name="masuk[]" id="masuk-{{ $i }}" class="border p-1 text-xs mt-2 w-36"></td>
                         <td>
-                            <input type="text" name="saldo[]" id="saldo-{{ $i }}" class="border p-1 text-xs mt-2 w-36">
-                            <input type="hidden" name="kategori_type[]" id="new_transaction-kategori_type-{{ $i }}">
+                            <input type="text" name="masuk[]" id="masuk-{{ $i }}" class="border p-1 text-xs mt-2 w-36">
+                            <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}">
+                        </td>
+                        <td>
+                            {{-- <input type="text" name="saldo[]" id="saldo-{{ $i }}" class="border p-1 text-xs mt-2 w-36"> --}}
+                            {{-- <input type="hidden" name="kategori_type[]" id="new_transaction-kategori_type-{{ $i }}">
                             <input type="hidden" name="kategori_level_one[]" id="new_transaction-kategori_level_one-{{ $i }}">
                             <input type="hidden" name="kategori_level_two[]" id="new_transaction-kategori_level_two-{{ $i }}">
                             <input type="hidden" name="related_user_id[]" id="new_transaction-related_user_id-{{ $i }}">
@@ -106,7 +137,7 @@
                             <input type="hidden" name="related_user_instance_type[]" id="new_transaction-related_user_instance_type-{{ $i }}">
                             <input type="hidden" name="related_user_instance_id[]" id="new_transaction-related_user_instance_id-{{ $i }}">
                             <input type="hidden" name="related_user_instance_name[]" id="new_transaction-related_user_instance_name-{{ $i }}">
-                            <input type="hidden" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-{{ $i }}">
+                            <input type="hidden" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-{{ $i }}"> --}}
                         </td>
                         {{-- <td>
                             <div>
@@ -171,10 +202,19 @@
                 </div>
             </form>
         </div>
+        @endif
         {{-- END - STORE NEW TRANSACTIONS --}}
 
     </div>
 </main>
+
+<style>
+    .table-border td {
+        border: 1px solid grey;
+        border-collapse: collapse;
+        padding: 5px;
+    }
+</style>
 
 <script>
     const related_users = {!! json_encode($related_users, JSON_HEX_TAG) !!};
@@ -194,26 +234,12 @@
         parent.insertAdjacentHTML('beforeend',
         `
         <tr>
-            <td><input type="text" name="created_at[]" id="created_at-${transaction_index}" class="border p-1 text-xs mt-2 w-28"></td>
+            <td><input type="text" name="created_at[]" id="created_at-${transaction_index}" class="border p-1 text-xs mt-2 w-28" placeholder="dd-mm-yyyy"></td>
             <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs mt-2 w-16"></td>
             <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs mt-2 w-60"></td>
             <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs mt-2 w-full"></td>
             <td><input type="text" name="keluar[]" id="keluar-${transaction_index}" class="border p-1 text-xs mt-2 w-36"></td>
             <td><input type="text" name="masuk[]" id="masuk-${transaction_index}" class="border p-1 text-xs mt-2 w-36"></td>
-            <td>
-                <input type="text" name="saldo[]" id="saldo-${transaction_index}" class="border p-1 text-xs mt-2 w-36">
-                <input type="hidden" name="kategori_type[]" id="new_transaction-kategori_type-${transaction_index}">
-                <input type="hidden" name="kategori_level_one[]" id="new_transaction-kategori_level_one-${transaction_index}">
-                <input type="hidden" name="kategori_level_two[]" id="new_transaction-kategori_level_two-${transaction_index}">
-                <input type="hidden" name="related_user_id[]" id="new_transaction-related_user_id-${transaction_index}">
-                <input type="hidden" name="pelanggan_nama[]" id="new_transaction-pelanggan_nama-${transaction_index}">
-                <input type="hidden" name="pelanggan_id[]" id="new_transaction-pelanggan_id-${transaction_index}">
-                <input type="hidden" name="related_desc[]" id="new_transaction-related_desc-${transaction_index}">
-                <input type="hidden" name="related_user_instance_type[]" id="new_transaction-related_user_instance_type-${transaction_index}">
-                <input type="hidden" name="related_user_instance_id[]" id="new_transaction-related_user_instance_id-${transaction_index}">
-                <input type="hidden" name="related_user_instance_name[]" id="new_transaction-related_user_instance_name-${transaction_index}">
-                <input type="hidden" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-${transaction_index}">
-            </td>
         </tr>
         `);
         setTimeout(() => {
@@ -234,32 +260,33 @@
                 // console.log(ui.item);
                 // document.getElementById(`transaction_desc-${index}`).value = ui.item.id;
                 document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
-                autofill_transaction(index, ui.item.value);
+                document.getElementById(`transaction_id-${index}`).value = ui.item.id;
+                // autofill_transaction(index, ui.item.value);
             }
         });
     }
 
-    const transaction_names = {!! json_encode($transaction_names, JSON_HEX_TAG) !!};
+    // const transaction_names = {-!! json_encode($transaction_names, JSON_HEX_TAG) !!};
 
-    function autofill_transaction(index, desc) {
-        // console.log(index, desc);
-        let res = transaction_names.find(o => o.desc === desc);
-        console.log(res);
-        let related_user_instance_id = document.getElementById(`new_transaction-related_user_instance_id-${index}`);
-        document.getElementById(`new_transaction-kategori_type-${index}`).value = res.kategori_type;
-        document.getElementById(`new_transaction-kategori_level_one-${index}`).value = res.kategori_level_one;
-        document.getElementById(`new_transaction-kategori_level_two-${index}`).value = res.kategori_level_two;
-        document.getElementById(`new_transaction-related_desc-${index}`).value = res.related_desc;
-        document.getElementById(`new_transaction-related_user_id-${index}`).value = res.related_user_id;
-        document.getElementById(`new_transaction-pelanggan_id-${index}`).value = res.pelanggan_id;
-        document.getElementById(`new_transaction-pelanggan_nama-${index}`).value = res.pelanggan_nama;
-        related_user_instance_id.value = res.related_user_instance_id;
-        document.getElementById(`new_transaction-related_user_instance_type-${index}`).value = res.related_user_instance_type;
-        document.getElementById(`new_transaction-related_user_instance_name-${index}`).value = res.related_user_instance_name;
-        document.getElementById(`new_transaction-related_user_instance_branch-${index}`).value = res.related_user_instance_branch;
-        // console.log(related_user_instance_id)
-        // console.log(related_user_instance_id.value)
-    }
+    // function autofill_transaction(index, desc) {
+    //     // console.log(index, desc);
+    //     let res = transaction_names.find(o => o.desc === desc);
+    //     console.log(res);
+    //     let related_user_instance_id = document.getElementById(`new_transaction-related_user_instance_id-${index}`);
+    //     document.getElementById(`new_transaction-kategori_type-${index}`).value = res.kategori_type;
+    //     document.getElementById(`new_transaction-kategori_level_one-${index}`).value = res.kategori_level_one;
+    //     document.getElementById(`new_transaction-kategori_level_two-${index}`).value = res.kategori_level_two;
+    //     document.getElementById(`new_transaction-related_desc-${index}`).value = res.related_desc;
+    //     document.getElementById(`new_transaction-related_user_id-${index}`).value = res.related_user_id;
+    //     document.getElementById(`new_transaction-pelanggan_id-${index}`).value = res.pelanggan_id;
+    //     document.getElementById(`new_transaction-pelanggan_nama-${index}`).value = res.pelanggan_nama;
+    //     related_user_instance_id.value = res.related_user_instance_id;
+    //     document.getElementById(`new_transaction-related_user_instance_type-${index}`).value = res.related_user_instance_type;
+    //     document.getElementById(`new_transaction-related_user_instance_name-${index}`).value = res.related_user_instance_name;
+    //     document.getElementById(`new_transaction-related_user_instance_branch-${index}`).value = res.related_user_instance_branch;
+    //     // console.log(related_user_instance_id)
+    //     // console.log(related_user_instance_id.value)
+    // }
 
     function table_to_excel(table_id) {
         $(`#${table_id}`).table2excel({

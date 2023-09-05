@@ -837,15 +837,19 @@ class ArtisanController extends Controller
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('username', 50);
-            $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('related_username', 50)->nullable();
+            $table->foreignId('user_instance_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('user_instance_type', 50);
+            $table->string('user_instance_name', 50);
+            $table->string('user_instance_branch', 50);
             $table->string('desc');
             $table->string('kategori_type',50)->nullable();
             $table->string('kategori_level_one',100)->nullable();
             $table->string('kategori_level_two',100)->nullable();
-            $table->string('related_desc')->nullable();
             $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
             $table->string('pelanggan_nama')->nullable();
+            $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('related_username', 50)->nullable();
+            $table->string('related_desc')->nullable();
             $table->foreignId('related_user_instance_id')->nullable()->constrained('user_instances')->onDelete('set null');
             $table->string('related_user_instance_type', 50)->nullable();
             $table->string('related_user_instance_name', 50)->nullable();
@@ -890,32 +894,130 @@ class ArtisanController extends Controller
             }
         }
 
-        list($list_of_transaction_names_albert, $list_of_transaction_names_bca_dmd, $list_of_transaction_names_bri_dmd) = TransactionName::list_of_transaction_names();
+        list(
+            $list_of_transaction_names_kas_ktr_1_albert,
+            $list_of_transaction_names_kas_ktr_akhun,
+            $list_of_transaction_names_kas_ktr_dian,
+            $list_of_transaction_names_bca_mcp,
+            $list_of_transaction_names_bca_dmd,
+            $list_of_transaction_names_bri_dmd,
+            $list_of_transaction_names_danamon_mcp,
+            $list_of_transaction_names_kas_bg,
+        ) = TransactionName::list_of_transaction_names();
 
-        foreach ($list_of_transaction_names_albert as $transaction_name_albert) {
+        foreach ($list_of_transaction_names_kas_ktr_1_albert as $transaction_name_albert) {
+            try {
+                TransactionName::create([
+                    'user_id'=>$transaction_name_albert['user_id'],
+                    'username'=>$transaction_name_albert['username'],
+                    'user_instance_id'=>$transaction_name_albert['user_instance_id'],
+                    'user_instance_type'=>$transaction_name_albert['user_instance_type'],
+                    'user_instance_name'=>$transaction_name_albert['user_instance_name'],
+                    'user_instance_branch'=>$transaction_name_albert['user_instance_branch'],
+                    'related_user_id'=>$transaction_name_albert['related_user_id'],
+                    'related_username'=>$transaction_name_albert['related_username'],
+                    'desc'=>$transaction_name_albert['desc'],
+                    'kategori_type'=>$transaction_name_albert['kategori_type'],
+                    'kategori_level_one'=>$transaction_name_albert['kategori_level_one'],
+                    'kategori_level_two'=>$transaction_name_albert['kategori_level_two'],
+                    'related_desc'=>$transaction_name_albert['related_desc'],
+                    'pelanggan_id'=>$transaction_name_albert['pelanggan_id'],
+                    'pelanggan_nama'=>$transaction_name_albert['pelanggan_nama'],
+                    'related_user_instance_id'=>$transaction_name_albert['related_user_instance_id'],
+                    'related_user_instance_type'=>$transaction_name_albert['related_user_instance_type'],
+                    'related_user_instance_name'=>$transaction_name_albert['related_user_instance_name'],
+                    'related_user_instance_branch'=>$transaction_name_albert['related_user_instance_branch'],
+                ]);
+            } catch (\Throwable $th) {
+                dump($th);
+                dd($transaction_name_albert);
+            }
+        }
+
+        foreach ($list_of_transaction_names_kas_ktr_akhun as $transaction_name_akhun) {
             TransactionName::create([
-                'user_id'=>$transaction_name_albert['user_id'],
-                'username'=>$transaction_name_albert['username'],
-                'related_user_id'=>$transaction_name_albert['related_user_id'],
-                'related_username'=>$transaction_name_albert['related_username'],
-                'desc'=>$transaction_name_albert['desc'],
-                'kategori_type'=>$transaction_name_albert['kategori_type'],
-                'kategori_level_one'=>$transaction_name_albert['kategori_level_one'],
-                'kategori_level_two'=>$transaction_name_albert['kategori_level_two'],
-                'related_desc'=>$transaction_name_albert['related_desc'],
-                'pelanggan_id'=>$transaction_name_albert['pelanggan_id'],
-                'pelanggan_nama'=>$transaction_name_albert['pelanggan_nama'],
-                'related_user_instance_id'=>$transaction_name_albert['related_user_instance_id'],
-                'related_user_instance_type'=>$transaction_name_albert['related_user_instance_type'],
-                'related_user_instance_name'=>$transaction_name_albert['related_user_instance_name'],
-                'related_user_instance_branch'=>$transaction_name_albert['related_user_instance_branch'],
+                'user_id'=>$transaction_name_akhun['user_id'],
+                'username'=>$transaction_name_akhun['username'],
+                'user_instance_id'=>$transaction_name_akhun['user_instance_id'],
+                'user_instance_type'=>$transaction_name_akhun['user_instance_type'],
+                'user_instance_name'=>$transaction_name_akhun['user_instance_name'],
+                'user_instance_branch'=>$transaction_name_akhun['user_instance_branch'],
+                'related_user_id'=>$transaction_name_akhun['related_user_id'],
+                'related_username'=>$transaction_name_akhun['related_username'],
+                'desc'=>$transaction_name_akhun['desc'],
+                'kategori_type'=>$transaction_name_akhun['kategori_type'],
+                'kategori_level_one'=>$transaction_name_akhun['kategori_level_one'],
+                'kategori_level_two'=>$transaction_name_akhun['kategori_level_two'],
+                'related_desc'=>$transaction_name_akhun['related_desc'],
+                'pelanggan_id'=>$transaction_name_akhun['pelanggan_id'],
+                'pelanggan_nama'=>$transaction_name_akhun['pelanggan_nama'],
+                'related_user_instance_id'=>$transaction_name_akhun['related_user_instance_id'],
+                'related_user_instance_type'=>$transaction_name_akhun['related_user_instance_type'],
+                'related_user_instance_name'=>$transaction_name_akhun['related_user_instance_name'],
+                'related_user_instance_branch'=>$transaction_name_akhun['related_user_instance_branch'],
             ]);
+        }
+
+        foreach ($list_of_transaction_names_kas_ktr_dian as $transaction_name_dian) {
+            TransactionName::create([
+                'user_id'=>$transaction_name_dian['user_id'],
+                'username'=>$transaction_name_dian['username'],
+                'user_instance_id'=>$transaction_name_dian['user_instance_id'],
+                'user_instance_type'=>$transaction_name_dian['user_instance_type'],
+                'user_instance_name'=>$transaction_name_dian['user_instance_name'],
+                'user_instance_branch'=>$transaction_name_dian['user_instance_branch'],
+                'related_user_id'=>$transaction_name_dian['related_user_id'],
+                'related_username'=>$transaction_name_dian['related_username'],
+                'desc'=>$transaction_name_dian['desc'],
+                'kategori_type'=>$transaction_name_dian['kategori_type'],
+                'kategori_level_one'=>$transaction_name_dian['kategori_level_one'],
+                'kategori_level_two'=>$transaction_name_dian['kategori_level_two'],
+                'related_desc'=>$transaction_name_dian['related_desc'],
+                'pelanggan_id'=>$transaction_name_dian['pelanggan_id'],
+                'pelanggan_nama'=>$transaction_name_dian['pelanggan_nama'],
+                'related_user_instance_id'=>$transaction_name_dian['related_user_instance_id'],
+                'related_user_instance_type'=>$transaction_name_dian['related_user_instance_type'],
+                'related_user_instance_name'=>$transaction_name_dian['related_user_instance_name'],
+                'related_user_instance_branch'=>$transaction_name_dian['related_user_instance_branch'],
+            ]);
+        }
+
+        foreach ($list_of_transaction_names_bca_mcp as $transaction_name_bca_mcp) {
+            try {
+                TransactionName::create([
+                    'user_id'=>$transaction_name_bca_mcp['user_id'],
+                    'username'=>$transaction_name_bca_mcp['username'],
+                    'user_instance_id'=>$transaction_name_bca_mcp['user_instance_id'],
+                    'user_instance_type'=>$transaction_name_bca_mcp['user_instance_type'],
+                    'user_instance_name'=>$transaction_name_bca_mcp['user_instance_name'],
+                    'user_instance_branch'=>$transaction_name_bca_mcp['user_instance_branch'],
+                    'related_user_id'=>$transaction_name_bca_mcp['related_user_id'],
+                    'related_username'=>$transaction_name_bca_mcp['related_username'],
+                    'desc'=>$transaction_name_bca_mcp['desc'],
+                    'kategori_type'=>$transaction_name_bca_mcp['kategori_type'],
+                    'kategori_level_one'=>$transaction_name_bca_mcp['kategori_level_one'],
+                    'kategori_level_two'=>$transaction_name_bca_mcp['kategori_level_two'],
+                    'related_desc'=>$transaction_name_bca_mcp['related_desc'],
+                    'pelanggan_id'=>$transaction_name_bca_mcp['pelanggan_id'],
+                    'pelanggan_nama'=>$transaction_name_bca_mcp['pelanggan_nama'],
+                    'related_user_instance_id'=>$transaction_name_bca_mcp['related_user_instance_id'],
+                    'related_user_instance_type'=>$transaction_name_bca_mcp['related_user_instance_type'],
+                    'related_user_instance_name'=>$transaction_name_bca_mcp['related_user_instance_name'],
+                    'related_user_instance_branch'=>$transaction_name_bca_mcp['related_user_instance_branch'],
+                ]);
+            } catch (\Throwable $th) {
+                dd($transaction_name_bca_mcp);
+            }
         }
 
         foreach ($list_of_transaction_names_bca_dmd as $transaction_name_bca_dmd) {
             TransactionName::create([
                 'user_id'=>$transaction_name_bca_dmd['user_id'],
                 'username'=>$transaction_name_bca_dmd['username'],
+                'user_instance_id'=>$transaction_name_bca_dmd['user_instance_id'],
+                'user_instance_type'=>$transaction_name_bca_dmd['user_instance_type'],
+                'user_instance_name'=>$transaction_name_bca_dmd['user_instance_name'],
+                'user_instance_branch'=>$transaction_name_bca_dmd['user_instance_branch'],
                 'related_user_id'=>$transaction_name_bca_dmd['related_user_id'],
                 'related_username'=>$transaction_name_bca_dmd['related_username'],
                 'desc'=>$transaction_name_bca_dmd['desc'],
@@ -936,6 +1038,10 @@ class ArtisanController extends Controller
             TransactionName::create([
                 'user_id'=>$transaction_name_bri_dmd['user_id'],
                 'username'=>$transaction_name_bri_dmd['username'],
+                'user_instance_id'=>$transaction_name_bri_dmd['user_instance_id'],
+                'user_instance_type'=>$transaction_name_bri_dmd['user_instance_type'],
+                'user_instance_name'=>$transaction_name_bri_dmd['user_instance_name'],
+                'user_instance_branch'=>$transaction_name_bri_dmd['user_instance_branch'],
                 'related_user_id'=>$transaction_name_bri_dmd['related_user_id'],
                 'related_username'=>$transaction_name_bri_dmd['related_username'],
                 'desc'=>$transaction_name_bri_dmd['desc'],
@@ -952,6 +1058,65 @@ class ArtisanController extends Controller
             ]);
         }
 
+        foreach ($list_of_transaction_names_danamon_mcp as $transaction_name_danamon_mcp) {
+            TransactionName::create([
+                'user_id'=>$transaction_name_danamon_mcp['user_id'],
+                'username'=>$transaction_name_danamon_mcp['username'],
+                'user_instance_id'=>$transaction_name_danamon_mcp['user_instance_id'],
+                'user_instance_type'=>$transaction_name_danamon_mcp['user_instance_type'],
+                'user_instance_name'=>$transaction_name_danamon_mcp['user_instance_name'],
+                'user_instance_branch'=>$transaction_name_danamon_mcp['user_instance_branch'],
+                'related_user_id'=>$transaction_name_danamon_mcp['related_user_id'],
+                'related_username'=>$transaction_name_danamon_mcp['related_username'],
+                'desc'=>$transaction_name_danamon_mcp['desc'],
+                'kategori_type'=>$transaction_name_danamon_mcp['kategori_type'],
+                'kategori_level_one'=>$transaction_name_danamon_mcp['kategori_level_one'],
+                'kategori_level_two'=>$transaction_name_danamon_mcp['kategori_level_two'],
+                'related_desc'=>$transaction_name_danamon_mcp['related_desc'],
+                'pelanggan_id'=>$transaction_name_danamon_mcp['pelanggan_id'],
+                'pelanggan_nama'=>$transaction_name_danamon_mcp['pelanggan_nama'],
+                'related_user_instance_id'=>$transaction_name_danamon_mcp['related_user_instance_id'],
+                'related_user_instance_type'=>$transaction_name_danamon_mcp['related_user_instance_type'],
+                'related_user_instance_name'=>$transaction_name_danamon_mcp['related_user_instance_name'],
+                'related_user_instance_branch'=>$transaction_name_danamon_mcp['related_user_instance_branch'],
+            ]);
+        }
+
+        foreach ($list_of_transaction_names_kas_bg as $transaction_name_kas_bg) {
+            TransactionName::create([
+                'user_id'=>$transaction_name_kas_bg['user_id'],
+                'username'=>$transaction_name_kas_bg['username'],
+                'user_instance_id'=>$transaction_name_kas_bg['user_instance_id'],
+                'user_instance_type'=>$transaction_name_kas_bg['user_instance_type'],
+                'user_instance_name'=>$transaction_name_kas_bg['user_instance_name'],
+                'user_instance_branch'=>$transaction_name_kas_bg['user_instance_branch'],
+                'related_user_id'=>$transaction_name_kas_bg['related_user_id'],
+                'related_username'=>$transaction_name_kas_bg['related_username'],
+                'desc'=>$transaction_name_kas_bg['desc'],
+                'kategori_type'=>$transaction_name_kas_bg['kategori_type'],
+                'kategori_level_one'=>$transaction_name_kas_bg['kategori_level_one'],
+                'kategori_level_two'=>$transaction_name_kas_bg['kategori_level_two'],
+                'related_desc'=>$transaction_name_kas_bg['related_desc'],
+                'pelanggan_id'=>$transaction_name_kas_bg['pelanggan_id'],
+                'pelanggan_nama'=>$transaction_name_kas_bg['pelanggan_nama'],
+                'related_user_instance_id'=>$transaction_name_kas_bg['related_user_instance_id'],
+                'related_user_instance_type'=>$transaction_name_kas_bg['related_user_instance_type'],
+                'related_user_instance_name'=>$transaction_name_kas_bg['related_user_instance_name'],
+                'related_user_instance_branch'=>$transaction_name_kas_bg['related_user_instance_branch'],
+            ]);
+        }
+
+        $jumlah_transaction_names =
+        count($list_of_transaction_names_kas_ktr_1_albert) +
+        count($list_of_transaction_names_kas_ktr_akhun) +
+        count($list_of_transaction_names_kas_ktr_dian) +
+        count($list_of_transaction_names_bca_mcp) +
+        count($list_of_transaction_names_bca_dmd) +
+        count($list_of_transaction_names_bri_dmd) +
+        count($list_of_transaction_names_danamon_mcp) +
+        count($list_of_transaction_names_kas_bg);
+
+        dump($jumlah_transaction_names);
         dump(TransactionName::all());
     }
     // END - FUNGSI - ACCOUNTING

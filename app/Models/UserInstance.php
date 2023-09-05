@@ -77,6 +77,14 @@ class UserInstance extends Model
                 'branch'=>'Dian',
                 'account_number'=>null,
                 'timerange'=>'triwulan',
+            ],[
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'instance_type'=>'bank',
+                'instance_name'=>'BG',
+                'branch'=>'BG',
+                'account_number'=>null,
+                'timerange'=>'triwulan',
             ],
         ];
     }
