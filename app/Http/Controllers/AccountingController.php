@@ -80,39 +80,64 @@ class AccountingController extends Controller
         return back()->with('success_', '-user_instance created-');
     }
 
-    function show_transactions(UserInstance $user_instance) {
+    function show_transactions(UserInstance $user_instance, Request $request) {
         // dd($user_instance);
+        $get = $request->query();
 
         $accountings = collect();
 
         $from = null;
         $until = null;
-        if ($user_instance->timerange === 'triwulan') {
-            $month = (int)date('m');
-            if ($month <= 3) {
-                $from = date('Y') . "-01" . "-01";
-                $t = date('t', strtotime(date('Y') . "-03-01"));
-                $until = date('Y') . "-03" . "-$t" . " 23:59:59";
-            } elseif ($month <= 6) {
-                $from = date('Y') . "-04" . "-01";
-                $t = date('t', strtotime(date('Y') . "-06-01"));
-                $until = date('Y') . "-06" . "-$t" . " 23:59:59";
-            } elseif ($month <= 9) {
-                $from = date('Y') . "-07" . "-01";
-                $t = date('t', strtotime(date('Y') . "-09-01"));
-                $until = date('Y') . "-09" . "-$t" . " 23:59:59";
-            } elseif ($month <= 12) {
-                $from = date('Y') . "-10" . "-01";
-                $t = date('t', strtotime(date('Y') . "-12-01"));
-                $until = date('Y') . "-12" . "-$t" . " 23:59:59";
+        if (count($get) === 0) {
+            if ($user_instance->timerange === 'triwulan') {
+                $month = (int)date('m');
+                if ($month <= 3) {
+                    $from = date('Y') . "-01" . "-01";
+                    $t = date('t', strtotime(date('Y') . "-03-01"));
+                    $until = date('Y') . "-03" . "-$t" . " 23:59:59";
+                } elseif ($month <= 6) {
+                    $from = date('Y') . "-04" . "-01";
+                    $t = date('t', strtotime(date('Y') . "-06-01"));
+                    $until = date('Y') . "-06" . "-$t" . " 23:59:59";
+                } elseif ($month <= 9) {
+                    $from = date('Y') . "-07" . "-01";
+                    $t = date('t', strtotime(date('Y') . "-09-01"));
+                    $until = date('Y') . "-09" . "-$t" . " 23:59:59";
+                } elseif ($month <= 12) {
+                    $from = date('Y') . "-10" . "-01";
+                    $t = date('t', strtotime(date('Y') . "-12-01"));
+                    $until = date('Y') . "-12" . "-$t" . " 23:59:59";
+                }
+            }
+            $accountings = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at',[$from, $until])->oldest()->get();
+        } else {
+            if ($get['desc'] === null) {
+                if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                } else {
+                    dd('date?', $get);
+                }
+                $accountings = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at',[$from, $until])->oldest()->get();
+            } else {
+                if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $accountings = Accounting::where('user_instance_id', $user_instance->id)->where('transaction_desc', 'like', "%$get[desc]%")->whereBetween('created_at',[$from, $until])->oldest()->get();
+                } else {
+                    $accountings = Accounting::where('user_instance_id', $user_instance->id)->where('transaction_desc', 'like', "%$get[desc]%")->oldest()->limit(500)->get();
+                }
             }
         }
-        $last_transaction = Accounting::where('created_at', '<', $from)->latest()->first();
+
+        $last_transaction = null;
+        if ($from) {
+            $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<', $from)->latest()->first();
+        }
         $saldo_awal = 0;
         if ($last_transaction !== null) {
             $saldo_awal = $last_transaction->saldo;
         }
-        $accountings = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at',[$from, $until])->orderBy('created_at')->get();
         // dump((int)date('m'));
         // dump($accountings);
         $keluar_total = 0;
@@ -134,6 +159,8 @@ class AccountingController extends Controller
         // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();
 
+        $notifications = Accounting::where('related_user_instance_id', $user_instance->id)->latest()->limit(100)->get();
+
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.show_transaction',
@@ -150,6 +177,8 @@ class AccountingController extends Controller
             'related_users' => $related_users,
             'label_deskripsi' => $label_deskripsi,
             'saldo_awal' => $saldo_awal,
+            'from' => $from,
+            'notifications' => $notifications,
             // 'label_kategori_level_one' => $label_kategori_level_one,
             // 'label_kategori_level_two' => $label_kategori_level_two,
             // 'transaction_names' => $transaction_names,
@@ -157,6 +186,7 @@ class AccountingController extends Controller
 
         // dd($label_kategori_level_two);
         // dump($label_deskripsi);
+        // dump($accountings);
 
         return view('accounting.show_transactions', $data);
     }

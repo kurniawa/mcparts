@@ -776,6 +776,7 @@ class ArtisanController extends Controller
             $table->string('instance_name', 50);
             $table->string('branch', 50)->nullable();
             $table->string('account_number', 50)->nullable();
+            $table->string('kode', 20)->nullable();
             $table->string('timerange', 50)->default('triwulan')->nullable(); // bulan, triwulan, caturwulan, semester
             $table->timestamps();
         });
@@ -821,6 +822,7 @@ class ArtisanController extends Controller
                 'instance_name'=>$user_instance['instance_name'],
                 'branch'=>$user_instance['branch'],
                 'account_number'=>$user_instance['account_number'],
+                'kode'=>$user_instance['kode'],
                 'timerange'=>$user_instance['timerange'],
             ]);
         }
