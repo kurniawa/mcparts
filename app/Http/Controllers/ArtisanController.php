@@ -805,6 +805,8 @@ class ArtisanController extends Controller
             $table->string('related_user_instance_branch', 50)->nullable();
             $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
             $table->string('pelanggan_nama')->nullable();
+            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('supplier_nama')->nullable();
             $table->string('keterangan')->nullable(); // keterangan tambahan akan ditulis dalam tanda kurung
             $table->bigInteger('jumlah');
             $table->bigInteger('saldo');
@@ -849,6 +851,8 @@ class ArtisanController extends Controller
             $table->string('kategori_level_two',100)->nullable();
             $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
             $table->string('pelanggan_nama')->nullable();
+            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('supplier_nama')->nullable();
             $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('related_username', 50)->nullable();
             $table->string('related_desc')->nullable();
@@ -925,6 +929,8 @@ class ArtisanController extends Controller
                     'related_desc'=>$transaction_name_albert['related_desc'],
                     'pelanggan_id'=>$transaction_name_albert['pelanggan_id'],
                     'pelanggan_nama'=>$transaction_name_albert['pelanggan_nama'],
+                    'supplier_id'=>$transaction_name_albert['supplier_id'],
+                    'supplier_nama'=>$transaction_name_albert['supplier_nama'],
                     'related_user_instance_id'=>$transaction_name_albert['related_user_instance_id'],
                     'related_user_instance_type'=>$transaction_name_albert['related_user_instance_type'],
                     'related_user_instance_name'=>$transaction_name_albert['related_user_instance_name'],
@@ -953,6 +959,8 @@ class ArtisanController extends Controller
                 'related_desc'=>$transaction_name_akhun['related_desc'],
                 'pelanggan_id'=>$transaction_name_akhun['pelanggan_id'],
                 'pelanggan_nama'=>$transaction_name_akhun['pelanggan_nama'],
+                'supplier_id'=>$transaction_name_akhun['supplier_id'],
+                'supplier_nama'=>$transaction_name_akhun['supplier_nama'],
                 'related_user_instance_id'=>$transaction_name_akhun['related_user_instance_id'],
                 'related_user_instance_type'=>$transaction_name_akhun['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_akhun['related_user_instance_name'],
@@ -977,6 +985,8 @@ class ArtisanController extends Controller
                 'related_desc'=>$transaction_name_dian['related_desc'],
                 'pelanggan_id'=>$transaction_name_dian['pelanggan_id'],
                 'pelanggan_nama'=>$transaction_name_dian['pelanggan_nama'],
+                'supplier_id'=>$transaction_name_dian['supplier_id'],
+                'supplier_nama'=>$transaction_name_dian['supplier_nama'],
                 'related_user_instance_id'=>$transaction_name_dian['related_user_instance_id'],
                 'related_user_instance_type'=>$transaction_name_dian['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_dian['related_user_instance_name'],
@@ -1002,6 +1012,8 @@ class ArtisanController extends Controller
                     'related_desc'=>$transaction_name_bca_mcp['related_desc'],
                     'pelanggan_id'=>$transaction_name_bca_mcp['pelanggan_id'],
                     'pelanggan_nama'=>$transaction_name_bca_mcp['pelanggan_nama'],
+                    'supplier_id'=>$transaction_name_bca_mcp['supplier_id'],
+                    'supplier_nama'=>$transaction_name_bca_mcp['supplier_nama'],
                     'related_user_instance_id'=>$transaction_name_bca_mcp['related_user_instance_id'],
                     'related_user_instance_type'=>$transaction_name_bca_mcp['related_user_instance_type'],
                     'related_user_instance_name'=>$transaction_name_bca_mcp['related_user_instance_name'],
@@ -1029,6 +1041,8 @@ class ArtisanController extends Controller
                 'related_desc'=>$transaction_name_bca_dmd['related_desc'],
                 'pelanggan_id'=>$transaction_name_bca_dmd['pelanggan_id'],
                 'pelanggan_nama'=>$transaction_name_bca_dmd['pelanggan_nama'],
+                'supplier_id'=>$transaction_name_bca_dmd['supplier_id'],
+                'supplier_nama'=>$transaction_name_bca_dmd['supplier_nama'],
                 'related_user_instance_id'=>$transaction_name_bca_dmd['related_user_instance_id'],
                 'related_user_instance_type'=>$transaction_name_bca_dmd['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_bca_dmd['related_user_instance_name'],
@@ -1053,6 +1067,8 @@ class ArtisanController extends Controller
                 'related_desc'=>$transaction_name_bri_dmd['related_desc'],
                 'pelanggan_id'=>$transaction_name_bri_dmd['pelanggan_id'],
                 'pelanggan_nama'=>$transaction_name_bri_dmd['pelanggan_nama'],
+                'supplier_id'=>$transaction_name_bri_dmd['supplier_id'],
+                'supplier_nama'=>$transaction_name_bri_dmd['supplier_nama'],
                 'related_user_instance_id'=>$transaction_name_bri_dmd['related_user_instance_id'],
                 'related_user_instance_type'=>$transaction_name_bri_dmd['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_bri_dmd['related_user_instance_name'],
@@ -1077,6 +1093,8 @@ class ArtisanController extends Controller
                 'related_desc'=>$transaction_name_danamon_mcp['related_desc'],
                 'pelanggan_id'=>$transaction_name_danamon_mcp['pelanggan_id'],
                 'pelanggan_nama'=>$transaction_name_danamon_mcp['pelanggan_nama'],
+                'supplier_id'=>$transaction_name_danamon_mcp['supplier_id'],
+                'supplier_nama'=>$transaction_name_danamon_mcp['supplier_nama'],
                 'related_user_instance_id'=>$transaction_name_danamon_mcp['related_user_instance_id'],
                 'related_user_instance_type'=>$transaction_name_danamon_mcp['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_danamon_mcp['related_user_instance_name'],
@@ -1101,6 +1119,8 @@ class ArtisanController extends Controller
                 'related_desc'=>$transaction_name_kas_bg['related_desc'],
                 'pelanggan_id'=>$transaction_name_kas_bg['pelanggan_id'],
                 'pelanggan_nama'=>$transaction_name_kas_bg['pelanggan_nama'],
+                'supplier_id'=>$transaction_name_kas_bg['supplier_id'],
+                'supplier_nama'=>$transaction_name_kas_bg['supplier_nama'],
                 'related_user_instance_id'=>$transaction_name_kas_bg['related_user_instance_id'],
                 'related_user_instance_type'=>$transaction_name_kas_bg['related_user_instance_type'],
                 'related_user_instance_name'=>$transaction_name_kas_bg['related_user_instance_name'],

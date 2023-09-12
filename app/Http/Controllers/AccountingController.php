@@ -243,36 +243,6 @@ class AccountingController extends Controller
                         $saldo = $saldo + (int)$post['masuk'][$i];
                     }
 
-                    Accounting::create([
-                        'user_id'=>$user->id,
-                        'username'=>$user->username,
-                        'user_instance_id'=>$user_instance->id,
-                        'instance_type'=>$user_instance->instance_type,
-                        'instance_name'=>$user_instance->instance_name,
-                        'branch'=>$user_instance->branch,
-                        'account_number'=>$user_instance->account_number,
-                        'kode'=>$post['kode'][$i],
-                        'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
-                        'transaction_desc'=>$post['transaction_desc'][$i],
-                        'kategori_type'=>$transaction_name->kategori_type,
-                        'kategori_level_one'=>$transaction_name->kategori_level_one,
-                        'kategori_level_two'=>$transaction_name->kategori_level_two,
-                        'related_user_id'=>$transaction_name->related_user_id,
-                        'related_username'=>$transaction_name->related_username,
-                        'related_desc'=>$transaction_name->related_desc,
-                        'related_user_instance_id'=>$transaction_name->related_user_instance_id,
-                        'related_user_instance_type'=>$transaction_name->related_user_instance_type,
-                        'related_user_instance_name'=>$transaction_name->related_user_instance_name,
-                        'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
-                        'pelanggan_id'=>$transaction_name->pelanggan_id,
-                        'pelanggan_nama'=>$transaction_name->pelanggan_nama,
-                        'keterangan'=>$post['keterangan'][$i], // keterangan tambahan akan ditulis dalam tanda kurung
-                        'jumlah'=>$jumlah,
-                        'saldo'=>$saldo,
-                        'status'=>$status, // read or not read yet by other user
-                        'created_at'=>$created_at
-                    ]);
-
                     foreach ($last_transactions as $last_transaction) {
                         if ($last_transaction->transaction_type === 'pengeluaran') {
                             $saldo -= $last_transaction->jumlah;
@@ -294,37 +264,39 @@ class AccountingController extends Controller
                     } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
                         $saldo = $saldo + (int)$post['masuk'][$i];
                     }
-                    Accounting::create([
-                        'user_id'=>$user->id,
-                        'username'=>$user->username,
-                        'user_instance_id'=>$user_instance->id,
-                        'instance_type'=>$user_instance->instance_type,
-                        'instance_name'=>$user_instance->instance_name,
-                        'branch'=>$user_instance->branch,
-                        'account_number'=>$user_instance->account_number,
-                        'kode'=>$post['kode'][$i],
-                        'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
-                        'transaction_desc'=>$post['transaction_desc'][$i],
-                        'kategori_type'=>$transaction_name->kategori_type,
-                        'kategori_level_one'=>$transaction_name->kategori_level_one,
-                        'kategori_level_two'=>$transaction_name->kategori_level_two,
-                        'related_user_id'=>$transaction_name->related_user_id,
-                        'related_username'=>$transaction_name->related_username,
-                        'related_desc'=>$transaction_name->related_desc,
-                        'related_user_instance_id'=>$transaction_name->related_user_instance_id,
-                        'related_user_instance_type'=>$transaction_name->related_user_instance_type,
-                        'related_user_instance_name'=>$transaction_name->related_user_instance_name,
-                        'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
-                        'pelanggan_id'=>$transaction_name->pelanggan_id,
-                        'pelanggan_nama'=>$transaction_name->pelanggan_nama,
-                        'keterangan'=>$post['keterangan'][$i], // keterangan tambahan akan ditulis dalam tanda kurung
-                        'jumlah'=>$jumlah,
-                        'saldo'=>$saldo,
-                        'status'=>$status, // read or not read yet by other user
-                        'created_at'=>$created_at
-                    ]);
                 }
 
+                Accounting::create([
+                    'user_id'=>$user->id,
+                    'username'=>$user->username,
+                    'user_instance_id'=>$user_instance->id,
+                    'instance_type'=>$user_instance->instance_type,
+                    'instance_name'=>$user_instance->instance_name,
+                    'branch'=>$user_instance->branch,
+                    'account_number'=>$user_instance->account_number,
+                    'kode'=>$post['kode'][$i],
+                    'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
+                    'transaction_desc'=>$post['transaction_desc'][$i],
+                    'kategori_type'=>$transaction_name->kategori_type,
+                    'kategori_level_one'=>$transaction_name->kategori_level_one,
+                    'kategori_level_two'=>$transaction_name->kategori_level_two,
+                    'related_user_id'=>$transaction_name->related_user_id,
+                    'related_username'=>$transaction_name->related_username,
+                    'related_desc'=>$transaction_name->related_desc,
+                    'related_user_instance_id'=>$transaction_name->related_user_instance_id,
+                    'related_user_instance_type'=>$transaction_name->related_user_instance_type,
+                    'related_user_instance_name'=>$transaction_name->related_user_instance_name,
+                    'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
+                    'pelanggan_id'=>$transaction_name->pelanggan_id,
+                    'pelanggan_nama'=>$transaction_name->pelanggan_nama,
+                    'supplier_id'=>$transaction_name->supplier_id,
+                    'supplier_nama'=>$transaction_name->supplier_nama,
+                    'keterangan'=>$post['keterangan'][$i], // keterangan tambahan akan ditulis dalam tanda kurung
+                    'jumlah'=>$jumlah,
+                    'saldo'=>$saldo,
+                    'status'=>$status, // read or not read yet by other user
+                    'created_at'=>$created_at
+                ]);
 
             } else {
                 if ($post['created_at'][$i] === null && $post['transaction_desc'][$i] !== null) {
@@ -337,9 +309,131 @@ class AccountingController extends Controller
             }
         }
 
-        $success_ = '-transactions inputted-';
+        $success_ .= '-transactions created-';
 
         return back()->with('success_', $success_);
+    }
+
+    function mark_as_read_or_unread(UserInstance $user_instance, Accounting $accounting, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dump($user_instance);
+        // dd($accounting);
+        $user = Auth::user();
+        if ($user->id !== $user_instance->user_id) {
+            dump('user_instance->user: ', $user_instance->user_id);
+            dd('auth_user: ', $user->id);
+        }
+
+        if ($post['read'] === 'yes') {
+            $accounting->status = 'read';
+            $accounting->save();
+        } elseif ($post['read'] === 'no') {
+            $accounting->status = 'not read yet';
+            $accounting->save();
+        }
+
+        return back()->with('success_','-transaction_status changed-');
+    }
+
+    function apply_entry(UserInstance $user_instance, Accounting $accounting, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dump($user_instance);
+        // dump($accounting);
+
+        $success_ = '';
+        $user = Auth::user();
+        if ($user->id !== $user_instance->user_id) {
+            dump('user_instance->user: ', $user_instance->user_id);
+            dd('auth_user: ', $user->id);
+        }
+
+        $transaction_name = TransactionName::where('user_id', $accounting->related_user_id)->where('desc', $accounting->related_desc)->where('user_instance_id', $accounting->related_user_instance_id)->first();
+        // dd($transaction_name);
+        $transaction_type = 'pengeluaran';
+        if ($transaction_name === 'UANG MASUK') {
+            $transaction_type = 'pemasukan';
+        }
+
+        $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
+        $saldo = 0;
+        $created_at = date('Y-m-d', strtotime($accounting->created_at) . " " . date("H:i:s"));
+
+        if (count($last_transactions) !== 0) {
+            $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$last_transactions[0]->created_at)->latest()->first();
+            // dump('before_last_transaction: ', $before_last_transaction);
+            if ($before_last_transaction !== null) {
+                $saldo = $before_last_transaction->saldo;
+            }
+
+            if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                $saldo = $saldo - $accounting->jumlah;
+            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                $saldo = $saldo + $accounting->jumlah;
+            }
+
+            foreach ($last_transactions as $last_transaction) {
+                if ($last_transaction->transaction_type === 'pengeluaran') {
+                    $saldo -= $last_transaction->jumlah;
+                } elseif ($last_transaction->transaction_type === 'pemasukan') {
+                    $saldo += $last_transaction->jumlah;
+                }
+                $last_transaction->saldo = $saldo;
+                $last_transaction->save();
+            }
+            $success_ .= '-jumlah saldo editted-';
+
+        } else {
+            $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
+            dump(date('d-m-Y H:i:s', strtotime($last_transaction->created_at)) . " - $last_transaction->transaction_type: $last_transaction->jumlah, saldo: $last_transaction->saldo");
+            if ($last_transaction !== null) {
+                $saldo = $last_transaction->saldo; // -5.000.000
+            }
+            if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                $saldo = $saldo - $accounting->jumlah;
+            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                $saldo = $saldo + $accounting->jumlah;
+            }
+        }
+
+        Accounting::create([
+            'user_id'=>$user_instance->user_id,
+            'username'=>$user_instance->username,
+            'user_instance_id'=>$user_instance->id,
+            'instance_type'=>$user_instance->instance_type,
+            'instance_name'=>$user_instance->instance_name,
+            'branch'=>$user_instance->instance_branch,
+            'account_number'=>$user_instance->account_number,
+            'kode'=>$user_instance->kode,
+            'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
+            'transaction_desc'=>$accounting->related_desc,
+            'kategori_type'=>$transaction_name->kategori_type,
+            'kategori_level_one'=>$transaction_name->kategori_level_one,
+            'kategori_level_two'=>$transaction_name->kategori_level_two,
+            'related_user_id'=>$transaction_name->related_user_id,
+            'related_username'=>$transaction_name->related_username,
+            'related_desc'=>$transaction_name->related_desc,
+            'related_user_instance_id'=>$transaction_name->related_user_instance_id,
+            'related_user_instance_type'=>$transaction_name->related_user_instance_type,
+            'related_user_instance_name'=>$transaction_name->related_user_instance_name,
+            'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
+            'pelanggan_id'=>$transaction_name->pelanggan_id,
+            'pelanggan_nama'=>$transaction_name->pelanggan_nama,
+            'supplier_id'=>$transaction_name->supplier_id,
+            'supplier_nama'=>$transaction_name->supplier_nama,
+            'keterangan'=>null, // keterangan tambahan akan ditulis dalam tanda kurung
+            'jumlah'=>$accounting->jumlah,
+            'saldo'=>$saldo,
+            'status'=>'read', // read or not read yet by other user
+            'created_at'=>$created_at
+        ]);
+        $success_ .= '-transaction created-';
+
+        $accounting->status = 'read';
+        $accounting->save();
+
+        // return back()->with('success_',$success_);
     }
 
     function transactions_relations() {
