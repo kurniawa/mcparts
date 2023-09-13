@@ -164,7 +164,11 @@
                 <tr>
                     <td>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
                     <td>{{ $accounting->kode }}</td>
+                    @if ($accounting->keterangan !== null)
+                    <td>{{ $accounting->transaction_desc }} ({{ $accounting->keterangan }})</td>
+                    @else
                     <td>{{ $accounting->transaction_desc }}</td>
+                    @endif
                     <td>
                         @if ($accounting->transaction_type === 'pengeluaran')
                         <div class="flex justify-between">
@@ -198,7 +202,7 @@
                 <tr class="hidden" id="tr_edit_transaction-{{ $key_accounting }}">
                     <td colspan="6">
                         <div class="text-center">
-                            <form action="" method="POST" class="inline-block p-1 rounded bg-white shadow drop-shadow">
+                            <form action="{{ route('accounting.edit_entry', [$user_instance->id, $accounting->id]) }}" method="POST" class="inline-block p-1 rounded bg-white shadow drop-shadow">
                                 @csrf
                                 <h3 class="text-lg font-bold text-slate-500">Edit Transaksi</h3>
                                 <div class="flex">
@@ -234,9 +238,9 @@
                                         <input type="text" name="masuk" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36">
                                         @endif
                                     </div>
-                                    <input type="hidden" name="transaction_id" id="edit-{{ $key_accounting }}-transaction_id">
+                                    <input type="hidden" name="transaction_id" id="edit-{{ $key_accounting }}-transaction_id" value="{{ $accounting }}">
                                 </div>
-                                <div class="flex mt-2">
+                                {{-- <div class="flex mt-2">
                                     <div>
                                         <label for="" class="block">pelanggan:</label>
                                         <input type="text" name="pelanggan_nama" id="edit-{{ $key_accounting }}-pelanggan_nama" class="border p-1 text-xs mt-1" value="{{ $accounting->pelanggan_nama }}">
@@ -249,14 +253,14 @@
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">related_user:</label>
-                                        <input type="text" name="related_user_nama" id="edit-{{ $key_accounting }}-related_user_nama" class="border p-1 text-xs mt-1" value="{{ $accounting->related_username }}">
+                                        <input type="text" name="related_username" id="edit-{{ $key_accounting }}-related_username" class="border p-1 text-xs mt-1" value="{{ $accounting->related_username }}">
                                         <input type="hidden" name="related_user_id" id="edit-{{ $key_accounting }}-related_user_id" value="{{ $accounting->related_user_id }}">
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">related_desc:</label>
                                         <input type="text" name="related_desc" id="edit-{{ $key_accounting }}-related_desc" class="border p-1 text-xs mt-1 w-56" value="{{ $accounting->related_desc }}">
                                     </div>
-                                </div>
+                                </div> --}}
                                 {{-- <table class="table-slim mt-1">
                                     <tr>
                                         <td>Pelanggan</td><td>:</td><td></td>
@@ -266,7 +270,7 @@
                                     <button type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2">confirm edit</button>
                                 </div>
                             </form>
-                            <form action="" method="POST" onsubmit="return confirm('Yakin ingin hapus transaksi ini?')" class="mt-1">
+                            <form action="{{ route('accounting.delete_entry', [$user_instance->id, $accounting->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus transaksi ini?')" class="mt-1">
                                 @csrf
                                 <div class="flex justify-center">
                                     <button type="submit" class="border-2 font-semibold rounded text-pink-500 border-pink-300 bg-pink-200 px-2">hapus transaksi</button>

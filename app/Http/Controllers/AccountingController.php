@@ -193,11 +193,11 @@ class AccountingController extends Controller
 
     function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        // dump($user_instance);
-        // if ($post['transaction_id'][0] !== null) {
-        //     dump(TransactionName::find($post['transaction_id'][0]));
-        // }
-        // dd($post);
+        dump($user_instance);
+        if ($post['transaction_id'][0] !== null) {
+            dump(TransactionName::find($post['transaction_id'][0]));
+        }
+        dd($post);
 
         $user = Auth::user();
 
@@ -358,7 +358,7 @@ class AccountingController extends Controller
 
         $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
         $saldo = 0;
-        $created_at = date('Y-m-d', strtotime($accounting->created_at) . " " . date("H:i:s"));
+        $created_at = date('Y-m-d', strtotime($accounting->created_at)) . " " . date("H:i:s");
 
         if (count($last_transactions) !== 0) {
             $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$last_transactions[0]->created_at)->latest()->first();
@@ -386,8 +386,8 @@ class AccountingController extends Controller
 
         } else {
             $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
-            dump(date('d-m-Y H:i:s', strtotime($last_transaction->created_at)) . " - $last_transaction->transaction_type: $last_transaction->jumlah, saldo: $last_transaction->saldo");
             if ($last_transaction !== null) {
+                // dump(date('d-m-Y H:i:s', strtotime($last_transaction->created_at)) . " - $last_transaction->transaction_type: $last_transaction->jumlah, saldo: $last_transaction->saldo");
                 $saldo = $last_transaction->saldo; // -5.000.000
             }
             if ($transaction_name->kategori_type === 'UANG KELUAR') {
@@ -433,7 +433,129 @@ class AccountingController extends Controller
         $accounting->status = 'read';
         $accounting->save();
 
-        // return back()->with('success_',$success_);
+        return back()->with('success_',$success_);
+    }
+
+    function edit_entry(UserInstance $user_instance, Accounting $accounting, Request $request) {
+        $post = $request->post();
+        dump($post);
+        dump($user_instance);
+        dd($accounting);
+
+        $user = Auth::user();
+
+        if ($user_instance->user_id !== $user->id) {
+            $request->validate(['error'=>'required'],['error.required'=>'different user???']);
+        }
+
+        $success_ = '';
+        if ($post['created_at'] !== null && $post['transaction_desc'] !== null && ($post['keluar'] !== null || $post['masuk'] !== null) ) {
+            $transaction_name = TransactionName::find($post['transaction_id']);
+            if ($transaction_name === null) {
+                dump("transaction_name?");
+                dd($post);
+            }
+            $jumlah = null;
+            $transaction_type = 'pengeluaran';
+            if ($post['keluar'] !== null) {
+                $jumlah = (int)$post['keluar'];
+            } elseif ($post['masuk'] !== null) {
+                $jumlah = (int)$post['masuk'];
+                $transaction_type = 'pemasukan';
+            }
+
+            $status = null;
+            if ($transaction_name->related_user_id !== null) {
+                $status = 'not read yet';
+            }
+            $saldo = 0;
+            // Cari apakah ada transaksi dengan tanggal yang setelahnya?
+            $created_at = date('Y-m-d', strtotime($post['created_at'])) . " " . date("H:i:s");
+            $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$created_at)->orderBy('created_at')->get();
+            if (count($last_transactions) !== 0) {
+                $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$last_transactions[0]->created_at)->latest()->first();
+                // dump('before_last_transaction: ', $before_last_transaction);
+                if ($before_last_transaction !== null) {
+                    $saldo = $before_last_transaction->saldo;
+                }
+
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo = $saldo - (int)$post['keluar'];
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo = $saldo + (int)$post['masuk'];
+                }
+
+                foreach ($last_transactions as $last_transaction) {
+                    if ($last_transaction->transaction_type === 'pengeluaran') {
+                        $saldo -= $last_transaction->jumlah;
+                    } elseif ($last_transaction->transaction_type === 'pemasukan') {
+                        $saldo += $last_transaction->jumlah;
+                    }
+                    $last_transaction->saldo = $saldo;
+                    $last_transaction->save();
+                }
+                $success_ .= '-jumlah saldo editted-';
+
+            } else {
+                $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
+                if ($last_transaction !== null) {
+                    $saldo = $last_transaction->saldo;
+                }
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo = $saldo - (int)$post['keluar'];
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo = $saldo + (int)$post['masuk'];
+                }
+            }
+
+            $accounting->update([
+                'user_id'=>$user->id,
+                'username'=>$user->username,
+                'user_instance_id'=>$user_instance->id,
+                'instance_type'=>$user_instance->instance_type,
+                'instance_name'=>$user_instance->instance_name,
+                'branch'=>$user_instance->branch,
+                'account_number'=>$user_instance->account_number,
+                'kode'=>$post['kode'],
+                'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
+                'transaction_desc'=>$post['transaction_desc'],
+                'kategori_type'=>$transaction_name->kategori_type,
+                'kategori_level_one'=>$transaction_name->kategori_level_one,
+                'kategori_level_two'=>$transaction_name->kategori_level_two,
+                'related_user_id'=>$transaction_name->related_user_id,
+                'related_username'=>$transaction_name->related_username,
+                'related_desc'=>$transaction_name->related_desc,
+                'related_user_instance_id'=>$transaction_name->related_user_instance_id,
+                'related_user_instance_type'=>$transaction_name->related_user_instance_type,
+                'related_user_instance_name'=>$transaction_name->related_user_instance_name,
+                'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
+                'pelanggan_id'=>$transaction_name->pelanggan_id,
+                'pelanggan_nama'=>$transaction_name->pelanggan_nama,
+                'supplier_id'=>$transaction_name->supplier_id,
+                'supplier_nama'=>$transaction_name->supplier_nama,
+                'keterangan'=>$post['keterangan'], // keterangan tambahan akan ditulis dalam tanda kurung
+                'jumlah'=>$jumlah,
+                'saldo'=>$saldo,
+                'status'=>$status, // read or not read yet by other user
+                'created_at'=>$created_at
+            ]);
+
+            $success_ .= '-transactions edited-';
+
+        } else {
+            if ($post['created_at'] === null && $post['transaction_desc'] !== null) {
+                dd('created_at: ', $post['created_at']);
+                dump('keluar: ', $post['keluar']);
+                dd('masuk: ', $post['masuk']);
+            } elseif ($post['created_at'] !== null && $post['transaction_desc'] === null) {
+                dd('transaction_desc: ', $post['transaction_desc']);
+            }
+        }
+    }
+
+    function delete_entry(UserInstance $user_instance, Accounting $accounting) {
+        dump($user_instance);
+        dd($accounting);
     }
 
     function transactions_relations() {

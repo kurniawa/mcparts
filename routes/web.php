@@ -186,6 +186,8 @@ Route::controller(AccountingController::class)->group(function(){
     Route::post('/accounting/{user_instance}/store_transactions','store_transactions')->name('accounting.store_transactions');
     Route::post('/accounting/{user_instance}/{accounting}/mark_as_read_or_unread','mark_as_read_or_unread')->name('accounting.mark_as_read_or_unread');
     Route::post('/accounting/{user_instance}/{accounting}/apply_entry','apply_entry')->name('accounting.apply_entry');
+    Route::post('/accounting/{user_instance}/{accounting}/edit_entry','edit_entry')->name('accounting.edit_entry');
+    Route::post('/accounting/{user_instance}/{accounting}/delete_entry','delete_entry')->name('accounting.delete_entry');
     Route::get('/accounting/transactions_relations','transactions_relations')->name('accounting.transactions_relations');
 });
 
