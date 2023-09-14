@@ -225,20 +225,24 @@
                                     <div class="ml-1">
                                         <label for="" class="block">keluar:</label>
                                         @if ($accounting->transaction_type === 'pengeluaran')
-                                        <input type="text" name="keluar" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}">
+                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" oninput="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
+                                        <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
-                                        <input type="text" name="keluar" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36">
+                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36">
+                                        <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted">
                                         @endif
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">masuk:</label>
                                         @if ($accounting->transaction_type === 'pemasukan')
-                                        <input type="text" name="masuk" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}">
+                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" oninput="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
+                                        <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
-                                        <input type="text" name="masuk" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36">
+                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36">
+                                        <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted">
                                         @endif
                                     </div>
-                                    <input type="hidden" name="transaction_id" id="edit-{{ $key_accounting }}-transaction_id" value="{{ $accounting }}">
+                                    {{-- <input type="hidden" name="transaction_id" id="edit-{{ $key_accounting }}-transaction_id" value="{{ $accounting }}"> --}}
                                 </div>
                                 {{-- <div class="flex mt-2">
                                     <div>
@@ -301,9 +305,13 @@
                         <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ $user_instance->kode }}"></td>
                         <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60"></td>
                         <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full"></td>
-                        <td><input type="text" name="keluar[]" id="keluar-{{ $i }}" class="border p-1 text-xs w-36"></td>
                         <td>
-                            <input type="text" name="masuk[]" id="masuk-{{ $i }}" class="border p-1 text-xs w-36">
+                            <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'keluar-{{ $i }}-unformatted')">
+                            <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted">
+                        </td>
+                        <td>
+                            <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'masuk-{{ $i }}-unformatted')">
+                            <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted">
                             <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}">
                         </td>
                         <td>
@@ -474,8 +482,15 @@
             <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs w-20" value="${user_instance.kode}"></td>
             <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
             <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>
-            <td><input type="text" name="keluar[]" id="keluar-${transaction_index}" class="border p-1 text-xs w-36"></td>
-            <td><input type="text" name="masuk[]" id="masuk-${transaction_index}" class="border p-1 text-xs w-36"></td>
+            <td>
+                <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
+                <input type="hidden" name="keluar[]" id="keluar-${transaction_index}-unformatted">
+            </td>
+            <td>
+                <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
+                <input type="hidden" name="masuk[]" id="masuk-${transaction_index}-unformatted">
+                <input type="hidden" name="transaction_id[]" id="transaction_id-${transaction_index}">
+            </td>
         </tr>
         <tr id="tr_add_transaction">
             <td>

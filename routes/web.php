@@ -182,13 +182,14 @@ Route::controller(SupplierController::class)->group(function(){
 Route::controller(AccountingController::class)->group(function(){
     Route::get('/accounting','index')->name('accounting.index')->middleware('auth');
     Route::post('/accounting/create_kas','create_kas')->name('accounting.create_kas');
-    Route::get('/accounting/{user_instance}/show_transactions','show_transactions')->name('accounting.show_transactions');
-    Route::post('/accounting/{user_instance}/store_transactions','store_transactions')->name('accounting.store_transactions');
-    Route::post('/accounting/{user_instance}/{accounting}/mark_as_read_or_unread','mark_as_read_or_unread')->name('accounting.mark_as_read_or_unread');
-    Route::post('/accounting/{user_instance}/{accounting}/apply_entry','apply_entry')->name('accounting.apply_entry');
-    Route::post('/accounting/{user_instance}/{accounting}/edit_entry','edit_entry')->name('accounting.edit_entry');
-    Route::post('/accounting/{user_instance}/{accounting}/delete_entry','delete_entry')->name('accounting.delete_entry');
-    Route::get('/accounting/transactions_relations','transactions_relations')->name('accounting.transactions_relations');
+    Route::get('/accounting/{user_instance}/show_transactions','show_transactions')->name('accounting.show_transactions')->middleware('auth');
+    Route::post('/accounting/{user_instance}/store_transactions','store_transactions')->name('accounting.store_transactions')->middleware('auth');
+    Route::post('/accounting/{user_instance}/{accounting}/mark_as_read_or_unread','mark_as_read_or_unread')->name('accounting.mark_as_read_or_unread')->middleware('auth');
+    Route::post('/accounting/{user_instance}/{accounting}/apply_entry','apply_entry')->name('accounting.apply_entry')->middleware('auth');
+    Route::post('/accounting/{user_instance}/{accounting}/edit_entry','edit_entry')->name('accounting.edit_entry')->middleware('auth');
+    Route::post('/accounting/{user_instance}/{accounting}/delete_entry','delete_entry')->name('accounting.delete_entry')->middleware('auth');
+    Route::get('/accounting/jurnal','jurnal')->name('accounting.jurnal')->middleware('auth');
+    Route::get('/accounting/transactions_relations','transactions_relations')->name('accounting.transactions_relations')->middleware('auth');
 });
 
 Route::controller(ArtisanController::class)->group(function(){

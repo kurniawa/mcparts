@@ -193,11 +193,11 @@ class AccountingController extends Controller
 
     function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        dump($user_instance);
-        if ($post['transaction_id'][0] !== null) {
-            dump(TransactionName::find($post['transaction_id'][0]));
-        }
-        dd($post);
+        // dump($user_instance);
+        // if ($post['transaction_id'][0] !== null) {
+        //     dump(TransactionName::find($post['transaction_id'][0]));
+        // }
+        // dd($post);
 
         $user = Auth::user();
 
@@ -231,7 +231,7 @@ class AccountingController extends Controller
                 $created_at = date('Y-m-d', strtotime($post['created_at'][$i])) . " " . date("H:i:s");
                 $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$created_at)->orderBy('created_at')->get();
                 if (count($last_transactions) !== 0) {
-                    $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$last_transactions[0]->created_at)->latest()->first();
+                    $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
                     // dump('before_last_transaction: ', $before_last_transaction);
                     if ($before_last_transaction !== null) {
                         $saldo = $before_last_transaction->saldo;
@@ -243,13 +243,14 @@ class AccountingController extends Controller
                         $saldo = $saldo + (int)$post['masuk'][$i];
                     }
 
+                    $saldo_next = $saldo;
                     foreach ($last_transactions as $last_transaction) {
                         if ($last_transaction->transaction_type === 'pengeluaran') {
-                            $saldo -= $last_transaction->jumlah;
+                            $saldo_next -= $last_transaction->jumlah;
                         } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                            $saldo += $last_transaction->jumlah;
+                            $saldo_next += $last_transaction->jumlah;
                         }
-                        $last_transaction->saldo = $saldo;
+                        $last_transaction->saldo = $saldo_next;
                         $last_transaction->save();
                     }
                     $success_ .= '-jumlah saldo editted-';
@@ -361,7 +362,7 @@ class AccountingController extends Controller
         $created_at = date('Y-m-d', strtotime($accounting->created_at)) . " " . date("H:i:s");
 
         if (count($last_transactions) !== 0) {
-            $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$last_transactions[0]->created_at)->latest()->first();
+            $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
             // dump('before_last_transaction: ', $before_last_transaction);
             if ($before_last_transaction !== null) {
                 $saldo = $before_last_transaction->saldo;
@@ -373,13 +374,14 @@ class AccountingController extends Controller
                 $saldo = $saldo + $accounting->jumlah;
             }
 
+            $saldo_next = $saldo;
             foreach ($last_transactions as $last_transaction) {
                 if ($last_transaction->transaction_type === 'pengeluaran') {
-                    $saldo -= $last_transaction->jumlah;
+                    $saldo_next -= $last_transaction->jumlah;
                 } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                    $saldo += $last_transaction->jumlah;
+                    $saldo_next += $last_transaction->jumlah;
                 }
-                $last_transaction->saldo = $saldo;
+                $last_transaction->saldo = $saldo_next;
                 $last_transaction->save();
             }
             $success_ .= '-jumlah saldo editted-';
@@ -438,9 +440,9 @@ class AccountingController extends Controller
 
     function edit_entry(UserInstance $user_instance, Accounting $accounting, Request $request) {
         $post = $request->post();
-        dump($post);
-        dump($user_instance);
-        dd($accounting);
+        // dump($post);
+        // dump($user_instance);
+        // dump($accounting);
 
         $user = Auth::user();
 
@@ -450,7 +452,17 @@ class AccountingController extends Controller
 
         $success_ = '';
         if ($post['created_at'] !== null && $post['transaction_desc'] !== null && ($post['keluar'] !== null || $post['masuk'] !== null) ) {
-            $transaction_name = TransactionName::find($post['transaction_id']);
+            $created_at_before = date('d-m-Y', strtotime($accounting->created_at));
+            // dump('created_at_before:', $created_at_before);
+            // dump('post[created_at]:', $post['created_at']);
+            if ($created_at_before === $post['created_at']) {
+                // dd('sama');
+                $created_at = $accounting->created_at;
+            } else {
+                $created_at = date('Y-m-d', strtotime($post['created_at'])) . " " . date("H:i:s");
+            }
+            // dd('end');
+            $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $post['transaction_desc'])->first();
             if ($transaction_name === null) {
                 dump("transaction_name?");
                 dd($post);
@@ -470,10 +482,9 @@ class AccountingController extends Controller
             }
             $saldo = 0;
             // Cari apakah ada transaksi dengan tanggal yang setelahnya?
-            $created_at = date('Y-m-d', strtotime($post['created_at'])) . " " . date("H:i:s");
             $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$created_at)->orderBy('created_at')->get();
             if (count($last_transactions) !== 0) {
-                $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$last_transactions[0]->created_at)->latest()->first();
+                $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
                 // dump('before_last_transaction: ', $before_last_transaction);
                 if ($before_last_transaction !== null) {
                     $saldo = $before_last_transaction->saldo;
@@ -485,19 +496,22 @@ class AccountingController extends Controller
                     $saldo = $saldo + (int)$post['masuk'];
                 }
 
+                $saldo_next = $saldo;
                 foreach ($last_transactions as $last_transaction) {
                     if ($last_transaction->transaction_type === 'pengeluaran') {
-                        $saldo -= $last_transaction->jumlah;
+                        $saldo_next -= $last_transaction->jumlah;
                     } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                        $saldo += $last_transaction->jumlah;
+                        $saldo_next += $last_transaction->jumlah;
                     }
-                    $last_transaction->saldo = $saldo;
+                    $last_transaction->saldo = $saldo_next;
                     $last_transaction->save();
                 }
                 $success_ .= '-jumlah saldo editted-';
 
             } else {
                 $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
+                // dd($last_transaction);
+                // dd('else');
                 if ($last_transaction !== null) {
                     $saldo = $last_transaction->saldo;
                 }
@@ -541,6 +555,8 @@ class AccountingController extends Controller
             ]);
 
             $success_ .= '-transactions edited-';
+            // dump('updated!');
+            return back()->with('success_', $success_);
 
         } else {
             if ($post['created_at'] === null && $post['transaction_desc'] !== null) {
@@ -556,6 +572,159 @@ class AccountingController extends Controller
     function delete_entry(UserInstance $user_instance, Accounting $accounting) {
         dump($user_instance);
         dd($accounting);
+    }
+
+    function jurnal(Request $request) {
+        // dd($user_instance);
+        $get = $request->query();
+
+        $accountings = collect();
+
+        $from = null;
+        $until = null;
+        if (count($get) === 0) {
+            $month = (int)date('m');
+            if ($month <= 3) {
+                $from = date('Y') . "-01" . "-01";
+                $t = date('t', strtotime(date('Y') . "-03-01"));
+                $until = date('Y') . "-03" . "-$t" . " 23:59:59";
+            } elseif ($month <= 6) {
+                $from = date('Y') . "-04" . "-01";
+                $t = date('t', strtotime(date('Y') . "-06-01"));
+                $until = date('Y') . "-06" . "-$t" . " 23:59:59";
+            } elseif ($month <= 9) {
+                $from = date('Y') . "-07" . "-01";
+                $t = date('t', strtotime(date('Y') . "-09-01"));
+                $until = date('Y') . "-09" . "-$t" . " 23:59:59";
+            } elseif ($month <= 12) {
+                $from = date('Y') . "-10" . "-01";
+                $t = date('t', strtotime(date('Y') . "-12-01"));
+                $until = date('Y') . "-12" . "-$t" . " 23:59:59";
+            }
+            $accountings = Accounting::orderBy('user_instance_id')->whereBetween('created_at',[$from, $until])->oldest()->get();
+        } else {
+            dd($get);
+            if (!$get['kode'] && !$get['desc']) {
+                if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $accountings = Accounting::orderBy('user_instance_id')->whereBetween('created_at',[$from, $until])->oldest()->get();
+                } else {
+                    dd('date?', $get);
+                }
+            } elseif ($get['kode'] && !$get['desc']) {
+                if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $accountings = Accounting::orderBy('user_instance_id')->where('kode', 'like', "%get[kode]%")->whereBetween('created_at',[$from, $until])->oldest()->get();
+                } else {
+                    $accountings = Accounting::orderBy('user_instance_id')->where('kode', 'like', "%get[kode]%")->oldest()->limit(500)->get();
+                }
+            } elseif (!$get['kode'] && $get['desc']) {
+                if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $accountings = Accounting::orderBy('user_instance_id')->where('transaction_desc', 'like', "%$get[desc]%")->whereBetween('created_at',[$from, $until])->oldest()->get();
+                } else {
+                    $accountings = Accounting::orderBy('user_instance_id')->where('transaction_desc', 'like', "%$get[desc]%")->oldest()->limit(500)->get();
+                }
+            } elseif ($get['kode'] && $get['desc']) {
+                if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
+                    $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+                    $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+                    $accountings = Accounting::orderBy('user_instance_id')->where('kode', 'like', "%get[kode]%")->where('transaction_desc', 'like', "%$get[desc]%")->whereBetween('created_at',[$from, $until])->oldest()->get();
+                } else {
+                    $accountings = Accounting::orderBy('user_instance_id')->where('kode', 'like', "%get[kode]%")->where('transaction_desc', 'like', "%$get[desc]%")->oldest()->limit(500)->get();
+                }
+            }
+        }
+
+        // $last_transaction = null;
+        // if ($from) {
+        //     $last_transaction = Accounting::orderBy('user_instance_id')->where('created_at', '<', $from)->latest()->first();
+        // }
+
+        // $saldo_awal = 0;
+        // if ($last_transaction !== null) {
+        //     $saldo_awal = $last_transaction->saldo;
+        // }
+
+        // dump((int)date('m'));
+        // dump($accountings);
+        $keluar_total = 0;
+        $masuk_total = 0;
+
+        foreach ($accountings as $accounting) {
+            if ($accounting->transaction_type === 'pengeluaran') {
+                $keluar_total += $accounting->jumlah;
+            } elseif ($accounting->transaction_type === 'pemasukan') {
+                $masuk_total += $accounting->jumlah;
+            }
+        }
+        $balance_total = $masuk_total - $keluar_total;
+
+        $accountings_grouped = $accountings->groupBy('user_instance_id');
+        $keluar = $masuk = $balance = array();
+
+        foreach ($accountings_grouped as $key_acconting_grouped => $accounting_grouped) {
+            $keluar[$key_acconting_grouped] = 0;
+            $masuk[$key_acconting_grouped] = 0;
+            foreach ($accounting_grouped as $accounting) {
+                if ($accounting->transaction_type === 'pengeluaran') {
+                    $keluar[$key_acconting_grouped] += $accounting->jumlah;
+                } elseif ($accounting->transaction_type === 'pemasukan') {
+                    $masuk[$key_acconting_grouped] += $accounting->jumlah;
+                }
+            }
+            $balance[$key_acconting_grouped] = $masuk[$key_acconting_grouped] - $keluar[$key_acconting_grouped];
+        }
+
+        $user = Auth::user();
+
+        $related_users = User::where('id', '!=', $user->id)->get();
+
+        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->groupBy('id','desc')->orderBy('desc')->get();
+        // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
+        // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
+        // $transaction_names = TransactionName::all();
+
+        // $notifications = Accounting::where('related_user_instance_id', $user_instance->id)->latest()->limit(100)->get();
+
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'accounting.show_transaction',
+            'parent_route' => 'accounting.index',
+            'profile_menus' => Menu::get_profile_menus(),
+            'accounting_menus' => Menu::get_accounting_menus(),
+            'user' => $user,
+            'instance_types' => Accounting::get_instance_types(),
+            'instance_names' => Accounting::get_instance_names(),
+            'accountings' => $accountings,
+            'keluar_total' => $keluar_total,
+            'masuk_total' => $masuk_total,
+            'related_users' => $related_users,
+            // 'saldo_awal' => $saldo_awal,
+            'balance_total' => $balance_total,
+            'from' => $from,
+            'keluar' => $keluar,
+            'masuk' => $masuk,
+            'balance' => $balance,
+            // 'user_instance' => $user_instance,
+            'label_deskripsi' => $label_deskripsi,
+            // 'notifications' => $notifications,
+            // 'label_kategori_level_one' => $label_kategori_level_one,
+            // 'label_kategori_level_two' => $label_kategori_level_two,
+            // 'transaction_names' => $transaction_names,
+        ];
+
+        // dd($label_kategori_level_two);
+        // dump($label_deskripsi);
+        // dump($accountings);
+
+        // dump($accountings);
+        // dd($accountings->groupBy('user_instance_id'));
+
+        return view('accounting.jurnal', $data);
     }
 
     function transactions_relations() {
