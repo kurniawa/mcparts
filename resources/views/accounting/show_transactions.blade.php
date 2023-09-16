@@ -117,21 +117,21 @@
                 <tr>
                     <th></th><th></th><th></th>
                     <th>
-                        <div class="flex justify-between bg-yellow-300">
+                        <div class="flex justify-between bg-pink-300">
                             <span>Rp</span>
                             <span>{{ number_format($keluar_total,0,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
                     <th>
-                        <div class="flex justify-between bg-yellow-300">
+                        <div class="flex justify-between bg-emerald-300">
                             <span>Rp</span>
                             <span>{{ number_format($masuk_total,0,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
                     <th>
-                        <div class="flex justify-between bg-emerald-300">
+                        <div class="flex justify-between bg-yellow-300">
                             <span>Rp</span>
                             @if ($from)
                             @if (count($accountings) !== 0)
@@ -456,6 +456,9 @@
     const related_users = {!! json_encode($related_users, JSON_HEX_TAG) !!};
     const label_deskripsi = {!! json_encode($label_deskripsi, JSON_HEX_TAG) !!};
     const user_instance = {!! json_encode($user_instance, JSON_HEX_TAG) !!};
+    const count_accountings = {!! json_encode(count($accountings), JSON_HEX_TAG) !!};
+
+    // console.log(count_accountings);
 
     $(`#filter-desc`).autocomplete({
         source: label_deskripsi,
@@ -521,6 +524,26 @@
                 // document.getElementById(`transaction_desc-${index}`).value = ui.item.id;
                 document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
                 document.getElementById(`transaction_id-${index}`).value = ui.item.id;
+                // autofill_transaction(index, ui.item.value);
+            }
+        });
+    }
+
+    setTimeout(() => {
+        for (let j = 0; j < count_accountings; j++) {
+            autocomplete_edit_deskripsi(j);
+        }
+    }, 1000);
+
+    function autocomplete_edit_deskripsi(index) {
+        // console.log(index);
+        $(`#edit-${index}-transaction_desc`).autocomplete({
+            source: label_deskripsi,
+            select: function (event, ui) {
+                // console.log(ui.item);
+                // document.getElementById(`edit-${index}-transaction_desc`).value = ui.item.id;
+                document.getElementById(`edit-${index}-transaction_desc`).value = ui.item.value;
+                // document.getElementById(`edit-${index}-transaction_id`).value = ui.item.id;
                 // autofill_transaction(index, ui.item.value);
             }
         });

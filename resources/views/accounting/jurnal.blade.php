@@ -130,7 +130,7 @@
                         </div>
                     </th>
                 </tr>
-                <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR TOTAL</th><th>MASUK TOTAL</th><th>BALANCE TOTAL</th></tr>
+                <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th></tr>
 
                 {{-- <tr>
                     <td></td>
