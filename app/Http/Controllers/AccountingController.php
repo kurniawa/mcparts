@@ -764,6 +764,120 @@ class AccountingController extends Controller
         return view('accounting.jurnal', $data);
     }
 
+    function ringkasan(Request $request) {
+        $get = $request->query();
+
+        $kategories = Kategori::list_of_kategoris();
+        $ringkasans = array();
+
+        $from = null;
+        $until = null;
+
+        $keluar_total = 0;
+        $masuk_total = 0;
+
+        if (count($get) !== 0) {
+            dd($get);
+        } else {
+            $month = (int)date('m');
+            if ($month <= 3) {
+                $from = date('Y') . "-01" . "-01";
+                $t = date('t', strtotime(date('Y') . "-03-01"));
+                $until = date('Y') . "-03" . "-$t" . " 23:59:59";
+            } elseif ($month <= 6) {
+                $from = date('Y') . "-04" . "-01";
+                $t = date('t', strtotime(date('Y') . "-06-01"));
+                $until = date('Y') . "-06" . "-$t" . " 23:59:59";
+            } elseif ($month <= 9) {
+                $from = date('Y') . "-07" . "-01";
+                $t = date('t', strtotime(date('Y') . "-09-01"));
+                $until = date('Y') . "-09" . "-$t" . " 23:59:59";
+            } elseif ($month <= 12) {
+                $from = date('Y') . "-10" . "-01";
+                $t = date('t', strtotime(date('Y') . "-12-01"));
+                $until = date('Y') . "-12" . "-$t" . " 23:59:59";
+            }
+            foreach ($kategories as $key_type => $kategori) {
+                // $kategori_types = array();
+                $kategori_level_ones = array();
+                foreach ($kategori['kategori_level_one'] as $key_level_one => $kategori_level_one) {
+                    if (isset($kategori_level_one['kategori_level_two'])) {
+                        $kategori_level_twos = array();
+                        foreach ($kategori_level_one['kategori_level_two'] as $key_level_two => $kategori_level_two) {
+                            // dd($kategori_level_two);
+                            $transactions = Accounting::whereBetween('created_at', [$from, $until])->where('kategori_type', $kategori['type'])->where('kategori_level_one', $kategori_level_one['name'])->where('kategori_level_two', $kategori_level_two['name'])->get();
+                            $jumlah = 0;
+                            foreach ($transactions as $transaction) {
+                                $jumlah += $transaction->jumlah;
+                            }
+                            $kategori_level_twos[] = [
+                                'name' => $kategori_level_two['name'],
+                                'jumlah' => $jumlah,
+                            ];
+                            if ($kategori['type'] === 'UANG KELUAR') {
+                                $keluar_total += $jumlah;
+                            } elseif ($kategori['type'] === 'UANG MASUK') {
+                                $masuk_total += $jumlah;
+                            }
+                        }
+                        $kategori_level_ones[] = [
+                            'name' => $kategori_level_one['name'],
+                            'kategori_level_two' => $kategori_level_twos,
+                        ];
+                    } else {
+                        $transactions = Accounting::whereBetween('created_at', [$from, $until])->where('kategori_type', $kategori['type'])->where('kategori_level_one', $kategori_level_one['name'])->get();
+                        $jumlah = 0;
+                        foreach ($transactions as $transaction) {
+                            $jumlah += $transaction->jumlah;
+                        }
+                        $kategori_level_ones[] = [
+                            'name' => $kategori_level_one['name'],
+                            'jumlah' => $jumlah,
+                        ];
+                        if ($kategori['type'] === 'UANG KELUAR') {
+                            $keluar_total += $jumlah;
+                        } elseif ($kategori['type'] === 'UANG MASUK') {
+                            $masuk_total += $jumlah;
+                        }
+                    }
+                    // $kategori_types[] = [
+                    //     'type' => $kategori['type'],
+                    //     'kategori_level_one' => $kategori_level_ones
+                    // ];
+                }
+                $ringkasans[] = [
+                    'type' => $kategori['type'],
+                    'kategori_level_one' => $kategori_level_ones
+                ];
+            }
+        }
+
+        // dd($ringkasans);
+
+
+
+        // dump($kategories);
+        // dd($ringkasans);
+
+
+
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'accounting.ringkasan',
+            'parent_route' => 'accounting.index',
+            'profile_menus' => Menu::get_profile_menus(),
+            'accounting_menus' => Menu::get_accounting_menus(),
+            'ringkasans' => $ringkasans,
+            'from' => $from,
+            'until' => $until,
+            'keluar_total' => $keluar_total,
+            'masuk_total' => $masuk_total,
+            'kategories' => $kategories,
+
+        ];
+        return view('accounting.ringkasan', $data);
+    }
+
     function transactions_relations() {
         $transaction_names = TransactionName::all();
         // dump($transaction_names);

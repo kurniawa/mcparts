@@ -124,8 +124,13 @@
                         @endforeach
                     </table>
                     <div class="mt-2">
-                        <a href="{{ route('accounting.jurnal') }}" target="_blank" class="text-sky-500 font-bold">
-                            <button class="bg-violet-400 text-white font-semibold p-1 rounded">Lihat Jurnal >></button>
+                        <a href="{{ route('accounting.jurnal') }}" target="_blank">
+                            <button class="bg-orange-400 text-white font-semibold p-1 rounded">Lihat Jurnal >></button>
+                        </a>
+                    </div>
+                    <div class="mt-2">
+                        <a href="{{ route('accounting.ringkasan') }}" target="_blank">
+                            <button class="bg-violet-400 text-white font-semibold p-1 rounded">Lihat Ringkasan >></button>
                         </a>
                     </div>
                 </div>

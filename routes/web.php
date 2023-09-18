@@ -189,6 +189,7 @@ Route::controller(AccountingController::class)->group(function(){
     Route::post('/accounting/{user_instance}/{accounting}/edit_entry','edit_entry')->name('accounting.edit_entry')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/delete_entry','delete_entry')->name('accounting.delete_entry')->middleware('auth');
     Route::get('/accounting/jurnal','jurnal')->name('accounting.jurnal')->middleware('auth');
+    Route::get('/accounting/ringkasan','ringkasan')->name('accounting.ringkasan')->middleware('auth');
     Route::get('/accounting/transactions_relations','transactions_relations')->name('accounting.transactions_relations')->middleware('auth');
 });
 
