@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Accounting;
 use App\Models\Kategori;
 use App\Models\Menu;
+use App\Models\Pelanggan;
+use App\Models\Supplier;
 use App\Models\TransactionName;
 use App\Models\User;
 use App\Models\UserInstance;
@@ -879,10 +881,28 @@ class AccountingController extends Controller
         return view('accounting.ringkasan', $data);
     }
 
-    function transactions_relations() {
-        $transaction_names = TransactionName::all();
+    function transactions_relations(Request $request) {
+        $get = $request->query();
+        $user_instances = UserInstance::all();
+        // dump($user_instances);
+        $transaction_names = collect();
+        if (count($get) !== 0) {
+            dd($get);
+        } else {
+            foreach ($user_instances as $user_instance) {
+                $tr_names = collect();
+                $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->orderBy('desc')->get();
+                $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->orderBy('desc')->get();
+                $tr_names->push($uang_keluars);
+                $tr_names->push($uang_masuks);
+                $transaction_names->push($tr_names);
+            }
+        }
         // dump($transaction_names);
+        // dd($transaction_names[0]);
         $users = User::all();
+        $label_suppliers = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $label_pelanggans = Pelanggan::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
 
         $data = [
             'menus' => Menu::get(),
@@ -891,9 +911,116 @@ class AccountingController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'accounting_menus' => Menu::get_accounting_menus(),
             'transaction_names' => $transaction_names,
+            'user_instances' => $user_instances,
             'users' => $users,
+            'label_suppliers' => $label_suppliers,
+            'label_pelanggans' => $label_pelanggans,
         ];
 
         return view('accounting.transactions_relations', $data);
+    }
+
+    function store_transactions_relations(Request $request) {
+        $post = $request->post();
+        dd($post);
+        $request->validate([
+            'user_instance_id' => 'required',
+            'type' => 'required',
+            'desc' => 'required',
+            'kategori_level_one' => 'required',
+        ]);
+
+        $success_ = '';
+        $user_instance = UserInstance::find($post['user_instance_id']);
+        $user = Auth::user();
+
+        if ($user_instance->user_id !== $user->id) {
+            dd('user_id');
+        }
+
+        $exist_kategori = null;
+
+        if ($post['kategori_level_two']) {
+            $exist_kategori = Kategori::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->where('kategori_level_two', $post['kategori_level_two'])->first();
+        } else {
+            $exist_kategori = Kategori::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->first();
+        }
+
+        if (!$exist_kategori) {
+            dd('exist kategori?');
+        }
+
+        $related_user_id = null;
+        $related_username = null;
+
+        if ($post['related_user_id']) {
+            $related_user = User::find($post['related_user_id']);
+            if ($related_user) {
+                $related_user_id = $post['related_user_id'];
+                $related_username = $related_user->username;
+            }
+        }
+
+        $pelanggan_id = null;
+        $pelanggan_nama = null;
+
+        if ($post['pelanggan_id']) {
+            $pelanggan = Pelanggan::find($post['pelanggan_id']);
+            if (!$pelanggan) {
+                dd('isset($post["pelanggan_id"]) but pelanggan?');
+            }
+            $pelanggan_id = $pelanggan->id;
+            $pelanggan_nama = $pelanggan->nama;
+        }
+
+        $supplier_id = null;
+        $supplier_nama = null;
+
+        if ($post['supplier_id']) {
+            $supplier = Supplier::find($post['supplier_id']);
+            $supplier_id = $supplier->id;
+            $supplier_nama = $supplier->nama;
+        }
+
+        $related_user_instance_id = null;
+        $related_user_instance_type = null;
+        $related_user_instance_name = null;
+        $related_user_instance_branch = null;
+
+        if ($post['related_user_instance_id']) {
+            $related_user_instance = UserInstance::find($post['related_user_instance_id']);
+            $related_user_instance_id = $related_user_instance->id;
+            $related_user_instance_type = $related_user_instance->instance_type;
+            $related_user_instance_name = $related_user_instance->instance_name;
+            $related_user_instance_branch = $related_user_instance->branch;
+        }
+
+        TransactionName::create([
+            'user_id'=>$user->id,
+            'username'=>$user->username,
+            'user_instance_id'=>$user_instance->id,
+            'user_instance_type'=>$user_instance->instance_type,
+            'user_instance_name'=>$user_instance->instance_name,
+            'user_instance_branch'=>$user_instance->branch,
+            'related_user_id'=>$related_user_id,
+            'related_username'=>$related_username,
+            'desc'=>$post['desc'],
+            'kategori_type'=>$post['type'],
+            'kategori_level_one'=>$post['kategori_level_one'],
+            'kategori_level_two'=>$post['kategori_level_two'],
+            'related_desc'=>$post['related_desc'],
+            'pelanggan_id'=>$pelanggan_id,
+            'pelanggan_nama'=>$pelanggan_nama,
+            'supplier_id'=>$supplier_id,
+            'supplier_nama'=>$supplier_nama,
+            'related_user_instance_id'=>$related_user_instance_id,
+            'related_user_instance_type'=>$related_user_instance_type,
+            'related_user_instance_name'=>$related_user_instance_name,
+            'related_user_instance_branch'=>$related_user_instance_branch,
+        ]);
+
+        $success_ .= '-transaction_relation created-';
+
+        return back()->with('success_', $success_);
     }
 }
