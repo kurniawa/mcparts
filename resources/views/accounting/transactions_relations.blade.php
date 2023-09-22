@@ -44,7 +44,7 @@
                                         <input type="radio" name="user_instance_id" id="filter-user_instance_id-all" value="all" checked>
                                         <label for="filter-user_instance_id-all" class="ml-1">all</label>
                                     </div>
-                                    @foreach ($user_instances as $key => $user_instance)
+                                    @foreach ($user_instances_all as $key => $user_instance)
                                     <div class="flex mt-1">
                                         <input type="radio" name="user_instance_id" id="filter-user_instance_id-{{ $key }}" value="{{ $user_instance->id }}">
                                         <label for="filter-user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
@@ -57,6 +57,7 @@
                                             <label>Tipe:</label>
                                             <div>
                                                 <select name="type" id="filter-type" class="rounded py-1 text-xs">
+                                                    <option value="ALL">ALL</option>
                                                     <option value="UANG MASUK">UANG MASUK</option>
                                                     <option value="UANG KELUAR">UANG KELUAR</option>
                                                 </select>
@@ -71,13 +72,13 @@
                                     </div>
                                     <div class="flex mt-1">
                                         <div class="ml-1">
-                                            <label>Kategori ke-1:</label>
+                                            <label>Kategori lvl.1:</label>
                                             <div>
                                                 <input type="text" name="kategori_level_one" id="filter-kategori_level_one" class="border rounded p-1 text-xs">
                                             </div>
                                         </div>
                                         <div class="ml-1">
-                                            <label>Kategori ke-2:</label>
+                                            <label>Kategori lvl.2:</label>
                                             <div>
                                                 <input type="text" name="kategori_level_two" id="filter-kategori_level_two" class="border rounded p-1 text-xs">
                                             </div>
@@ -138,16 +139,18 @@
                                         </div>
                                         <div class="flex mt-1">
                                             <div class="ml-1">
-                                                <label>Kategori ke-1:</label>
+                                                <label>Kategori lvl.1:</label>
                                                 <div>
                                                     <input type="text" name="kategori_level_one" id="new_relasi_transaksi-kategori_level_one" class="border rounded p-1 text-xs">
                                                 </div>
+                                                {{-- <div id="new-pilihan_kategori_level_one"></div> --}}
                                             </div>
                                             <div class="ml-1">
-                                                <label>Kategori ke-2:</label>
+                                                <label>Kategori lvl.2:</label>
                                                 <div>
                                                     <input type="text" name="kategori_level_two" id="new_relasi_transaksi-kategori_level_two" class="border rounded p-1 text-xs">
                                                 </div>
+                                                {{-- <div id="new-pilihan_kategori_level_two"></div> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -155,6 +158,10 @@
                                 <div class="flex border rounded p-1 border-sky-300 mt-3">
                                     <div>
                                         <label>Related User Instance:</label>
+                                        <div class="flex mt-1">
+                                            <input type="radio" name="related_user_instance_id" id="new_relasi_transaksi-related_user_instance_id-none" value="" checked>
+                                            <label for="new_relasi_transaksi-related_user_instance_id-none" class="ml-1">none</label>
+                                        </div>
                                         @foreach ($user_instances as $key => $user_instance)
                                         <div class="flex mt-1">
                                             <input type="radio" name="related_user_instance_id" id="new_relasi_transaksi-related_user_instance_id-{{ $key }}" value="{{ $user_instance->id }}">
@@ -168,6 +175,7 @@
                                                 <label>related_user:</label>
                                                 <div>
                                                     <select name="related_user_id" id="new_relasi_transaksi-related_user" class="text-xs rounded py-1">
+                                                        <option value="">-</option>
                                                         @foreach ($users as $user)
                                                         <option value="{{ $user->id }}">{{ $user->username }}</option>
                                                         @endforeach
@@ -205,7 +213,7 @@
                 {{-- END - FORM NEW RELASI TRANSAKSI --}}
 
                 <table class="table-slim table-border min-w-content max-w-full mt-2">
-                    <tr><th>Deskripsi/Keterangan</th><th>Kategori ke-1</th><th>Kategori ke-2</th><th>Info Lain</th></tr>
+                    <tr><th>Deskripsi/Keterangan</th><th>Kategori lvl.1</th><th>Kategori lvl.2</th><th>Info Lain</th></tr>
                     @foreach ($transaction_names as $key => $kategori_types)
                     <tr class="bg-violet-300">
                         <td colspan="4">
@@ -272,6 +280,8 @@
 <script>
     const label_suppliers = {!! json_encode($label_suppliers, JSON_HEX_TAG) !!};
     const label_pelanggans = {!! json_encode($label_pelanggans, JSON_HEX_TAG) !!};
+    const kategoris = {!! json_encode($kategoris, JSON_HEX_TAG) !!};
+    const label_kategori_level_one = {!! json_encode($label_kategori_level_one, JSON_HEX_TAG) !!};
 
     $('#new_relasi_transaksi-pelanggan').autocomplete({
         source: label_pelanggans,
@@ -290,6 +300,58 @@
             document.getElementById('new_relasi_transaksi-supplier').value = ui.item.value;
         }
     });
+
+    // function autocomplete_kategori_level_one(value) {
+    //     console.log(value);
+    //     var html_pilihan_kategori_level_one = ``;
+    // }
+
+    // const filterItems = (needle, heystack) => {
+    //     let query = needle.toLowerCase();
+    //     return heystack.filter(item => item.toLowerCase().indexOf(query) >= 0);
+    // }
+
+    console.log(kategoris);
+    let label_kategori_level_two = new Array();
+
+    $('#new_relasi_transaksi-kategori_level_one').autocomplete({
+        source: label_kategori_level_one,
+        select: function (event, ui) {
+            console.log(ui.item);
+            // document.getElementById('new_relasi_transaksi-kategori_level_one').value = ui.item.id;
+            document.getElementById('new_relasi_transaksi-kategori_level_one').value = ui.item.value;
+            let index_kategoris = new Array();
+            for (let i = 0; i < kategoris.length; i++) {
+                if (kategoris[i].kategori_level_one === ui.item.value) {
+                    index_kategoris.push(i);
+                }
+            }
+            console.log(index_kategoris);
+
+            label_kategori_level_two = new Array();
+            for (let j = 0; j < index_kategoris.length; j++) {
+                if (kategoris[index_kategoris[j]].kategori_level_two !== null) {
+                    label_kategori_level_two.push({
+                        'label': kategoris[index_kategoris[j]].kategori_level_two,
+                        'value': kategoris[index_kategoris[j]].kategori_level_two,
+                    });
+                }
+            }
+            set_autocomplete_kategori_level_two();
+        }
+    });
+
+    function set_autocomplete_kategori_level_two() {
+        console.log(label_kategori_level_two);
+        $('#new_relasi_transaksi-kategori_level_two').autocomplete({
+        source: label_kategori_level_two,
+        select: function (event, ui) {
+            console.log(ui.item);
+            // document.getElementById('new_relasi_transaksi-kategori_level_one').value = ui.item.id;
+            document.getElementById('new_relasi_transaksi-kategori_level_two').value = ui.item.value;
+        }
+    });
+    }
 </script>
 
 @endsection

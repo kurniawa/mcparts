@@ -883,27 +883,106 @@ class AccountingController extends Controller
 
     function transactions_relations(Request $request) {
         $get = $request->query();
-        $user_instances = UserInstance::all();
         // dump($user_instances);
+        $user_instances_all = UserInstance::all();
+        $user_instances = collect();
         $transaction_names = collect();
         if (count($get) !== 0) {
-            dd($get);
+            // dd($get);
+            if ($get['user_instance_id'] === 'all') {
+                $user_instances = UserInstance::all();
+            } else {
+                $user_instances = UserInstance::where('id', $get['user_instance_id'])->get();
+            }
         } else {
-            foreach ($user_instances as $user_instance) {
-                $tr_names = collect();
+            $user_instances = UserInstance::all();
+        }
+
+        foreach ($user_instances as $user_instance) {
+            $tr_names = collect();
+            $uang_masuks = collect();
+            $uang_keluars = collect();
+            if (count($get) !== 0) {
+                if ($get['desc'] && $get['kategori_level_one'] && $get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    }
+                } elseif ($get['desc'] && $get['kategori_level_one'] && !$get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                    }
+                } elseif ($get['desc'] && !$get['kategori_level_one'] && $get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    }
+                } elseif (!$get['desc'] && $get['kategori_level_one'] && $get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
+                    }
+                } elseif (!$get['desc'] && $get['kategori_level_one'] && !$get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->orderBy('desc')->get();
+                    }
+                } elseif (!$get['desc'] && !$get['kategori_level_one'] && $get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_two', 'like', "%$get[kategori_level_two]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_two', 'like', "%$get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_two', 'like', "%$get[kategori_level_two]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_two', 'like', "%$get[kategori_level_two]%")->orderBy('desc')->get();
+                    }
+                } elseif (!$get['desc'] && !$get['kategori_level_one'] && !$get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->orderBy('desc')->get();
+                    }
+                }
+            } else {
                 $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->orderBy('desc')->get();
                 $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->orderBy('desc')->get();
-                $tr_names->push($uang_keluars);
-                $tr_names->push($uang_masuks);
-                $transaction_names->push($tr_names);
             }
+            $tr_names->push($uang_keluars);
+            $tr_names->push($uang_masuks);
+            $transaction_names->push($tr_names);
         }
         // dump($transaction_names);
         // dd($transaction_names[0]);
         $users = User::all();
         $label_suppliers = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
         $label_pelanggans = Pelanggan::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
-
+        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->groupBy('id', 'desc')->orderBy('desc')->get();
+        $kategoris = Kategori::all();
+        $label_kategori_level_one = Kategori::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.transactions_relations',
@@ -915,6 +994,10 @@ class AccountingController extends Controller
             'users' => $users,
             'label_suppliers' => $label_suppliers,
             'label_pelanggans' => $label_pelanggans,
+            'user_instances_all' => $user_instances_all,
+            'label_deskripsi' => $label_deskripsi,
+            'kategoris' => $kategoris,
+            'label_kategori_level_one' => $label_kategori_level_one,
         ];
 
         return view('accounting.transactions_relations', $data);
@@ -922,7 +1005,7 @@ class AccountingController extends Controller
 
     function store_transactions_relations(Request $request) {
         $post = $request->post();
-        dd($post);
+        // dd($post);
         $request->validate([
             'user_instance_id' => 'required',
             'type' => 'required',
