@@ -192,6 +192,7 @@ Route::controller(AccountingController::class)->group(function(){
     Route::get('/accounting/ringkasan','ringkasan')->name('accounting.ringkasan')->middleware('auth');
     Route::get('/accounting/transactions_relations','transactions_relations')->name('accounting.transactions_relations')->middleware('auth');
     Route::post('/accounting/store_transactions_relations','store_transactions_relations')->name('accounting.store_transactions_relations')->middleware('auth');
+    Route::post('/accounting/{transaction_name}/delete_transaction_relation','delete_transaction_relation')->name('accounting.delete_transaction_relation')->middleware('auth');
 });
 
 Route::controller(ArtisanController::class)->group(function(){

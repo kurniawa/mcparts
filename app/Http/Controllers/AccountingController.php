@@ -355,13 +355,16 @@ class AccountingController extends Controller
         $transaction_name = TransactionName::where('user_id', $accounting->related_user_id)->where('desc', $accounting->related_desc)->where('user_instance_id', $accounting->related_user_instance_id)->first();
         // dd($transaction_name);
         $transaction_type = 'pengeluaran';
-        if ($transaction_name === 'UANG MASUK') {
+        if ($transaction_name->kategori_type === 'UANG MASUK') {
             $transaction_type = 'pemasukan';
         }
 
-        $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
-        $saldo = 0;
         $created_at = date('Y-m-d', strtotime($accounting->created_at)) . " " . date("H:i:s");
+        $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$created_at)->orderBy('created_at')->get();
+        // $last_transactions_desc = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderByDesc('created_at')->get();
+        // dump($last_transactions);
+        // dd($last_transactions_desc);
+        $saldo = 0;
 
         if (count($last_transactions) !== 0) {
             $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
@@ -370,13 +373,24 @@ class AccountingController extends Controller
                 $saldo = $before_last_transaction->saldo;
             }
 
-            if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                $saldo = $saldo - $accounting->jumlah;
-            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                $saldo = $saldo + $accounting->jumlah;
+            try {
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo = $saldo - $accounting->jumlah;
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo = $saldo + $accounting->jumlah;
+                }
+            } catch (\Throwable $th) {
+                dump($accounting);
+                dump(User::find($accounting->related_user_id));
+                dump(UserInstance::find($accounting->related_user_instance_id));
+                dd($transaction_name);
             }
 
             $saldo_next = $saldo;
+
+            // dump($saldo);
+            // dump($accounting);
+            // dd($last_transactions);
             foreach ($last_transactions as $last_transaction) {
                 if ($last_transaction->transaction_type === 'pengeluaran') {
                     $saldo_next -= $last_transaction->jumlah;
@@ -394,13 +408,22 @@ class AccountingController extends Controller
                 // dump(date('d-m-Y H:i:s', strtotime($last_transaction->created_at)) . " - $last_transaction->transaction_type: $last_transaction->jumlah, saldo: $last_transaction->saldo");
                 $saldo = $last_transaction->saldo; // -5.000.000
             }
-            if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                $saldo = $saldo - $accounting->jumlah;
-            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                $saldo = $saldo + $accounting->jumlah;
+            try {
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo = $saldo - $accounting->jumlah;
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo = $saldo + $accounting->jumlah;
+                }
+            } catch (\Throwable $th) {
+                dump("related to: " . User::find($accounting->related_user_id)->username . " - ID: $accounting->related_user_id, $accounting->related_desc - " . UserInstance::find($accounting->related_user_instance_id)->instance_type);
+                dump($accounting);
+                dump('transaction_name:', $transaction_name);
+                dd('last_transaction:', $last_transaction);
             }
         }
-
+        // dump($transaction_name);
+        // dump("kategori_type: " . $transaction_name->kategori_type);
+        // dd("transaction_type: " . $transaction_type);
         Accounting::create([
             'user_id'=>$user_instance->user_id,
             'username'=>$user_instance->username,
@@ -930,7 +953,16 @@ class AccountingController extends Controller
                     } elseif ($get['type'] === 'UANG MASUK') {
                         $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
                     }
-                } elseif (!$get['desc'] && $get['kategori_level_one'] && $get['kategori_level_two']) {
+                } elseif ($get['desc'] && !$get['kategori_level_one'] && !$get['kategori_level_two']) {
+                    if ($get['type'] === 'ALL') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->orderBy('desc')->get();
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG KELUAR') {
+                        $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('desc','like', "%$get[desc]%")->orderBy('desc')->get();
+                    } elseif ($get['type'] === 'UANG MASUK') {
+                        $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('desc','like', "%$get[desc]%")->orderBy('desc')->get();
+                    }
+                }  elseif (!$get['desc'] && $get['kategori_level_one'] && $get['kategori_level_two']) {
                     if ($get['type'] === 'ALL') {
                         $uang_keluars = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG KELUAR')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
                         $uang_masuks = TransactionName::where('user_instance_id', $user_instance->id)->where('kategori_type','UANG MASUK')->where('kategori_level_one', 'like', "%$get[kategori_level_one]%")->where('kategori_level_two', 'like', "%%get[kategori_level_two]%")->orderBy('desc')->get();
@@ -980,9 +1012,13 @@ class AccountingController extends Controller
         $users = User::all();
         $label_suppliers = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
         $label_pelanggans = Pelanggan::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $label_deskripsi_masuk = TransactionName::where('kategori_type', 'UANG MASUK')->select('id', 'desc as label', 'desc as value')->groupBy('id', 'desc')->orderBy('desc')->get();
+        $label_deskripsi_keluar = TransactionName::where('kategori_type', 'UANG KELUAR')->select('id', 'desc as label', 'desc as value')->groupBy('id', 'desc')->orderBy('desc')->get();
         $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->groupBy('id', 'desc')->orderBy('desc')->get();
+        // dump($label_deskripsi_keluar);
+        // dd($label_deskripsi_masuk);
         $kategoris = Kategori::all();
-        $label_kategori_level_one = Kategori::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
+        // $label_kategori_level_one = Kategori::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.transactions_relations',
@@ -996,8 +1032,10 @@ class AccountingController extends Controller
             'label_pelanggans' => $label_pelanggans,
             'user_instances_all' => $user_instances_all,
             'label_deskripsi' => $label_deskripsi,
+            'label_deskripsi_keluar' => $label_deskripsi_keluar,
+            'label_deskripsi_masuk' => $label_deskripsi_masuk,
             'kategoris' => $kategoris,
-            'label_kategori_level_one' => $label_kategori_level_one,
+            // 'label_kategori_level_one' => $label_kategori_level_one,
         ];
 
         return view('accounting.transactions_relations', $data);
@@ -1027,21 +1065,15 @@ class AccountingController extends Controller
             $exist_kategori = Kategori::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->where('kategori_level_two', $post['kategori_level_two'])->first();
         } else {
             $exist_kategori = Kategori::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->first();
+            if ($exist_kategori->kategori_level_two !== null) {
+                dump($exist_kategori);
+                dd('kategori_level_two?');
+            }
         }
 
         if (!$exist_kategori) {
+            dump($post);
             dd('exist kategori?');
-        }
-
-        $related_user_id = null;
-        $related_username = null;
-
-        if ($post['related_user_id']) {
-            $related_user = User::find($post['related_user_id']);
-            if ($related_user) {
-                $related_user_id = $post['related_user_id'];
-                $related_username = $related_user->username;
-            }
         }
 
         $pelanggan_id = null;
@@ -1065,17 +1097,29 @@ class AccountingController extends Controller
             $supplier_nama = $supplier->nama;
         }
 
+        $related_user_id = null;
+        $related_username = null;
+        $related_desc = null;
         $related_user_instance_id = null;
         $related_user_instance_type = null;
         $related_user_instance_name = null;
         $related_user_instance_branch = null;
 
         if ($post['related_user_instance_id']) {
+            if ($post['related_user_instance_id'] === $post['user_instance_id']) {
+                dd('user_instance = related_user_instance ?');
+            }
+            if (!$post['related_desc']) {
+                dd('related_desc?');
+            }
             $related_user_instance = UserInstance::find($post['related_user_instance_id']);
             $related_user_instance_id = $related_user_instance->id;
             $related_user_instance_type = $related_user_instance->instance_type;
             $related_user_instance_name = $related_user_instance->instance_name;
             $related_user_instance_branch = $related_user_instance->branch;
+            $related_user_id = $related_user_instance->user_id;
+            $related_username = $related_user_instance->username;
+            $related_desc = $post['related_desc'];
         }
 
         TransactionName::create([
@@ -1091,7 +1135,7 @@ class AccountingController extends Controller
             'kategori_type'=>$post['type'],
             'kategori_level_one'=>$post['kategori_level_one'],
             'kategori_level_two'=>$post['kategori_level_two'],
-            'related_desc'=>$post['related_desc'],
+            'related_desc'=>$related_desc,
             'pelanggan_id'=>$pelanggan_id,
             'pelanggan_nama'=>$pelanggan_nama,
             'supplier_id'=>$supplier_id,
@@ -1105,5 +1149,11 @@ class AccountingController extends Controller
         $success_ .= '-transaction_relation created-';
 
         return back()->with('success_', $success_);
+    }
+
+    function delete_transaction_relation(TransactionName $transaction_name) {
+        // dd($transaction_name);
+        $transaction_name->delete();
+        return back()->with('danger_', '-transaction_relation deleted!-');
     }
 }
