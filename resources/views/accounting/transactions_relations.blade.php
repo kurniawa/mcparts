@@ -274,6 +274,7 @@
                             </div>
                         </td>
                     </tr>
+                    {{-- DETAIL AND EDIT OR DELETE --}}
                     <tr class="hidden" id="detail_transaction_type-{{ $key_kategori }}-{{ $key_tr_name }}">
                         <td colspan="5">
                             <div class="flex justify-center">
@@ -283,17 +284,15 @@
                                         <div class="flex">
                                             <div>
                                                 <label>User Instance:</label>
-                                                @foreach ($user_instances_all as $key => $user_instance)
-                                                @if (Auth::user()->id === $user_instance->user_id)
+                                                @foreach ($user_instances_all as $key => $user_instance_this)
                                                 <div class="flex mt-1">
-                                                    @if ($tr_name->user_instance_id === $user_instance->id)
-                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance->id }}" checked>
+                                                    @if ($tr_name->user_instance_id === $user_instance_this->id)
+                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}" checked>
                                                     @else
-                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance->id }}">
+                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}">
                                                     @endif
-                                                    <label for="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
+                                                    <label for="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance_this->instance_type }} - {{ $user_instance_this->instance_name }} - {{ $user_instance_this->branch }} - {{ $user_instance_this->account_number }}</label>
                                                 </div>
-                                                @endif
                                                 @endforeach
                                             </div>
                                             <div class="ml-2">
@@ -373,6 +372,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @if ($tr_name->user_id === Auth::user()->id)
                                         <div class="flex mt-3 justify-center">
                                             <div>
                                                 <button type="submit" class="ml-2 flex items-center bg-pink-400 text-white py-1 px-3 rounded hover:bg-pink-600">
@@ -380,11 +380,13 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        @endif
                                     </form>
                                 </div>
                             </div>
                         </td>
                     </tr>
+                    {{-- END - DETAIL AND EDIT OR DELETE --}}
                     @endforeach
                     @endforeach
                     @endforeach

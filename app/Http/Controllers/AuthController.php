@@ -38,7 +38,7 @@ class AuthController extends Controller
             return redirect()->intended('/');
         }
 
-        return back()->with('failed', 'Login gagal!');
+        return back()->with('failed_', 'Login gagal!');
         // return back()->withErrors([
         //     'email' => 'The provided credentials do not match our records.',
         // ])->onlyInput('email');

@@ -6,8 +6,10 @@
     </div>
   </header> --}}
 <main>
-    <x-errors-any></x-errors-any>
-    <x-validation-feedback></x-validation-feedback>
+    <div class="m-2 text-xs">
+        <x-errors-any></x-errors-any>
+        <x-validation-feedback></x-validation-feedback>
+    </div>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 relative">
         <h1 class="text-xl font-bold">Data Transaksi - <span class="text-slate-500">{{ $user->username }}</span></h1>
         <div class="flex">
@@ -301,18 +303,18 @@
                     </tr>
                     @for ($i = 0; $i < 7; $i++)
                     <tr>
-                        <td><input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy"></td>
-                        <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ $user_instance->kode }}"></td>
-                        <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60"></td>
-                        <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full"></td>
+                        <td><input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"></td>
+                        <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ old('kode.' . $i) ? old('kode.' . $i) : $user_instance->kode }}"></td>
+                        <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
+                        <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
                         <td>
-                            <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'keluar-{{ $i }}-unformatted')">
-                            <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted">
+                            <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'keluar-{{ $i }}-unformatted')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
+                            <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted" value="{{ old('keluar.' . $i) }}">
                         </td>
                         <td>
-                            <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'masuk-{{ $i }}-unformatted')">
-                            <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted">
-                            <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}">
+                            <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'masuk-{{ $i }}-unformatted')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
+                            <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted" value="{{ old('masuk.' . $i) }}">
+                            <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
                         </td>
                         <td>
                             {{-- <input type="text" name="saldo[]" id="saldo-{{ $i }}" class="border p-1 text-xs w-36"> --}}
@@ -395,6 +397,7 @@
         {{-- END - STORE NEW TRANSACTIONS --}}
 
         {{-- NOTIFIKASI --}}
+        @if (Auth::user()->id === $user_instance->user_id)
         <div class="fixed bottom-16 right-12">
             <div class="border rounded p-1">
                 <h3 class="font-bold text-slate-500">Notifikasi</h3>
@@ -439,6 +442,7 @@
                 </div>
             </div>
         </div>
+        @endif
         {{-- END - NOTIFIKASI --}}
     </div>
 </main>

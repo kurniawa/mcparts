@@ -12,4 +12,7 @@
     @if (session()->has('errors_') && session('errors_')!=="")
     <div class="font-semibold px-3 py-2 rounded bg-red-200 text-red-600 opacity-70">{{ session('errors_') }}</div>
     @endif
+    @if (session()->has('failed_') && session('failed_')!=="")
+    <div class="font-semibold px-3 py-2 rounded bg-red-200 text-red-600 opacity-70">{{ session('failed_') }}</div>
+    @endif
 </div>

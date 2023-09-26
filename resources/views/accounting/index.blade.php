@@ -89,7 +89,7 @@
                             <td>{{ $key_user_instance_this + 1 }}.</td>
                             <td>
                                 <div class="ml-2">
-                                    <a href="{{ route('accounting.show_transactions', $user_ins->id) }}" target="_blank" class="text-sky-500 font-bold">
+                                    <a href="{{ route('accounting.show_transactions', $user_ins->id) }}" target="" class="text-sky-500 font-bold">
                                         <button>{{ $user_ins->instance_type }} - {{ $user_ins->instance_name }} - {{ $user_ins->branch }} >></button>
                                     </a>
                                 </div>
@@ -115,7 +115,7 @@
                             <td>{{ $user_instance->branch }}</td>
                             <td>
                                 <div class="ml-2">
-                                    <a href="{{ route('accounting.show_transactions', $user_instance->id) }}" target="_blank" class="text-sky-500 font-bold">
+                                    <a href="{{ route('accounting.show_transactions', $user_instance->id) }}" target="" class="text-sky-500 font-bold">
                                         <button>>></button>
                                     </a>
                                 </div>
@@ -124,12 +124,12 @@
                         @endforeach
                     </table>
                     <div class="mt-2">
-                        <a href="{{ route('accounting.jurnal') }}" target="_blank">
+                        <a href="{{ route('accounting.jurnal') }}" target="">
                             <button class="bg-orange-400 text-white font-semibold p-1 rounded">Lihat Jurnal >></button>
                         </a>
                     </div>
                     <div class="mt-2">
-                        <a href="{{ route('accounting.ringkasan') }}" target="_blank">
+                        <a href="{{ route('accounting.ringkasan') }}" target="">
                             <button class="bg-violet-400 text-white font-semibold p-1 rounded">Lihat Ringkasan >></button>
                         </a>
                     </div>
