@@ -303,7 +303,16 @@
                     </tr>
                     @for ($i = 0; $i < 7; $i++)
                     <tr>
-                        <td><input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"></td>
+                        <td>
+                            {{-- <input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"> --}}
+                            <div class="flex items-center">
+                                <input type="text" name="day[]" id="day-{{ $i }}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
+                                <span>-</span>
+                                <input type="text" name="month[]" id="month-{{ $i }}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
+                                <span>-</span>
+                                <input type="text" name="year[]" id="year-{{ $i }}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
+                            </div>
+                        </td>
                         <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ old('kode.' . $i) ? old('kode.' . $i) : $user_instance->kode }}"></td>
                         <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
                         <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
@@ -485,7 +494,15 @@
         parent.insertAdjacentHTML('beforeend',
         `
         <tr>
-            <td><input type="text" name="created_at[]" id="created_at-${transaction_index}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy"></td>
+            <td>
+                <div class="flex items-center">
+                    <input type="text" name="day[]" id="day-${transaction_index}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
+                    <span>-</span>
+                    <input type="text" name="month[]" id="month-${transaction_index}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
+                    <span>-</span>
+                    <input type="text" name="year[]" id="year-${transaction_index}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
+                </div>
+            </td>
             <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs w-20" value="${user_instance.kode}"></td>
             <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
             <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>

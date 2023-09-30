@@ -11,21 +11,36 @@ class PenjualanController extends Controller
 {
     function index(Request $request) {
         $get = $request->query();
-
         // Set di awal tanpa filter -> tanggal bulan ini
 
-        $date_start = date('Y') . "-" . date('m') . "-01";
-        $date_end = date('Y') . "-" . date('m') . "-" . date('d') . " 23:59:59";
 
-        if (isset($get['from_month'])) {
-            if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {
-                $request->validate(['error'=>'required'],['error.required'=>'customer || time_range']);
-            } else {
+        $notas = collect();
+
+        if (count($get) > 0) {
+            // dd($get);
+            $date_start = null;
+            $date_end = null;
+
+            if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
                 $date_start = "$get[from_year]-$get[from_month]-$get[from_day]";
                 $date_end = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
             }
+
+            if ($get['pelanggan_nama'] && $date_start && $date_end) {
+                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->get();
+            } elseif ($get['pelanggan_nama'] && !$date_start && !$date_end) {
+                $notas = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->get();
+            } elseif (!$get['pelanggan_nama'] && $date_start && $date_end) {
+                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->get();
+            } else {
+                $request->validate(['error'=>'required'],['error.required'=>'customer || time_range']);
+            }
+        } else {
+            $date_start = date('Y') . "-" . date('m') . "-01";
+            $date_end = date('Y') . "-" . date('m') . "-" . date('d') . " 23:59:59";
+            $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->get();
         }
-        $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->get();
+
         // dump($notas);
         // dd($notas->groupBy('pelanggan_nama'));
         $notas_grouped_pelanggan = $notas->groupBy('pelanggan_nama');

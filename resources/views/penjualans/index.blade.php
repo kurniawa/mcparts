@@ -19,7 +19,7 @@
                     <div>
                         <label>Customer:</label>
                         <div class="flex mt-1">
-                            <input type="text" class="border rounded text-xs p-1" name="nama_pelanggan" placeholder="Nama Customer..." id="nama_pelanggan">
+                            <input type="text" class="border rounded text-xs p-1" name="pelanggan_nama" placeholder="Nama Customer..." id="pelanggan_nama">
                             <input type="hidden" name="pelanggan_id" id="pelanggan_id">
                         </div>
                     </div>

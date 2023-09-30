@@ -18,7 +18,7 @@ class Kategori extends Model
                     [
                         ['name'=>'PENJUALAN CASH'],
                         ['name'=>'PENERIMAAN PIUTANG'],
-                        ['name'=>'MUTASI DARI KAS KANTOR 1'],
+                        ['name'=>'MUTASI DARI KAS KANTOR ALBERT'],
                         ['name'=>'MUTASI DARI KAS KANTOR AKHUN'],
                         ['name'=>'MUTASI DARI KAS BCA MCP'],
                         ['name'=>'MUTASI DARI KAS BCA DMD'],
@@ -39,7 +39,7 @@ class Kategori extends Model
                         ['name'=>'BELI BAHAN BAKU CASH'],
                         ['name'=>'BAYAR HUTANG BAHAN PENDUKUNG'],
                         ['name'=>'BELI BAHAN PENDUKUNG CASH'],
-                        ['name'=>'MUTASI KE KAS KANTOR 1'],
+                        ['name'=>'MUTASI KE KAS KANTOR ALBERT'],
                         ['name'=>'MUTASI KE KAS KANTOR DMD'],
                         ['name'=>'MUTASI KE KAS KANTOR DIAN'],
                         ['name'=>'MUTASI KE KAS KANTOR AKHUN'],

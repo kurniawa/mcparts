@@ -211,8 +211,15 @@ class AccountingController extends Controller
         $working_index = count($post['transaction_desc']);
 
         for ($i=0; $i < count($post['transaction_desc']); $i++) {
-            if ($post['created_at'][$i] !== null && $post['transaction_desc'][$i] !== null && ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null) ) {
-                $year_inputted = (int)date('Y', strtotime($post['created_at'][$i]));
+            $created_at = null;
+            if ($post['year'][$i] && $post['month'][$i] && $post['day'][$i]) {
+                $created_at = date('Y-m-d', strtotime($post['year'][$i] . "-" . $post['month'][$i] . "-" . $post['day'][$i])) . " " . date("H:i:s");
+            } else {
+                $request->validate(['error'=>'required'],['error.required'=>$post['year'][$i] . "-" . $post['month'][$i] . "-" . $post['day'][$i]]);
+            }
+
+            if ($created_at !== null && $post['transaction_desc'][$i] !== null && ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null) ) {
+                $year_inputted = (int)date('Y', strtotime($created_at));
                 $year_now = (int)date('Y');
                 // dump($year_inputted);
                 // dd($year_now);
@@ -251,14 +258,14 @@ class AccountingController extends Controller
 
             } else {
                 if ($i === 0) {
-                    if ($post['created_at'][$i] === null && $post['transaction_desc'][$i] !== null) {
-                        // dd('created_at: ', $post['created_at'][$i]);
+                    if ($created_at === null && $post['transaction_desc'][$i] !== null) {
+                        // dd('created_at: ', $created_at);
                         // dump('keluar: ', $post['keluar'][$i]);
                         // dd('masuk: ', $post['masuk'][$i]);
-                        $request->validate(['error'=>'required'],['error.required'=>"created_at[$i]: " . $post['created_at'][$i]]);
-                    } elseif ($post['created_at'][$i] !== null && $post['transaction_desc'][$i] === null) {
+                        $request->validate(['error'=>'required'],['error.required'=>"created_at[$i]: " . $created_at]);
+                    } elseif ($created_at !== null && $post['transaction_desc'][$i] === null) {
                         // dd('transaction_desc: ', $post['transaction_desc'][$i]);
-                        $request->validate(['error'=>'required'],['error.required'=>"transaction_desc[$i]: $post[transaction_desc][$i]"]);
+                        $request->validate(['error'=>'required'],['error.required'=>"transaction_desc[$i]: " . $post['transaction_desc'][$i]]);
                     }
                 } else {
                     $working_index = $i;
@@ -292,7 +299,9 @@ class AccountingController extends Controller
             }
             $saldo = 0;
             // Cari apakah ada transaksi dengan tanggal yang setelahnya?
-            $created_at = date('Y-m-d', strtotime($post['created_at'][$i])) . " " . date("H:i:s");
+            // $created_at = date('Y-m-d', strtotime("$post[year][$i]-$post[month][$i]-$post[day][$i]")) . " " . date("H:i:s");
+            $created_at = date('Y-m-d', strtotime($post['year'][$i] . "-" . $post['month'][$i] . "-" . $post['day'][$i])) . " " . date("H:i:s");
+            // $created_at = date('Y-m-d', strtotime($post['created_at'][$i])) . " " . date("H:i:s");
             $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$created_at)->orderBy('created_at')->get();
             if (count($last_transactions) !== 0) {
                 $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
@@ -798,7 +807,7 @@ class AccountingController extends Controller
 
         $related_users = User::where('id', '!=', $user->id)->get();
 
-        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->groupBy('id','desc')->orderBy('desc')->get();
+        $label_deskripsi = TransactionName::select('desc as label', 'desc as value')->groupBy('desc')->orderBy('desc')->get();
         // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
         // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();

@@ -13,6 +13,29 @@ class TransactionName extends Model
 
     static function list_of_transaction_names() {
         $list_of_transaction_names_kas_ktr_1_albert = [
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'user_instance_id'=>4,
+                'user_instance_type'=>'safe',
+                'user_instance_name'=>'storage',
+                'user_instance_branch'=>'Albert',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // PIUTANG
             [
                 'user_id'=>7,
@@ -297,7 +320,7 @@ class TransactionName extends Model
                 'kategori_level_two'=>null,
                 'related_user_id'=>7,
                 'related_username'=>'Albert21',
-                'related_desc'=>'MUTASI KE KAS KANTOR 1',
+                'related_desc'=>'MUTASI KE KAS ALBERT',
                 'pelanggan_id'=>null,
                 'pelanggan_nama'=>null,
                 'supplier_id'=>null,
@@ -319,7 +342,7 @@ class TransactionName extends Model
                 'kategori_level_two'=>null,
                 'related_user_id'=>7,
                 'related_username'=>'Albert21',
-                'related_desc'=>'MUTASI KE KAS KANTOR 1',
+                'related_desc'=>'MUTASI KE KAS ALBERT',
                 'pelanggan_id'=>null,
                 'pelanggan_nama'=>null,
                 'supplier_id'=>null,
@@ -896,6 +919,29 @@ class TransactionName extends Model
 
         // DIAN
         $list_of_transaction_names_kas_ktr_dian = [
+            [
+                'user_id'=>6,
+                'username'=>'Dian',
+                'user_instance_id'=>8,
+                'user_instance_type'=>'safe',
+                'user_instance_name'=>'storage',
+                'user_instance_branch'=>'Dian',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // DLL
             [
                 'user_id'=>6,
@@ -2211,6 +2257,29 @@ class TransactionName extends Model
         // END - DIAN
 
         $list_of_transaction_names_kas_ktr_akhun = [
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'user_instance_id'=>7,
+                'user_instance_type'=>'safe',
+                'user_instance_name'=>'storage',
+                'user_instance_branch'=>'Akhun',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // PIUTANG
             [
                 'user_id'=>2,
@@ -2739,6 +2808,29 @@ class TransactionName extends Model
         ];
 
         $list_of_transaction_names_bca_mcp = [
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'user_instance_id'=>1,
+                'user_instance_type'=>'bank',
+                'user_instance_name'=>'BCA',
+                'user_instance_branch'=>'MC-Parts',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // PIUTANG
             [
                 'user_id'=>7,
@@ -3501,9 +3593,9 @@ class TransactionName extends Model
                 'user_instance_type'=>'bank',
                 'user_instance_name'=>'BCA',
                 'user_instance_branch'=>'MC-Parts',
-                'desc'=>'MUTASI KE KAS KANTOR 1',
+                'desc'=>'MUTASI KE KAS ALBERT',
                 'kategori_type'=>'UANG KELUAR',
-                'kategori_level_one'=>'MUTASI KE KAS KANTOR 1',
+                'kategori_level_one'=>'MUTASI KE KAS ALBERT',
                 'kategori_level_two'=>null,
                 'pelanggan_id'=> null,
                 'pelanggan_nama'=>null,
@@ -3515,7 +3607,7 @@ class TransactionName extends Model
                 'related_user_instance_id'=>4,
                 'related_user_instance_type'=>'safe',
                 'related_user_instance_name'=>'storage',
-                'related_user_instance_branch'=>'Kantor 1',
+                'related_user_instance_branch'=>'Albert',
             ],[
                 'user_id'=>7,
                 'username'=>'Albert21',
@@ -3863,6 +3955,29 @@ class TransactionName extends Model
         ];
 
         $list_of_transaction_names_bca_dmd = [
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'user_instance_id'=>5,
+                'user_instance_type'=>'bank',
+                'user_instance_name'=>'BCA',
+                'user_instance_branch'=>'Demardi',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // PIUTANG
             [
                 'user_id'=>2,
@@ -4306,6 +4421,29 @@ class TransactionName extends Model
         ];
 
         $list_of_transaction_names_danamon_mcp = [
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'user_instance_id'=>2,
+                'user_instance_type'=>'bank',
+                'user_instance_name'=>'Danamon',
+                'user_instance_branch'=>'MC-Parts',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // PIUTANG
             [
                 'user_id'=>7,
@@ -4470,6 +4608,29 @@ class TransactionName extends Model
         ];
 
         $list_of_transaction_names_bri_dmd = [
+            [
+                'user_id'=>2,
+                'username'=>'kuruniawa',
+                'user_instance_id'=>6,
+                'user_instance_type'=>'bank',
+                'user_instance_name'=>'BRI',
+                'user_instance_branch'=>'Demardi',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             // PIUTANG
             [
                 'user_id'=>2,
@@ -4816,6 +4977,29 @@ class TransactionName extends Model
         ];
 
         $list_of_transaction_names_kas_bg = [
+            [
+                'user_id'=>7,
+                'username'=>'Albert21',
+                'user_instance_id'=>9,
+                'user_instance_type'=>'bank',
+                'user_instance_name'=>'BG',
+                'user_instance_branch'=>'BG',
+                'desc'=>'SALDO AWAL',
+                'kategori_type'=>'UANG MASUK',
+                'kategori_level_one'=>'SALDO AWAL',
+                'kategori_level_two'=>null,
+                'related_user_id'=>null,
+                'related_username'=>null,
+                'related_desc'=>null,
+                'pelanggan_id'=>null,
+                'pelanggan_nama'=>null,
+                'supplier_id'=>null,
+                'supplier_nama'=>null,
+                'related_user_instance_id'=>null,
+                'related_user_instance_type'=>null,
+                'related_user_instance_name'=>null,
+                'related_user_instance_branch'=>null,
+            ],
             [
                 'user_id'=>7,
                 'username'=>'Albert21',
