@@ -78,8 +78,8 @@
                                     <tr>
                                         <td>Supplier</td><td><div class="mx-2">:</div></td>
                                         <td class="py-1">
-                                            <input type="text" name="supplier_nama" id="produk_new-supplier_nama" placeholder="nama supplier..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
-                                            <input type="hidden" name="supplier_id" id="produk_new-supplier_id">
+                                            <input type="text" name="supplier_nama" id="produk_new-supplier_nama" value="{{ old('supplier_nama') }}" placeholder="nama supplier..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                                            <input type="hidden" name="supplier_id" id="produk_new-supplier_id" value="{{ old('supplier_id') }}">
                                         </td>
                                         <td>Tipe Produk</td><td><div class="mx-2">:</div></td>
                                         <td>
@@ -92,21 +92,35 @@
                                     </tr>
                                     <tr>
                                         <td>Nama</td><td><div class="mx-2">:</div></td>
-                                        <td><input type="text" name="nama" id="produk_new-produk_nama" class="rounded p-1 text-xs w-full" oninput="generate_nama_nota(this.value)" placeholder="Nama Produk ..."></td>
+                                        <td><input type="text" name="nama" value="{{ old('nama') }}" id="produk_new-produk_nama" class="rounded p-1 text-xs w-full" oninput="generate_nama_nota(this.value)" placeholder="Nama Produk ..."></td>
                                         <td>Harga</td><td><div class="mx-2">:</div></td>
                                         <td>
-                                            <input type="text" id="produk_new-harga" class="rounded p-1 text-xs" oninput="formatNumber(this, 'produk_new-harga_real')" placeholder="Harga ...">
-                                            <input type="hidden" name="harga" id="produk_new-harga_real">
+                                            <input type="text" name="harga_formatted" value="{{ old('harga_formatted') }}" id="produk_new-harga" class="rounded p-1 text-xs" oninput="formatNumber(this, 'produk_new-harga_real')" placeholder="Harga ...">
+                                            <input type="hidden" name="harga" id="produk_new-harga_real" value="{{ old('harga') }}">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>Nama Nota</td><td><div class="mx-2">:</div></td><td><input type="text" name="nama_nota" id="nama_nota" class="rounded p-1 text-xs w-full" placeholder="Nama Nota ..."></td>
+                                        <td>Nama Nota</td><td><div class="mx-2">:</div></td><td><input type="text" name="nama_nota" value="{{ old('nama_nota') }}" id="nama_nota" class="rounded p-1 text-xs w-full" placeholder="Nama Nota ..."></td>
                                         <td>Tipe Packing</td><td><div class="mx-2">:</div></td>
                                         <td>
                                             <select name="tipe_packing" id="tipe_packing" class="text-xs py-0 rounded">
+                                                @if (old('tipe_packing'))
                                                 @foreach ($tipe_packing as $tp)
+                                                @if ($tp === old('tipe_packing'))
+                                                <option value="{{ $tp }}" selected>{{ $tp }}</option>
+                                                @else
                                                 <option value="{{ $tp }}">{{ $tp }}</option>
+                                                @endif
                                                 @endforeach
+                                                @else
+                                                @foreach ($tipe_packing as $tp)
+                                                @if ($tp === 'colly')
+                                                <option value="{{ $tp }}" selected>{{ $tp }}</option>
+                                                @else
+                                                <option value="{{ $tp }}">{{ $tp }}</option>
+                                                @endif
+                                                @endforeach
+                                                @endif
                                             </select>
                                         </td>
                                     </tr>
@@ -114,9 +128,9 @@
                                         <td>Ket. (opt.)</td><td><div class="mx-2">:</div></td>
                                         <td class="py-1">
                                             {{-- <input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"> --}}
-                                            <textarea name="keterangan" id="" cols="30" rows="5" class="border rounded p-1 text-xs" placeholder="keterangan (opt.)"></textarea>
+                                            <textarea name="keterangan" id="" cols="30" rows="5" class="border rounded p-1 text-xs" placeholder="keterangan (opt.)">{{ old('keterangan') }}</textarea>
                                         </td>
-                                        <td>Aturan Packing</td><td><div class="mx-2">:</div></td><td><input type="number" name="aturan_packing" id="produk_new-aturan_packing" class="rounded p-1 text-xs" placeholder="Aturan Packing ..."></td>
+                                        <td>Aturan Packing</td><td><div class="mx-2">:</div></td><td><input type="number" name="aturan_packing" value="{{ old('aturan_packing') }}" id="produk_new-aturan_packing" class="rounded p-1 text-xs" placeholder="Aturan Packing ..."></td>
 
                                     </tr>
                                 </table>
@@ -124,7 +138,7 @@
 
                         </div>
                         <div class="flex justify-center mt-3">
-                            <button type="submit" class="border-2 border-emerald-300 bg-emerald-200 text-emerald-600 rounded-lg font-semibold py-1 px-3 hover:bg-emerald-300">+ Produk</button>
+                            <button type="submit" class="border-2 border-emerald-300 bg-emerald-200 text-emerald-600 rounded-lg font-semibold px-3 hover:bg-emerald-300">+ Produk</button>
                         </div>
                     </form>
                 </div>
