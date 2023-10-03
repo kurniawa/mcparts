@@ -205,7 +205,14 @@
                         <tr><td><div class="text-center">-----</div></td><td><div class="text-center">---</div></td></tr>
                         @foreach ($spk_produks as $key_spk_produk => $spk_produk)
                         <tr>
-                            <td onclick="toggle_element('spk_produk_detail-{{ $key_spk_produk }}')">{{ $spk_produk->nama_produk }}</td>
+                            <td onclick="toggle_element('spk_produk_detail-{{ $key_spk_produk }}')">
+                                <div>
+                                    {{ $spk_produk->nama_produk }}
+                                </div>
+                                @if ($spk_produk->keterangan)
+                                    <div class="border rounded text-slate-400 ml-1 italic">{{ $spk_produk->keterangan }}</div>
+                                @endif
+                            </td>
                             <td>
                                 <div class="text-center" onclick="toggle_element('jumlah_deviasi-{{ $key_spk_produk }}')">
                                     <span>{{ $spk_produk->jumlah }}</span>
@@ -214,6 +221,18 @@
                                     @elseif ($spk_produk->deviasi_jumlah < 0)
                                     <span class="text-pink-500"> {{ $spk_produk->deviasi_jumlah }}</span>
                                     @endif
+                                </div>
+                                <div class="hidden" id="jumlah_deviasi-{{ $key_spk_produk }}">
+                                    <form action="{{ route('spks.edit_jumlah_deviasi',[$spk->id, $spk_produk->id]) }}" method="POST" class="border rounded">
+                                        @csrf
+                                        <table>
+                                            <tr><td>Jml.</td><td>:</td><td><input type="number" class="text-xs p-0 rounded w-12" name="jumlah" value="{{ $spk_produk->jumlah }}"></td></tr>
+                                            <tr><td>+/-</td><td>:</td><td><input type="number" class="text-xs p-0 rounded w-12" name="deviasi" value="{{ $spk_produk->deviasi_jumlah }}"></td></tr>
+                                        </table>
+                                        <div class="text-center my-1">
+                                            <button type="submit" class="px-1 bg-emerald-200 text-emerald-500 rounded">confirm</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -295,16 +314,14 @@
                                         </button>
                                     </form>
                                 </div>
-                            </td>
-                            <td class="hidden" id="jumlah_deviasi-{{ $key_spk_produk }}">
-                                <form action="{{ route('spks.edit_jumlah_deviasi',[$spk->id, $spk_produk->id]) }}" method="POST" class="border rounded">
+                                <form action="{{ route('spks.spk_produk_edit_keterangan', [$spk->id, $spk_produk->id]) }}" method="POST" class="mt-2">
                                     @csrf
-                                    <table>
-                                        <tr><td>Jml.</td><td>:</td><td><input type="number" class="text-xs p-0 rounded w-12" name="jumlah" value="{{ $spk_produk->jumlah }}"></td></tr>
-                                        <tr><td>+/-</td><td>:</td><td><input type="number" class="text-xs p-0 rounded w-12" name="deviasi" value="{{ $spk_produk->deviasi_jumlah }}"></td></tr>
-                                    </table>
-                                    <div class="text-center my-1">
-                                        <button type="submit" class="px-1 bg-emerald-200 text-emerald-500 rounded">confirm</button>
+                                    <h5>Edit Keterangan:</h5>
+                                    <div class="inline-block">
+                                        <textarea name="keterangan" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item...">{{ $spk_produk->keterangan }}</textarea>
+                                        <div class="text-end my-1">
+                                            <button type="submit" class="px-1 bg-emerald-200 text-emerald-500 rounded">confirm</button>
+                                        </div>
                                     </div>
                                 </form>
                             </td>
@@ -755,7 +772,9 @@
             {{-- SJ --}}
             <div>
                 {{-- PILIHAN EKSPEDISI/TRANSIT --}}
-                <div class="text-right"><button id="btn_opsi_ekspedisi_transit" class="border rounded border-orange-300 text-orange-500" onclick="toggle_light(this.id, 'pilihan_ekspedisi_transit', [], ['bg-orange-200'], 'block')">Opsi Ekspedisi/Transit</button></div>
+                <div class="text-right">
+                    <button id="btn_opsi_ekspedisi_transit" class="border rounded border-orange-300 text-orange-500" onclick="toggle_light(this.id, 'pilihan_ekspedisi_transit', [], ['bg-orange-200'], 'block')">Opsi Ekspedisi/Transit</button>
+                </div>
                 <div id="pilihan_ekspedisi_transit" class="hidden">
                     <div class="border rounded p-1 grid grid-cols-2 mt-1">
                         <form method="POST" action="{{ route('sjs.edit_ekspedisi', $spk->id) }}">

@@ -10,6 +10,7 @@ function hideMenuCloseLayer(menu_id, close_layer_id) {
 }
 
 function toggle_element(element_id) {
+    console.log($(`#${element_id}`));
     $(`#${element_id}`).toggle(300);
 }
 

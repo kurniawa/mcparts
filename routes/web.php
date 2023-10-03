@@ -67,6 +67,7 @@ Route::controller(SpkController::class)->group(function(){
     Route::post('/spks/{spk}/add_item','add_item')->name('spks.add_item')->middleware('auth');
     Route::post('/spks/{spk}/{spk_produk}/delete_item','delete_item')->name('spks.delete_item')->middleware('auth');
     Route::post('/spks/{spk}/{spk_produk}/edit_jumlah_deviasi','edit_jumlah_deviasi')->name('spks.edit_jumlah_deviasi')->middleware('auth');
+    Route::post('/spks/{spk}/{spk_produk}/spk_produk_edit_keterangan','spk_produk_edit_keterangan')->name('spks.spk_produk_edit_keterangan')->middleware('auth');
 });
 
 Route::controller(NotaController::class)->group(function(){
