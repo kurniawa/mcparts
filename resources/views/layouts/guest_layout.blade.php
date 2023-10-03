@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   @vite('resources/css/app.css')
   <script src="{{ asset('js/jquery-3.5.1.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.css') }}">
+  <link rel="shortcut icon" href="{{ asset('images/logo-mc-bg_removed.png') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.css') }}">
     <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.js') }}"></script>
     <script src="{{ asset('js/jquery.table2excel.js') }}"></script>
     <script src="{{ asset('js/functions.js') }}"></script>

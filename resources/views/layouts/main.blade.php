@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   @vite('resources/css/app.css')
   <script src="{{ asset('js/jquery-3.5.1.js') }}"></script>
+  <link rel="shortcut icon" href="{{ asset('images/logo-mc-bg_removed.png') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ asset('js/jquery-ui-1.12.1/jquery-ui.css') }}">
     <script src="{{ asset('js/jquery-ui-1.12.1/jquery-ui.js') }}"></script>
     <script src="{{ asset('js/jquery.table2excel.js') }}"></script>
@@ -20,7 +21,8 @@
               <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <a href="{{ route('home') }}">
-                        <img class="h-8 w-8" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                        {{-- <img class="h-8 w-8" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company"> --}}
+                        <img src="{{ asset('images/logo-mc-bg_removed.png') }}" class="h-8" alt="MC-Parts">
                     </a>
                 </div>
                 <div class="hidden md:block">

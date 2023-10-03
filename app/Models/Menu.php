@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Menu extends Model
 {
@@ -11,22 +12,22 @@ class Menu extends Model
     protected $guarded = ['id'];
 
     public static function get() {
-        $menus = collect([
-            // ['name'=>'SPK','route'=>'spks.index'],
-            // ['name'=>'Nota','route'=>'notas.index'],
-            // ['name'=>'SJ','route'=>'sjs.index'],
-            // ['name'=>'Pelanggan','route'=>'pelanggans.index'],
-            // ['name'=>'Ekspedisi','route'=>'ekspedisis.index'],
-            ['name'=>'Penjualan','route'=>'penjualans.index'],
-            ['name'=>'Pembelian','route'=>'pembelians.index'],
-            ['name'=>'Accounting','route'=>'accounting.index'],
-            ['name'=>'Artisan','route'=>'artisan.index'],
-        ]);
-        // $menus = [
-        //     ['name'=>'SPK','route'=>'spks'],
-        //     ['name'=>'Nota','route'=>'notas'],
-        //     ['name'=>'SJ','route'=>'srjalans'],
-        // ];
+        $user = Auth::user();
+
+        if ($user->role !== 'developer') {
+            $menus = collect([
+                ['name'=>'Penjualan','route'=>'penjualans.index'],
+                ['name'=>'Pembelian','route'=>'pembelians.index'],
+                ['name'=>'Accounting','route'=>'accounting.index'],
+            ]);
+        } else {
+            $menus = collect([
+                ['name'=>'Penjualan','route'=>'penjualans.index'],
+                ['name'=>'Pembelian','route'=>'pembelians.index'],
+                ['name'=>'Accounting','route'=>'accounting.index'],
+                ['name'=>'Artisan','route'=>'artisan.index'],
+            ]);
+        }
 
         return $menus;
     }
