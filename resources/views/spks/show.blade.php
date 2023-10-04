@@ -771,10 +771,11 @@
             </div>
             {{-- SJ --}}
             <div>
-                {{-- PILIHAN EKSPEDISI/TRANSIT --}}
-                <div class="text-right">
-                    <button id="btn_opsi_ekspedisi_transit" class="border rounded border-orange-300 text-orange-500" onclick="toggle_light(this.id, 'pilihan_ekspedisi_transit', [], ['bg-orange-200'], 'block')">Opsi Ekspedisi/Transit</button>
+                <div class="flex justify-end">
+                    <button id="btn_opsi_ekspedisi_transit" class="border rounded border-orange-300 text-orange-500 ml-1" onclick="toggle_light(this.id, 'pilihan_ekspedisi_transit', [], ['bg-orange-200'], 'block')">Opsi Ekspedisi/Transit</button>
                 </div>
+
+                {{-- PILIHAN EKSPEDISI/TRANSIT --}}
                 <div id="pilihan_ekspedisi_transit" class="hidden">
                     <div class="border rounded p-1 grid grid-cols-2 mt-1">
                         <form method="POST" action="{{ route('sjs.edit_ekspedisi', $spk->id) }}">
@@ -984,6 +985,26 @@
                                     </form>
                                 </td>
                             </tr>
+                            {{-- EDIT NAMA TERTERA --}}
+                            <tr>
+                                <td>tertera</td><td>:</td>
+                                @if ($srjalan->nama_tertera)
+                                <td>{{ $srjalan->nama_tertera }}</td>
+                                @else
+                                <td>{{ $srjalan->pelanggan_nama }}</td>
+                                @endif
+                            </tr>
+                            <tr class="hidden" id="edit_nama_tertera">
+                                <td></td><td></td>
+                                <td>
+                                    <form method="POST" action="{{ route('sjs.edit_ekspedisi', $spk->id) }}">
+                                        @csrf
+                                        <input type="text" name="nama_tertera" value="{{ $srjalan->nama_tertera }}" class="border rounded text-xs p-1 w-full" placeholder="{{ $srjalan->nama_tertera ? $srjalan->nama_tertera : 'nama tertera ...' }}">
+                                        <div class="text-end mt-1"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{-- END - EDIT NAMA TERTERA --}}
                         </table>
                         <div>
                             <div class="border rounded border-sky-400">

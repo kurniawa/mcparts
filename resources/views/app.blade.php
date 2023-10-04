@@ -26,188 +26,192 @@
         @endforeach
     </div>
       <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
-            <div class="flex">
+            {{-- <div class="flex">
                 <button id="btn_filter" class="border rounded border-yellow-300 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content', [], ['bg-yellow-200'], 'inline-block')">Filter</button>
                 <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_spk" onclick="toggle_light(this.id, 'form_new_spk', [], ['bg-emerald-200'], 'block')">+ SPK</button>
-            </div>
-        {{-- SEARCH / FILTER --}}
-        <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1" id="filter-content">
-            <form action="" method="GET">
-                {{-- <div class="flex items-center">
-                    <div><input type="radio" name="tipe_filter" value="spk" id="radio_spk" checked><label for="radio_spk" class="ml-1">SPK</label></div>
-                    <div class="ml-3"><input type="radio" name="tipe_filter" value="nota" id="radio_nota"><label for="radio_nota" class="ml-1">Nota</label></div>
-                    <div class="ml-3"><input type="radio" name="tipe_filter" value="sj" id="radio_sj"><label for="radio_sj" class="ml-1">SJ</label></div>
-                </div> --}}
-                <input type="hidden" name="tipe_filter" value="spk">
-                <div class="ml-1 mt-2 flex">
-                    <div>
-                        <label>Customer:</label>
-                        <div class="flex mt-1">
-                            <input type="text" class="border rounded text-xs p-1" name="nama_pelanggan" placeholder="Nama Customer..." id="nama_pelanggan">
-                            <input type="hidden" name="pelanggan_id" id="pelanggan_id">
-                        </div>
-                    </div>
-                    <div class="flex items-center ml-2">
-                        <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1">now</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
-                        {{-- <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1">30d</label></div> --}}
-                        <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1">bulan ini</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')"><label for="tahun_ini" class="ml-1">tahun ini</label></div>
-                        <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')"><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
-                    </div>
-                </div>
-                <div class="flex mt-2">
-                    <div class="ml-1 flex">
-                        <div>
-                            <label>Dari:</label>
-                            <div class="flex">
-                                <select name="from_day" id="from_day" class="rounded text-xs py-1">
-                                    <option value="">-</option>
-                                    @for ($i = 1; $i < 32; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                    @endfor
-                                </select>
-                                <select name="from_month" id="from_month" class="rounded text-xs py-1 ml-1">
-                                    <option value="">-</option>
-                                    @for ($i = 1; $i < 13; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                    @endfor
-                                </select>
-                                <select name="from_year" id="from_year" class="rounded text-xs py-1 ml-1">
-                                    <option value="{{ date('Y') }}">{{ date('Y') }}</option>
-                                    <option value="">-</option>
-                                    @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                    @endfor
-                                </select>
+            </div> --}}
+        <div class="flex mt-1">
+            {{-- SEARCH / FILTER --}}
+            <div>
+                <div class="rounded p-2 bg-white shadow drop-shadow inline-block" id="filter-content">
+                    <form action="" method="GET">
+                        {{-- <div class="flex items-center">
+                            <div><input type="radio" name="tipe_filter" value="spk" id="radio_spk" checked><label for="radio_spk" class="ml-1">SPK</label></div>
+                            <div class="ml-3"><input type="radio" name="tipe_filter" value="nota" id="radio_nota"><label for="radio_nota" class="ml-1">Nota</label></div>
+                            <div class="ml-3"><input type="radio" name="tipe_filter" value="sj" id="radio_sj"><label for="radio_sj" class="ml-1">SJ</label></div>
+                        </div> --}}
+                        <input type="hidden" name="tipe_filter" value="spk">
+                        <div class="ml-1 mt-2 flex">
+                            <div>
+                                <label>Customer:</label>
+                                <div class="flex mt-1">
+                                    <input type="text" class="border rounded text-xs p-1" name="nama_pelanggan" placeholder="Nama Customer..." id="nama_pelanggan">
+                                    <input type="hidden" name="pelanggan_id" id="pelanggan_id">
+                                </div>
+                            </div>
+                            <div class="flex items-center ml-2">
+                                <div class="flex"><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1 whitespace-nowrap">now</label></div>
+                                <div class="ml-3 flex"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1 whitespace-nowrap">7d</label></div>
+                                {{-- <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1 whitespace-nowrap">30d</label></div> --}}
+                                <div class="ml-3 flex"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1 whitespace-nowrap whitespace-nowrap">bulan ini</label></div>
+                                <div class="ml-3 flex"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1 whitespace-nowrap">bulan lalu</label></div>
+                                <div class="ml-3 flex"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')"><label for="tahun_ini" class="ml-1 whitespace-nowrap">tahun ini</label></div>
+                                <div class="ml-3 flex"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')"><label for="tahun_lalu" class="ml-1 whitespace-nowrap">tahun lalu</label></div>
                             </div>
                         </div>
-                        <div class="ml-3">
-                            <label>Sampai:</label>
-                            <div class="flex items-center">
-                                <select name="to_day" id="to_day" class="rounded text-xs py-1">
-                                    <option value="">-</option>
-                                    @for ($i = 1; $i < 32; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                    @endfor
-                                </select>
-                                <select name="to_month" id="to_month" class="rounded text-xs py-1 ml-1">
-                                    <option value="">-</option>
-                                    @for ($i = 1; $i < 13; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                    @endfor
-                                </select>
-                                <select name="to_year" id="to_year" class="rounded text-xs py-1 ml-1">
-                                    <option value="{{ date('Y') }}">{{ date('Y') }}</option>
-                                    <option value="">-</option>
-                                    @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
-                                    @endfor
-                                </select>
-                                <button type="submit" class="ml-2 flex items-center bg-orange-500 text-white py-1 px-3 rounded hover:bg-orange-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                    </svg>
-                                    <span class="ml-1">Search</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        {{-- END - SEARCH / FILTER --}}
-
-        {{-- FORM_NEW_SPK --}}
-        <div class="hidden" id="form_new_spk">
-            <div class="flex justify-center mt-1">
-                <form action="{{ route('spks.store') }}" method="POST" class="lg:w-1/2 md:w-3/4">
-                    @csrf
-                    <div class="border rounded p-2">
-                        <div class="border-b pb-3">
-                            <table>
-                                <tr>
-                                    <td>Tanggal</td><td><div class="mx-2">:</div></td>
-                                    <td class="py-1">
-                                        <div class="flex">
-                                            {{-- <select name="day" id="day" class="rounded text-xs">
-                                                <option value="{{ date('d') }}">{{ date('d') }}</option>
-                                                @for ($i = 1; $i < 32; $i++)
-                                                <option value="{{ $i }}">{{ $i }}</option>
-                                                @endfor
-                                            </select>
-                                            <select name="month" id="month" class="rounded text-xs ml-1">
-                                                <option value="{{ date('m') }}">{{ date('m') }}</option>
-                                                @for ($i = 1; $i < 13; $i++)
-                                                <option value="{{ $i }}">{{ $i }}</option>
-                                                @endfor
-                                            </select>
-                                            <select name="year" id="year" class="rounded text-xs ml-1">
-                                                <option value="{{ date('Y') }}">{{ date('Y') }}</option>
-                                                <option value="">-</option>
-                                                @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
-                                                <option value="{{ $i }}">{{ $i }}</option>
-                                                @endfor
-                                            </select> --}}
-                                            <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
-                                            <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
-                                            <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Untuk</td><td><div class="mx-2">:</div></td>
-                                    <td class="py-1">
-                                        <input type="text" name="pelanggan_nama" id="new_spk-pelanggan_nama" placeholder="nama pelanggan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
-                                        <input type="hidden" name="pelanggan_id" id="new_spk-pelanggan_id">
-                                        <input type="hidden" name="reseller_id" id="new_spk-reseller_id">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Ket. (opt.)</td><td><div class="mx-2">:</div></td>
-                                    <td class="py-1"><input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="mt-2">
-                            <table id="table_spk_items" class="text-slate-500 w-full">
-                                <tr><th>Nama Item</th><th>Jumlah</th></tr>
-                                <tr id="tr_add_item">
-                                    <td>
-                                        <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="addSPKItem('tr_add_item','table_spk_items')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        <div class="flex mt-2">
+                            <div class="ml-1 flex">
+                                <div>
+                                    <label>Dari:</label>
+                                    <div class="flex">
+                                        <select name="from_day" id="from_day" class="rounded text-xs py-1">
+                                            <option value="">-</option>
+                                            @for ($i = 1; $i < 32; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <select name="from_month" id="from_month" class="rounded text-xs py-1 ml-1">
+                                            <option value="">-</option>
+                                            @for ($i = 1; $i < 13; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <select name="from_year" id="from_year" class="rounded text-xs py-1 ml-1">
+                                            <option value="{{ date('Y') }}">{{ date('Y') }}</option>
+                                            <option value="">-</option>
+                                            @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <label>Sampai:</label>
+                                    <div class="flex items-center">
+                                        <select name="to_day" id="to_day" class="rounded text-xs py-1">
+                                            <option value="">-</option>
+                                            @for ($i = 1; $i < 32; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <select name="to_month" id="to_month" class="rounded text-xs py-1 ml-1">
+                                            <option value="">-</option>
+                                            @for ($i = 1; $i < 13; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <select name="to_year" id="to_year" class="rounded text-xs py-1 ml-1">
+                                            <option value="{{ date('Y') }}">{{ date('Y') }}</option>
+                                            <option value="">-</option>
+                                            @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                        <button type="submit" class="ml-2 flex items-center bg-orange-500 text-white py-1 px-3 rounded hover:bg-orange-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                                             </svg>
+                                            <span class="ml-1">filter/search</span>
                                         </button>
-                                    </td>
-                                </tr>
-                                {{-- <tr>
-                                    <td>
-                                        <div class="flex items-center">
-                                            <button id="toggle_produk_keterangan" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggleButton(this.id,'produk_keterangan',['bg-yellow-300'],null)">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {{-- END - SEARCH / FILTER --}}
+
+            {{-- FORM_NEW_SPK --}}
+            <div id="form_new_spk" class="ml-2 w-full">
+                <div class="flex">
+                    <form action="{{ route('spks.store') }}" method="POST" class="w-full">
+                        @csrf
+                        <div class="border rounded p-2">
+                            <div class="border-b pb-3">
+                                <table>
+                                    <tr>
+                                        <td>Tanggal</td><td><div class="mx-2">:</div></td>
+                                        <td class="py-1">
+                                            <div class="flex">
+                                                {{-- <select name="day" id="day" class="rounded text-xs">
+                                                    <option value="{{ date('d') }}">{{ date('d') }}</option>
+                                                    @for ($i = 1; $i < 32; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <select name="month" id="month" class="rounded text-xs ml-1">
+                                                    <option value="{{ date('m') }}">{{ date('m') }}</option>
+                                                    @for ($i = 1; $i < 13; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <select name="year" id="year" class="rounded text-xs ml-1">
+                                                    <option value="{{ date('Y') }}">{{ date('Y') }}</option>
+                                                    <option value="">-</option>
+                                                    @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select> --}}
+                                                <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
+                                                <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
+                                                <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Untuk</td><td><div class="mx-2">:</div></td>
+                                        <td class="py-1">
+                                            <input type="text" name="pelanggan_nama" id="new_spk-pelanggan_nama" placeholder="nama pelanggan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                                            <input type="hidden" name="pelanggan_id" id="new_spk-pelanggan_id">
+                                            <input type="hidden" name="reseller_id" id="new_spk-reseller_id">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ket. (opt.)</td><td><div class="mx-2">:</div></td>
+                                        <td class="py-1"><input type="text" name="keterangan" placeholder="judul/keterangan..." class="text-xs rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="mt-2">
+                                <table id="table_spk_items" class="text-slate-500 w-full">
+                                    <tr><th>Nama Item</th><th>Jumlah</th></tr>
+                                    <tr id="tr_add_item">
+                                        <td>
+                                            <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="addSPKItem('tr_add_item','table_spk_items')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                                 </svg>
                                             </button>
-                                            <input type="text" name="produk_nama[]" id="produk_nama" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400" placeholder="nama item...">
-                                        </div>
-                                        <div class="mt-1" id="produk_keterangan">
-                                            <textarea name="produk_keterangan[]" id="produk_keterangan" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
-                                        </div>
-                                    </td>
-                                    <td><div class="text-center"><input type="number" name="produk_jumlah[]" id="produk_jumlah" class="border-slate-300 rounded-lg text-xs p-1 w-1/2"></div></td>
-                                </tr> --}}
-                            </table>
+                                        </td>
+                                    </tr>
+                                    {{-- <tr>
+                                        <td>
+                                            <div class="flex items-center">
+                                                <button id="toggle_produk_keterangan" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggleButton(this.id,'produk_keterangan',['bg-yellow-300'],null)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                </button>
+                                                <input type="text" name="produk_nama[]" id="produk_nama" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400" placeholder="nama item...">
+                                            </div>
+                                            <div class="mt-1" id="produk_keterangan">
+                                                <textarea name="produk_keterangan[]" id="produk_keterangan" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
+                                            </div>
+                                        </td>
+                                        <td><div class="text-center"><input type="number" name="produk_jumlah[]" id="produk_jumlah" class="border-slate-300 rounded-lg text-xs p-1 w-1/2"></div></td>
+                                    </tr> --}}
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex justify-center mt-3">
-                        <button type="submit" class="border-2 border-emerald-300 bg-emerald-200 text-emerald-600 rounded-lg font-semibold py-1 px-3 hover:bg-emerald-300">Proses/Konfirmasi</button>
-                    </div>
-                </form>
+                        <div class="flex justify-center mt-3">
+                            <button type="submit" class="border-2 border-emerald-300 bg-emerald-200 text-emerald-600 rounded-lg font-semibold py-1 px-3 hover:bg-emerald-300">proses new SPK</button>
+                        </div>
+                    </form>
+                </div>
             </div>
+            {{-- END - FORM_NEW_SPK --}}
         </div>
-        {{-- END - FORM_NEW_SPK --}}
     </div>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
         <div class="grid grid-cols-3 gap-1">
@@ -421,7 +425,7 @@
 </div>
 {{-- <div class="bg-yellow-200">test</div> --}}
 <script>
-    $('#filter-content').hide();
+    // $('#filter-content').hide();
     function toggleFilter(filter_button_id, filter_content_id) {
         $(`#${filter_content_id}`).toggle(350);
         setTimeout(() => {

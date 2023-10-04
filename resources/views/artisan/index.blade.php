@@ -8,6 +8,10 @@
   <x-errors-any></x-errors-any>
   <x-validation-feedback></x-validation-feedback>
   <main class="text-xs">
+    <form action="{{ route('artisan.fix_pembelian') }}" method="post" class="ml-2">
+        @csrf
+        <button class="bg-pink-400 text-white font-semibold rounded px-3 py-2">fix_pembelian</button>
+    </form>
       <form action="{{ route('artisan.lower_case_role') }}" method="post" class="ml-2">
           @csrf
           <p>Sebelumnya, ganti nama column clearance menjadi role terlebih dahulu.</p>

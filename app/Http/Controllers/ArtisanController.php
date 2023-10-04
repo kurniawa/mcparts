@@ -517,210 +517,159 @@ class ArtisanController extends Controller
     }
 
     function filling_pembelian_barang() {
-        // Pengelompokkan Pembelian yang sudah ada
-        // $pembelian = Pembelian::first();
-        // dd($pembelian);
-        $from = null;
-        $until = null;
-        $pembelians = PembelianTemp::orderBy('created_at')->get();
-        $a = 0;
-        // dump(count($pembelians));
-        while ($a < count($pembelians)) {
-            // dump($a);
-            if ($a === 0) {
-                $pembelian = PembelianTemp::first();
-                $from = date('Y-m-d', strtotime($pembelian->created_at));
-                $from .= ' 23:59:59';
-                // dump($from);
-                $until = $from;
-                $pembelian_tanggal_terkaits = PembelianTemp::where('created_at', '<=', $from)->get();
+        // Pengelompokkan berdasarkan supplier terlebih dahulu
+        $suppliers = Supplier::all();
+        $number_processed = 0;
+        foreach ($suppliers as $supplier) {
+            if ($supplier->nama === 'Bpk. ISMAIL') {
+                $pembelian_temps = PembelianTemp::where('supplier', 'like', "%ismail%")->orderBy('created_at')->get();
             } else {
-                // dump($from);
-                $pembelian_tanggal_terkaits = PembelianTemp::where('created_at', '>', $from)->where('created_at', '<=', $until)->orderBy('created_at')->get();
+                $pembelian_temps = PembelianTemp::where('supplier', 'like', "%$supplier->nama%")->orderBy('created_at')->get();
             }
-            // dump($pembelian_tanggal_terkaits);
-            $pembelian_grouped_suppliers = $pembelian_tanggal_terkaits->groupBy('supplier');
-            foreach ($pembelian_grouped_suppliers as $pembelian_grouped_supplier) {
-                // if ($key === 0) {
-                //     dump(date('Y-m-d', strtotime($pembelian_tanggal_terkait->created_at)));
-                // }
-                // dump($count_pembelians++);
-                $supplier = Supplier::where('nama', $pembelian_grouped_supplier[0]->supplier)->first();
-                $nomor_nota = null;
-                if ($supplier === null) {
-                    if (str_contains($pembelian_grouped_supplier[0]->supplier, 'MAX')) {
-                        // if (strtok($pembelian_grouped_supplier[0]->supplier) === 'MAX') {
-                        //     $supplier = Supplier::where('nama', 'MAX')->first();
-                        //     $nomor_nota = explode(' ', trim($pembelian_grouped_supplier[0]->supplier))[1];
-                        // }
-                        if (explode(' ', trim($pembelian_grouped_supplier[0]->supplier))[0] === 'MAX') {
-                            $supplier = Supplier::where('nama', 'MAX')->first();
-                            $nomor_nota = explode(' ', trim($pembelian_grouped_supplier[0]->supplier))[1];
-                        }
-                    } elseif (str_contains($pembelian_grouped_supplier[0]->supplier, 'ROYAL')) {
-                        // if (strtok($pembelian_grouped_supplier[0]->supplier) === 'ROYAL') {
-                        //     $supplier = Supplier::where('nama', 'ROYAL')->first();
-                        //     $nomor_nota = explode(' ', trim($pembelian_grouped_supplier[0]->supplier))[1];
-                        // }
-                        if (explode(' ', trim($pembelian_grouped_supplier[0]->supplier))[0] === 'ROYAL') {
-                            $supplier = Supplier::where('nama', 'ROYAL')->first();
-                            $nomor_nota = explode(' ', trim($pembelian_grouped_supplier[0]->supplier))[1];
-                        }
-                    } elseif (str_contains($pembelian_grouped_supplier[0]->supplier, 'ISMAIL')) {
-                        $supplier = Supplier::where('nama', 'Bpk. ISMAIL')->first();
-                    }
+            // dump(date('Y-m-d', strtotime($pembelian_temps[0]->created_at)));
+            // dd($pembelian_temps[0]->created_at);
+            try {
+                $date_1 = date('Y-m-d', strtotime($pembelian_temps[0]->created_at));
+            } catch (\Throwable $th) {
+                dump($supplier);
+                dd($pembelian_temps);
+            }
+
+            $pembelian = null;
+            foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
+                $number_processed++;
+                $barang = Barang::where('nama', $pembelian_temp->nama_barang)->first();
+                $jumlah_sub = null;
+                if ($pembelian_temp->jumlah_rol !== null) {
+                    $jumlah_sub = (int)($pembelian_temp->jumlah_rol * 100);
                 }
-                $pembelian_new = Pembelian::create([
-                    'supplier_id' => $supplier->id,
-                    'supplier_nama' => $supplier->nama,
-                ]);
 
-                $isi = array();
-                $harga_total = 0;
-                $status_bayar = 'BELUM';
-                $jumlah_lunas = 0;
-                $keterangan_bayar = '';
-                $tanggal_lunas = null;
-                $created_at = null;
+                if ($key_pembelian_temp === 0) {
+                    dump($number_processed . ". " . $date_1);
+                    $pembelian = Pembelian::create([
+                        'supplier_id' => $supplier->id,
+                        'supplier_nama' => $supplier->nama,
+                        'created_at' => $date_1,
+                    ]);
 
-                foreach ($pembelian_grouped_supplier as $pembelian_barang) {
-                    $barang = Barang::where('nama', $pembelian_barang->nama_barang)->first();
-                    $jumlah_sub = null;
-                    if ($pembelian_barang->jumlah_rol !== null) {
-                        $jumlah_sub = (int)($pembelian_barang->jumlah_rol * 100);
-                    }
-                    $pembelian_barang_new = PembelianBarang::create([
-                        'pembelian_id' => $pembelian_new->id,
+                    PembelianBarang::create([
+                        'pembelian_id' => $pembelian->id,
                         'barang_id' => $barang->id,
                         'barang_nama' => $barang->nama,
-                        'satuan_main' => $pembelian_barang->satuan_meter,
-                        'jumlah_main' => (int)($pembelian_barang->jumlah_meter * 100),
-                        'harga_main' => (int)$pembelian_barang->harga_meter,
-                        'satuan_sub' => $pembelian_barang->satuan_rol,
+                        'satuan_main' => $pembelian_temp->satuan_meter,
+                        'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
+                        'harga_main' => (int)$pembelian_temp->harga_meter,
+                        'satuan_sub' => $pembelian_temp->satuan_rol,
                         'jumlah_sub' => $jumlah_sub,
                         'harga_sub' => null,
-                        'harga_t' => (int)$pembelian_barang->harga_total,
-                        'status_bayar' => $pembelian_barang->status_pembayaran,
-                        'keterangan_bayar' => $pembelian_barang->keterangan_pembayaran,
-                        'tanggal_lunas' => $pembelian_barang->tanggal_lunas,
-                        'created_at' => $pembelian_barang->created_at,
-                        'updated_at' => $pembelian_barang->updated_at,
-                        'creator' => $pembelian_barang->created_by,
-                        'updater' => $pembelian_barang->updated_by,
+                        'harga_t' => (int)$pembelian_temp->harga_total,
+                        'status_bayar' => $pembelian_temp->status_pembayaran,
+                        'keterangan_bayar' => $pembelian_temp->keterangan_pembayaran,
+                        'tanggal_lunas' => $pembelian_temp->tanggal_lunas,
+                        'created_at' => $pembelian_temp->created_at,
+                        'updated_at' => $pembelian_temp->updated_at,
+                        'creator' => $pembelian_temp->created_by,
+                        'updater' => $pembelian_temp->updated_by,
                     ]);
-                    $harga_total += (int)$pembelian_barang_new->harga_t;
-                    $exist_satuan_main = false;
-                    $exist_satuan_sub = false;
-                    if (count($isi) !== 0) {
-                        for ($i=0; $i < count($isi); $i++) {
-                            if ($isi[$i]['satuan'] === $pembelian_barang->satuan_meter) {
-                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_meter * 100);
-                                $exist_satuan_main = true;
-                            }
-                            if ($isi[$i]['satuan'] === $pembelian_barang->satuan_rol) {
-                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_rol * 100);
-                                $exist_satuan_sub = true;
-                            }
+
+                    list($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota) = Pembelian::lengkapi_data_pembelian($pembelian, $pembelian_temp);
+
+                    $pembelian->update([
+                        'nomor_nota' => $nomor_nota,
+                        'isi' => json_encode($isi),
+                        'harga_total' => $harga_total,
+                        'status_bayar' => $status_bayar,
+                        'keterangan_bayar' => $keterangan_bayar,
+                        'tanggal_lunas' => $tanggal_lunas,
+                    ]);
+
+                } else {
+                    $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
+                    if ($date_2 > $date_1) {
+                        dump($number_processed . ". " . $date_2 . " -- " . $date_1 . " -- " . "date_2 > date_1 ? " . ($date_2 > $date_1));
+                        // UPDATE PEMBELIAN SEBELUMNYA DULU
+                        if ($pembelian !== null) {
+                            list($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota) = Pembelian::lengkapi_data_pembelian($pembelian, $pembelian_temp);
+
+                            $pembelian->update([
+                                'nomor_nota' => $nomor_nota,
+                                'isi' => json_encode($isi),
+                                'harga_total' => $harga_total,
+                                'status_bayar' => $status_bayar,
+                                'keterangan_bayar' => $keterangan_bayar,
+                                'tanggal_lunas' => $tanggal_lunas,
+                            ]);
+                            dump("pembelian updated - $nomor_nota, $harga_total, $status_bayar");
                         }
-                        // foreach ($isi as $isi_item) {
-                        //     if ($isi_item['satuan'] === $pembelian_barang->satuan_meter) {
-                        //         $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_meter);
-                        //         $exist_satuan_main = true;
-                        //     }
-                        //     if ($isi_item['satuan'] === $pembelian_barang->satuan_rol) {
-                        //         $isi_item['jumlah'] += (int)($pembelian_barang->jumlah_rol);
-                        //         $exist_satuan_sub = true;
-                        //     }
-                        // }
-                    }
-                    if (!$exist_satuan_main) {
-                        // $isi->push([
-                        //     'satuan' => $pembelian_barang->satuan_meter,
-                        //     'jumlah' => (int)($pembelian_barang->jumlah_meter),
-                        // ]);
-                        $isi[] = [
-                            'satuan' => $pembelian_barang->satuan_meter,
-                            'jumlah' => (int)($pembelian_barang->jumlah_meter * 100),
-                        ];
-                    }
-                    if (!$exist_satuan_sub) {
-                        if ($pembelian_barang->satuan_rol !== null) {
-                            $isi[] = [
-                                'satuan' => $pembelian_barang->satuan_rol,
-                                'jumlah' => (int)($pembelian_barang->jumlah_rol * 100),
-                            ];
-                            // $isi->push([
-                            //     'satuan' => $pembelian_barang->satuan_rol,
-                            //     'jumlah' => (int)($pembelian_barang->jumlah_rol),
-                            // ]);
-                        }
-                    }
-                    if ($pembelian_barang->status_pembayaran === 'LUNAS') {
-                        $jumlah_lunas++;
-                    }
-                    $keterangan_bayar = $pembelian_barang->keterangan_pembayaran;
-                    if ($tanggal_lunas === null) {
-                        $tanggal_lunas = $pembelian_barang->tanggal_lunas;
-                    } else {
-                        if ($pembelian_barang->tanggal_lunas !== null) {
-                            if (date('Y-m-d H:i:s', strtotime($tanggal_lunas)) < date('Y-m-d H:i:s', strtotime($pembelian_barang->tanggal_lunas))) {
-                                $tanggal_lunas = $pembelian_barang->tanggal_lunas;
-                            }
+                        // END - UPDATE PEMBELIAN SEBELUMNYA
+
+                        $date_1 = $date_2;
+                        $pembelian = Pembelian::create([
+                            'supplier_id' => $supplier->id,
+                            'supplier_nama' => $supplier->nama,
+                            'created_at' => $date_1,
+                        ]);
+                        PembelianBarang::create([
+                            'pembelian_id' => $pembelian->id,
+                            'barang_id' => $barang->id,
+                            'barang_nama' => $barang->nama,
+                            'satuan_main' => $pembelian_temp->satuan_meter,
+                            'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
+                            'harga_main' => (int)$pembelian_temp->harga_meter,
+                            'satuan_sub' => $pembelian_temp->satuan_rol,
+                            'jumlah_sub' => $jumlah_sub,
+                            'harga_sub' => null,
+                            'harga_t' => (int)$pembelian_temp->harga_total,
+                            'status_bayar' => $pembelian_temp->status_pembayaran,
+                            'keterangan_bayar' => $pembelian_temp->keterangan_pembayaran,
+                            'tanggal_lunas' => $pembelian_temp->tanggal_lunas,
+                            'created_at' => $pembelian_temp->created_at,
+                            'updated_at' => $pembelian_temp->updated_at,
+                            'creator' => $pembelian_temp->created_by,
+                            'updater' => $pembelian_temp->updated_by,
+                        ]);
+
+                        list($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota) = Pembelian::lengkapi_data_pembelian($pembelian, $pembelian_temp);
+
+                        $pembelian->update([
+                            'nomor_nota' => $nomor_nota,
+                            'isi' => json_encode($isi),
+                            'harga_total' => $harga_total,
+                            'status_bayar' => $status_bayar,
+                            'keterangan_bayar' => $keterangan_bayar,
+                            'tanggal_lunas' => $tanggal_lunas,
+                        ]);
+
+                    } elseif ($date_2 === $date_1) {
+                        dump($number_processed . ". " . $date_2 . " -- " . $date_1 . " -- " . "date_2 === date_1 ? " . ($date_2 === $date_1));
+                        if ($pembelian !== null) {
+                            PembelianBarang::create([
+                                'pembelian_id' => $pembelian->id,
+                                'barang_id' => $barang->id,
+                                'barang_nama' => $barang->nama,
+                                'satuan_main' => $pembelian_temp->satuan_meter,
+                                'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
+                                'harga_main' => (int)$pembelian_temp->harga_meter,
+                                'satuan_sub' => $pembelian_temp->satuan_rol,
+                                'jumlah_sub' => $jumlah_sub,
+                                'harga_sub' => null,
+                                'harga_t' => (int)$pembelian_temp->harga_total,
+                                'status_bayar' => $pembelian_temp->status_pembayaran,
+                                'keterangan_bayar' => $pembelian_temp->keterangan_pembayaran,
+                                'tanggal_lunas' => $pembelian_temp->tanggal_lunas,
+                                'created_at' => $pembelian_temp->created_at,
+                                'updated_at' => $pembelian_temp->updated_at,
+                                'creator' => $pembelian_temp->created_by,
+                                'updater' => $pembelian_temp->updated_by,
+                            ]);
                         }
                     }
 
-                    if ($created_at === null) {
-                        $created_at = $pembelian_barang->created_at;
-                    } else {
-                        if (date('Y-m-d H:i:s', strtotime($created_at)) > date('Y-m-d H:i:s', strtotime($pembelian_barang->created_at))) {
-                            $created_at = $pembelian_barang->created_at;
-                        }
-                    }
                 }
-                // Perlu diupdate: nomor_nota, isi, status_bayar, keterangan_bayar, tanggal_lunas
-
-                if ($jumlah_lunas === count($pembelian_grouped_supplier)) {
-                    $status_bayar = 'LUNAS';
-                } elseif ($jumlah_lunas < count($pembelian_grouped_supplier) && $jumlah_lunas > 0) {
-                    $status_bayar = 'SEBAGIAN';
-                }
-
-                if ($nomor_nota === null) {
-                    $nomor_nota = "N-$pembelian_new->id";
-                }
-
-                $pembelian_new->update([
-                    'nomor_nota' => $nomor_nota,
-                    'isi' => json_encode($isi),
-                    'harga_total' => $harga_total,
-                    'status_bayar' => $status_bayar,
-                    'keterangan_bayar' => $keterangan_bayar,
-                    'tanggal_lunas' => $tanggal_lunas,
-                    'created_at' => $tanggal_lunas,
-                ]);
             }
-            $pembelian_tanggal_selanjutnya = PembelianTemp::where('created_at', '>', $until)->orderBy('created_at')->first();
-            // if ($until > date('Y-m-d H:i:s', strtotime('2023-05-08 23:59:59'))) {
-            //     dump('anomali');
-            //     dump($until);
-            //     dump($pembelian_tanggal_selanjutnya);
-            // }
-            if ($pembelian_tanggal_selanjutnya === null) {
-                // dd($a);
-                break;
-            }
-            // dump($pembelian_tanggal_selanjutnya->created_at);
-            $until = date('Y-m-d', strtotime($pembelian_tanggal_selanjutnya->created_at));
-            $until .= ' 23:59:59';
-            $from = date('Y-m-d', strtotime($pembelian_tanggal_selanjutnya->created_at));
-            $from .= ' 00:00:00';
-            // $pembelian_tanggal_terkaits = Pembelian::where('created_at', '>', $from)->where('created_at', '<=', $until)->get();
-            // dd($pembelian_tanggal_selanjutnya);
-            // dump(count($pembelian_tanggal_terkaits));
-            $a += count($pembelian_tanggal_terkaits);
         }
 
-        // END - Pengelompokkan Pembelian yang sudah ada
+        dump($number_processed);
         dump('filling_pembelian_barang');
         $pembelian_barangs = PembelianBarang::all();
         dump(count($pembelian_barangs));
@@ -1142,4 +1091,135 @@ class ArtisanController extends Controller
         dump(TransactionName::all());
     }
     // END - FUNGSI - ACCOUNTING
+    function fix_pembelian() {
+        $suppliers = PembelianTemp::select('supplier')->orderBy('supplier')->groupBy('supplier')->get();
+        // dd($suppliers);
+        // foreach ($suppliers as $supplier) {
+        //     dump($supplier->supplier);
+        // }
+        // dd('finish');
+        $user = Auth::user();
+        foreach ($suppliers as $supplier) {
+            $nama = $supplier->supplier;
+            if (str_contains($supplier->supplier, 'MAX')) {
+                // if (strtok($supplier->supplier) === 'MAX') {
+                //     $nama = 'MAX';
+                // }
+                if (explode(' ', trim($supplier->supplier))[0] === 'MAX') {
+                    $nama = 'MAX';
+                }
+            } elseif (str_contains($supplier->supplier, 'ROYAL')) {
+                // if (strtok($supplier->supplier) === 'ROYAL') {
+                //     $nama = 'ROYAL';
+                // }
+                if (explode(' ', trim($supplier->supplier))[0] === 'ROYAL') {
+                    $nama = 'ROYAL';
+                }
+            } elseif (str_contains($supplier->supplier, 'ISMAIL')) {
+                $nama = 'Bpk. ISMAIL';
+            } elseif (str_contains($supplier->supplier, 'TOKO BARU')) {
+                $nama = 'TOKO BARU';
+            }
+            $exist_supplier = Supplier::where('nama', $nama)->first();
+            if (!$exist_supplier) {
+                Supplier::create([
+                    'nama' => $nama,
+                    'creator' => $user->username,
+                    'updater' => $user->username,
+                ]);
+            }
+        }
+        // $suppliers = Supplier::all();
+        // dump(count($suppliers));
+        // foreach ($suppliers as $supplier) {
+        //     dump($supplier->nama);
+        // }
+        // dd('check');
+        // END - Supplier
+
+        // Pengisian Table barangs
+        $barangs = PembelianTemp::orderBy('nama_barang')->get();
+        // dd($barangs->groupBy('nama_barang')['AMPLAS (RY) 137']);
+        $barangs_grouped = $barangs->groupBy('nama_barang');
+        $barangs_grouped_filtered = collect();
+        foreach ($barangs_grouped as $barang) {
+            // dd($barang);
+            $barangs_grouped_filtered->push($barang[0]);
+        }
+        // dd($barangs_grouped_filtered);
+        foreach ($barangs_grouped_filtered as $barang) {
+            // satuan_main, harga_main adalah acuan yang digunakan nantinya untuk menghitung harga_total
+            // misal satuan_sub: rol, jumlah_sub: 5, satuan_main: meter, 1 rol berapa meter? -> jumlah_main: 20 meter, harga_main: 20000
+            // jumlah_main dan harga_main adalah harga acuan/utama untuk penentu harga_total/ harga_total_main
+            //
+            $satuan_main = null;
+            $satuan_sub = null;
+            $harga_main = null;
+            $harga_sub = null;
+            $jumlah_main = null;
+            $jumlah_sub = null;
+            $harga_total_main = null;
+            $harga_total_sub = null;
+            if ($barang->satuan_rol !== null && $barang->satuan_meter !== null) {
+                $satuan_main = $barang->satuan_meter;
+                $satuan_sub = $barang->satuan_rol;
+                $jumlah_sub = 100;
+                $harga_main = (int)$barang->harga_meter;
+                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
+                $harga_sub = $harga_total_main;
+                $harga_total_sub = $harga_sub;
+            } elseif ($barang->satuan_rol === null && $barang->satuan_meter !== null) {
+                $satuan_main = $barang->satuan_meter;
+                $harga_main = (int)$barang->harga_meter;
+                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
+            } elseif ($barang->satuan_rol !== null && $barang->satuan_meter === null) {
+                $satuan_main = $barang->satuan_rol;
+                $harga_main = (int)($barang->harga_total / $barang->jumlah_rol);
+                $jumlah_main = 1;
+                $harga_total_main = $harga_main;
+            }
+            $supplier = Supplier::where('nama', $barang->supplier)->first();
+            if ($supplier === null) {
+                if (str_contains($barang->supplier, 'MAX')) {
+                    if (explode(' ', trim($barang->supplier))[0] === 'MAX') {
+                        $supplier = Supplier::where('nama', 'MAX')->first();
+                    }
+                } elseif (str_contains($barang->supplier, 'ROYAL')) {
+                    if (explode(' ', trim($barang->supplier))[0] === 'ROYAL') {
+                        $supplier = Supplier::where('nama', 'ROYAL')->first();
+                    }
+                } elseif (str_contains($barang->supplier, 'TOKO BARU')) {
+                    $supplier = Supplier::where('nama', 'TOKO BARU')->first();
+                    // if (explode(' ', trim($barang->supplier))[0] === 'TOKO' && explode(' ', trim($barang->supplier))[1] === 'BARU') {
+                    //     $supplier = Supplier::where('nama', 'TOKO BARU')->first();
+                    // }
+                } elseif (str_contains($barang->supplier, 'ISMAIL')) {
+                    $supplier = Supplier::where('nama', 'Bpk. ISMAIL')->first();
+                }
+            }
+
+            if ($supplier === null) {
+                dump($barang->supplier);
+            }
+
+            Barang::create([
+                'supplier_id' => $supplier->id,
+                'supplier_nama' => $supplier->nama,
+                'nama' => $barang->nama_barang,
+                'satuan_main' => $satuan_main,
+                'satuan_sub' => $satuan_sub,
+                'harga_main' => $harga_main,
+                'harga_sub' => $harga_sub,
+                'jumlah_sub' => $jumlah_sub,
+                'jumlah_main' => $jumlah_main,
+                'harga_total_main' => $harga_total_main,
+                'harga_total_sub' => $harga_total_sub,
+            ]);
+        }
+        // END - Pengisian Table barangs
+
+        dump('filling records to barangs and suppliers');
+    }
 }

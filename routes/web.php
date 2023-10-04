@@ -215,4 +215,5 @@ Route::controller(ArtisanController::class)->group(function(){
     Route::post('/artisan-command/filling_pembelian_barang','filling_pembelian_barang')->name('artisan.filling_pembelian_barang')->middleware('developer');
     Route::post('/artisan-command/create_tables_for_accounting','create_tables_for_accounting')->name('artisan.create_tables_for_accounting')->middleware('developer');
     Route::post('/artisan-command/create_table_for_transaction_names','create_table_for_transaction_names')->name('artisan.create_table_for_transaction_names')->middleware('developer');
+    Route::post('/artisan-command/fix_pembelian','fix_pembelian')->name('artisan.fix_pembelian')->middleware('developer');
 });
