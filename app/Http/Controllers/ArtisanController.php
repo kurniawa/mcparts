@@ -510,6 +510,7 @@ class ArtisanController extends Controller
             $table->string('keterangan')->nullable();
             $table->string('status_bayar', 20)->default('BELUM'); // ['BELUM', 'SEBAGIAN', 'LUNAS']
             $table->string('keterangan_bayar')->nullable();
+            $table->timestamp('tanggal_lunas')->nullable();
             $table->timestamps();
         });
 
@@ -520,38 +521,66 @@ class ArtisanController extends Controller
         // Pengelompokkan berdasarkan supplier terlebih dahulu
         $suppliers = Supplier::all();
         $number_processed = 0;
-        foreach ($suppliers as $supplier) {
+        foreach ($suppliers as $key_supplier => $supplier) {
             if ($supplier->nama === 'Bpk. ISMAIL') {
                 $pembelian_temps = PembelianTemp::where('supplier', 'like', "%ismail%")->orderBy('created_at')->get();
             } else {
                 $pembelian_temps = PembelianTemp::where('supplier', 'like', "%$supplier->nama%")->orderBy('created_at')->get();
             }
-            // dump(date('Y-m-d', strtotime($pembelian_temps[0]->created_at)));
-            // dd($pembelian_temps[0]->created_at);
-            try {
-                $date_1 = date('Y-m-d', strtotime($pembelian_temps[0]->created_at));
-            } catch (\Throwable $th) {
-                dump($supplier);
-                dd($pembelian_temps);
+            // pusing, coba sekarang lakukan pemisahan tanggal terlebih dahulu!
+            $pembelian_temps_grouped_by_supplier_date = array();
+            $arr_temp = array();
+            $date_1 = date('Y-m-d', strtotime($pembelian_temps[0]->created_at));
+            foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
+                if ($key_pembelian_temp === 0) {
+                    // dump("date_1: $date_1");
+                    // $arr_temp[] = $key_pembelian_temp;
+                    $arr_temp[] = $pembelian_temp;
+                } elseif ($key_pembelian_temp > 0) {
+                    $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
+                    if ($date_2 > $date_1) {
+                        // dump("date_1: $date_1 > date_2: $date_2");
+                        // kalau beda tanggal, arr_temp yang sudah ada masuk dulu ke arr_key_same_date
+                        // lalu bikin arr_temp yang baru, yaitu kosongkan arr_temp dan tambah key sekarang.
+                        $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+                        $arr_temp = array();
+                        // $arr_temp[] = $key_pembelian_temp;
+                        $arr_temp[] = $pembelian_temp;
+                        $date_1 = $date_2;
+
+                        if (count($pembelian_temps) === ($key_pembelian_temp + 1)) {
+                            $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+                        }
+                    } elseif ($date_2 === $date_1) {
+                        // dump("date_1: $date_1 === date_2: $date_2");
+                        // $arr_temp[] = $key_pembelian_temp;
+                        $arr_temp[] = $pembelian_temp;
+                        if (count($pembelian_temps) === ($key_pembelian_temp + 1)) {
+                            $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+                        }
+                    }
+                }
             }
 
-            $pembelian = null;
-            foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
-                $number_processed++;
-                $barang = Barang::where('nama', $pembelian_temp->nama_barang)->first();
-                $jumlah_sub = null;
-                if ($pembelian_temp->jumlah_rol !== null) {
-                    $jumlah_sub = (int)($pembelian_temp->jumlah_rol * 100);
-                }
+            // dump($supplier->nama);
+            // dump(count($pembelian_temps));
+            // dump($arr_key_same_date);
 
-                if ($key_pembelian_temp === 0) {
-                    dump($number_processed . ". " . $date_1);
-                    $pembelian = Pembelian::create([
-                        'supplier_id' => $supplier->id,
-                        'supplier_nama' => $supplier->nama,
-                        'created_at' => $date_1,
-                    ]);
+            foreach ($pembelian_temps_grouped_by_supplier_date as $pembelian_temps_grouped_by_date) {
 
+                $pembelian = Pembelian::create([
+                    'supplier_id' => $supplier->id,
+                    'supplier_nama' => $supplier->nama,
+                    'created_at' => $pembelian_temps_grouped_by_date[0]->created_at,
+                ]);
+
+                foreach ($pembelian_temps_grouped_by_date as $pembelian_temp) {
+                    $number_processed++;
+                    $barang = Barang::where('nama', $pembelian_temp->nama_barang)->first();
+                    $jumlah_sub = null;
+                    if ($pembelian_temp->jumlah_rol !== null) {
+                        $jumlah_sub = (int)($pembelian_temp->jumlah_rol * 100);
+                    }
                     PembelianBarang::create([
                         'pembelian_id' => $pembelian->id,
                         'barang_id' => $barang->id,
@@ -571,102 +600,102 @@ class ArtisanController extends Controller
                         'creator' => $pembelian_temp->created_by,
                         'updater' => $pembelian_temp->updated_by,
                     ]);
+                }
 
-                    list($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota) = Pembelian::lengkapi_data_pembelian($pembelian, $pembelian_temp);
+                $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->orderBy('created_at')->get();
 
-                    $pembelian->update([
-                        'nomor_nota' => $nomor_nota,
-                        'isi' => json_encode($isi),
-                        'harga_total' => $harga_total,
-                        'status_bayar' => $status_bayar,
-                        'keterangan_bayar' => $keterangan_bayar,
-                        'tanggal_lunas' => $tanggal_lunas,
-                    ]);
+                $isi = array();
+                $harga_total = 0;
+                $status_bayar = 'BELUM';
+                $jumlah_lunas = 0;
+                $keterangan_bayar = '';
+                $tanggal_lunas = null;
 
-                } else {
-                    $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
-                    if ($date_2 > $date_1) {
-                        dump($number_processed . ". " . $date_2 . " -- " . $date_1 . " -- " . "date_2 > date_1 ? " . ($date_2 > $date_1));
-                        // UPDATE PEMBELIAN SEBELUMNYA DULU
-                        if ($pembelian !== null) {
-                            list($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota) = Pembelian::lengkapi_data_pembelian($pembelian, $pembelian_temp);
-
-                            $pembelian->update([
-                                'nomor_nota' => $nomor_nota,
-                                'isi' => json_encode($isi),
-                                'harga_total' => $harga_total,
-                                'status_bayar' => $status_bayar,
-                                'keterangan_bayar' => $keterangan_bayar,
-                                'tanggal_lunas' => $tanggal_lunas,
-                            ]);
-                            dump("pembelian updated - $nomor_nota, $harga_total, $status_bayar");
-                        }
-                        // END - UPDATE PEMBELIAN SEBELUMNYA
-
-                        $date_1 = $date_2;
-                        $pembelian = Pembelian::create([
-                            'supplier_id' => $supplier->id,
-                            'supplier_nama' => $supplier->nama,
-                            'created_at' => $date_1,
-                        ]);
-                        PembelianBarang::create([
-                            'pembelian_id' => $pembelian->id,
-                            'barang_id' => $barang->id,
-                            'barang_nama' => $barang->nama,
-                            'satuan_main' => $pembelian_temp->satuan_meter,
-                            'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
-                            'harga_main' => (int)$pembelian_temp->harga_meter,
-                            'satuan_sub' => $pembelian_temp->satuan_rol,
-                            'jumlah_sub' => $jumlah_sub,
-                            'harga_sub' => null,
-                            'harga_t' => (int)$pembelian_temp->harga_total,
-                            'status_bayar' => $pembelian_temp->status_pembayaran,
-                            'keterangan_bayar' => $pembelian_temp->keterangan_pembayaran,
-                            'tanggal_lunas' => $pembelian_temp->tanggal_lunas,
-                            'created_at' => $pembelian_temp->created_at,
-                            'updated_at' => $pembelian_temp->updated_at,
-                            'creator' => $pembelian_temp->created_by,
-                            'updater' => $pembelian_temp->updated_by,
-                        ]);
-
-                        list($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota) = Pembelian::lengkapi_data_pembelian($pembelian, $pembelian_temp);
-
-                        $pembelian->update([
-                            'nomor_nota' => $nomor_nota,
-                            'isi' => json_encode($isi),
-                            'harga_total' => $harga_total,
-                            'status_bayar' => $status_bayar,
-                            'keterangan_bayar' => $keterangan_bayar,
-                            'tanggal_lunas' => $tanggal_lunas,
-                        ]);
-
-                    } elseif ($date_2 === $date_1) {
-                        dump($number_processed . ". " . $date_2 . " -- " . $date_1 . " -- " . "date_2 === date_1 ? " . ($date_2 === $date_1));
-                        if ($pembelian !== null) {
-                            PembelianBarang::create([
-                                'pembelian_id' => $pembelian->id,
-                                'barang_id' => $barang->id,
-                                'barang_nama' => $barang->nama,
-                                'satuan_main' => $pembelian_temp->satuan_meter,
-                                'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
-                                'harga_main' => (int)$pembelian_temp->harga_meter,
-                                'satuan_sub' => $pembelian_temp->satuan_rol,
-                                'jumlah_sub' => $jumlah_sub,
-                                'harga_sub' => null,
-                                'harga_t' => (int)$pembelian_temp->harga_total,
-                                'status_bayar' => $pembelian_temp->status_pembayaran,
-                                'keterangan_bayar' => $pembelian_temp->keterangan_pembayaran,
-                                'tanggal_lunas' => $pembelian_temp->tanggal_lunas,
-                                'created_at' => $pembelian_temp->created_at,
-                                'updated_at' => $pembelian_temp->updated_at,
-                                'creator' => $pembelian_temp->created_by,
-                                'updater' => $pembelian_temp->updated_by,
-                            ]);
+                foreach ($pembelian_barangs as $key_pembelian_barang => $pembelian_barang) {
+                    $harga_total += (int)$pembelian_barang->harga_t;
+                    $exist_satuan_main = false;
+                    $exist_satuan_sub = false;
+                    if (count($isi) !== 0) {
+                        for ($i=0; $i < count($isi); $i++) {
+                            if ($isi[$i]['satuan'] === $pembelian_barang->satuan_main) {
+                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_main);
+                                $exist_satuan_main = true;
+                            }
+                            if ($isi[$i]['satuan'] === $pembelian_barang->satuan_sub) {
+                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_sub);
+                                $exist_satuan_sub = true;
+                            }
                         }
                     }
-
+                    if (!$exist_satuan_main) {
+                        $isi[] = [
+                            'satuan' => $pembelian_barang->satuan_main,
+                            'jumlah' => (int)($pembelian_barang->jumlah_main),
+                        ];
+                    }
+                    if (!$exist_satuan_sub) {
+                        if ($pembelian_barang->satuan_sub !== null) {
+                            $isi[] = [
+                                'satuan' => $pembelian_barang->satuan_sub,
+                                'jumlah' => (int)($pembelian_barang->jumlah_sub),
+                            ];
+                        }
+                    }
+                    if ($pembelian_barang->status_bayar === 'LUNAS') {
+                        $jumlah_lunas++;
+                    }
+                    $keterangan_bayar = $pembelian_barang->keterangan_bayar;
+                    if ($tanggal_lunas === null) {
+                        $tanggal_lunas = $pembelian_barang->tanggal_lunas;
+                    } else {
+                        if ($pembelian_barang->tanggal_lunas !== null) {
+                            if (date('Y-m-d H:i:s', strtotime($tanggal_lunas)) < date('Y-m-d H:i:s', strtotime($pembelian_barang->tanggal_lunas))) {
+                                $tanggal_lunas = $pembelian_barang->tanggal_lunas;
+                            }
+                        }
+                    }
                 }
+
+                if ($jumlah_lunas === count($pembelian_barangs)) {
+                    $status_bayar = 'LUNAS';
+                } elseif ($jumlah_lunas < count($pembelian_barangs) && $jumlah_lunas > 0) {
+                    $status_bayar = 'SEBAGIAN';
+                }
+
+                // if ($status_bayar === 'BELUM') {
+                //     $tanggal_lunas = null;
+                // }
+
+                $nomor_nota = null;
+                if ($pembelian->supplier_nama !== $pembelian_temps[0]->supplier) {
+                    if (str_contains($pembelian_temps[0]->supplier, 'MAX')) {
+                        $nomor_nota = explode(' ', trim($pembelian_temps[0]->supplier))[1];
+                    } elseif (str_contains($pembelian_temps[0]->supplier, 'ROYAL')) {
+                        $nomor_nota = explode(' ', trim($pembelian_temps[0]->supplier))[1];
+                    } elseif (str_contains($pembelian_temps[0]->supplier, 'TOKO BARU')) {
+                        $nomor_nota = explode(' ', trim($pembelian_temps[0]->supplier))[2];
+                    } elseif (str_contains($pembelian_temps[0]->supplier, 'ISMAIL')) {
+                        $nomor_nota = "N-$pembelian->id";
+                    }
+                } else {
+                    $nomor_nota = "N-$pembelian->id";
+                }
+
+                if (!$nomor_nota) {
+                    dump("nomor nota? pembelian->supplier_nama: $pembelian->supplier_nama -- pembelian_temp->supplier: $pembelian_temp->supplier");
+                }
+
+                $pembelian->update([
+                    'nomor_nota' => $nomor_nota,
+                    'isi' => json_encode($isi),
+                    'harga_total' => $harga_total,
+                    'status_bayar' => $status_bayar,
+                    'keterangan_bayar' => $keterangan_bayar,
+                    'tanggal_lunas' => $tanggal_lunas,
+                ]);
+
             }
+
         }
 
         dump($number_processed);
@@ -675,40 +704,6 @@ class ArtisanController extends Controller
         dump(count($pembelian_barangs));
     }
     // END - SUPPLIER
-
-    // FUNGSI PRODUK
-    // function duplicate_produk() {
-    //     Schema::dropIfExists('produks_duplicate');
-
-    //     Schema::create('produks_duplicate', function (Blueprint $table) {
-    //         $table->id();
-    //         $table->string('tipe', 50);
-    //         $table->string('nama');
-    //         $table->string('nama_nota');
-    //         $table->string('tipe_packing', 20)->nullable();
-    //         $table->smallInteger('aturan_packing')->nullable();
-    //         $table->string('keterangan')->nullable();
-    //         $table->timestamps();
-    //         $table->string('creator', 50)->nullable();
-    //         $table->string('updater', 50)->nullable();
-    //     });
-
-    //     $produks = Produk::all()->each(function ($produk) {
-    //         $produk_temp = $produk->replicate();
-    //         $produk_temp->setTable('produks_duplicate');
-    //         $produk_temp->save();
-    //     });
-
-    //     $produks_duplicate = ProdukDuplicate::all();
-    //     for ($i=0; $i < count($produks); $i++) {
-    //         $produks_duplicate[$i]->created_at = $produks[$i]->created_at;
-    //         $produks_duplicate[$i]->updated_at = $produks[$i]->updated_at;
-    //         $produks_duplicate[$i]->save();
-    //     }
-    //     dump($produks_duplicate);
-    // }
-
-    // END - FUNGSI PRODUK
 
     // FUNGSI - ACCOUNTING
     function create_tables_for_accounting() {
@@ -1091,7 +1086,7 @@ class ArtisanController extends Controller
         dump(TransactionName::all());
     }
     // END - FUNGSI - ACCOUNTING
-    function fix_pembelian() {
+    function filling_suppliers_dan_barangs() {
         $suppliers = PembelianTemp::select('supplier')->orderBy('supplier')->groupBy('supplier')->get();
         // dd($suppliers);
         // foreach ($suppliers as $supplier) {

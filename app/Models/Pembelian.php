@@ -19,8 +19,17 @@ class Pembelian extends Model
         $tanggal_lunas = null;
 
         $pembelian_barangs_before = PembelianBarang::where('pembelian_id', $pembelian->id)->orderBy('created_at')->get();
-
+        // dump($pembelian->supplier_nama);
+        // dump($pembelian_barangs_before);
+        $date = null;
         foreach ($pembelian_barangs_before as $pembelian_barang_before) {
+            $date = date('Y-m-d', strtotime($pembelian_barang_before->created_at));
+            // if ($pembelian->supplier_nama === 'PD RIZKY AGUNG') {
+            //     dd($date);
+            // }
+            if ($pembelian->supplier_nama === 'PD RIZKY AGUNG' && $date == "2023-01-09") {
+                dump("harga_t: " . number_format($pembelian_barang_before->harga_t, 0, ',','.'));
+            }
             $harga_total += (int)$pembelian_barang_before->harga_t;
             $exist_satuan_main = false;
             $exist_satuan_sub = false;
@@ -88,6 +97,12 @@ class Pembelian extends Model
 
         if (!$nomor_nota) {
             dump("nomor nota? pembelian->supplier_nama: $pembelian->supplier_nama -- pembelian_temp->supplier: $pembelian_temp->supplier");
+        }
+
+        if ($pembelian->supplier_nama === 'PD RIZKY AGUNG' && $date == "2023-01-09") {
+            dump('isi:');
+            dump($isi);
+            dump("harga_total: " . number_format($harga_total, 0, ',','.'));
         }
 
         return array($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota);
