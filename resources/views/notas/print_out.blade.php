@@ -27,7 +27,13 @@
                     </tr>
                     <tr>
                         <td><div class="font-bold">Kepada</div></td><th>:</th>
-                        <td><div class="font-bold">{{ $nota->pelanggan_nama }}</div></td>
+                        <td>
+                            @if ($nota->reseller_id)
+                            <div class="font-bold">{{ $nota->reseller_nama }} - {{ $nota->pelanggan_nama }}</div>
+                            @else
+                            <div class="font-bold">{{ $nota->pelanggan_nama }}</div>
+                            @endif
+                        </td>
                     </tr>
                     <tr><td>Tanggal</td><td>:</td><td>{{ date('d-m-Y', strtotime($nota->created_at)) }}</td></tr>
                     <tr style="vertical-align: top"><td>Alamat</td><td>:</td>

@@ -354,6 +354,9 @@
                                         @endif
                                     </div>
                                 </a>
+                                @if ($pembelians[$i]->keterangan_bayar)
+                                <div class="text-slate-400">( {{ $pembelians[$i]->keterangan_bayar }} )</div>
+                                @endif
                             </td>
                             <td><a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-indigo-500">{{ $pembelians[$i]->nomor_nota }}</a></td>
                             {{-- <td>
@@ -509,6 +512,10 @@
                                                     @endif
                                                 </div>
                                             </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Keterangan</td><td>:</td>
+                                            <td><textarea name="keterangan_bayar" id="" cols="30" rows="3" class="text-xs p-1">{{ $pembelians[$i]->keterangan_bayar }}</textarea></td>
                                         </tr>
                                         <tr>
                                             <td colspan="3">

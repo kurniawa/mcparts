@@ -263,9 +263,10 @@ class PembelianController extends Controller
 
         $pembelian->tanggal_lunas = date('Y-m-d', strtotime("$post[year]-$post[month]-$post[day]")) . " " . date('H:i:s');
         $pembelian->status_bayar = 'LUNAS';
+        $pembelian->keterangan_bayar = $post['keterangan_bayar'];
         $pembelian->save();
 
-        return back()->with('success_', '-tanggal_lunas & status_bayar updated-');
+        return back()->with('success_', '-data_pelunasan updated-');
     }
 
     function edit(Pembelian $pembelian) {

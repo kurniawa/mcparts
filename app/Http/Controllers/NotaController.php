@@ -352,6 +352,7 @@ class NotaController extends Controller
             'rest_row' => $rest_row,
         ];
 
+        // dd($data);
         return view('notas.print_out', $data);
     }
 
