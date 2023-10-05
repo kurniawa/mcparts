@@ -269,6 +269,15 @@ class PembelianController extends Controller
         return back()->with('success_', '-data_pelunasan updated-');
     }
 
+    function pembatalan_pelunasan(Pembelian $pembelian) {
+        $pembelian->tanggal_lunas = null;
+        $pembelian->status_bayar = 'BELUM';
+        $pembelian->keterangan_bayar = null;
+        $pembelian->save();
+
+        return back()->with('warnings_', '-pelunasan dibatalkan-');
+    }
+
     function edit(Pembelian $pembelian) {
         $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->get();
 

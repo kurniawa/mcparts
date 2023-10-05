@@ -526,6 +526,12 @@
                                         </tr>
                                     </table>
                                 </form>
+                                <form action="{{ route('pembelians.pembatalan_pelunasan', $pembelians[$i]->id) }}" method="POST" onsubmit="return confirm('Batalkan Pelunasan?')" class="mt-1">
+                                    @csrf
+                                    <div class="text-center">
+                                        <button class="border-2 border-yellow-300 bg-yellow-100 rounded text-yellow-500 px-1">batalkan pelunasan</button>
+                                    </div>
+                                </form>
                             </td>
                         </tr>
                         {{-- FORM PELUNASAN --}}

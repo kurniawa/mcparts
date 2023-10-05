@@ -155,6 +155,7 @@ Route::controller(PembelianController::class)->group(function(){
     Route::post('/pembelians','store')->name('pembelians.store');
     Route::post('/pembelians/{pembelian}/delete','delete')->name('pembelians.delete');
     Route::post('/pembelians/{pembelian}/pelunasan','pelunasan')->name('pembelians.pelunasan');
+    Route::post('/pembelians/{pembelian}/pembatalan_pelunasan','pembatalan_pelunasan')->name('pembelians.pembatalan_pelunasan');
 });
 
 Route::controller(BarangController::class)->group(function(){
