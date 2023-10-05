@@ -660,7 +660,24 @@
                             <tr>
                                 <td><div class="text-center">{{ $spk_produk_nota->jumlah }}</div></td>
                                 <td onclick="toggle_element('spk_produk_nota_detail-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">{{ $spk_produk_nota->nama_nota }}</td>
-                                <td><div class="text-center">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div></td>
+                                <td>
+                                    <div class="text-center" onclick="toggle_element('edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div>
+                                    <div class="hidden text-center" id="edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
+                                        <form action="{{ route('notas.edit_harga_item', [$spk->id, $nota->id, $spk_produk_nota->id]) }}" method="POST">
+                                            @csrf
+                                            <input type="text" class="rounded p-0 text-xs w-16" value="{{ number_format($spk_produk_nota->harga,0,',','.') }}" oninput="formatNumber(this, 'harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
+                                            <input type="hidden" id="harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}" name="harga" value="{{ $spk_produk_nota->harga }}">
+                                            <div>harga khusus pelanggan ini?</div>
+                                            <div class="flex items-center justify-center">
+                                                <input type="checkbox" name="harga_khusus_pelanggan" value="yes" id="harga_khusus_pelanggan-{{ $key_nota }}-{{ $key_spk_produk_nota }}" class="rounded">
+                                                <label for="harga_khusus_pelanggan-{{ $key_nota }}-{{ $key_spk_produk_nota }}" class="ml-1">yes</label>
+                                            </div>
+                                            <div class="mt-1">
+                                                <button class="rounded px-1 bg-emerald-300 text-emerald-500 font-semibold">confirm</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </td>
                                 <td><div class="text-center">{{ number_format($spk_produk_nota->harga_t,0,',','.') }}</div></td>
                             </tr>
                             {{-- SPK_PRODUK_NOTA_DETAIL --}}

@@ -79,6 +79,7 @@ Route::controller(NotaController::class)->group(function(){
     Route::post('/notas/{spk}/{spk_produk_nota}/delete_item','delete_item')->name('notas.delete_item')->middleware('auth');
     Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.edit_alamat')->middleware('auth');
     Route::post('/notas/{spk}/edit_kontak','edit_kontak')->name('notas.edit_kontak')->middleware('auth');
+    Route::post('/notas/{spk}/{nota}/{spk_produk_nota}/edit_harga_item','edit_harga_item')->name('notas.edit_harga_item')->middleware('auth');
 });
 
 Route::controller(SrjalanController::class)->group(function(){

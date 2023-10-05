@@ -6,7 +6,32 @@
     {{-- SJ PELANGGAN TANPA RESELLER --}}
     <div class="border-t-2 mt-1 mb-1"></div>
     <div class="grid grid-cols-3 items-center" style="font-size: 0.8rem">
-        <div class=""><img class="logo-mc" src="{{ asset('images/logo-mc.jpg') }}" alt=""></div>
+        @if ($srjalan->reseller_id)
+        <div class="text-center">
+            <div class="font-bold text-base">Pengirim:</div>
+            <span class="font-bold text-base">{{ $srjalan->reseller_nama }}</span>
+            <div style="font-size: 0.8rem">
+                @if ($srjalan->reseller_long)
+                @foreach (json_decode($srjalan->reseller_long) as $long)
+                <div>{{ $long }}</div>
+                @endforeach
+                @endif
+            </div>
+        </div>
+        <div class="text-center font-bold">
+            <span class="judul-sj">SURAT JALAN /</span><br><span class="judul-sj">TANDA TERIMA BARANG</span>
+        </div>
+        <div class="text-center">
+            @if ($i_copy_sj===0)
+            ( Asli )
+            @else
+            ( Copy )
+            @endif
+        </div>
+        @else
+        <div class="">
+            <img class="logo-mc" src="{{ asset('images/logo-mc.jpg') }}" alt="">
+        </div>
         <div class="">
             <div class="font-bold font-1_3">CV. MC-Parts</div>
             <div>Jl. Raya Karanggan No. 96</div><div>Kec. Gn. Putri/Kab. Bogor</div>
@@ -23,11 +48,12 @@
                 @endif
             </div>
         </div>
+        @endif
     </div>
 
     <div class="hr-line border-top border-2 mt-1 mb-1"></div>
     <div class="grid grid-cols-3 items-center">
-        <div class="">
+        <div class="text-center">
             <div class="font-bold">Untuk:</div>
             <div class="font-bold">{{ $srjalan->pelanggan_nama }}</div>
         </div>

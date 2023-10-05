@@ -378,4 +378,58 @@ class NotaController extends Controller
         ];
         return back()->with($feedback);
     }
+
+    function edit_harga_item(Spk $spk, Nota $nota, SpkProdukNota $spk_produk_nota, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dump($nota);
+        // dd($spk_produk_nota);
+
+        $request->validate(['harga' => 'required|numeric']);
+
+        $success_ = '';
+        if (isset($post['harga_khusus_pelanggan'])) {
+            if ($post['harga_khusus_pelanggan'] === 'yes') {
+                $pelanggan_produks = PelangganProduk::where('pelanggan_id', $spk->pelanggan_id)->where('produk_id', $spk_produk_nota->produk_id)->where('status', 'default')->get();
+                foreach ($pelanggan_produks as $pelanggan_produk) {
+                    $pelanggan_produk->status = 'lama';
+                    $pelanggan_produk->save();
+                }
+
+                $produk_harga = ProdukHarga::where('produk_id', $spk_produk_nota->produk_id)->where('status', 'default')->latest()->first();
+
+                PelangganProduk::create([
+                    'pelanggan_id' => $spk->pelanggan_id,
+                    'reseller_id' => $spk->reseller_id,
+                    'produk_id' => $spk_produk_nota->produk_id,
+                    'harga_price_list' => $produk_harga->harga,
+                    'harga_khusus' => (int)$post['harga'],
+                    'status' => 'default',
+                ]);
+                $success_ .= '-pelanggan_produk created-';
+            }
+        }
+
+        $harga = (int)$post['harga'];
+        $harga_t = $harga * $spk_produk_nota->jumlah;
+
+        $spk_produk_nota->harga = $harga;
+        $spk_produk_nota->harga_t = $harga_t;
+        $spk_produk_nota->save();
+        $success_ .= '-harga_nota_item updated-';
+
+        // UPDATE HARGA TOTAL NOTA
+        $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
+
+        $harga_total = 0;
+        foreach ($spk_produk_notas as $spk_produk_nota) {
+            $harga_total += $spk_produk_nota->harga_t;
+        }
+
+        $nota->harga_total = $harga_total;
+        $nota->save();
+        $success_ .= '-nota:harga_total updated-';
+
+        return back()->with('success_', $success_);
+    }
 }

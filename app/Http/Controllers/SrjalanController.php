@@ -243,6 +243,7 @@ class SrjalanController extends Controller
         ];
 
         // dd($srjalan->cust_kontak['nomor']);
+        // dd($data);
         return view('srjalans.print_out', $data);
     }
 
