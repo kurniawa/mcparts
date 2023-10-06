@@ -530,42 +530,118 @@ class ArtisanController extends Controller
             // pusing, coba sekarang lakukan pemisahan tanggal terlebih dahulu!
             $pembelian_temps_grouped_by_supplier_date = array();
             $arr_temp = array();
-            $date_1 = date('Y-m-d', strtotime($pembelian_temps[0]->created_at));
-            foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
-                if ($key_pembelian_temp === 0) {
-                    // dump("date_1: $date_1");
-                    // $arr_temp[] = $key_pembelian_temp;
-                    $arr_temp[] = $pembelian_temp;
-                } elseif ($key_pembelian_temp > 0) {
-                    $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
-                    if ($date_2 > $date_1) {
-                        // dump("date_1: $date_1 > date_2: $date_2");
-                        // kalau beda tanggal, arr_temp yang sudah ada masuk dulu ke arr_key_same_date
-                        // lalu bikin arr_temp yang baru, yaitu kosongkan arr_temp dan tambah key sekarang.
-                        $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
-                        $arr_temp = array();
-                        // $arr_temp[] = $key_pembelian_temp;
-                        $arr_temp[] = $pembelian_temp;
-                        $date_1 = $date_2;
 
-                        if (count($pembelian_temps) === ($key_pembelian_temp + 1)) {
-                            $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+            if ($supplier->nama === 'TOKO BARU') {
+                $arr_nomor_nota = array();
+                $date_1 = null;
+                foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
+                    $suku_kata_nama_supplier = explode(' ', trim($pembelian_temp->supplier));
+                    if (isset($suku_kata_nama_supplier[2])) {
+                        // dump($suku_kata_nama_supplier[2]);
+                        $exist_nomor_nota = false;
+                        foreach ($arr_nomor_nota as $nomor_nota) {
+                            if ($nomor_nota === $suku_kata_nama_supplier[2]) {
+                                $exist_nomor_nota = true;
+                            }
                         }
-                    } elseif ($date_2 === $date_1) {
-                        // dump("date_1: $date_1 === date_2: $date_2");
+                        if (!$exist_nomor_nota) {
+                            $nomor_nota_now = $suku_kata_nama_supplier[2];
+                            $pembelian_temps_nomor_nota = PembelianTemp::where('supplier', "$supplier->nama $nomor_nota_now")->get();
+                            $pembelian_temps_grouped_by_supplier_date[] = $pembelian_temps_nomor_nota;
+                            $nomor_nota = $nomor_nota_now;
+                            $arr_nomor_nota[] = $nomor_nota_now;
+                        }
+                        // else {
+                        //     $nomor_nota_now = $suku_kata_nama_supplier[1];
+                        //     $pembelian_temps_nomor_nota = PembelianTemp::where('supplier', "$supplier->nama $nomor_nota_now")->get();
+                        // }
+                    } else {
+                        $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
+                        if ($date_1 !== $date_2) {
+                            $pembelian_temps_this = PembelianTemp::where('supplier', $supplier->nama)->whereDate('created_at', date('Y-m-d', strtotime($pembelian_temp->created_at)))->get();
+                            $pembelian_temps_grouped_by_supplier_date[] = $pembelian_temps_this;
+                            $date_1 = $date_2;
+                        }
+                    }
+                    // $nomor_nota = explode(' ', trim($pembelian_temp->supplier))[2];
+                    // dump($nomor_nota);
+                }
+            } elseif ($supplier->nama === 'ROYAL' || $supplier->nama === 'MAX') {
+                $arr_nomor_nota = array();
+                $date_1 = null;
+                foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
+                    $suku_kata_nama_supplier = explode(' ', trim($pembelian_temp->supplier));
+                    if (isset($suku_kata_nama_supplier[1])) {
+                        // dump($suku_kata_nama_supplier[1]);
+                        $exist_nomor_nota = false;
+                        foreach ($arr_nomor_nota as $nomor_nota) {
+                            if ($nomor_nota === $suku_kata_nama_supplier[1]) {
+                                $exist_nomor_nota = true;
+                            }
+                        }
+                        if (!$exist_nomor_nota) {
+                            $nomor_nota_now = $suku_kata_nama_supplier[1];
+                            $pembelian_temps_nomor_nota = PembelianTemp::where('supplier', "$supplier->nama $nomor_nota_now")->get();
+                            $pembelian_temps_grouped_by_supplier_date[] = $pembelian_temps_nomor_nota;
+                            $nomor_nota = $nomor_nota_now;
+                            $arr_nomor_nota[] = $nomor_nota_now;
+                        }
+                        // else {
+                        //     $nomor_nota_now = $suku_kata_nama_supplier[1];
+                        //     $pembelian_temps_nomor_nota = PembelianTemp::where('supplier', "$supplier->nama $nomor_nota_now")->get();
+                        // }
+                    } else {
+                        $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
+                        if ($date_1 !== $date_2) {
+                            $pembelian_temps_this = PembelianTemp::where('supplier', $supplier->nama)->whereDate('created_at', date('Y-m-d', strtotime($pembelian_temp->created_at)))->get();
+                            $pembelian_temps_grouped_by_supplier_date[] = $pembelian_temps_this;
+                            $date_1 = $date_2;
+                        }
+                    }
+                }
+            } else {
+                $date_1 = date('Y-m-d', strtotime($pembelian_temps[0]->created_at));
+                foreach ($pembelian_temps as $key_pembelian_temp => $pembelian_temp) {
+                    if ($key_pembelian_temp === 0) {
+                        // dump("date_1: $date_1");
                         // $arr_temp[] = $key_pembelian_temp;
                         $arr_temp[] = $pembelian_temp;
-                        if (count($pembelian_temps) === ($key_pembelian_temp + 1)) {
+                    } elseif ($key_pembelian_temp > 0) {
+                        $date_2 = date('Y-m-d', strtotime($pembelian_temp->created_at));
+                        if ($date_2 > $date_1) {
+                            // dump("date_1: $date_1 > date_2: $date_2");
+                            // kalau beda tanggal, arr_temp yang sudah ada masuk dulu ke arr_key_same_date
+                            // lalu bikin arr_temp yang baru, yaitu kosongkan arr_temp dan tambah key sekarang.
                             $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+                            $arr_temp = array();
+                            // $arr_temp[] = $key_pembelian_temp;
+                            $arr_temp[] = $pembelian_temp;
+                            $date_1 = $date_2;
+
+                            if (count($pembelian_temps) === ($key_pembelian_temp + 1)) {
+                                $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+                            }
+                        } elseif ($date_2 === $date_1) {
+                            // dump("date_1: $date_1 === date_2: $date_2");
+                            // $arr_temp[] = $key_pembelian_temp;
+                            $arr_temp[] = $pembelian_temp;
+                            if (count($pembelian_temps) === ($key_pembelian_temp + 1)) {
+                                $pembelian_temps_grouped_by_supplier_date[] = $arr_temp;
+                            }
                         }
                     }
                 }
             }
 
-            // dump($supplier->nama);
+
             // dump(count($pembelian_temps));
             // dump($arr_key_same_date);
 
+            // dump($supplier->nama);
+            // foreach ($pembelian_temps_grouped_by_supplier_date as $pembelian_temps) {
+            //     dump($pembelian_temps);
+            // }
+            // DARI SINI
             foreach ($pembelian_temps_grouped_by_supplier_date as $pembelian_temps_grouped_by_date) {
 
                 $pembelian = Pembelian::create([
@@ -667,14 +743,16 @@ class ArtisanController extends Controller
                 // }
 
                 $nomor_nota = null;
-                if ($pembelian->supplier_nama !== $pembelian_temps[0]->supplier) {
-                    if (str_contains($pembelian_temps[0]->supplier, 'MAX')) {
-                        $nomor_nota = explode(' ', trim($pembelian_temps[0]->supplier))[1];
-                    } elseif (str_contains($pembelian_temps[0]->supplier, 'ROYAL')) {
-                        $nomor_nota = explode(' ', trim($pembelian_temps[0]->supplier))[1];
-                    } elseif (str_contains($pembelian_temps[0]->supplier, 'TOKO BARU')) {
-                        $nomor_nota = explode(' ', trim($pembelian_temps[0]->supplier))[2];
-                    } elseif (str_contains($pembelian_temps[0]->supplier, 'ISMAIL')) {
+                if ($supplier->nama === 'MAX' || $supplier->nama === 'ROYAL') {
+                    $suku_kata_nama_supplier = explode(' ', trim($pembelian_temp->supplier));
+                    if (isset($suku_kata_nama_supplier[1])) {
+                        $nomor_nota = $suku_kata_nama_supplier[1];
+                    }
+                } elseif ($supplier->nama === 'TOKO BARU') {
+                    $suku_kata_nama_supplier = explode(' ', trim($pembelian_temp->supplier));
+                    if (isset($suku_kata_nama_supplier[2])) {
+                        $nomor_nota = $suku_kata_nama_supplier[2];
+                    } else {
                         $nomor_nota = "N-$pembelian->id";
                     }
                 } else {
@@ -695,6 +773,7 @@ class ArtisanController extends Controller
                 ]);
 
             }
+            // SAMPE SINI
 
         }
 
@@ -702,6 +781,7 @@ class ArtisanController extends Controller
         dump('filling_pembelian_barang');
         $pembelian_barangs = PembelianBarang::all();
         dump(count($pembelian_barangs));
+        dump(count(PembelianTemp::all()));
     }
     // END - SUPPLIER
 
