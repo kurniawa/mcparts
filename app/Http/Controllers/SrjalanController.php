@@ -353,4 +353,15 @@ class SrjalanController extends Controller
         $feedback = ['success_' => $success_];
         return back()->with($feedback);
     }
+
+    function edit_nama_tertera(Srjalan $srjalan, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($srjalan);
+
+        $srjalan->nama_tertera = $post['nama_tertera'];
+        $srjalan->save();
+
+        return back()->with('success_', '-nama_tertera updated-');
+    }
 }

@@ -1006,17 +1006,17 @@
                             <tr>
                                 <td>tertera</td><td>:</td>
                                 @if ($srjalan->nama_tertera)
-                                <td>{{ $srjalan->nama_tertera }}</td>
+                                <td onclick="toggle_element('edit_nama_tertera')">{{ $srjalan->nama_tertera }}</td>
                                 @else
-                                <td>{{ $srjalan->pelanggan_nama }}</td>
+                                <td onclick="toggle_element('edit_nama_tertera')">{{ $srjalan->pelanggan_nama }}</td>
                                 @endif
                             </tr>
                             <tr class="hidden" id="edit_nama_tertera">
                                 <td></td><td></td>
                                 <td>
-                                    <form method="POST" action="{{ route('sjs.edit_ekspedisi', $spk->id) }}">
+                                    <form method="POST" action="{{ route('sjs.edit_nama_tertera', $srjalan->id) }}">
                                         @csrf
-                                        <input type="text" name="nama_tertera" value="{{ $srjalan->nama_tertera }}" class="border rounded text-xs p-1 w-full" placeholder="{{ $srjalan->nama_tertera ? $srjalan->nama_tertera : 'nama tertera ...' }}">
+                                        <input type="text" name="nama_tertera" value="{{ $srjalan->nama_tertera }}" class="border rounded text-xs p-1 w-full">
                                         <div class="text-end mt-1"><button type="submit" class="bg-emerald-200 text-emerald-500 rounded px-1">confirm</button></div>
                                     </form>
                                 </td>
