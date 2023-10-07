@@ -356,7 +356,7 @@
         {{-- END - PRINT OUT TRANSACTIONS --}}
 
         {{-- STORE NEW TRANSACTIONS --}}
-        @if ($user_instance->user_id === $user->id)
+        @if ($user_instance->user_id == $user->id)
         <div class="border rounded p-1 mt-3">
             <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
             <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
