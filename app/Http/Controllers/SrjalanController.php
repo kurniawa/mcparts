@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alamat;
+use App\Models\Ekspedisi;
+use App\Models\EkspedisiAlamat;
+use App\Models\EkspedisiKontak;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
@@ -338,18 +342,100 @@ class SrjalanController extends Controller
 
     function edit_ekspedisi(Spk $spk, Request $request) {
         $post = $request->post();
-        dump($post);
-        dd($spk);
+        // dump($post);
+        // dump($spk);
         $success_ = '';
+
+        $srjalans = collect();
+        if ($post['srjalan_id'] === 'on') {
+            $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
+            foreach ($spk_notas as $spk_nota) {
+                $nota_srjalans = NotaSrjalan::where('nota_id', $spk_nota->nota_id)->get();
+                foreach ($nota_srjalans as $nota_srjalan) {
+                    $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+                    $srjalans->push($srjalan);
+                }
+            }
+        } else {
+            $srjalan = Srjalan::find($post['srjalan_id']);
+            $srjalans->push($srjalan);
+        }
+
+        $ekspedisi = Ekspedisi::find($post['ekspedisi_id']);
+        $ekspedisi_alamat = EkspedisiAlamat::where('ekspedisi_id', $ekspedisi->id)->where('tipe', 'UTAMA')->first();
+        $alamat_ekspedisi = Alamat::find($ekspedisi_alamat->alamat_id);
+        $ekspedisi_kontak = EkspedisiKontak::where('ekspedisi_id', $ekspedisi->id)->where('is_aktual', 'yes')->first();
+
+        // dump($ekspedisi);
+        // dump($ekspedisi_alamat);
+        // dump($alamat_ekspedisi);
+        // dd($ekspedisi_kontak);
+
+        foreach ($srjalans as $srjalan) {
+            // dd($srjalan);
+            if ($ekspedisi_kontak!==null) {
+                $ekspedisi_kontak=json_encode($ekspedisi_kontak->toArray());
+            }
+            $srjalan->update([
+                'ekspedisi_id' => $ekspedisi->id,
+                'ekspedisi_nama' => $ekspedisi->nama,
+                'ekspedisi_long' => $alamat_ekspedisi->long,
+                'ekspedisi_short' => $alamat_ekspedisi->short,
+                'ekspedisi_kontak' => $ekspedisi_kontak,
+            ]);
+            $success_ .= "-$srjalan->id updated-";
+        }
+
         $feedback = ['success_' => $success_];
         return back()->with($feedback);
     }
 
     function edit_transit(Spk $spk, Request $request) {
         $post = $request->post();
-        dump($post);
-        dd($spk);
+        // dump($post);
+        // dd($spk);
         $success_ = '';
+
+        $srjalans = collect();
+        if ($post['srjalan_id'] === 'on') {
+            $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
+            foreach ($spk_notas as $spk_nota) {
+                $nota_srjalans = NotaSrjalan::where('nota_id', $spk_nota->nota_id)->get();
+                foreach ($nota_srjalans as $nota_srjalan) {
+                    $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+                    $srjalans->push($srjalan);
+                }
+            }
+        } else {
+            $srjalan = Srjalan::find($post['srjalan_id']);
+            $srjalans->push($srjalan);
+        }
+
+        $transit = Ekspedisi::find($post['transit_id']);
+        $transit_alamat = EkspedisiAlamat::where('ekspedisi_id', $transit->id)->where('tipe', 'UTAMA')->first();
+        $alamat_transit = Alamat::find($transit_alamat->alamat_id);
+        $transit_kontak = EkspedisiKontak::where('ekspedisi_id', $transit->id)->where('is_aktual', 'yes')->first();
+
+        // dump($transit);
+        // dump($transit_alamat);
+        // dump($alamat_ekspedisi);
+        // dd($transit_kontak);
+
+        foreach ($srjalans as $srjalan) {
+            // dd($srjalan);
+            if ($transit_kontak!==null) {
+                $transit_kontak=json_encode($transit_kontak->toArray());
+            }
+            $srjalan->update([
+                'transit_id' => $transit->id,
+                'transit_nama' => $transit->nama,
+                'transit_long' => $alamat_transit->long,
+                'transit_short' => $alamat_transit->short,
+                'transit_kontak' => $transit_kontak,
+            ]);
+            $success_ .= "-SJ-$srjalan->id updated-";
+        }
+
         $feedback = ['success_' => $success_];
         return back()->with($feedback);
     }

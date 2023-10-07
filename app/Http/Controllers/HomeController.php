@@ -156,7 +156,8 @@ class HomeController extends Controller
             'label_produks' => $label_produks,
         ];
         // dump($user_role);
-        // dump($spks);
+        // dd($spks[7]);
+        // dd($col_srjalans[7]);
         // dd($data);
         // dd($col_spk_produk_notas[0]);
         // dd($label_pelanggans[0]);

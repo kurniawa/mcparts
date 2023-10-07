@@ -1025,7 +1025,7 @@
                         </table>
                         <div>
                             <div class="border rounded border-sky-400">
-                                <div class="text-center"><h3>Data Ekspedisi</h3></div>
+                                <div class="text-center"><h3 class="font-bold">Data Ekspedisi</h3></div>
                                 <table class="w-full text-xs">
                                     <tr><td></td><td></td><td>{{ $srjalan->ekspedisi_nama }}</td></tr>
                                     <tr>

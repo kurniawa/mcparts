@@ -265,6 +265,7 @@ class SpkController extends Controller
         // dd($data_spk_nota_srjalans['col_srjalans']);
         // dd($data_spk_nota_srjalans['notas'][0]);
         // dd($data_packings);
+        // dd($data_spk_nota_srjalans['col_srjalans']);
         return view('spks.show', $data);
     }
 

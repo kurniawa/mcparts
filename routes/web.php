@@ -92,8 +92,8 @@ Route::controller(SrjalanController::class)->group(function(){
     Route::post('/sjs/{spk}/{srjalan}/{spk_produk_nota_srjalan}/delete_item','delete_item')->name('sjs.delete_item')->middleware('auth');
     Route::post('/sjs/{srjalan}/update_packing','update_packing')->name('sjs.update_packing')->middleware('auth');
     Route::post('/sjs/{srjalan}/edit_jenis_barang','edit_jenis_barang')->name('sjs.edit_jenis_barang')->middleware('auth');
-    Route::post('/sjs/{srjalan}/edit_ekspedisi','edit_ekspedisi')->name('sjs.edit_ekspedisi')->middleware('auth');
-    Route::post('/sjs/{srjalan}/edit_transit','edit_transit')->name('sjs.edit_transit')->middleware('auth');
+    Route::post('/sjs/{spk}/edit_ekspedisi','edit_ekspedisi')->name('sjs.edit_ekspedisi')->middleware('auth');
+    Route::post('/sjs/{spk}/edit_transit','edit_transit')->name('sjs.edit_transit')->middleware('auth');
     Route::post('/sjs/{srjalan}/edit_nama_tertera','edit_nama_tertera')->name('sjs.edit_nama_tertera')->middleware('auth');
 });
 
