@@ -471,7 +471,7 @@
         {{-- END - STORE NEW TRANSACTIONS --}}
 
         {{-- NOTIFIKASI --}}
-        @if (Auth::user()->id === $user_instance->user_id)
+        @if (Auth::user()->id === (int)$user_instance->user_id)
         <div class="fixed bottom-16 right-12">
             <div class="border rounded p-1">
                 <h3 class="font-bold text-slate-500">Notifikasi</h3>
