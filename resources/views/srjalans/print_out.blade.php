@@ -55,7 +55,11 @@
     <div class="grid grid-cols-3 items-center">
         <div class="text-center">
             <div class="font-bold">Untuk:</div>
+            @if ($srjalan->nama_tertera)
+            <div class="font-bold">{{ $srjalan->nama_tertera }}</div>
+            @else
             <div class="font-bold">{{ $srjalan->pelanggan_nama }}</div>
+            @endif
         </div>
         <div class="" style="font-size: 0.8rem">
             <div class="font-bold font-big">Alamat:</div>
