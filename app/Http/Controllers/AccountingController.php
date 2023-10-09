@@ -189,7 +189,6 @@ class AccountingController extends Controller
         // dd($label_kategori_level_two);
         // dump($label_deskripsi);
         // dump($accountings);
-
         return view('accounting.show_transactions', $data);
     }
 
