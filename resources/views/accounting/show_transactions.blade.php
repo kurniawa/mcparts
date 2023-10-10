@@ -209,6 +209,34 @@
                             </svg>
                         </button>
                     </td>
+                    @if ($fitur_up_down_transaction)
+                    <td>
+                        <div>
+                            <form action="{{ route('accounting.up_down_transaction', [$user_instance->id, $accounting->id]) }}" class="flex" method="POST" onsubmit="return confirm('up sekali?')">
+                                @csrf
+                                <div class="flex">
+                                    <button class="rounded bg-indigo-300" type="submit" name="up_down_transaction" value="up">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div>
+                            <form action="{{ route('accounting.up_down_transaction', [$user_instance->id, $accounting->id]) }}" class="flex" method="POST" onsubmit="return confirm('down sekali?')">
+                                @csrf
+                                <div>
+                                    <button class="rounded bg-orange-300" type="submit" name="up_down_transaction" value="down">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                    @endif
                 </tr>
                 <tr class="hidden" id="tr_edit_transaction-{{ $key_accounting }}">
                     <td colspan="6">
@@ -236,7 +264,7 @@
                                     <div class="ml-1">
                                         <label for="" class="block">keluar:</label>
                                         @if ($accounting->transaction_type === 'pengeluaran')
-                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" oninput="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
+                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
                                         <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
                                         <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36">
@@ -246,7 +274,7 @@
                                     <div class="ml-1">
                                         <label for="" class="block">masuk:</label>
                                         @if ($accounting->transaction_type === 'pemasukan')
-                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" oninput="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
+                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
                                         <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
                                         <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36">
@@ -349,6 +377,7 @@
                     <td>
                         {{ $accounting->saldo }}
                     </td>
+
                 </tr>
                 @endforeach
             </table>
@@ -382,11 +411,11 @@
                         <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
                         <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
                         <td>
-                            <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'keluar-{{ $i }}-unformatted')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
+                            <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-unformatted')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
                             <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted" value="{{ old('keluar.' . $i) }}">
                         </td>
                         <td>
-                            <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'masuk-{{ $i }}-unformatted')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
+                            <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-{{ $i }}-unformatted')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
                             <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted" value="{{ old('masuk.' . $i) }}">
                             <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
                         </td>
@@ -572,11 +601,11 @@
             <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
             <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>
             <td>
-                <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
+                <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
                 <input type="hidden" name="keluar[]" id="keluar-${transaction_index}-unformatted">
             </td>
             <td>
-                <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" oninput="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
+                <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
                 <input type="hidden" name="masuk[]" id="masuk-${transaction_index}-unformatted">
                 <input type="hidden" name="transaction_id[]" id="transaction_id-${transaction_index}">
             </td>

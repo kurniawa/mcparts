@@ -45,12 +45,12 @@
                                     </td>
                                     <td>Harga</td><td><div class="mx-1">:</div></td>
                                     <td>
-                                        <input type="text" id="harga_main" value="{{ number_format($barang->harga_main,0,',','.') }}" class="text-xs rounded p-1" oninput="formatNumber(this, 'harga_main-real');count_harga_total_main()">
+                                        <input type="text" id="harga_main" value="{{ number_format($barang->harga_main,0,',','.') }}" class="text-xs rounded p-1" onchange="formatNumber(this, 'harga_main-real');count_harga_total_main()">
                                         <input type="hidden" name="harga_main" id="harga_main-real" value="{{ $barang->harga_main }}">
                                     </td>
                                     <td>Harga Total</td><td><div class="mx-1">:</div></td>
                                     <td>
-                                        <input type="text" name="harga_total_main" id="harga_total_main" value="{{ number_format($barang->harga_total_main,0,',','.') }}" class="text-xs rounded p-1" oninput="formatNumber(this, 'harga_total_main-real');copy_to_harga_sub();count_harga_total_sub()">
+                                        <input type="text" name="harga_total_main" id="harga_total_main" value="{{ number_format($barang->harga_total_main,0,',','.') }}" class="text-xs rounded p-1" onchange="formatNumber(this, 'harga_total_main-real');copy_to_harga_sub();count_harga_total_sub()">
                                         <input type="hidden" name="harga_total_main" id="harga_total_main-real" value="{{ $barang->harga_total_main }}">
                                     </td>
                                 </tr>
@@ -62,12 +62,12 @@
                                     </td>
                                     <td>Harga</td><td><div class="mx-1">:</div></td>
                                     <td>
-                                        <input type="text" id="harga_sub" value="{{ number_format($barang->harga_sub,0,',','.') }}" class="text-xs rounded p-1" oninput="formatNumber(this, 'harga_sub-real');count_harga_total_sub()">
+                                        <input type="text" id="harga_sub" value="{{ number_format($barang->harga_sub,0,',','.') }}" class="text-xs rounded p-1" onchange="formatNumber(this, 'harga_sub-real');count_harga_total_sub()">
                                         <input type="hidden" name="harga_sub" id="harga_sub-real" value="{{ $barang->harga_sub }}">
                                     </td>
                                     <td>Harga Total</td><td><div class="mx-1">:</div></td>
                                     <td>
-                                        <input type="text" name="harga_total_sub" id="harga_total_sub" value="{{ number_format($barang->harga_total_sub,0,',','.') }}" class="text-xs rounded p-1" oninput="formatNumber(this, 'harga_total_sub-real');">
+                                        <input type="text" name="harga_total_sub" id="harga_total_sub" value="{{ number_format($barang->harga_total_sub,0,',','.') }}" class="text-xs rounded p-1" onchange="formatNumber(this, 'harga_total_sub-real');">
                                         <input type="hidden" name="harga_total_sub" id="harga_total_sub-real" value="{{ $barang->harga_total_sub }}">
                                     </td>
                                 </tr>

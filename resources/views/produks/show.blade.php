@@ -97,7 +97,7 @@
                                 <td><input type="text" name="nama" id="produk_nama" value="{{ $produk->nama }}" class="rounded p-1 text-xs w-full" oninput="generate_nama_nota(this.value)" placeholder="Nama Produk ..."></td>
                                 <td>Harga</td><td><div class="mx-2">:</div></td>
                                 <td>
-                                    <input type="text" id="harga" class="rounded p-1 text-xs" value="{{ number_format($produk_harga->harga,0,',','.') }}" oninput="formatNumber(this, 'harga_real')" placeholder="Harga ...">
+                                    <input type="text" id="harga" class="rounded p-1 text-xs" value="{{ number_format($produk_harga->harga,0,',','.') }}" onchange="formatNumber(this, 'harga_real')" placeholder="Harga ...">
                                     <input type="hidden" name="harga" id="harga_real" value="{{ $produk_harga->harga }}">
                                     <input type="hidden" name="produk_harga_id" value="{{ $produk_harga->id }}">
                                 </td>

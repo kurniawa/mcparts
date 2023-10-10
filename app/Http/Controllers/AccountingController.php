@@ -86,6 +86,7 @@ class AccountingController extends Controller
         // dd($user_instance);
         $get = $request->query();
 
+        $fitur_up_down_transaction = true;
         $accountings = collect();
 
         $from = null;
@@ -129,6 +130,7 @@ class AccountingController extends Controller
                 } else {
                     $accountings = Accounting::where('user_instance_id', $user_instance->id)->where('transaction_desc', 'like', "%$get[desc]%")->oldest()->limit(500)->get();
                 }
+                $fitur_up_down_transaction = false;
             }
         }
 
@@ -181,6 +183,7 @@ class AccountingController extends Controller
             'saldo_awal' => $saldo_awal,
             'from' => $from,
             'notifications' => $notifications,
+            'fitur_up_down_transaction' => $fitur_up_down_transaction,
             // 'label_kategori_level_one' => $label_kategori_level_one,
             // 'label_kategori_level_two' => $label_kategori_level_two,
             // 'transaction_names' => $transaction_names,
@@ -1218,5 +1221,76 @@ class AccountingController extends Controller
         // dd($transaction_name);
         $transaction_name->delete();
         return back()->with('danger_', '-transaction_relation deleted!-');
+    }
+
+    function up_down_transaction(UserInstance $user_instance, Accounting $accounting, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dump($user_instance);
+        // dd($accounting);
+
+        $accounting_to_compare = collect();
+        $saldo_1 = null;
+        $saldo_2 = null;
+        if ($post['up_down_transaction'] === 'up') {
+            $accounting_to_compare = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<', $accounting->created_at)->latest()->first();
+            if ($accounting_to_compare === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'no transaction to compare']);
+            }
+            $saldo_1 = $accounting->saldo;
+            if ($accounting_to_compare->transaction_type === 'pengeluaran') {
+                $saldo_1 += $accounting_to_compare->jumlah;
+                $saldo_2 = $saldo_1;
+                $saldo_2 -= $accounting_to_compare->jumlah;
+            } elseif ($accounting_to_compare->transaction_type === 'pemasukan') {
+                $saldo_1 -= $accounting_to_compare->jumlah;
+                $saldo_2 = $saldo_1;
+                $saldo_2 += $accounting_to_compare->jumlah;
+            }
+        } elseif ($post['up_down_transaction'] === 'down') {
+            $accounting_to_compare = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '>', $accounting->created_at)->first();
+            if ($accounting_to_compare === null) {
+                $request->validate(['error'=>'required'],['error.required'=>'no transaction to compare']);
+            }
+            $saldo_2 = $accounting->saldo;
+            if ($accounting->transaction_type === 'pengeluaran') {
+                $saldo_2 += $accounting->jumlah;
+            } elseif ($accounting->transaction_type === 'pemasukan') {
+                $saldo_2 -= $accounting->jumlah;
+            }
+
+            if ($accounting_to_compare->transaction_type === 'pengeluaran') {
+                $saldo_2 -= $accounting_to_compare->jumlah;
+            } elseif ($accounting_to_compare->transaction_type === 'pemasukan') {
+                $saldo_2 += $accounting_to_compare->jumlah;
+            }
+
+            $saldo_1 = $saldo_2;
+
+            if ($accounting->transaction_type === 'pengeluaran') {
+                $saldo_1 -= $accounting->jumlah;
+            } elseif ($accounting->transaction_type === 'pemasukan') {
+                $saldo_1 += $accounting->jumlah;
+            }
+
+        }
+
+        // dd($accounting_to_compare);
+
+        $created_at_1 = $accounting_to_compare->created_at;
+        $created_at_2 = $accounting->created_at;
+
+        // dump('saldo_1: ' . $saldo_1);
+        // dd('saldo_2: ' . $saldo_2);
+
+        $accounting->created_at = $created_at_1;
+        $accounting->saldo = $saldo_1;
+        $accounting->save();
+
+        $accounting_to_compare->created_at = $created_at_2;
+        $accounting_to_compare->saldo = $saldo_2;
+        $accounting_to_compare->save();
+
+        return back()->with('success_', "-accounting's time swapped-");
     }
 }

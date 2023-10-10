@@ -248,13 +248,34 @@ function pin_formatted_number_on_certain_element(value, element_id) {
 function formatNumber(ipt, hidden_id) {
     // console.log(ipt);
     // console.log(isNaN(ipt.value));
-    var num = parseFloat(ipt.value.split(".").join(""));
-    document.getElementById(hidden_id).value = num;
+    var num = ipt.value.split(".").join("");
+    num = num.split(",");
+    // console.log(num);
+    let hidden_num;
+    if (num.length === 2) {
+        if (num[1] !== '') {
+            hidden_num = `${num[0]}.${num[1]}`;
+        }
+    } else {
+        hidden_num = num[0];
+    }
+
+    hidden_num = parseFloat(hidden_num);
+    // console.log(num);
+    document.getElementById(hidden_id).value = hidden_num;
+    console.log(document.getElementById(hidden_id).value);
     // console.log(ipt.value, num);
-    if (!isNaN(num)) {
-        ipt.value = num.toLocaleString("id-ID", {
+    if (!isNaN(hidden_num)) {
+        let real_number_formatted = parseFloat(num[0]).toLocaleString("id-ID", {
             style: "decimal",
         });
+        // console.log(real_number_formatted);
+        if (num.length === 2) {
+            ipt.value = `${real_number_formatted},${num[1]}`;
+        } else {
+            ipt.value = real_number_formatted;
+        }
+        console.log(ipt.value);
     }
 }
 

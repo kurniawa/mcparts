@@ -240,12 +240,12 @@
                                                 </td>
                                                 <td>Harga</td><td><div class="mx-1">:</div></td>
                                                 <td>
-                                                    <input type="text" id="barang_new-harga_main" class="text-xs rounded p-1" oninput="formatNumber(this, 'barang_new-harga_main-real');count_harga_total_main()">
+                                                    <input type="text" id="barang_new-harga_main" class="text-xs rounded p-1" onchange="formatNumber(this, 'barang_new-harga_main-real');count_harga_total_main()">
                                                     <input type="hidden" name="harga_main" id="barang_new-harga_main-real">
                                                 </td>
                                                 <td>Harga Total</td><td><div class="mx-1">:</div></td>
                                                 <td>
-                                                    <input type="text" name="harga_total_main" id="barang_new-harga_total_main" class="text-xs rounded p-1" oninput="formatNumber(this, 'barang_new-harga_total_main-real');copy_to_harga_sub();count_harga_total_sub()">
+                                                    <input type="text" name="harga_total_main" id="barang_new-harga_total_main" class="text-xs rounded p-1" onchange="formatNumber(this, 'barang_new-harga_total_main-real');copy_to_harga_sub();count_harga_total_sub()">
                                                     <input type="hidden" name="harga_total_main" id="barang_new-harga_total_main-real">
                                                 </td>
                                             </tr>
@@ -257,12 +257,12 @@
                                                 </td>
                                                 <td>Harga</td><td><div class="mx-1">:</div></td>
                                                 <td>
-                                                    <input type="text" id="barang_new-harga_sub" class="text-xs rounded p-1" oninput="formatNumber(this, 'barang_new-harga_sub-real');count_harga_total_sub()">
+                                                    <input type="text" id="barang_new-harga_sub" class="text-xs rounded p-1" onchange="formatNumber(this, 'barang_new-harga_sub-real');count_harga_total_sub()">
                                                     <input type="hidden" name="harga_sub" id="barang_new-harga_sub-real">
                                                 </td>
                                                 <td>Harga Total</td><td><div class="mx-1">:</div></td>
                                                 <td>
-                                                    <input type="text" name="harga_total_sub" id="barang_new-harga_total_sub" class="text-xs rounded p-1" oninput="formatNumber(this, 'barang_new-harga_total_sub-real');">
+                                                    <input type="text" name="harga_total_sub" id="barang_new-harga_total_sub" class="text-xs rounded p-1" onchange="formatNumber(this, 'barang_new-harga_total_sub-real');">
                                                     <input type="hidden" name="harga_total_sub" id="barang_new-harga_total_sub-real">
                                                 </td>
                                             </tr>
@@ -608,7 +608,7 @@
             <td>
                 <div class="text-center">
                     <div class="flex items-center">
-                        <input type="text" id="harga_main-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" oninput="formatNumber(this, 'harga_main_real-${index_item}'); count_harga_total(${index_item})">/<span class="satuan_main-${index_item} ml-1"></span>
+                        <input type="text" id="harga_main-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" onchange="formatNumber(this, 'harga_main_real-${index_item}'); count_harga_total(${index_item})">/<span class="satuan_main-${index_item} ml-1"></span>
                         <input type="hidden" name="harga_main[]" id="harga_main_real-${index_item}">
                     </div>
                 </div>
@@ -616,7 +616,7 @@
             <td>
                 <div class="text-center">
                     <div class="flex">
-                        <input type="text" id="harga_t-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" oninput="formatNumber(this, 'harga_t_real-${index_item}');">
+                        <input type="text" id="harga_t-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" onchange="formatNumber(this, 'harga_t_real-${index_item}');">
                         <input type="hidden" name="harga_t[]" id="harga_t_real-${index_item}" class="harga_t_real">
                     </div>
                 </div>

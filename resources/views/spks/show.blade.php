@@ -665,7 +665,7 @@
                                     <div class="hidden text-center" id="edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
                                         <form action="{{ route('notas.edit_harga_item', [$spk->id, $nota->id, $spk_produk_nota->id]) }}" method="POST">
                                             @csrf
-                                            <input type="text" class="rounded p-0 text-xs w-16" value="{{ number_format($spk_produk_nota->harga,0,',','.') }}" oninput="formatNumber(this, 'harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
+                                            <input type="text" class="rounded p-0 text-xs w-16" value="{{ number_format($spk_produk_nota->harga,0,',','.') }}" onchange="formatNumber(this, 'harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
                                             <input type="hidden" id="harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}" name="harga" value="{{ $spk_produk_nota->harga }}">
                                             <div>harga khusus pelanggan ini?</div>
                                             <div class="flex items-center justify-center">

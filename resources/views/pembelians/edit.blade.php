@@ -87,7 +87,7 @@
                                 <td>
                                     <div class="text-center">
                                         <div class="flex items-center">
-                                            <input type="text" id="harga_main-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_main,0,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" oninput="formatNumber(this, 'harga_main_real-{{ $key_pembelian_barang }}'); count_harga_total({{ $key_pembelian_barang }})">/<span class="satuan_main-{{ $key_pembelian_barang }} ml-1">{{ $pembelian_barang->satuan_main }}</span>
+                                            <input type="text" id="harga_main-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_main,0,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" onchange="formatNumber(this, 'harga_main_real-{{ $key_pembelian_barang }}'); count_harga_total({{ $key_pembelian_barang }})">/<span class="satuan_main-{{ $key_pembelian_barang }} ml-1">{{ $pembelian_barang->satuan_main }}</span>
                                             <input type="hidden" name="harga_main[]" id="harga_main_real-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->harga_main }}">
                                         </div>
                                     </div>
@@ -95,7 +95,7 @@
                                 <td>
                                     <div class="text-center">
                                         <div class="flex">
-                                            <input type="text" id="harga_t-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_t,0,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" oninput="formatNumber(this, 'harga_t_real-{{ $key_pembelian_barang }}');">
+                                            <input type="text" id="harga_t-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_t,0,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" onchange="formatNumber(this, 'harga_t_real-{{ $key_pembelian_barang }}');">
                                             <input type="hidden" name="harga_t[]" id="harga_t_real-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->harga_t }}" class="harga_t_real">
                                         </div>
                                     </div>
@@ -190,7 +190,7 @@
             <td>
                 <div class="text-center">
                     <div class="flex items-center">
-                        <input type="text" id="harga_main-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" oninput="formatNumber(this, 'harga_main_real-${index_item}'); count_harga_total(${index_item})">/<span class="satuan_main-${index_item} ml-1"></span>
+                        <input type="text" id="harga_main-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" onchange="formatNumber(this, 'harga_main_real-${index_item}'); count_harga_total(${index_item})">/<span class="satuan_main-${index_item} ml-1"></span>
                         <input type="hidden" name="harga_main[]" id="harga_main_real-${index_item}">
                     </div>
                 </div>
@@ -198,7 +198,7 @@
             <td>
                 <div class="text-center">
                     <div class="flex">
-                        <input type="text" id="harga_t-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" oninput="formatNumber(this, 'harga_t_real-${index_item}');">
+                        <input type="text" id="harga_t-${index_item}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" onchange="formatNumber(this, 'harga_t_real-${index_item}');">
                         <input type="hidden" name="harga_t[]" id="harga_t_real-${index_item}" class="harga_t_real">
                     </div>
                 </div>
