@@ -599,7 +599,7 @@ class AccountingController extends Controller
 
             } else {
                 $last_transaction = Accounting::where('id', '!=', $accounting->id)->where('user_instance_id', $user_instance->id)->latest()->first();
-                // dd($last_transaction);
+                dd($last_transaction);
                 // dd('else');
                 if ($last_transaction !== null) {
                     $saldo = $last_transaction->saldo;
