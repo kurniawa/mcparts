@@ -543,4 +543,14 @@ class PelangganController extends Controller
         ];
         return redirect()->route('pelanggans.index')->with($feedback);
     }
+
+    function update_nama(Pelanggan $pelanggan, Request $request) {
+        $post = $request->post();
+        $request->validate(['pelanggan_nama'=>'required']);
+
+        $pelanggan->nama = $post['pelanggan_nama'];
+        $pelanggan->save();
+
+        return back()->with('success_', '-pelanggan_nama updated-');
+    }
 }

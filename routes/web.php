@@ -119,6 +119,7 @@ Route::controller(PelangganController::class)->group(function(){
     Route::post('/pelanggans/{pelanggan}/transit_add','transit_add')->name('pelanggans.transit_add')->middleware('auth');
     Route::post('/pelanggans/{pelanggan_ekspedisi}/transit_delete','transit_delete')->name('pelanggans.transit_delete')->middleware('auth');
     Route::post('/pelanggans/{pelanggan}/{pelanggan_ekspedisi}/transit_utama','transit_utama')->name('pelanggans.transit_utama')->middleware('auth');
+    Route::post('/pelanggans/{pelanggan}/update_nama','update_nama')->name('pelanggans.update_nama')->middleware('auth');
 });
 
 Route::controller(EkspedisiController::class)->group(function(){
