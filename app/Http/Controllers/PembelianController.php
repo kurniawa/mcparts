@@ -110,7 +110,7 @@ class PembelianController extends Controller
 
     function store(Request $request) {
         $post = $request->post();
-        // dd($post);
+        dd($post);
         $request->validate([
             'day' => 'required',
             'month' => 'required',
@@ -136,6 +136,9 @@ class PembelianController extends Controller
         for ($i=0; $i < count($post['barang_id']); $i++) {
             $barang = Barang::find($post['barang_id'][$i]);
             // dd($barang);
+            if ($barang == null || (int)$post['harga_t'][$i] == 0 || (int)$post['jumlah_main'][$i] == 0) {
+                break;
+            }
             $pembelian_barang = PembelianBarang::create([
                 'pembelian_id' => $pembelian_new->id,
                 'barang_id' => $barang->id,
@@ -160,9 +163,9 @@ class PembelianController extends Controller
 
             $exist_satuan_main = false;
             $exist_satuan_sub = false;
-            if (count($isi) !== 0) {
+            if (count($isi) != 0) {
                 for ($i=0; $i < count($isi); $i++) {
-                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_main) {
+                    if ($isi[$i]['satuan'] == $pembelian_barang->satuan_main) {
                         $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_main);
                         // dump($isi[$i]['jumlah']);
                         // dump($pembelian_barang->jumlah_main);
@@ -170,13 +173,13 @@ class PembelianController extends Controller
                         // dump($isi);
                         $exist_satuan_main = true;
                     }
-                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_sub) {
+                    if ($isi[$i]['satuan'] == $pembelian_barang->satuan_sub) {
                         $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
                         $exist_satuan_sub = true;
                     }
                 }
                 // foreach ($isi as $isi_item) {
-                //     if ($isi_item['satuan'] === $pembelian_barang->satuan_main) {
+                //     if ($isi_item['satuan'] == $pembelian_barang->satuan_main) {
                 //         $isi_item['jumlah'] = (int)$isi_item['jumlah'] + (int)($pembelian_barang->jumlah_main);
                 //         dump($isi_item['jumlah']);
                 //         dump($pembelian_barang->jumlah_main);
@@ -184,7 +187,7 @@ class PembelianController extends Controller
                 //         dump($isi);
                 //         $exist_satuan_main = true;
                 //     }
-                //     if ($isi_item['satuan'] === $pembelian_barang->satuan_sub) {
+                //     if ($isi_item['satuan'] == $pembelian_barang->satuan_sub) {
                 //         $isi_item['jumlah'] = (int)$isi_item['jumlah'] + (int)($pembelian_barang->jumlah_sub);
                 //         $exist_satuan_sub = true;
                 //     }
@@ -203,7 +206,7 @@ class PembelianController extends Controller
                 // dump((int)($pembelian_barang->jumlah_main));
             }
             if (!$exist_satuan_sub) {
-                if ($pembelian_barang->satuan_sub !== null) {
+                if ($pembelian_barang->satuan_sub != null) {
                     // $isi->push([
                     //     'satuan' => $pembelian_barang->satuan_sub,
                     //     'jumlah' => (int)($pembelian_barang->jumlah_sub),
@@ -217,9 +220,15 @@ class PembelianController extends Controller
         }
         // dump('isi:');
         // dump($isi);
+        // cek apakah ada yang diinput ke pembelian_barang?
+        $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian_new->id)->get();
+        if (count($pembelian_barangs) == 0) {
+            $pembelian_new->delete();
+            return back()->with('warnings_', '-pembelian di cancel karena tidak terdeteksi adanya barang-');
+        }
 
         $nomor_nota = "N-$pembelian_new->id";
-        if ($post['nomor_nota'] !== null) {
+        if ($post['nomor_nota'] != null) {
             $nomor_nota = $post['nomor_nota'];
         }
 

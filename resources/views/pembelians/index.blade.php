@@ -725,7 +725,7 @@
             formatNumber(harga_sub, 'barang_new-harga_sub-real');
         }
         // console.log(harga_main);
-        // console.log(jumlah_main);
+        console.log(jumlah_main);
         // console.log(harga_total_main);
     }
 
