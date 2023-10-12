@@ -2,9 +2,20 @@
 @section('content')
 <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-xl font-bold tracking-tight text-gray-900">Data Pelanggan: {{ $pelanggan->nama }}</h1>
+        <div class="flex items-center">
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">Data Pelanggan: {{ $pelanggan->nama }}</h1>
+            <form action="{{ route('pelanggans.update_nama', $pelanggan->id) }}" method="POST" onsubmit="return confirm('Ganti Nama Pelanggan?')" class="ml-2">
+                @csrf
+                <div class="flex items-center">
+                    <input type="text" name="pelanggan_nama" class="rounded" placeholder="edit nama pelanggan ..." value="{{ $pelanggan->nama }}">
+                    <div class="ml-2">
+                        <button class="border-2 border-emerald-500 rounded p-1 bg-emerald-200 text-emerald-500 font-bold">confirm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-  </header>
+</header>
 <main class="mb-9">
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
