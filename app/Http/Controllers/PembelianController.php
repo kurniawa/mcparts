@@ -447,4 +447,14 @@ class PembelianController extends Controller
 
         return back()->with($feedback);
     }
+
+    function delete_pembelian_barang(Pembelian $pembelian, PembelianBarang $pembelian_barang) {
+        dump($pembelian);
+        dd($pembelian_barang);
+
+        $pembelian_barang->delete();
+
+        $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->get();
+
+    }
 }
