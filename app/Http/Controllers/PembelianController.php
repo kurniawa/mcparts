@@ -110,7 +110,7 @@ class PembelianController extends Controller
 
     function store(Request $request) {
         $post = $request->post();
-        dd($post);
+        // dd($post);
         $request->validate([
             'day' => 'required',
             'month' => 'required',
