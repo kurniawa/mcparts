@@ -108,4 +108,56 @@ class Pembelian extends Model
         return array($isi, $harga_total, $status_bayar, $keterangan_bayar, $tanggal_lunas, $nomor_nota);
 
     }
+
+    static function get_isi($pembelian_id) {
+        $isi = array();
+
+
+        $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian_id)->get();
+
+        foreach ($pembelian_barangs as $pembelian_barang) {
+            $exist_satuan_main = false;
+            $exist_satuan_sub = false;
+            if (count($isi) !== 0) {
+                for ($i=0; $i < count($isi); $i++) {
+                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_main) {
+                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_main);
+                        $exist_satuan_main = true;
+                    }
+                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_sub) {
+                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
+                        $exist_satuan_sub = true;
+                    }
+                }
+            }
+            if (!$exist_satuan_main) {
+                $isi[]=[
+                    'satuan' => $pembelian_barang->satuan_main,
+                    'jumlah' => (int)($pembelian_barang->jumlah_main),
+                ];
+            }
+            if (!$exist_satuan_sub) {
+                if ($pembelian_barang->satuan_sub !== null) {
+                    $isi[]=[
+                        'satuan' => $pembelian_barang->satuan_sub,
+                        'jumlah' => (int)($pembelian_barang->jumlah_sub),
+                    ];
+                }
+            }
+        }
+
+        return $isi;
+    }
+
+    static function get_harga_total($pembelian_id) {
+        $harga_total = 0;
+
+        $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian_id)->get();
+
+        foreach ($pembelian_barangs as $pembelian_barang) {
+            $harga_total += $pembelian_barang->harga_t;
+        }
+
+        return $harga_total;
+    }
 }

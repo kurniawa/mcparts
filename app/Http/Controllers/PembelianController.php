@@ -449,12 +449,21 @@ class PembelianController extends Controller
     }
 
     function delete_pembelian_barang(Pembelian $pembelian, PembelianBarang $pembelian_barang) {
-        dump($pembelian);
-        dd($pembelian_barang);
+        // dump($pembelian);
+        // dd($pembelian_barang);
 
         $pembelian_barang->delete();
+        $isi = Pembelian::get_isi($pembelian->id);
+        $harga_total = Pembelian::get_harga_total($pembelian->id);
 
-        $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->get();
+        // dump($pembelian->isi);
+        // dd($isi);
+
+        $pembelian->harga_total = $harga_total;
+        $pembelian->isi = json_encode($isi);
+        $pembelian->save();
+
+        return back()->with('success_', '-item pembelian deleted, pembelian updated-');
 
     }
 }

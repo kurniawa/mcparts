@@ -440,7 +440,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <form action="{{ route('pembelians.delete_pembelian_barang', [$pembelians[$i]->id, $pembelian_barang->id]) }}" method="POST" onsubmit="return confirm('hapus item?')">
+                                            <form action="{{ route('pembelians.delete_pembelian_barang', [$pembelians[$i]->id, $pembelian_barang->id]) }}" method="POST" onsubmit="return confirm('hapus item pembelian ini?')">
                                                 @csrf
                                                 <div>
                                                     <button class="rounded bg-pink-300 text-pink-500">
