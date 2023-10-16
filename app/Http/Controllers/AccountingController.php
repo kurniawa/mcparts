@@ -535,7 +535,7 @@ class AccountingController extends Controller
 
         $user = Auth::user();
 
-        if ($user_instance->user_id !== $user->id) {
+        if ((int)$user_instance->user_id !== $user->id) {
             $request->validate(['error'=>'required'],['error.required'=>'different user???']);
         }
 
