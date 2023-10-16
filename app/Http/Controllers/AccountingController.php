@@ -373,7 +373,7 @@ class AccountingController extends Controller
                 'status'=>$status, // read or not read yet by other user
                 'created_at'=>$created_at
             ]);
-
+            sleep(1.5);
         }
 
         $success_ .= '-transactions created-';
@@ -539,123 +539,172 @@ class AccountingController extends Controller
             $request->validate(['error'=>'required'],['error.required'=>'different user???']);
         }
 
-        $success_ = '';
-        if ($post['created_at'] !== null && $post['transaction_desc'] !== null && ($post['keluar'] !== null || $post['masuk'] !== null) ) {
-            $created_at_before = date('d-m-Y', strtotime($accounting->created_at));
-            // dump('created_at_before:', $created_at_before);
-            // dump('post[created_at]:', $post['created_at']);
-            if ($created_at_before === $post['created_at']) {
-                // dd('sama');
-                $created_at = $accounting->created_at;
-            } else {
-                $created_at = date('Y-m-d', strtotime($post['created_at'])) . " " . date("H:i:s");
-            }
-            // dd('end');
-            $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $post['transaction_desc'])->first();
-            if ($transaction_name === null) {
-                dump("transaction_name?");
-                dd($post);
-            }
-            $jumlah = null;
-            $transaction_type = 'pengeluaran';
-            if ($post['keluar'] !== null) {
-                $jumlah = (int)$post['keluar'];
-            } elseif ($post['masuk'] !== null) {
-                $jumlah = (int)$post['masuk'];
-                $transaction_type = 'pemasukan';
-            }
-
-            $status = null;
-            if ($transaction_name->related_user_id !== null) {
-                $status = 'not read yet';
-            }
-            $saldo = 0;
-            // Cari apakah ada transaksi dengan tanggal yang setelahnya?
-            $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$created_at)->orderBy('created_at')->get();
-            if (count($last_transactions) !== 0) {
-                $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
-                // dump('before_last_transaction: ', $before_last_transaction);
-                if ($before_last_transaction !== null) {
-                    $saldo = $before_last_transaction->saldo;
-                }
-
-                if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - (int)$post['keluar'];
-                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + (int)$post['masuk'];
-                }
-
-                $saldo_next = $saldo;
-                foreach ($last_transactions as $last_transaction) {
-                    if ($last_transaction->transaction_type === 'pengeluaran') {
-                        $saldo_next -= $last_transaction->jumlah;
-                    } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                        $saldo_next += $last_transaction->jumlah;
-                    }
-                    $last_transaction->saldo = $saldo_next;
-                    $last_transaction->save();
-                }
-                $success_ .= '-jumlah saldo editted-';
-
-            } else {
-                $last_transaction = Accounting::where('id', '!=', $accounting->id)->where('user_instance_id', $user_instance->id)->latest()->first();
-                dd($last_transaction);
-                // dd('else');
-                if ($last_transaction !== null) {
-                    $saldo = $last_transaction->saldo;
-                }
-                if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - (int)$post['keluar'];
-                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + (int)$post['masuk'];
-                }
-            }
-
-            $accounting->update([
-                'user_id'=>$user->id,
-                'username'=>$user->username,
-                'user_instance_id'=>$user_instance->id,
-                'instance_type'=>$user_instance->instance_type,
-                'instance_name'=>$user_instance->instance_name,
-                'branch'=>$user_instance->branch,
-                'account_number'=>$user_instance->account_number,
-                'kode'=>$post['kode'],
-                'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
-                'transaction_desc'=>$post['transaction_desc'],
-                'kategori_type'=>$transaction_name->kategori_type,
-                'kategori_level_one'=>$transaction_name->kategori_level_one,
-                'kategori_level_two'=>$transaction_name->kategori_level_two,
-                'related_user_id'=>$transaction_name->related_user_id,
-                'related_username'=>$transaction_name->related_username,
-                'related_desc'=>$transaction_name->related_desc,
-                'related_user_instance_id'=>$transaction_name->related_user_instance_id,
-                'related_user_instance_type'=>$transaction_name->related_user_instance_type,
-                'related_user_instance_name'=>$transaction_name->related_user_instance_name,
-                'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
-                'pelanggan_id'=>$transaction_name->pelanggan_id,
-                'pelanggan_nama'=>$transaction_name->pelanggan_nama,
-                'supplier_id'=>$transaction_name->supplier_id,
-                'supplier_nama'=>$transaction_name->supplier_nama,
-                'keterangan'=>$post['keterangan'], // keterangan tambahan akan ditulis dalam tanda kurung
-                'jumlah'=>$jumlah,
-                'saldo'=>$saldo,
-                'status'=>$status, // read or not read yet by other user
-                'created_at'=>$created_at
-            ]);
-
-            $success_ .= '-transactions updated-';
-            // dump('updated!');
-            return back()->with('success_', $success_);
-
-        } else {
-            if ($post['created_at'] === null && $post['transaction_desc'] !== null) {
-                dump('created_at: ', $post['created_at']);
-                dump('keluar: ', $post['keluar']);
-                dd('masuk: ', $post['masuk']);
-            } elseif ($post['created_at'] !== null && $post['transaction_desc'] === null) {
-                dd('transaction_desc: ', $post['transaction_desc']);
-            }
+        if ($post['created_at'] === null || $post['transaction_desc'] === null || ($post['keluar'] === null && $post['masuk'] === null)) {
+            $request->validate(['error'=>'required'],['error.required'=>'tanggal || transaction_desc || jumlah_keluar || jumlah_masuk?']);
         }
+
+        $success_ = '';
+
+        // 1. NILAI CREATED AT
+        $created_at_old = date('d-m-Y', strtotime($accounting->created_at));
+        // dump($created_at_old);
+        $created_at_new = $created_at_old;
+        // dump($post['created_at']);
+        // dd($created_at_old);
+        if (is_string($created_at_old)) {
+            if ($post['created_at'] !== $created_at_old) {
+                $created_at_new = date('Y-m-d', strtotime($post['created_at'])) . " " . date("H:i:s");
+            }
+        } else {
+            dump('created_at_old is not string type');
+            dd($created_at_old);
+        }
+        // END - NILAI CREATED AT
+        // TENTUKAN APAKAH TRANSAKI MUNDUR ATAU MAJU?
+        $mode = null;
+        $date_1 = strtotime($created_at_old);
+        $date_2 = strtotime($post['created_at']);
+        // dump($created_at_old, $date_1);
+        // dd($post['created_at'], $date_2);
+
+        if ($date_1 === $date_2) {
+            $mode = 'tanggal_sama';
+        } elseif ($date_2 < $date_1) {
+            $mode = 'tanggal_mundur';
+        } elseif ($date_2 > $date_1) {
+            $mode = 'tanggal_maju';
+        }
+
+        // Format created_at_old kembali seperti seharusnya
+        $created_at_old = $accounting->created_at;
+
+        $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $post['transaction_desc'])->first();
+        if ($transaction_name === null) {
+            dump("transaction_name?");
+            dd($post);
+        }
+        $jumlah = null;
+        $transaction_type = 'pengeluaran';
+        if ($post['keluar'] !== null) {
+            $jumlah = (int)$post['keluar'];
+        } elseif ($post['masuk'] !== null) {
+            $jumlah = (int)$post['masuk'];
+            $transaction_type = 'pemasukan';
+        }
+
+        $status = null;
+        if ($transaction_name->related_user_id !== null) {
+            $status = 'not read yet';
+        }
+
+        $saldo_to_update = $accounting->saldo;
+
+        if ($mode === 'tanggal_mundur') {
+            // MODE TRANSAKSI MUNDUR
+            $transactions_between = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at', [$created_at_new, $created_at_old])->where('id', '!=', $accounting->id)->orderBy('created_at')->get();
+            $saldo_akhir = 0;
+            // dump($created_at_old);
+            // dump($created_at_new);
+            // dd($transactions_between);
+            if (count($transactions_between) > 0) {
+                $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_new)->latest()->first();
+                if ($transaction_batas_atas) {
+                    $saldo_akhir = (int)$transaction_batas_atas->saldo;
+                }
+            }
+
+            if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                $saldo_akhir -= $jumlah;
+            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                $saldo_akhir += $jumlah;
+            }
+
+            $saldo_to_update = $saldo_akhir;
+
+            foreach ($transactions_between as $transaction_between) {
+                if ($transaction_between->transaction_type === 'pengeluaran') {
+                    $saldo_akhir -= $transaction_between->jumlah;
+                } elseif ($transaction_between->transaction_type === 'pemasukan') {
+                    $saldo_akhir += $transaction_between->jumlah;
+                }
+                $transaction_between->saldo = $saldo_akhir;
+                $transaction_between->save();
+            }
+
+            $success_ .= '-tanggal_mundur, transactions_between updated-';
+
+        } elseif ($mode === 'tanggal_maju') {
+            // MODE TRANSAKSI MAJU
+            $transactions_between = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at', [$created_at_old, $created_at_new])->where('id', '!=', $accounting->id)->orderBy('created_at')->get();
+            // dump($created_at_old);
+            // dump($created_at_new);
+            // dd($transactions_between);
+            $saldo_akhir = 0;
+            if (count($transactions_between) > 0) {
+                $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_old)->latest()->first();
+                if ($transaction_batas_atas) {
+                    $saldo_akhir = (int)$transaction_batas_atas->saldo;
+                }
+            }
+
+            foreach ($transactions_between as $transaction_between) {
+                if ($transaction_between->transaction_type === 'pengeluaran') {
+                    $saldo_akhir -= $transaction_between->jumlah;
+                } elseif ($transaction_between->transaction_type === 'pemasukan') {
+                    $saldo_akhir += $transaction_between->jumlah;
+                }
+                $transaction_between->saldo = $saldo_akhir;
+                $transaction_between->save();
+            }
+
+            if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                $saldo_akhir -= $jumlah;
+            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                $saldo_akhir += $jumlah;
+            }
+
+            $saldo_to_update = $saldo_akhir;
+            $success_ .= '-tanggal_maju, transactions_between updated-';
+        } else {
+            $success_ .= '-tanggal_sama, transactions_between none-';
+        }
+
+        $accounting->update([
+            'user_id'=>$user->id,
+            'username'=>$user->username,
+            'user_instance_id'=>$user_instance->id,
+            'instance_type'=>$user_instance->instance_type,
+            'instance_name'=>$user_instance->instance_name,
+            'branch'=>$user_instance->branch,
+            'account_number'=>$user_instance->account_number,
+            'kode'=>$post['kode'],
+            'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
+            'transaction_desc'=>$post['transaction_desc'],
+            'kategori_type'=>$transaction_name->kategori_type,
+            'kategori_level_one'=>$transaction_name->kategori_level_one,
+            'kategori_level_two'=>$transaction_name->kategori_level_two,
+            'related_user_id'=>$transaction_name->related_user_id,
+            'related_username'=>$transaction_name->related_username,
+            'related_desc'=>$transaction_name->related_desc,
+            'related_user_instance_id'=>$transaction_name->related_user_instance_id,
+            'related_user_instance_type'=>$transaction_name->related_user_instance_type,
+            'related_user_instance_name'=>$transaction_name->related_user_instance_name,
+            'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
+            'pelanggan_id'=>$transaction_name->pelanggan_id,
+            'pelanggan_nama'=>$transaction_name->pelanggan_nama,
+            'supplier_id'=>$transaction_name->supplier_id,
+            'supplier_nama'=>$transaction_name->supplier_nama,
+            'keterangan'=>$post['keterangan'], // keterangan tambahan akan ditulis dalam tanda kurung
+            'jumlah'=>$jumlah,
+            'saldo'=>$saldo_to_update,
+            'status'=>$status, // read or not read yet by other user
+            'created_at'=>$created_at_new
+        ]);
+
+        $success_ .= '-transactions updated-';
+        // dump('updated!');
+        return back()->with('success_', $success_);
+
     }
 
     function delete_entry(UserInstance $user_instance, Accounting $accounting) {
