@@ -127,6 +127,28 @@ function set_time_range(timerange) {
             to_month = 12;
         }
         to_day = new Date(to_year, to_month, 0).getDate();
+    } else if (timerange === 'triwulan_lalu') {
+        const date = new Date();
+        const actual_month = date.getMonth() + 1;
+        from_day = 1;
+        from_year = date.getFullYear();
+        to_year = from_year;
+        if (actual_month <= 3) {
+            from_month = 10;
+            to_month = 12;
+            from_year--;
+            to_year--;
+        } else if (actual_month <= 6) {
+            from_month = 1;
+            to_month = 3;
+        } else if (actual_month <= 9) {
+            from_month = 4;
+            to_month = 6;
+        } else if (actual_month <= 12) {
+            from_month = 7;
+            to_month = 9;
+        }
+        to_day = new Date(to_year, to_month, 0).getDate();
     }
 
     document.getElementById("from_day").value = from_day;

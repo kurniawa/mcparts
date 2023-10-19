@@ -27,15 +27,10 @@
             @endforeach
         </div>
         <div class="relative bg-white border-t z-10">
-            <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs mt-1">
-                <div class="flex">
-                    <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button>
-                    <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_pembelian" onclick="toggle_light(this.id, 'form_new_pembelian', [], ['bg-emerald-200'], 'block')">+ Pembelian</button>
-                    <button type="submit" class="border rounded border-indigo-300 text-indigo-500 font-semibold px-3 py-1 ml-1" id="btn_new_barang" onclick="toggle_light(this.id, 'form_new_barang', [], ['bg-indigo-200'], 'block')">+ Barang</button>
-                </div>
+            <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
                 {{-- SEARCH / FILTER --}}
-                <div class="hidden" id="filter-content">
-                    <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1">
+                <div class="" id="filter-content">
+                    <div class="rounded p-2 bg-white shadow drop-shadow inline-block">
                         <form action="" method="GET">
                             <div class="ml-1 mt-2 flex">
                                 <div>
@@ -45,14 +40,32 @@
                                         <input type="hidden" name="supplier_id" id="supplier_id">
                                     </div>
                                 </div>
-                                <div class="flex items-center ml-2">
-                                    <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1">now</label></div>
-                                    <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
-                                    {{-- <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1">30d</label></div> --}}
-                                    <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1">bulan ini</label></div>
-                                    <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
-                                    <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')"><label for="tahun_ini" class="ml-1">tahun ini</label></div>
-                                    <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')"><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
+                                <div class="ml-2">
+                                    Rentang waktu:
+                                    <div class="mt-1">
+                                        <div class="flex items-center">
+                                            <div><input type="radio" name="timerange" value="triwulan" id="triwulan" onclick="set_time_range('triwulan')"><label for="triwulan" class="ml-1">triwulan ini</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="triwulan_lalu" id="triwulan_lalu" onclick="set_time_range('triwulan_lalu')"><label for="triwulan_lalu" class="ml-1">triwulan lalu</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')"><label for="tahun_ini" class="ml-1">tahun ini</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')"><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1">now</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1">30d</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1">bulan ini</label></div>
+                                            <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ml-1">
+                                status_bayar:
+                                <div class="flex">
+                                    <div><input type="checkbox" name="status_bayar[]" class="rounded" value="all" id="all"><label for="all" class="ml-1">all</label></div>
+                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="lunas" id="lunas"><label for="lunas" class="ml-1">lunas</label></div>
+                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="belum" id="belum"><label for="belum" class="ml-1">belum</label></div>
+                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="sebagian" id="sebagian"><label for="sebagian" class="ml-1">sebagian</label></div>
                                 </div>
                             </div>
                             <div class="flex mt-2">
@@ -103,11 +116,11 @@
                                                 <option value="{{ $i }}">{{ $i }}</option>
                                                 @endfor
                                             </select>
-                                            <button type="submit" class="ml-2 flex items-center bg-orange-500 text-white py-1 px-3 rounded hover:bg-orange-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                            <button type="submit" class="ml-2 flex items-center bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-700">
+                                                {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                                </svg>
-                                                <span class="ml-1">Search</span>
+                                                </svg> --}}
+                                                <span class="ml-1">tetapkan filter</span>
                                             </button>
                                         </div>
                                     </div>
@@ -117,6 +130,11 @@
                     </div>
                 </div>
                 {{-- END - SEARCH / FILTER --}}
+                <div class="flex mt-2">
+                    {{-- <button id="filter" class="border rounded border-yellow-500 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button> --}}
+                    <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_pembelian" onclick="toggle_light(this.id, 'form_new_pembelian', [], ['bg-emerald-200'], 'block')">+ Pembelian</button>
+                    <button type="submit" class="border rounded border-indigo-300 text-indigo-500 font-semibold px-3 py-1 ml-1" id="btn_new_barang" onclick="toggle_light(this.id, 'form_new_barang', [], ['bg-indigo-200'], 'block')">+ Barang</button>
+                </div>
             </div>
             {{-- FORM_NEW_PEMBELIAN --}}
             <div id="form_new_pembelian" class="hidden">
@@ -284,6 +302,7 @@
             {{-- END - FORM_NEW_BARANG --}}
             <div class="flex justify-center">
                 <div class='pb-1 text-xs lg:w-1/2 md:w-3/4'>
+                    <div class="text-slate-400 font-semibold">rentang waktu: {{ date('d M Y', strtotime($from)) }} - {{ date('d M Y', strtotime($until)) }}</div>
                     <table class="table-nice w-full">
                         <tr>
                             <th>Grand Total</th>
