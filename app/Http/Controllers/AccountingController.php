@@ -666,6 +666,7 @@ class AccountingController extends Controller
             $saldo_to_update = $saldo_akhir;
             $success_ .= '-tanggal_maju, transactions_between updated-';
         } else {
+            $created_at_new = $created_at_old;
             $success_ .= '-tanggal_sama, transactions_between none-';
         }
 
