@@ -667,7 +667,34 @@ class AccountingController extends Controller
             $success_ .= '-tanggal_maju, transactions_between updated-';
         } else {
             $created_at_new = $created_at_old;
-            $success_ .= '-tanggal_sama, transactions_between none-';
+            $saldo_akhir = 0;
+
+            $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_old)->latest()->first();
+            if ($transaction_batas_atas) {
+                $saldo_akhir = (int)$transaction_batas_atas->saldo;
+            }
+
+            if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                $saldo_akhir -= $jumlah;
+            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                $saldo_akhir += $jumlah;
+            }
+
+            $saldo_to_update = $saldo_akhir;
+
+            $transactions_after = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '>' , $created_at_old)->orderBy('created_at')->get();
+
+            foreach ($transactions_after as $transaction_after) {
+                if ($transaction_after->transaction_type === 'pengeluaran') {
+                    $saldo_akhir -= $transaction_after->jumlah;
+                } elseif ($transaction_after->transaction_type === 'pemasukan') {
+                    $saldo_akhir += $transaction_after->jumlah;
+                }
+                $transaction_after->saldo = $saldo_akhir;
+                $transaction_after->save();
+            }
+
+            $success_ .= '-tanggal_sama, transactions_between none, transactions_after updated-';
         }
 
         $accounting->update([
