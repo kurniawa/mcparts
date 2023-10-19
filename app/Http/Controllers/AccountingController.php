@@ -387,7 +387,7 @@ class AccountingController extends Controller
         // dump($user_instance);
         // dd($accounting);
         $user = Auth::user();
-        if ($user->id !== $user_instance->user_id) {
+        if ($user->id !== (int)$user_instance->user_id) {
             dump('user_instance->user: ', $user_instance->user_id);
             dd('auth_user: ', $user->id);
         }
@@ -411,7 +411,7 @@ class AccountingController extends Controller
 
         $success_ = '';
         $user = Auth::user();
-        if ($user->id !== $user_instance->user_id) {
+        if ($user->id !== (int)$user_instance->user_id) {
             dump('user_instance->user: ', $user_instance->user_id);
             dd('auth_user: ', $user->id);
         }
@@ -712,7 +712,7 @@ class AccountingController extends Controller
         // dd($accounting);
 
         $user = Auth::user();
-        if ($user_instance->user_id !== $user->id) {
+        if ((int)$user_instance->user_id !== $user->id) {
             dd('user?');
         }
 
@@ -1170,7 +1170,7 @@ class AccountingController extends Controller
         $user_instance = UserInstance::find($post['user_instance_id']);
         $user = Auth::user();
 
-        if ($user_instance->user_id !== $user->id) {
+        if ((int)$user_instance->user_id !== $user->id) {
             dd('user_id');
         }
 

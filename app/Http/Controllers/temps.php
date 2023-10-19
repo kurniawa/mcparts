@@ -234,3 +234,108 @@ $pembelian->update([
     'keterangan_bayar' => $keterangan_bayar,
     'tanggal_lunas' => $tanggal_lunas,
 ]);
+
+if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {
+    // Filter Berdasarkan Nama Pelanggan - Tanpa Tanggal
+    if ($all || (!$all && !$lunas && !$belum_lunas && !$sebagian) || ($lunas && $belum_lunas && $sebagian)) {
+
+    } else {
+        if ($lunas && !$belum_lunas && !$sebagian) {
+            if ($get['supplier_id']) {
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+            } else {
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                if (count($pembelians) === 0) {
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                }
+            }
+        } elseif (!$lunas && $belum_lunas && !$sebagian) {
+            if ($get['supplier_id']) {
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+            } else {
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                if (count($pembelians) === 0) {
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                }
+            }
+        } elseif (!$lunas && !$belum_lunas && $sebagian) {
+            if ($get['supplier_id']) {
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+            } else {
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                if (count($pembelians) === 0) {
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                }
+            }
+        } elseif ($lunas && $belum_lunas && !$sebagian) {
+            if ($get['supplier_id']) {
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where(function ($query) {
+                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
+                })->latest()->limit(500)->get();
+            } else {
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where(function ($query) {
+                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
+                })->latest()->limit(500)->get();
+                if (count($pembelians) === 0) {
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where(function ($query) {
+                        $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
+                    })->latest()->limit(500)->get();
+                }
+            }
+        } elseif ($lunas && !$belum_lunas && $sebagian) {
+            if ($get['supplier_id']) {
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where(function ($query) {
+                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
+                })->latest()->limit(500)->get();
+            } else {
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where(function ($query) {
+                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
+                })->latest()->limit(500)->get();
+                if (count($pembelians) === 0) {
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where(function ($query) {
+                        $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
+                    })->latest()->limit(500)->get();
+                }
+            }
+        } elseif (!$lunas && $belum_lunas && $sebagian) {
+            if ($get['supplier_id']) {
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where(function ($query) {
+                    $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
+                })->latest()->limit(500)->get();
+            } else {
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where(function ($query) {
+                    $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
+                })->latest()->limit(500)->get();
+                if (count($pembelians) === 0) {
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where(function ($query) {
+                        $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
+                    })->latest()->limit(500)->get();
+                }
+            }
+        }
+    }
+    // End - Filter Berdasarkan Nama Pelanggan - Tanpa Tanggal
+    } else {
+        // Filter Berdasarkan Nama Pelanggan + Tanggal
+        $from = "$get[from_year]-$get[from_month]-$get[from_day]";
+        $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
+        if ($all || (!$all && !$lunas && !$belum_lunas && !$sebagian) || ($lunas && $belum_lunas && $sebagian)) {
+
+        } else {
+            if ($lunas && !$belum_lunas && !$sebagian) {
+
+            } elseif (!$lunas && $belum_lunas && !$sebagian) {
+
+            } elseif (!$lunas && !$belum_lunas && $sebagian) {
+
+            } elseif ($lunas && $belum_lunas && !$sebagian) {
+
+            } elseif ($lunas && !$belum_lunas && $sebagian) {
+
+            } elseif (!$lunas && $belum_lunas && $sebagian) {
+
+            }
+        }
+    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->latest()->get();
+    // End - Filter Berdasarkan Nama Pelanggan + Tanggal
+    }
