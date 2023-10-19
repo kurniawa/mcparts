@@ -111,7 +111,7 @@
                                     <div>
                                         <label>User Instance:</label>
                                         @foreach ($user_instances_all as $key => $user_instance)
-                                        @if (Auth::user()->id === $user_instance->user_id)
+                                        @if (Auth::user()->id === (int)$user_instance->user_id)
                                         <div class="flex mt-1">
                                             <input type="radio" name="user_instance_id" id="new_relasi_transaksi-user_instance_id-{{ $key }}" value="{{ $user_instance->id }}">
                                             <label for="new_relasi_transaksi-user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
@@ -372,7 +372,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        @if ($tr_name->user_id === Auth::user()->id)
+                                        @if ((int)$tr_name->user_id === Auth::user()->id)
                                         <div class="flex mt-3 justify-center">
                                             <div>
                                                 <button type="submit" class="ml-2 flex items-center bg-pink-400 text-white py-1 px-3 rounded hover:bg-pink-600">
