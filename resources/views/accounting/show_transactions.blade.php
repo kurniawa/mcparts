@@ -202,6 +202,7 @@
                             <span>{{ number_format($accounting->saldo,0,',','.') }} ,-</span>
                         </div>
                     </td>
+                    @if ((int)$user_instance->user_id === $user->id)
                     <td class="border_none">
                         <button id="btn_edit_transaction-{{ $key_accounting }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'tr_edit_transaction-{{ $key_accounting }}')">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
@@ -209,6 +210,8 @@
                             </svg>
                         </button>
                     </td>
+                    @endif
+                    @if ((int)$user_instance->user_id === $user->id)
                     @if ($fitur_up_down_transaction)
                     <td>
                         <div>
@@ -237,7 +240,10 @@
                         </div>
                     </td>
                     @endif
+                    @endif
                 </tr>
+
+                @if ((int)$user_instance->user_id === $user->id)
                 <tr class="hidden" id="tr_edit_transaction-{{ $key_accounting }}">
                     <td colspan="6">
                         <div class="text-center">
@@ -322,6 +328,7 @@
                         </div>
                     </td>
                 </tr>
+                @endif
                 @endforeach
             </table>
         </div>
@@ -385,7 +392,7 @@
         {{-- END - PRINT OUT TRANSACTIONS --}}
 
         {{-- STORE NEW TRANSACTIONS --}}
-        @if ($user_instance->user_id == $user->id)
+        @if ((int)$user_instance->user_id === $user->id)
         <div class="border rounded p-1 mt-3">
             <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
             <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
