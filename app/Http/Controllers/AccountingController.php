@@ -201,9 +201,12 @@ class AccountingController extends Controller
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
         // }
-        // dd($post);
+        // dump($post);
+        dump('loading...');
 
         $user = Auth::user();
+        $success_ = '';
+        $warnings_ = '';
 
         // VALIDASI
         if ((int)$user_instance->user_id !== $user->id) {
@@ -213,6 +216,7 @@ class AccountingController extends Controller
         $working_index = count($post['transaction_desc']);
 
         for ($i=0; $i < count($post['transaction_desc']); $i++) {
+            // dd('masuk loop');
             $created_at = null;
             if ($post['year'][$i] && $post['month'][$i] && $post['day'][$i]) {
                 $created_at = date('Y-m-d', strtotime($post['year'][$i] . "-" . $post['month'][$i] . "-" . $post['day'][$i])) . " " . date("H:i:s");
@@ -220,7 +224,13 @@ class AccountingController extends Controller
                 $request->validate(['error'=>'required'],['error.required'=>$post['year'][$i] . "-" . $post['month'][$i] . "-" . $post['day'][$i]]);
             }
 
+            // dump("post['keluar'][i] : ");
+            // dump($post['keluar'][$i]);
+            // dump("post['masuk'][i] : ");
+            // dd($post['masuk'][$i]);
+
             if ($created_at !== null && $post['transaction_desc'][$i] !== null && ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null) ) {
+                // dd($post['transaction_desc'][$i]);
                 $year_inputted = (int)date('Y', strtotime($created_at));
                 $year_now = (int)date('Y');
                 // dump($year_inputted);
@@ -236,7 +246,11 @@ class AccountingController extends Controller
                         // dd($post);
                         $request->validate(['error'=>'required'],['error.required'=>"transaction_name[$i] || transaction_desc[$i]?"]);
                     } else {
-                        $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $post['transaction_id'][$i])->first();
+                        $transaction_desc = strtoupper($post['transaction_desc'][$i]);
+                        $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $transaction_desc)->first();
+                        if ($transaction_name === null) {
+                            $request->validate(['error'=>'required'],['error.required'=>"deskripsi[$i] tidak ditemukan"]);
+                        }
                     }
                 } else {
                     $transaction_name = TransactionName::find($post['transaction_id'][$i]);
@@ -247,7 +261,8 @@ class AccountingController extends Controller
                     // dd($post);
                     $request->validate(['error'=>'required'],['error.required'=>"transaction_name[$i]"]);
                 }
-
+                // dump($transaction_name);
+                // dd($post['masuk'][$i]);
                 if ($transaction_name->kategori_type === 'UANG MASUK' && $post['masuk'][$i] === null) {
                     // dump("index: $i - kategori_type = 'UANG MASUK' but post[masuk] = null?");
                     // dd($post);
@@ -268,9 +283,14 @@ class AccountingController extends Controller
                     } elseif ($created_at !== null && $post['transaction_desc'][$i] === null) {
                         // dd('transaction_desc: ', $post['transaction_desc'][$i]);
                         $request->validate(['error'=>'required'],['error.required'=>"transaction_desc[$i]: " . $post['transaction_desc'][$i]]);
+                    } elseif ($post['keluar'][$i] === null && $post['masuk'][$i] === null) {
+                        $request->validate(['error'=>'required'],['error.required'=>"jumlah keluar / masuk ?? [$i]"]);
                     }
                 } else {
                     $working_index = $i;
+                    if ($post['transaction_desc'][$i] !== null || ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null)) {
+                        $warnings_ .= "-mulai dari input ke-[$i] tidak diproses (data tidak lengkap)-";
+                    }
                     break;
                 }
             }
@@ -278,10 +298,10 @@ class AccountingController extends Controller
         // dd($working_index);
         // END - VALIDASI
 
-        $success_ = '';
         for ($i=0; $i < $working_index ; $i++) {
             if ($post['transaction_id'][$i] === null) {
-                $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $post['transaction_id'][$i])->first();
+                $transaction_desc = strtoupper($post['transaction_desc'][$i]);
+                $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $transaction_desc)->first();
             } else {
                 $transaction_name = TransactionName::find($post['transaction_id'][$i]);
             }
@@ -352,7 +372,7 @@ class AccountingController extends Controller
                 'account_number'=>$user_instance->account_number,
                 'kode'=>$post['kode'][$i],
                 'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
-                'transaction_desc'=>$post['transaction_desc'][$i],
+                'transaction_desc'=>$transaction_name->desc,
                 'kategori_type'=>$transaction_name->kategori_type,
                 'kategori_level_one'=>$transaction_name->kategori_level_one,
                 'kategori_level_two'=>$transaction_name->kategori_level_two,
@@ -374,11 +394,22 @@ class AccountingController extends Controller
                 'created_at'=>$created_at
             ]);
             sleep(1.5);
+            dump("$transaction_name->desc --> Rp " . number_format($jumlah,0,',','.') . ",- inputted");
         }
 
         $success_ .= '-transactions created-';
 
-        return back()->with('success_', $success_);
+        $feedback = [
+            'success_' => $success_,
+            'warnings_' => $warnings_,
+        ];
+        sleep(3);
+        return back()->with($feedback);
+    }
+
+    function store_pilih_transaction_name(Request $request) {
+        $get = $request->query();
+        dd($get);
     }
 
     function mark_as_read_or_unread(UserInstance $user_instance, Accounting $accounting, Request $request) {

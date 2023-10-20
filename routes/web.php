@@ -190,6 +190,7 @@ Route::controller(AccountingController::class)->group(function(){
     Route::post('/accounting/create_kas','create_kas')->name('accounting.create_kas');
     Route::get('/accounting/{user_instance}/show_transactions','show_transactions')->name('accounting.show_transactions')->middleware('auth');
     Route::post('/accounting/{user_instance}/store_transactions','store_transactions')->name('accounting.store_transactions')->middleware('auth');
+    // Route::get('/accounting/{user_instance}/store_pilih_transaction_name','store_pilih_transaction_name')->name('accounting.store_pilih_transaction_name')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/mark_as_read_or_unread','mark_as_read_or_unread')->name('accounting.mark_as_read_or_unread')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/apply_entry','apply_entry')->name('accounting.apply_entry')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/edit_entry','edit_entry')->name('accounting.edit_entry')->middleware('auth');
