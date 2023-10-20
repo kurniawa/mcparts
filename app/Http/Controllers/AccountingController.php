@@ -407,11 +407,6 @@ class AccountingController extends Controller
         return back()->with($feedback);
     }
 
-    function store_pilih_transaction_name(Request $request) {
-        $get = $request->query();
-        dd($get);
-    }
-
     function mark_as_read_or_unread(UserInstance $user_instance, Accounting $accounting, Request $request) {
         $post = $request->post();
         // dump($post);
@@ -585,6 +580,26 @@ class AccountingController extends Controller
         if (is_string($created_at_old)) {
             if ($post['created_at'] !== $created_at_old) {
                 $created_at_new = date('Y-m-d', strtotime($post['created_at'])) . " " . date("H:i:s");
+                // mencegah error, apabila jam, menit dan detik, kebetulan sama dengan yang ingin ditukar posisinya
+                $same_created_at = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', $created_at_new)->first();
+                if ($same_created_at !== null) {
+                    $detik_0 = date('Y-m-d H:i:00', strtotime($created_at_new));
+                    $detik_0 = strtotime($detik_0);
+                    // dd($detik_0);
+                    $detik_digunakan = $detik_0;
+                    for ($i=0; $i < 60; $i++) {
+                        $detik_digunakan += $i;
+                        $created_at_new = date('Y-m-d H:i:s', $detik_digunakan);
+                        $same_created_at = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', $created_at_new)->first();
+                        if ($same_created_at === null) {
+                            break;
+                        }
+                        if ($i === 59) {
+                            dd('-very rare error: detik sama-');
+                        }
+                    }
+                }
+                // END - mencegah error, apabila jam, menit dan detik, kebetulan sama dengan yang ingin ditukar posisinya
             }
         } else {
             dump('created_at_old is not string type');
@@ -596,7 +611,13 @@ class AccountingController extends Controller
         $date_1 = strtotime($created_at_old);
         $date_2 = strtotime($post['created_at']);
         // dump($created_at_old, $date_1);
-        // dd($post['created_at'], $date_2);
+        // $date_1_seharian = strtotime("$created_at_old 23:59:59");
+        // dump($date_1_seharian - $date_1);
+        // dump(gmdate("H:i:s", $date_1_seharian - $date_1));
+        // dump($post['created_at'], $date_2);
+        // dump(date('Y-m-d H:i:00', strtotime($created_at_new)));
+        // dd($date_2 - $date_1);
+        // dd(date('Y-m-d H:i:s', $date_1));
 
         if ($date_1 === $date_2) {
             $mode = 'tanggal_sama';

@@ -176,7 +176,7 @@
                     <td>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
                     <td>{{ $accounting->kode }}</td>
                     @if ($accounting->keterangan !== null)
-                    <td>{{ $accounting->transaction_desc }} ({{ $accounting->keterangan }})</td>
+                    <td>{{ $accounting->transaction_desc }} <span class="font-bold text-blue-300">- {{ $accounting->keterangan }} -</span></td>
                     @else
                     <td>{{ $accounting->transaction_desc }}</td>
                     @endif
@@ -488,9 +488,9 @@
                         </td>
                     </tr>
                 </table>
-                <div class="mt-3 text-xs border rounded p-1 inline-block border-yellow-500">
+                {{-- <div class="mt-3 text-xs border rounded p-1 inline-block border-yellow-500">
                     <p>*) Keterangan Tambahan akan tertulis dalam tanda kurung pada ringkasan/laporan.</p>
-                </div>
+                </div> --}}
                 <div class="mt-3 text-center text-xs">
                     <button type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2">CONFIRM</button>
                 </div>
