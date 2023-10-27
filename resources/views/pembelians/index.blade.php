@@ -258,7 +258,8 @@
                                                 </td>
                                                 <td>Harga</td><td><div class="mx-1">:</div></td>
                                                 <td>
-                                                    <input type="text" id="barang_new-harga_main" class="text-xs rounded p-1" onchange="formatNumber(this, 'barang_new-harga_main-real');count_harga_total_main()">
+                                                    <input type="text" id="barang_new-harga_main" class="text-xs rounded p-1" onchange="formatNumber(this, 'barang_new-harga_main-real')">
+                                                    {{-- ;count_harga_total_main() --}}
                                                     <input type="hidden" name="harga_main" id="barang_new-harga_main-real">
                                                 </td>
                                                 <td>Harga Total</td><td><div class="mx-1">:</div></td>
@@ -309,22 +310,22 @@
                             <th>
                                 <div class="flex justify-between bg-pink-200">
                                     <span>Rp</span>
-                                    <span>{{ number_format(($grand_total - $lunas_total), 0,',','.') }}</span>
-                                    <span> ,-</span>
+                                    <span>{{ number_format(($grand_total - $lunas_total),2,',','.') }}</span>
+                                    {{-- <span> ,-</span> --}}
                                 </div>
                             </th>
                             <th>
                                 <div class="flex justify-between bg-emerald-200">
                                     <span>Rp</span>
-                                    <span>{{ number_format($lunas_total, 0,',','.') }}</span>
-                                    <span> ,-</span>
+                                    <span>{{ number_format($lunas_total,2,',','.') }}</span>
+                                    {{-- <span> ,-</span> --}}
                                 </div>
                             </th>
                             <th>
                                 <div class="flex justify-between">
                                     <span>Rp</span>
-                                    <span>{{ number_format($grand_total, 0,',','.') }}</span>
-                                    <span> ,-</span>
+                                    <span>{{ number_format($grand_total,2,',','.') }}</span>
+                                    {{-- <span> ,-</span> --}}
                                 </div>
                             </th>
                         </tr>
@@ -387,8 +388,8 @@
                             <td>
                                 <div class="flex justify-between font-semibold">
                                     <span>Rp</span>
-                                    {{ number_format($pembelians[$i]->harga_total,0,',','.') }}
-                                    <span>,-</span>
+                                    {{-- {{ dump($pembelians[$i]->harga_total) }} --}}
+                                    {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
                                 </div>
                             </td>
                             <td>
@@ -448,14 +449,15 @@
                                         </td>
                                         <td>
                                             <div class="min-w-max">
-                                                Rp {{ number_format($pembelian_barang->harga_main,0,',','.') }},-/{{ $pembelian_barang->satuan_main }}
+                                                {{-- {{ dump($pembelian_barang->harga_main) }} --}}
+                                                Rp {{ number_format($pembelian_barang->harga_main,2,',','.') }} /{{ $pembelian_barang->satuan_main }}
                                             </div>
                                         </td>
                                         <td>
                                             <div class="flex justify-between">
                                                 <span>Rp</span>
-                                                {{ number_format($pembelian_barang->harga_t,0,',','.') }}
-                                                <span>,-</span>
+                                                {{ number_format($pembelian_barang->harga_t,2,',','.') }}
+                                                {{-- <span>,-</span> --}}
                                             </div>
                                         </td>
                                         <td>
@@ -487,7 +489,7 @@
                                         <td>
                                             <div class="flex justify-between font-semibold">
                                                 <span>Rp</span>
-                                                {{ number_format($pembelians[$i]->harga_total,0,',','.') }}
+                                                {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
                                                 <span>,-</span>
                                             </div>
                                         </td>
@@ -725,7 +727,13 @@
         let jumlah_main = document.getElementById(`jumlah_main-${index}`).value;
         let harga_main = document.getElementById(`harga_main_real-${index}`).value;
         let harga_total_el = document.getElementById(`harga_t-${index}`);
-        let harga_total = jumlah_sub * jumlah_main * harga_main;
+        let harga_total = parseInt(jumlah_sub) * parseInt(jumlah_main) * parseFloat(harga_main);
+        // console.log(`jumlah_sub:`);
+        // console.log(jumlah_sub);
+        // console.log(`jumlah_main:`);
+        // console.log(jumlah_main);
+        // console.log(`harga_main:`);
+        // console.log(parseFloat(harga_main));
         // console.log(harga_total);
         harga_total_el.value = harga_total;
         formatNumber(harga_total_el, `harga_t_real-${index}`);
@@ -733,7 +741,7 @@
 
         let harga_total_pembelian = 0;
         harga_t_real_all.forEach(harga_t => {
-            harga_total_pembelian += parseInt(harga_t.value);
+            harga_total_pembelian += harga_t.value;
         });
         let harga_total_pembelian_el = document.getElementById('harga_total_pembelian');
         harga_total_pembelian_el.value = harga_total_pembelian;

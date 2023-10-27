@@ -294,6 +294,9 @@ class PembelianController extends Controller
     function store(Request $request) {
         $post = $request->post();
         // dd($post);
+        // dump((int)$post['harga_t'][0]);
+        // dump((float)$post['harga_t'][0]);
+        // dd((float)$post['harga_t'][1]);
         $request->validate([
             'day' => 'required',
             'month' => 'required',
@@ -315,24 +318,44 @@ class PembelianController extends Controller
         // $isi = collect();
         $isi = array();
         $success_ = '';
+        $warnings_ = '';
+
+        $indexes_to_process = array();
 
         for ($i=0; $i < count($post['barang_id']); $i++) {
             $barang = Barang::find($post['barang_id'][$i]);
-            // dd($barang);
-            if ($barang == null || (int)$post['harga_t'][$i] == 0 || (int)$post['jumlah_main'][$i] == 0) {
-                break;
+            // dump($barang);
+            // dump((float)$post['harga_t'][$i]);
+            // dump((int)$post['jumlah_main'][$i]);
+            if ($barang !== null && (float)$post['harga_t'][$i] !== 0.0 && (int)$post['jumlah_main'][$i] !== 0) {
+                $indexes_to_process[] = $i;
+            } else {
+                $warnings_ .= "-failed to process-index: $i-";
             }
+        }
+        // dd('end');
+        for ($i=0; $i < count($indexes_to_process); $i++) {
+            $barang = Barang::find($post['barang_id'][$indexes_to_process[$i]]);
+            // dump($barang);
+            // dump((float)$post['harga_t'][$indexes_to_process[$i]]);
+            // dd((int)$post['jumlah_main'][$indexes_to_process[$i]]);
+            // if ($barang == null || (float)$post['harga_t'][$indexes_to_process[$i]] == 0 || (int)$post['jumlah_main'][$indexes_to_process[$i]] == 0) {
+            //     break;
+            // }
+            $harga_main = round((float)$post['harga_main'][$indexes_to_process[$i]],2);
+            $harga_sub = round($harga_main * (int)$post['jumlah_main'][$indexes_to_process[$i]],2);
+
             $pembelian_barang = PembelianBarang::create([
                 'pembelian_id' => $pembelian_new->id,
                 'barang_id' => $barang->id,
                 'barang_nama' => $barang->nama,
                 'satuan_main' => $barang->satuan_main,
-                'jumlah_main' => (int)$post['jumlah_main'][$i] * 100,
-                'harga_main' => (int)$post['harga_main'][$i],
+                'jumlah_main' => (int)$post['jumlah_main'][$indexes_to_process[$i]] * 100,
+                'harga_main' => $harga_main,
                 'satuan_sub' => $barang->satuan_sub,
-                'jumlah_sub' => (int)$post['jumlah_sub'][$i] * 100,
-                'harga_sub' => $barang->harga_sub,
-                'harga_t' => (int)$post['harga_t'][$i],
+                'jumlah_sub' => (int)$post['jumlah_sub'][$indexes_to_process[$i]] * 100,
+                'harga_sub' => $harga_sub,
+                'harga_t' => round((float)$post['harga_t'][$indexes_to_process[$i]],2),
                 // 'status_bayar' => null,
                 // 'keterangan_bayar' => null,
                 // 'tanggal_lunas' => null,
@@ -347,17 +370,17 @@ class PembelianController extends Controller
             $exist_satuan_main = false;
             $exist_satuan_sub = false;
             if (count($isi) != 0) {
-                for ($i=0; $i < count($isi); $i++) {
-                    if ($isi[$i]['satuan'] == $pembelian_barang->satuan_main) {
-                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_main);
-                        // dump($isi[$i]['jumlah']);
+                for ($j=0; $j < count($isi); $j++) {
+                    if ($isi[$j]['satuan'] == $pembelian_barang->satuan_main) {
+                        $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_main);
+                        // dump($isi[$j]['jumlah']);
                         // dump($pembelian_barang->jumlah_main);
                         // dump('isi:');
                         // dump($isi);
                         $exist_satuan_main = true;
                     }
-                    if ($isi[$i]['satuan'] == $pembelian_barang->satuan_sub) {
-                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
+                    if ($isi[$j]['satuan'] == $pembelian_barang->satuan_sub) {
+                        $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
                         $exist_satuan_sub = true;
                     }
                 }
@@ -418,7 +441,7 @@ class PembelianController extends Controller
         $pembelian_new->update([
             'nomor_nota' => $nomor_nota,
             'isi' => json_encode($isi),
-            'harga_total' => $post['harga_total'],
+            'harga_total' => round((float)$post['harga_total'],2),
             // 'status_bayar' => $status_bayar,
             // 'keterangan_bayar' => $keterangan_bayar,
             // 'tanggal_lunas' => $tanggal_lunas,
@@ -428,6 +451,7 @@ class PembelianController extends Controller
 
         $feedback = [
             'success_' => $success_,
+            'warnings_' => $warnings_,
         ];
 
         return back()->with($feedback);
@@ -530,17 +554,21 @@ class PembelianController extends Controller
             if ($post['pembelian_barang_id'][$i] === 'new') {
                 // dd($barang);
                 $barang = Barang::find($post['barang_id'][$i]);
+
+                $harga_main = round((float)$post['harga_main'][$i],2);
+                $harga_sub = round($harga_main * (int)$post['jumlah_main'][$i],2);
+
                 $pembelian_barang = PembelianBarang::create([
                     'pembelian_id' => $pembelian->id,
                     'barang_id' => $barang->id,
                     'barang_nama' => $barang->nama,
                     'satuan_main' => $barang->satuan_main,
                     'jumlah_main' => (int)$post['jumlah_main'][$i] * 100,
-                    'harga_main' => (int)$post['harga_main'][$i],
+                    'harga_main' => $harga_main,
                     'satuan_sub' => $barang->satuan_sub,
                     'jumlah_sub' => (int)$post['jumlah_sub'][$i] * 100,
-                    'harga_sub' => $barang->harga_sub,
-                    'harga_t' => (int)$post['harga_t'][$i],
+                    'harga_sub' => $harga_sub,
+                    'harga_t' => round((float)$post['harga_t'][$i],2),
                     // 'status_bayar' => null,
                     // 'keterangan_bayar' => null,
                     // 'tanggal_lunas' => null,
@@ -554,17 +582,20 @@ class PembelianController extends Controller
             } else {
                 $pembelian_barang = PembelianBarang::find($post['pembelian_barang_id'][$i]);
                 // dd($pembelian_barang);
+                $harga_main = round((float)$post['harga_main'][$i],2);
+                $harga_sub = round($harga_main * (int)$post['jumlah_main'][$i],2);
+
                 try {
                     $pembelian_barang->update([
                         'barang_id' => $pembelian_barang->barang_id,
                         'barang_nama' => $pembelian_barang->barang_nama,
                         'satuan_main' => $pembelian_barang->satuan_main,
                         'jumlah_main' => (int)$post['jumlah_main'][$i] * 100,
-                        'harga_main' => (int)$post['harga_main'][$i],
+                        'harga_main' => $harga_main,
                         'satuan_sub' => $pembelian_barang->satuan_sub,
                         'jumlah_sub' => (int)$post['jumlah_sub'][$i] * 100,
-                        'harga_sub' => $pembelian_barang->harga_sub,
-                        'harga_t' => (int)$post['harga_t'][$i],
+                        'harga_sub' => $harga_sub,
+                        'harga_t' => round((float)$post['harga_t'][$i],2),
                         // 'status_bayar' => null,
                         // 'keterangan_bayar' => null,
                         // 'tanggal_lunas' => null,
@@ -583,17 +614,17 @@ class PembelianController extends Controller
             $exist_satuan_main = false;
             $exist_satuan_sub = false;
             if (count($isi) !== 0) {
-                for ($i=0; $i < count($isi); $i++) {
-                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_main) {
-                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_main);
-                        // dump($isi[$i]['jumlah']);
+                for ($j=0; $j < count($isi); $j++) {
+                    if ($isi[$j]['satuan'] === $pembelian_barang->satuan_main) {
+                        $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_main);
+                        // dump($isi[$j]['jumlah']);
                         // dump($pembelian_barang->jumlah_main);
                         // dump('isi:');
                         // dump($isi);
                         $exist_satuan_main = true;
                     }
-                    if ($isi[$i]['satuan'] === $pembelian_barang->satuan_sub) {
-                        $isi[$i]['jumlah'] = (int)$isi[$i]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
+                    if ($isi[$j]['satuan'] === $pembelian_barang->satuan_sub) {
+                        $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
                         $exist_satuan_sub = true;
                     }
                 }
@@ -616,7 +647,7 @@ class PembelianController extends Controller
 
         $pembelian->update([
             'isi' => json_encode($isi),
-            'harga_total' => $post['harga_total'],
+            'harga_total' => round((float)$post['harga_total'],2),
             // 'status_bayar' => $status_bayar,
             // 'keterangan_bayar' => $keterangan_bayar,
             // 'tanggal_lunas' => $tanggal_lunas,

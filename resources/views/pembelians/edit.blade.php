@@ -87,7 +87,7 @@
                                 <td>
                                     <div class="text-center">
                                         <div class="flex items-center">
-                                            <input type="text" id="harga_main-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_main,0,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" onchange="formatNumber(this, 'harga_main_real-{{ $key_pembelian_barang }}'); count_harga_total({{ $key_pembelian_barang }})">/<span class="satuan_main-{{ $key_pembelian_barang }} ml-1">{{ $pembelian_barang->satuan_main }}</span>
+                                            <input type="text" id="harga_main-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_main,2,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-3/4" onchange="formatNumber(this, 'harga_main_real-{{ $key_pembelian_barang }}'); count_harga_total({{ $key_pembelian_barang }})">/<span class="satuan_main-{{ $key_pembelian_barang }} ml-1">{{ $pembelian_barang->satuan_main }}</span>
                                             <input type="hidden" name="harga_main[]" id="harga_main_real-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->harga_main }}">
                                         </div>
                                     </div>
@@ -95,7 +95,7 @@
                                 <td>
                                     <div class="text-center">
                                         <div class="flex">
-                                            <input type="text" id="harga_t-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_t,0,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" onchange="formatNumber(this, 'harga_t_real-{{ $key_pembelian_barang }}');">
+                                            <input type="text" id="harga_t-{{ $key_pembelian_barang }}" value="{{ number_format($pembelian_barang->harga_t,2,',','.') }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-full" onchange="formatNumber(this, 'harga_t_real-{{ $key_pembelian_barang }}');">
                                             <input type="hidden" name="harga_t[]" id="harga_t_real-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->harga_t }}" class="harga_t_real">
                                         </div>
                                     </div>
@@ -123,8 +123,7 @@
                             <span class="font-bold">Total</span>
                             <div class="flex font-bold ml-2 items-center text-pink-500">
                                 <span>Rp</span>
-                                <input type="text" id="harga_total_pembelian" class="border-none p-1 w-28 ml-2" value="{{ number_format($pembelian->harga_total,0,',','.') }}" readonly>
-                                <span class="ml-1">,-</span>
+                                <input type="text" id="harga_total_pembelian" class="border-none p-1 w-28 ml-2" value="{{ number_format($pembelian->harga_total,2,',','.') }}" readonly>
                             </div>
                             <input type="hidden" name="harga_total" id="harga_total_pembelian_real" value="{{ $pembelian->harga_total }}">
                         </div>
@@ -267,15 +266,15 @@
         let jumlah_main = document.getElementById(`jumlah_main-${index}`).value;
         let harga_main = document.getElementById(`harga_main_real-${index}`).value;
         let harga_total_el = document.getElementById(`harga_t-${index}`);
-        let harga_total = jumlah_sub * jumlah_main * harga_main;
-        // console.log(harga_total);
+        let harga_total = parseInt(jumlah_sub) * parseInt(jumlah_main) * parseFloat(harga_main);
+        console.log(harga_main);
         harga_total_el.value = harga_total;
         formatNumber(harga_total_el, `harga_t_real-${index}`);
         let harga_t_real_all = document.querySelectorAll('.harga_t_real');
 
         let harga_total_pembelian = 0;
         harga_t_real_all.forEach(harga_t => {
-            harga_total_pembelian += parseInt(harga_t.value);
+            harga_total_pembelian += parseFloat(harga_t.value);
         });
         let harga_total_pembelian_el = document.getElementById('harga_total_pembelian');
         harga_total_pembelian_el.value = harga_total_pembelian;

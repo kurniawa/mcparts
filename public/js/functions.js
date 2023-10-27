@@ -270,8 +270,16 @@ function pin_formatted_number_on_certain_element(value, element_id) {
 function formatNumber(ipt, hidden_id) {
     // console.log(ipt);
     // console.log(isNaN(ipt.value));
-    var num = ipt.value.split(".").join("");
-    num = num.split(",");
+    // console.log(ipt.value[ipt.value.length - 2]);
+    var num = ipt.value;
+    if (num[ipt.value.length - 2] === '.') {
+        num = num.split('.');
+    } else {
+        num = ipt.value.split(".").join("");
+        num = num.split(",");
+    }
+    // console.log(num);
+
     // console.log(num);
     let hidden_num;
     if (num.length === 2) {
@@ -285,7 +293,7 @@ function formatNumber(ipt, hidden_id) {
     hidden_num = parseFloat(hidden_num);
     // console.log(num);
     document.getElementById(hidden_id).value = hidden_num;
-    console.log(document.getElementById(hidden_id).value);
+    // console.log(document.getElementById(hidden_id).value);
     // console.log(ipt.value, num);
     if (!isNaN(hidden_num)) {
         let real_number_formatted = parseFloat(num[0]).toLocaleString("id-ID", {
@@ -297,7 +305,7 @@ function formatNumber(ipt, hidden_id) {
         } else {
             ipt.value = real_number_formatted;
         }
-        console.log(ipt.value);
+        // console.log(ipt.value);
     }
 }
 
