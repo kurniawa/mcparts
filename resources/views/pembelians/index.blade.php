@@ -741,7 +741,7 @@
 
         let harga_total_pembelian = 0;
         harga_t_real_all.forEach(harga_t => {
-            harga_total_pembelian += harga_t.value;
+            harga_total_pembelian += parseFloat(harga_t.value);
         });
         let harga_total_pembelian_el = document.getElementById('harga_total_pembelian');
         harga_total_pembelian_el.value = harga_total_pembelian;

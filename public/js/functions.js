@@ -272,7 +272,10 @@ function formatNumber(ipt, hidden_id) {
     // console.log(isNaN(ipt.value));
     // console.log(ipt.value[ipt.value.length - 2]);
     var num = ipt.value;
-    if (num[ipt.value.length - 2] === '.') {
+    // console.log(num);
+    // console.log(ipt.value.length);
+    // console.log(num[ipt.value.length - 2]);
+    if (num[ipt.value.length - 2] === '.' || num[ipt.value.length - 3] === '.') {
         num = num.split('.');
     } else {
         num = ipt.value.split(".").join("");
