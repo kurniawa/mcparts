@@ -44,6 +44,36 @@ function toggle_light(
     }, 500);
 }
 
+function toggle_light_instant(
+    // btn_id,
+    class_id,
+    // classes_to_remove,
+    // classes_to_add,
+    // display_ref
+) {
+    $(`.${class_id}`).toggle();
+    // setTimeout(() => {
+    //     let display = $(`.${class_id}`).css("display");
+    //     // console.log(display);
+    //     let detail_button = document.getElementById(btn_id);
+    //     if (display === display_ref) {
+    //         classes_to_remove.forEach((element) => {
+    //             detail_button.classList.remove(element);
+    //         });
+    //         classes_to_add.forEach((element) => {
+    //             detail_button.classList.add(element);
+    //         });
+    //     } else {
+    //         classes_to_remove.forEach((element) => {
+    //             detail_button.classList.add(element);
+    //         });
+    //         classes_to_add.forEach((element) => {
+    //             detail_button.classList.remove(element);
+    //         });
+    //     }
+    // }, 100);
+}
+
 function set_time_range(timerange) {
     // console.log(timerange);
     let from_day, from_month, from_year;

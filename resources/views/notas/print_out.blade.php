@@ -1,8 +1,16 @@
 @extends('layouts.main')
 @section('content')
 
+<div class="no_print">
+    <div class="flex mt-2 ml-2">
+        <button id="btn-asli+copy" onclick="toggle_light_instant('nota-all', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3">asli+copy</button>
+        <button id="btn-asli" onclick="toggle_light_instant('nota-0', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3 ml-2">asli</button>
+        <button id="btn-copy" onclick="toggle_light_instant('nota-1', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3 ml-2">copy</button>
+    </div>
+</div>
+
 @for ($k = 0; $k < 2; $k++)
-<div class="containerDetailNota">
+<div class="containerDetailNota nota-all nota-{{ $k }}" id="">
     <div class="border-t mt-1 mb-1 pt-2"></div>
     <div class="grid grid-cols-3 items-center">
         <div class=""><img class="logo-mc" src="{{ asset('images/logo-mc.jpg') }}" alt="" style="width: 10rem;"></div>
@@ -119,7 +127,6 @@
     </div>
 
     <div class="hr-line border-top border-2 mt-2"></div>
-
 </div>
 @endfor
 
