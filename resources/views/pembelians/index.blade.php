@@ -303,6 +303,13 @@
             {{-- END - FORM_NEW_BARANG --}}
             <div class="flex justify-center">
                 <div class='pb-1 text-xs lg:w-1/2 md:w-3/4'>
+                    <div>
+                        <button class="rounded bg-emerald-200 text-emerald-500 p-1" onclick="table_to_excel('pembelian-to-excel')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                            </svg>
+                        </button>
+                    </div>
                     <div class="text-slate-400 font-semibold">rentang waktu: {{ date('d M Y', strtotime($from)) }} - {{ date('d M Y', strtotime($until)) }}</div>
                     <table class="table-nice w-full">
                         <tr>
@@ -572,6 +579,43 @@
                     </table>
                 </div>
             </div>
+            {{-- PRINT_OUT --}}
+            <div class="text-center mt-5">Preview: Print Out</div>
+            <div class="flex justify-center">
+                <div class="border rounded p-2">
+                    <table id="pembelian-to-excel">
+                        <tr>
+                            <th></th><th></th><th></th><th></th><th></th><th></th><th>belum lunas</th><th>sudah lunas</th><th>grand total</th>
+                        </tr>
+                        <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>{{ $grand_total - $lunas_total }}</td><td>{{ $lunas_total }}</td><td>{{ $grand_total }}</td></tr>
+                        <tr>
+                            <th>tanggal</th><th>supplier</th><th>nomor nota</th><th>nama barang</th><th>keterangan</th><th>jumlah sub</th><th>jumlah main</th><th>harga</th><th>harga total</th>
+                        </tr>
+                        @for ($i = 0; $i < count($pembelians); $i++)
+                        @foreach ($pembelian_barangs_all[$i] as $key_pembelian_barang => $pembelian_barang)
+                        <tr class="border-b">
+                            <td>{{ date('d-m-Y',strtotime($pembelians[$i]->created_at)) }}</td>
+                            <td>
+                                @if ($alamats[$i] !== null)
+                                {{ $pembelians[$i]['supplier_nama'] }} - {{ $alamats[$i]['short'] }}
+                                @else
+                                {{ $pembelians[$i]['supplier_nama'] }}
+                                @endif
+                            </td>
+                            <td>{{ $pembelians[$i]->nomor_nota }}</td>
+                            <td>{{ $pembelian_barang->barang_nama }}</td>
+                            <td>{{ $pembelians[$i]->keterangan_bayar }}</td>
+                            <td>{{ $pembelian_barang->jumlah_sub / 100 }} {{ $pembelian_barang->satuan_sub }}</td>
+                            <td>{{ $pembelian_barang->jumlah_main / 100 }} {{ $pembelian_barang->satuan_main }}</td>
+                            <td>{{ $pembelian_barang->harga_main }}</td>
+                            <td>{{ $pembelian_barang->harga_t }}</td>
+                        </tr>
+                        @endforeach
+                        @endfor
+                    </table>
+                </div>
+            </div>
+            {{-- END - PRINT_OUT --}}
             <div class="w-56"></div>
         </div>
     </div>
