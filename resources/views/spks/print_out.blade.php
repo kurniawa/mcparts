@@ -6,7 +6,7 @@
 <div id="divTableToPrint" class="grid grid-cols-2 gap-3 mr-3">
     {{-- <div id="divTableToPrint" class="grid-2-auto grid-column-gap-0_5em"> --}}
     @for ($j = 0; $j < 2; $j++)
-        <table style="width: 100%" class="text-xs">
+        <table style="width: 100%">
             <tr>
                 <td colspan="3" style="text-align: center;"><span style="font-weight: bold;">SURAT PERINTAH KERJA<br>PENGAMBILAN STOK</span></td>
             </tr>
