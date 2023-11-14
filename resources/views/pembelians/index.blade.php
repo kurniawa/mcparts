@@ -302,6 +302,7 @@
             </div>
             {{-- END - FORM_NEW_BARANG --}}
             <div class="flex justify-center">
+
                 <div class='pb-1 text-xs lg:w-1/2 md:w-3/4'>
                     <div>
                         <button class="rounded bg-emerald-200 text-emerald-500 p-1" onclick="table_to_excel('pembelian-to-excel')">
@@ -311,272 +312,303 @@
                         </button>
                     </div>
                     <div class="text-slate-400 font-semibold">rentang waktu: {{ date('d M Y', strtotime($from)) }} - {{ date('d M Y', strtotime($until)) }}</div>
-                    <table class="table-nice w-full">
-                        <tr>
-                            <th>Grand Total</th>
-                            <th>
-                                <div class="flex justify-between bg-pink-200">
-                                    <span>Rp</span>
-                                    <span>{{ number_format(($grand_total - $lunas_total),2,',','.') }}</span>
-                                    {{-- <span> ,-</span> --}}
-                                </div>
-                            </th>
-                            <th>
-                                <div class="flex justify-between bg-emerald-200">
-                                    <span>Rp</span>
-                                    <span>{{ number_format($lunas_total,2,',','.') }}</span>
-                                    {{-- <span> ,-</span> --}}
-                                </div>
-                            </th>
-                            <th>
-                                <div class="flex justify-between">
-                                    <span>Rp</span>
-                                    <span>{{ number_format($grand_total,2,',','.') }}</span>
-                                    {{-- <span> ,-</span> --}}
-                                </div>
-                            </th>
-                        </tr>
-                        @for ($i = 0; $i < count($pembelians); $i++)
-                        <tr class="border-b">
-                            <td>
-                                <div class="flex">
+                    <div class="flex gap-3">
+                        <table class="table-nice w-full">
+                            <tr>
+                                <th>Grand Total</th>
+                                <th>
+                                    <div class="flex justify-between bg-pink-200">
+                                        <span>Rp</span>
+                                        <span>{{ number_format(($grand_total - $lunas_total),2,',','.') }}</span>
+                                        {{-- <span> ,-</span> --}}
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="flex justify-between bg-emerald-200">
+                                        <span>Rp</span>
+                                        <span>{{ number_format($lunas_total,2,',','.') }}</span>
+                                        {{-- <span> ,-</span> --}}
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="flex justify-between">
+                                        <span>Rp</span>
+                                        <span>{{ number_format($grand_total,2,',','.') }}</span>
+                                        {{-- <span> ,-</span> --}}
+                                    </div>
+                                </th>
+                            </tr>
+                            @for ($i = 0; $i < count($pembelians); $i++)
+                            <tr class="border-b">
+                                <td>
                                     <div class="flex">
-                                        @if ($pembelians[$i]->tanggal_lunas === null)
-                                        <div>
-                                            <div class="rounded p-1 bg-pink-200 text-pink-500 font-bold text-center">
-                                                <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->created_at)) }}</div>
-                                                <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->created_at)) }}</div>
-                                            </div>
-                                        </div>
-                                        @else
-                                        <div>
-                                            <div class="rounded p-1 bg-sky-200 text-sky-500 font-bold text-center">
-                                                <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->created_at)) }}</div>
-                                                <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->created_at)) }}</div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                    </div>
-                                    <div class="flex ml-1 items-center">
-                                        @if ($pembelians[$i]->tanggal_lunas !== null)
-                                        <div>
-                                            <div class="rounded p-1 bg-emerald-200 text-emerald-500 font-bold text-center">
-                                                <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->tanggal_lunas)) }}</div>
-                                                <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->tanggal_lunas)) }}</div>
-                                            </div>
-                                        </div>
-                                        @else
-                                        <span class="font-bold">--</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-sky-500">
-                                    <div class="min-w-max">
-                                        @if ($alamats[$i] !== null)
-                                        {{ $pembelians[$i]['supplier_nama'] }} - {{ $alamats[$i]['short'] }}
-                                        @else
-                                        {{ $pembelians[$i]['supplier_nama'] }}
-                                        @endif
-                                    </div>
-                                </a>
-                                @if ($pembelians[$i]->keterangan_bayar)
-                                <div class="text-slate-400">( {{ $pembelians[$i]->keterangan_bayar }} )</div>
-                                @endif
-                            </td>
-                            <td><a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-indigo-500">{{ $pembelians[$i]->nomor_nota }}</a></td>
-                            {{-- <td>
-                                <div>{{ $pembelian_barangs_all[$i][0]->barang_nama }}</div>
-                                @if (count($pembelian_barangs_all[$i]) > 1)
-                                <div class="text-blue-500">+{{ count($pembelian_barangs_all[$i]) - 1 }} barang lainnya</div>
-                                @endif
-                            </td> --}}
-                            <td>
-                                <div class="flex justify-between font-semibold">
-                                    <span>Rp</span>
-                                    {{-- {{ dump($pembelians[$i]->harga_total) }} --}}
-                                    {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
-                                </div>
-                            </td>
-                            <td>
-                                <button id="btn_detail_pembelian-{{ $i }}" class="border rounded" onclick="showDropdown(this.id, 'detail_pembelian-{{ $i }}')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="hidden" id="detail_pembelian-{{ $i }}">
-                            <td colspan="4">
-                                {{-- <table>
-                                    <tr>
-                                        <td>
-                                            @if ($alamats[$i]!==null)
-                                            @if ($alamats[$i]['long']!==null)
-                                            @foreach (json_decode($alamats[$i]['long'],true) as $alamat)
-                                            {{ $alamat }}<br>
-                                            @endforeach
-                                            @endif
-                                            @else
-                                            -
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($kontaks[$i]!==null)
-                                            @if ($kontaks[$i]['kodearea']!==null)
-                                            {{ $kontaks[$i]['kodearea'] }} {{ $kontaks[$i]['nomor'] }}
-                                            @else
-                                            {{ $kontaks[$i]['nomor'] }}
-                                            @endif
-                                            @else
-                                            -
-                                            @endif
-                                        </td>
-                                    </tr>
-                                </table> --}}
-
-                                {{-- PEMBELIAN_ITEMS --}}
-                                <table class="w-full">
-                                    @foreach ($pembelian_barangs_all[$i] as $key_pembelian_barang => $pembelian_barang)
-                                    <tr>
-                                        <td>{{ $key_pembelian_barang + 1 }}.</td>
-                                        <td><div class="min-w-max">{{ $pembelian_barang->barang_nama }}</div></td>
-                                        <td>
-                                            @if ($pembelian_barang->satuan_sub !== null)
-                                            <div class="min-w-max">
-                                                {{ $pembelian_barang->jumlah_sub / 100 }} {{ $pembelian_barang->satuan_sub }}
-                                            </div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="min-w-max">
-                                                {{ $pembelian_barang->jumlah_main / 100 }} {{ $pembelian_barang->satuan_main }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="min-w-max">
-                                                {{-- {{ dump($pembelian_barang->harga_main) }} --}}
-                                                Rp {{ number_format($pembelian_barang->harga_main,2,',','.') }} /{{ $pembelian_barang->satuan_main }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="flex justify-between">
-                                                <span>Rp</span>
-                                                {{ number_format($pembelian_barang->harga_t,2,',','.') }}
-                                                {{-- <span>,-</span> --}}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <form action="{{ route('pembelians.delete_pembelian_barang', [$pembelians[$i]->id, $pembelian_barang->id]) }}" method="POST" onsubmit="return confirm('hapus item pembelian ini?')">
-                                                @csrf
-                                                <div>
-                                                    <button class="rounded bg-pink-300 text-pink-500">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                    <tr>
-                                        <td colspan="4">
+                                        <div class="flex">
+                                            @if ($pembelians[$i]->tanggal_lunas === null)
                                             <div>
-                                                Content:
-                                                @if ($pembelians[$i]->isi !== null)
-                                                    @foreach (json_decode($pembelians[$i]->isi,true) as $isi)
-                                                        --> {{ $isi['jumlah'] / 100 }} {{ $isi['satuan'] }}
-                                                    @endforeach
-                                                @endif
+                                                <div class="rounded p-1 bg-pink-200 text-pink-500 font-bold text-center">
+                                                    <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->created_at)) }}</div>
+                                                    <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->created_at)) }}</div>
+                                                </div>
                                             </div>
-                                        </td>
-                                        <th>Total</th>
-                                        <td>
-                                            <div class="flex justify-between font-semibold">
-                                                <span>Rp</span>
-                                                {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
-                                                <span>,-</span>
+                                            @else
+                                            <div>
+                                                <div class="rounded p-1 bg-sky-200 text-sky-500 font-bold text-center">
+                                                    <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->created_at)) }}</div>
+                                                    <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->created_at)) }}</div>
+                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                </table>
-                                {{-- END - PEMBELIAN_ITEMS --}}
-                            </td>
-                            <td class="align-bottom">
-                                <div>
-                                    <a href="{{ route('pembelians.edit', $pembelians[$i]->id) }}">
-                                        <button class="rounded bg-slate-200 text-slate-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                            </svg>
-                                        </button>
+                                            @endif
+                                        </div>
+                                        <div class="flex ml-1 items-center">
+                                            @if ($pembelians[$i]->tanggal_lunas !== null)
+                                            <div>
+                                                <div class="rounded p-1 bg-emerald-200 text-emerald-500 font-bold text-center">
+                                                    <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->tanggal_lunas)) }}</div>
+                                                    <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->tanggal_lunas)) }}</div>
+                                                </div>
+                                            </div>
+                                            @else
+                                            <span class="font-bold">--</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-sky-500">
+                                        <div class="min-w-max">
+                                            @if ($alamats[$i] !== null)
+                                            {{ $pembelians[$i]['supplier_nama'] }} - {{ $alamats[$i]['short'] }}
+                                            @else
+                                            {{ $pembelians[$i]['supplier_nama'] }}
+                                            @endif
+                                        </div>
                                     </a>
-                                </div>
-                                <form action="{{ route('pembelians.delete', $pembelians[$i]->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pembelian ini?')">
-                                    @csrf
-                                    <button type="submit" class="text-red-500 bg-red-200 rounded">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    @if ($pembelians[$i]->keterangan_bayar)
+                                    <div class="text-slate-400">( {{ $pembelians[$i]->keterangan_bayar }} )</div>
+                                    @endif
+                                </td>
+                                <td><a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-indigo-500">{{ $pembelians[$i]->nomor_nota }}</a></td>
+                                {{-- <td>
+                                    <div>{{ $pembelian_barangs_all[$i][0]->barang_nama }}</div>
+                                    @if (count($pembelian_barangs_all[$i]) > 1)
+                                    <div class="text-blue-500">+{{ count($pembelian_barangs_all[$i]) - 1 }} barang lainnya</div>
+                                    @endif
+                                </td> --}}
+                                <td>
+                                    <div class="flex justify-between font-semibold">
+                                        <span>Rp</span>
+                                        {{-- {{ dump($pembelians[$i]->harga_total) }} --}}
+                                        {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <button id="btn_detail_pembelian-{{ $i }}" class="border rounded" onclick="showDropdown(this.id, 'detail_pembelian-{{ $i }}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                         </svg>
                                     </button>
-                                </form>
-                                <div>
-                                    <button id="btn_form_pelunasan" class="text-emerald-500 border border-emerald-300 rounded" onclick="toggle_light(this.id, 'form_pelunasan-{{ $i }}', [], ['bg-emerald-200'], 'table-row')">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {{-- FORM PELUNASAN --}}
-                        <tr class="hidden" id="form_pelunasan-{{ $i }}">
-                            <td colspan="7">
-                                <form action="{{ route('pembelians.pelunasan', $pembelians[$i]->id) }}" method="POST" class="flex justify-end">
-                                    @csrf
-                                    <table>
+                                </td>
+                            </tr>
+                            <tr class="hidden" id="detail_pembelian-{{ $i }}">
+                                <td colspan="4">
+                                    {{-- <table>
                                         <tr>
-                                            <td>Tanggal Lunas</td><td>:</td>
                                             <td>
-                                                <div class="flex">
-                                                    @if ($pembelians[$i]->status_bayar === 'LUNAS')
-                                                    <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d', strtotime($pembelians[$i]->tanggal_lunas)) }}">
-                                                    <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m'), strtotime($pembelians[$i]->tanggal_lunas) }}">
-                                                    <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y'), strtotime($pembelians[$i]->tanggal_lunas) }}">
-                                                    @else
-                                                    <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
-                                                    <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
-                                                    <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
+                                                @if ($alamats[$i]!==null)
+                                                @if ($alamats[$i]['long']!==null)
+                                                @foreach (json_decode($alamats[$i]['long'],true) as $alamat)
+                                                {{ $alamat }}<br>
+                                                @endforeach
+                                                @endif
+                                                @else
+                                                -
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($kontaks[$i]!==null)
+                                                @if ($kontaks[$i]['kodearea']!==null)
+                                                {{ $kontaks[$i]['kodearea'] }} {{ $kontaks[$i]['nomor'] }}
+                                                @else
+                                                {{ $kontaks[$i]['nomor'] }}
+                                                @endif
+                                                @else
+                                                -
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    </table> --}}
+
+                                    {{-- PEMBELIAN_ITEMS --}}
+                                    <table class="w-full">
+                                        @foreach ($pembelian_barangs_all[$i] as $key_pembelian_barang => $pembelian_barang)
+                                        <tr>
+                                            <td>{{ $key_pembelian_barang + 1 }}.</td>
+                                            <td><div class="min-w-max">{{ $pembelian_barang->barang_nama }}</div></td>
+                                            <td>
+                                                @if ($pembelian_barang->satuan_sub !== null)
+                                                <div class="min-w-max">
+                                                    {{ $pembelian_barang->jumlah_sub / 100 }} {{ $pembelian_barang->satuan_sub }}
+                                                </div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="min-w-max">
+                                                    {{ $pembelian_barang->jumlah_main / 100 }} {{ $pembelian_barang->satuan_main }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="min-w-max">
+                                                    {{-- {{ dump($pembelian_barang->harga_main) }} --}}
+                                                    Rp {{ number_format($pembelian_barang->harga_main,2,',','.') }} /{{ $pembelian_barang->satuan_main }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="flex justify-between">
+                                                    <span>Rp</span>
+                                                    {{ number_format($pembelian_barang->harga_t,2,',','.') }}
+                                                    {{-- <span>,-</span> --}}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <form action="{{ route('pembelians.delete_pembelian_barang', [$pembelians[$i]->id, $pembelian_barang->id]) }}" method="POST" onsubmit="return confirm('hapus item pembelian ini?')">
+                                                    @csrf
+                                                    <div>
+                                                        <button class="rounded bg-pink-300 text-pink-500">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                        <tr>
+                                            <td colspan="4">
+                                                <div>
+                                                    Content:
+                                                    @if ($pembelians[$i]->isi !== null)
+                                                        @foreach (json_decode($pembelians[$i]->isi,true) as $isi)
+                                                            --> {{ $isi['jumlah'] / 100 }} {{ $isi['satuan'] }}
+                                                        @endforeach
                                                     @endif
                                                 </div>
                                             </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Keterangan</td><td>:</td>
-                                            <td><textarea name="keterangan_bayar" id="" cols="30" rows="3" class="text-xs p-1">{{ $pembelians[$i]->keterangan_bayar }}</textarea></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3">
-                                                <div class="text-end">
-                                                    <button class="border-2 border-emerald-300 bg-emerald-100 rounded text-emerald-500 px-1">Confirm</button>
+                                            <th>Total</th>
+                                            <td>
+                                                <div class="flex justify-between font-semibold">
+                                                    <span>Rp</span>
+                                                    {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
+                                                    <span>,-</span>
                                                 </div>
                                             </td>
                                         </tr>
                                     </table>
-                                </form>
-                                <form action="{{ route('pembelians.pembatalan_pelunasan', $pembelians[$i]->id) }}" method="POST" onsubmit="return confirm('Batalkan Pelunasan?')" class="mt-1">
-                                    @csrf
-                                    <div class="text-center">
-                                        <button class="border-2 border-yellow-300 bg-yellow-100 rounded text-yellow-500 px-1">batalkan pelunasan</button>
+                                    {{-- END - PEMBELIAN_ITEMS --}}
+                                </td>
+                                <td class="align-bottom">
+                                    <div>
+                                        <a href="{{ route('pembelians.edit', $pembelians[$i]->id) }}">
+                                            <button class="rounded bg-slate-200 text-slate-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                </svg>
+                                            </button>
+                                        </a>
                                     </div>
-                                </form>
-                            </td>
-                        </tr>
-                        {{-- FORM PELUNASAN --}}
-                        @endfor
-                    </table>
+                                    <form action="{{ route('pembelians.delete', $pembelians[$i]->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pembelian ini?')">
+                                        @csrf
+                                        <button type="submit" class="text-red-500 bg-red-200 rounded">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    <div>
+                                        <button id="btn_form_pelunasan" class="text-emerald-500 border border-emerald-300 rounded" onclick="toggle_light(this.id, 'form_pelunasan-{{ $i }}', [], ['bg-emerald-200'], 'table-row')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{-- FORM PELUNASAN --}}
+                            <tr class="hidden" id="form_pelunasan-{{ $i }}">
+                                <td colspan="7">
+                                    <form action="{{ route('pembelians.pelunasan', $pembelians[$i]->id) }}" method="POST" class="flex justify-end">
+                                        @csrf
+                                        <table>
+                                            <tr>
+                                                <td>Tanggal Lunas</td><td>:</td>
+                                                <td>
+                                                    <div class="flex">
+                                                        @if ($pembelians[$i]->status_bayar === 'LUNAS')
+                                                        <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d', strtotime($pembelians[$i]->tanggal_lunas)) }}">
+                                                        <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m'), strtotime($pembelians[$i]->tanggal_lunas) }}">
+                                                        <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y'), strtotime($pembelians[$i]->tanggal_lunas) }}">
+                                                        @else
+                                                        <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
+                                                        <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
+                                                        <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Keterangan</td><td>:</td>
+                                                <td><textarea name="keterangan_bayar" id="" cols="30" rows="3" class="text-xs p-1">{{ $pembelians[$i]->keterangan_bayar }}</textarea></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3">
+                                                    <div class="text-end">
+                                                        <button class="border-2 border-emerald-300 bg-emerald-100 rounded text-emerald-500 px-1">Confirm</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </form>
+                                    <form action="{{ route('pembelians.pembatalan_pelunasan', $pembelians[$i]->id) }}" method="POST" onsubmit="return confirm('Batalkan Pelunasan?')" class="mt-1">
+                                        @csrf
+                                        <div class="text-center">
+                                            <button class="border-2 border-yellow-300 bg-yellow-100 rounded text-yellow-500 px-1">batalkan pelunasan</button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{-- FORM PELUNASAN --}}
+                            @endfor
+                        </table>
+                        {{-- PEMBELIAN TOTAL SUPPLIER --}}
+                        <div class="text-xs">
+                            <table class="table-nice w-full">
+                                @for ($i = 0; $i < count($pembelian_total_suppliers); $i++)
+                                <tr class="border-b">
+                                    <td>{{ $pembelian_total_suppliers[$i]['supplier_nama'] }}</td>
+                                    <td>
+                                        <div class="flex justify-between font-semibold">
+                                            <span>Rp</span>
+                                            {{-- {{ dump($pembelian_total_supplier[$i]->harga_total) }} --}}
+                                            {{ number_format($pembelian_total_suppliers[$i]['pembelian_total'],2,',','.') }}
+                                        </div>
+                                        <div class="flex justify-between text-emerald-500">
+                                            <span>Rp</span>
+                                            {{-- {{ dump($pembelian_total_supplier[$i]->harga_total) }} --}}
+                                            {{ number_format($pembelian_total_suppliers[$i]['pembelian_lunas'],2,',','.') }}
+                                        </div>
+                                        <div class="flex justify-between text-rose-500">
+                                            <span>Rp</span>
+                                            {{-- {{ dump($pembelian_total_supplier[$i]->harga_total) }} --}}
+                                            {{ number_format($pembelian_total_suppliers[$i]['pembelian_belum_lunas'],2,',','.') }}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                @endfor
+                            </table>
+                        </div>
+                        {{-- END - PEMBELIAN TOTAL SUPPLIER --}}
+                    </div>
                 </div>
             </div>
             {{-- PRINT_OUT --}}

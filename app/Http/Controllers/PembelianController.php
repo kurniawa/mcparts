@@ -345,6 +345,34 @@ class PembelianController extends Controller
         $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
         $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
 
+        // Pembelian Total Supplier
+        // dump($pembelians);
+        $pembelian_grouped_supplier = $pembelians->groupBy('supplier_nama');
+        // dump($pembelian_grouped_supplier);
+        $pembelian_total_suppliers = collect();
+        foreach ($pembelian_grouped_supplier as $pembelian_grouped_supp) {
+            $pembelian_total = 0;
+            $pembelian_lunas = 0;
+            $pembelian_belum_lunas = 0;
+            $supplier_nama = '';
+            foreach ($pembelian_grouped_supp as $pembelian_grouped_s) {
+                $pembelian_total += (float)$pembelian_grouped_s->harga_total;
+                if ($pembelian_grouped_s->status_bayar === 'BELUM') {
+                    $pembelian_belum_lunas += (float)$pembelian_grouped_s->harga_total;
+                } elseif ($pembelian_grouped_s->status_bayar === 'LUNAS') {
+                    $pembelian_lunas += (float)$pembelian_grouped_s->harga_total;
+                }
+                $supplier_nama = $pembelian_grouped_s->supplier_nama;
+            }
+            $pembelian_total_suppliers->push([
+                'supplier_nama' => $supplier_nama,
+                'pembelian_total' => $pembelian_total,
+                'pembelian_lunas' => $pembelian_lunas,
+                'pembelian_belum_lunas' => $pembelian_belum_lunas,
+            ]);
+        }
+        // dd($pembelian_total_suppliers);
+        // END - Pembelian Total Supplier
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'pembelians.index',
@@ -361,6 +389,7 @@ class PembelianController extends Controller
             'lunas_total' => $lunas_total,
             'from' => $from,
             'until' => $until,
+            'pembelian_total_suppliers' => $pembelian_total_suppliers,
         ];
         // dd($pembelians);
         // dump($from);
