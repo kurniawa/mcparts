@@ -52,19 +52,21 @@
                             @endforeach --}}
                             <div>{{ $nota->cust_short }}</div>
                             @else
-                            @if ($nota->cust_long !== null)
-                            @foreach (json_decode($nota->cust_long, true) as $long)
-                            <div>{{ $long }}</div>
-                            @endforeach
-                            @endif
-                            @if ($cust_kontak!==null)
-                            @if ($cust_kontak->kodearea!==null)
-                            <span>({{ $cust_kontak->kodearea }}) </span>
-                            @endif
-                            <span class="toFormatPhoneNumber">{{ $cust_kontak->nomor }}</span>
-                            @else
+                                @if ($nota->cust_long !== null)
+                                @foreach (json_decode($nota->cust_long, true) as $long)
+                                <div>{{ $long }}</div>
+                                @endforeach
+                                @endif
+                                @if ($cust_kontak)
+                                    @if ($cust_kontak!==null)
+                                        @if ($cust_kontak->kodearea!==null)
+                                        <span>({{ $cust_kontak->kodearea }}) </span>
+                                        @endif
+                                    <span class="toFormatPhoneNumber">{{ $cust_kontak->nomor }}</span>
+                                    @else
+                                    @endif
+                                @endif
 
-                            @endif
                             @endif
                         </td>
                     </tr>
