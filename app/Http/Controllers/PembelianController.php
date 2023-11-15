@@ -76,11 +76,11 @@ class PembelianController extends Controller
             if (($get['supplier_nama'] || $get['supplier_id']) && !$filter_tanggal && !$filter_status_bayar) {
                 // FILTER HANYA BERDASARKAN SUPPLIER
                 if ($get['supplier_id']) {
-                    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } else {
-                    $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     if (count($pembelians) === 0) {
-                        $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     }
                 }
                 // END - FILTER HANYA BERDASARKAN SUPPLIER
@@ -88,24 +88,24 @@ class PembelianController extends Controller
                 // Filter hanya berdasarkan tanggal
                 $from = "$get[from_year]-$get[from_month]-$get[from_day]";
                 $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
-                $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->latest()->get();
+                $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->get();
                 // END - Filter hanya berdasarkan tanggal
             } elseif (!($get['supplier_nama'] || $get['supplier_id']) && !$filter_tanggal && $filter_status_bayar) {
                 // Filter hanya berdasarkan status_bayar
                 if ($all) {
                     $pembelians = Pembelian::latest()->limit(500)->get();
                 } elseif ($lunas && !$belum_lunas && !$sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif (!$lunas && $belum_lunas && !$sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif (!$lunas && !$belum_lunas && $sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif ($lunas && $belum_lunas && !$sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif ($lunas && !$belum_lunas && $sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif (!$lunas && $belum_lunas && $sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } else {
                     dd('error - filter hanya berdasarkan status_bayar');
                 }
@@ -116,11 +116,11 @@ class PembelianController extends Controller
                 $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
 
                 if ($get['supplier_id']) {
-                    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } else {
-                    $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     if (count($pembelians) === 0) {
-                        $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     }
                 }
                 // END - Filter berdasarkan nama dan tanggal
@@ -128,74 +128,74 @@ class PembelianController extends Controller
                 // Filter berdasarkan nama dan status_bayar
                 if ($lunas && !$belum_lunas && !$sebagian) {
                     if ($get['supplier_id']) {
-                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
-                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
-                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif (!$lunas && $belum_lunas && !$sebagian) {
                     if ($get['supplier_id']) {
-                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
-                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
-                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif (!$lunas && !$belum_lunas && $sebagian) {
                     if ($get['supplier_id']) {
-                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
-                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
-                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif ($lunas && $belum_lunas && !$sebagian) {
                     if ($get['supplier_id']) {
                         $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
                         $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
                             $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where(function ($query) {
                                 $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
-                            })->latest()->limit(500)->get();
+                            })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif ($lunas && !$belum_lunas && $sebagian) {
                     if ($get['supplier_id']) {
                         $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
                         $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
                             $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where(function ($query) {
                                 $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
-                            })->latest()->limit(500)->get();
+                            })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif (!$lunas && $belum_lunas && $sebagian) {
                     if ($get['supplier_id']) {
                         $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
                         $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
                             $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where(function ($query) {
                                 $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
-                            })->latest()->limit(500)->get();
+                            })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } else {
@@ -208,19 +208,19 @@ class PembelianController extends Controller
                 $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
 
                 if ($all) {
-                    $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif ($lunas && !$belum_lunas && !$sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif (!$lunas && $belum_lunas && !$sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif (!$lunas && !$belum_lunas && $sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'SEBAGIAN')->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'SEBAGIAN')->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif ($lunas && $belum_lunas && !$sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM')->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM')->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif ($lunas && !$belum_lunas && $sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN')->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN')->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } elseif (!$lunas && $belum_lunas && $sebagian) {
-                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN')->whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN')->whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                 } else {
                     dd('error - filter hanya berdasarkan status_bayar');
                 }
@@ -233,74 +233,74 @@ class PembelianController extends Controller
 
                 if ($lunas && !$belum_lunas && !$sebagian) {
                     if ($get['supplier_id']) {
-                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
-                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
-                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->latest()->limit(500)->get();
+                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'LUNAS')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif (!$lunas && $belum_lunas && !$sebagian) {
                     if ($get['supplier_id']) {
-                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
-                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
-                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'BELUM')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif (!$lunas && !$belum_lunas && $sebagian) {
                     if ($get['supplier_id']) {
-                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
-                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                        $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
-                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->latest()->limit(500)->get();
+                            $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where('status_bayar', 'SEBAGIAN')->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif ($lunas && $belum_lunas && !$sebagian) {
                     if ($get['supplier_id']) {
                         $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
                         $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
                             $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where(function ($query) {
                                 $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
-                            })->latest()->limit(500)->get();
+                            })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif ($lunas && !$belum_lunas && $sebagian) {
                     if ($get['supplier_id']) {
                         $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
                         $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
                             $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where(function ($query) {
                                 $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
-                            })->latest()->limit(500)->get();
+                            })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } elseif (!$lunas && $belum_lunas && $sebagian) {
                     if ($get['supplier_id']) {
                         $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                     } else {
                         $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->whereBetween('created_at', [$from, $until])->where(function ($query) {
                             $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
-                        })->latest()->limit(500)->get();
+                        })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         if (count($pembelians) === 0) {
                             $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->whereBetween('created_at', [$from, $until])->where(function ($query) {
                                 $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
-                            })->latest()->limit(500)->get();
+                            })->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
                         }
                     }
                 } else {
@@ -311,7 +311,7 @@ class PembelianController extends Controller
                 dd('tidak menemukan filter yang cocok...');
             }
         } else {
-            $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->latest()->limit(500)->get();
+            $pembelians = Pembelian::whereBetween('created_at', [$from, $until])->orderBy('supplier_nama')->orderByDesc('created_at')->limit(500)->get();
             // $pembelians = Pembelian::latest()->limit(100)('created_at')->get();
             // dump($from, $until);
             // dd($pembelians);
