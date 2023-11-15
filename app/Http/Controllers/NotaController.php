@@ -343,6 +343,10 @@ class NotaController extends Controller
         // dd($nota);
         $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
         $rest_row = 16 - count($spk_produk_notas);
+        $cust_kontak = null;
+        if ($nota->cust_kontak) {
+            $cust_kontak = json_decode($nota->cust_kontak, true);
+        }
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'notas.print_out',
@@ -350,9 +354,10 @@ class NotaController extends Controller
             'nota' => $nota,
             'spk_produk_notas' => $spk_produk_notas,
             'rest_row' => $rest_row,
+            'cust_kontak' => $cust_kontak,
         ];
 
-        // dd($data);
+        // dd($nota);
         return view('notas.print_out', $data);
     }
 
