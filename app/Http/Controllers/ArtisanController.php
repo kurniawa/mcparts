@@ -1302,8 +1302,8 @@ class ArtisanController extends Controller
         // ACCOUNTING
         $accountings = Accounting::all();
         foreach ($accountings as $accounting) {
-            $accounting->jumlah = $accounting->jumlah * 100;
-            $accounting->saldo = $accounting->saldo * 100;
+            $accounting->jumlah = (int)$accounting->jumlah * 100;
+            $accounting->saldo = (int)$accounting->saldo * 100;
             $accounting->save();
         }
         dump('data rupiah pada accounting diupdate.');
