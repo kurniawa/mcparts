@@ -1297,4 +1297,16 @@ class ArtisanController extends Controller
 
         dump('filling records to barangs and suppliers');
     }
+
+    function accounting_update_data_rupiah() {
+        // ACCOUNTING
+        $accountings = Accounting::all();
+        foreach ($accountings as $accounting) {
+            $accounting->jumlah = $accounting->jumlah * 100;
+            $accounting->saldo = $accounting->saldo * 100;
+            $accounting->save();
+        }
+        dump('data rupiah pada accounting diupdate.');
+        // END - ACCOUNTING
+    }
 }

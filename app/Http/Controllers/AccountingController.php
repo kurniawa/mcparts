@@ -201,8 +201,8 @@ class AccountingController extends Controller
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
         // }
-        // dump($post);
-        dump('loading...');
+        // dd((float)$post['masuk'][0]);
+        // dump('loading...');
 
         $user = Auth::user();
         $success_ = '';
@@ -309,9 +309,9 @@ class AccountingController extends Controller
             $jumlah = null;
             $transaction_type = 'pengeluaran';
             if ($post['keluar'][$i] !== null) {
-                $jumlah = (int)$post['keluar'][$i];
+                $jumlah = (float)$post['keluar'][$i] * 100;
             } elseif ($post['masuk'][$i] !== null) {
-                $jumlah = (int)$post['masuk'][$i];
+                $jumlah = (float)$post['masuk'][$i] * 100;
                 $transaction_type = 'pemasukan';
             }
 
@@ -333,9 +333,9 @@ class AccountingController extends Controller
                 }
 
                 if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - (int)$post['keluar'][$i];
+                    $saldo = $saldo - (float)$post['keluar'][$i] * 100;
                 } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + (int)$post['masuk'][$i];
+                    $saldo = $saldo + (float)$post['masuk'][$i] * 100;
                 }
 
                 $saldo_next = $saldo;
@@ -356,9 +356,9 @@ class AccountingController extends Controller
                     $saldo = $last_transaction->saldo;
                 }
                 if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - (int)$post['keluar'][$i];
+                    $saldo = $saldo - (float)$post['keluar'][$i] * 100;
                 } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + (int)$post['masuk'][$i];
+                    $saldo = $saldo + (float)$post['masuk'][$i] * 100;
                 }
             }
 
@@ -403,7 +403,7 @@ class AccountingController extends Controller
             'success_' => $success_,
             'warnings_' => $warnings_,
         ];
-        sleep(3);
+        // sleep(3);
         return back()->with($feedback);
     }
 
@@ -638,9 +638,9 @@ class AccountingController extends Controller
         $jumlah = null;
         $transaction_type = 'pengeluaran';
         if ($post['keluar'] !== null) {
-            $jumlah = (int)$post['keluar'];
+            $jumlah = (float)$post['keluar'] * 100;
         } elseif ($post['masuk'] !== null) {
-            $jumlah = (int)$post['masuk'];
+            $jumlah = (float)$post['masuk'] * 100;
             $transaction_type = 'pemasukan';
         }
 
