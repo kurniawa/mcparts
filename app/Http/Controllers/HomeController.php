@@ -91,7 +91,7 @@ class HomeController extends Controller
                 $request->validate(['error'=>'required'],['error.required'=>'tipe_filter...']);
             }
         } else {
-            $spks = Spk::latest()->limit(50)->get();
+            $spks = Spk::latest()->limit(200)->get();
         }
         // dd($spks);
 
