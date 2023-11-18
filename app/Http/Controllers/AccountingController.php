@@ -460,14 +460,14 @@ class AccountingController extends Controller
             $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$created_at)->latest()->first();
             // dump('before_last_transaction: ', $before_last_transaction);
             if ($before_last_transaction !== null) {
-                $saldo = $before_last_transaction->saldo;
+                $saldo = (int)$before_last_transaction->saldo;
             }
 
             try {
                 if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - $accounting->jumlah;
+                    $saldo = $saldo - (int)$accounting->jumlah;
                 } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + $accounting->jumlah;
+                    $saldo = $saldo + (int)$accounting->jumlah;
                 }
             } catch (\Throwable $th) {
                 dump($accounting);
@@ -483,11 +483,11 @@ class AccountingController extends Controller
             // dd($last_transactions);
             foreach ($last_transactions as $last_transaction) {
                 if ($last_transaction->transaction_type === 'pengeluaran') {
-                    $saldo_next -= $last_transaction->jumlah;
+                    $saldo_next -= (int)$last_transaction->jumlah;
                 } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                    $saldo_next += $last_transaction->jumlah;
+                    $saldo_next += (int)$last_transaction->jumlah;
                 }
-                $last_transaction->saldo = $saldo_next;
+                $last_transaction->saldo = (string)$saldo_next;
                 $last_transaction->save();
             }
             $success_ .= '-jumlah saldo editted-';
@@ -496,13 +496,13 @@ class AccountingController extends Controller
             $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
             if ($last_transaction !== null) {
                 // dump(date('d-m-Y H:i:s', strtotime($last_transaction->created_at)) . " - $last_transaction->transaction_type: $last_transaction->jumlah, saldo: $last_transaction->saldo");
-                $saldo = $last_transaction->saldo; // -5.000.000
+                $saldo = (int)$last_transaction->saldo; // -5.000.000
             }
             try {
                 if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - $accounting->jumlah;
+                    $saldo = $saldo - (int)$accounting->jumlah;
                 } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + $accounting->jumlah;
+                    $saldo = $saldo + (int)$accounting->jumlah;
                 }
             } catch (\Throwable $th) {
                 dump("related to: " . User::find($accounting->related_user_id)->username . " - ID: $accounting->related_user_id, $accounting->related_desc - " . UserInstance::find($accounting->related_user_instance_id)->instance_type);
@@ -540,8 +540,8 @@ class AccountingController extends Controller
             'supplier_id'=>$transaction_name->supplier_id,
             'supplier_nama'=>$transaction_name->supplier_nama,
             'keterangan'=>null, // keterangan tambahan akan ditulis dalam tanda kurung
-            'jumlah'=>$accounting->jumlah,
-            'saldo'=>$saldo,
+            'jumlah'=>(string)$accounting->jumlah,
+            'saldo'=>(string)$saldo,
             'status'=>'read', // read or not read yet by other user
             'created_at'=>$created_at
         ]);
