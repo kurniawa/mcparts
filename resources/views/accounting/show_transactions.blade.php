@@ -393,7 +393,7 @@
         <div class="flex flex-col lg:flex-row lg:gap-2 mt-3">
             <div class="border rounded p-1">
                 <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
-                <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
+                <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" onsubmit="return set_scroll_here()" method="POST" class="mt-1 inline-block min-w-max">
                     @csrf
                     <table class="text-xs min-w-max" id="table_add_transactions">
                         <tr class="text-slate-600">
@@ -695,6 +695,24 @@
         $(`#${table_id}`).table2excel({
             filename:`${table_id}.xls`
         });
+    }
+
+    setTimeout(() => {
+        get_scroll();
+    }, 1000);
+
+    const get_scroll = () => {
+        const scrollValue = localStorage.getItem("scrollValue")
+        if (scrollValue !== null) {
+            window.scrollTo(0, scrollValue ? scrollValue : 0)
+        }
+        // console.log(scrollValue);
+    }
+
+    const set_scroll_here = () => {
+        // console.log('test scroll');
+        localStorage.setItem('scrollValue', window.scrollY)
+        return true;
     }
 </script>
 
