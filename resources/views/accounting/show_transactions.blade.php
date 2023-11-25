@@ -392,114 +392,121 @@
         @if ((int)$user_instance->user_id === $user->id)
         <div class="flex flex-col lg:flex-row lg:gap-2 mt-3">
             <div class="border rounded p-1">
-                <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
-                <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" onsubmit="return set_scroll_here()" method="POST" class="mt-1 inline-block min-w-max">
-                    @csrf
-                    <table class="text-xs min-w-max" id="table_add_transactions">
-                        <tr class="text-slate-600">
-                            <th>tanggal</th><th>kode</th><th>deskripsi/keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th>
-                            {{-- <th>saldo</th> --}}
-                        </tr>
-                        @for ($i = 0; $i < 7; $i++)
-                        <tr>
-                            <td>
-                                {{-- <input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"> --}}
-                                <div class="flex items-center">
-                                    <input type="text" name="day[]" id="day-{{ $i }}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
-                                    <span>-</span>
-                                    <input type="text" name="month[]" id="month-{{ $i }}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
-                                    <span>-</span>
-                                    <input type="text" name="year[]" id="year-{{ $i }}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
-                                </div>
-                            </td>
-                            <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ old('kode.' . $i) ? old('kode.' . $i) : $user_instance->kode }}"></td>
-                            <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
-                            <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
-                            <td>
-                                <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-unformatted')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
-                                <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted" value="{{ old('keluar.' . $i) }}">
-                            </td>
-                            <td>
-                                <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-{{ $i }}-unformatted')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
-                                <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted" value="{{ old('masuk.' . $i) }}">
-                                <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
-                            </td>
-                            <td>
-                                {{-- <input type="text" name="saldo[]" id="saldo-{{ $i }}" class="border p-1 text-xs w-36"> --}}
-                                {{-- <input type="hidden" name="kategori_type[]" id="new_transaction-kategori_type-{{ $i }}">
-                                <input type="hidden" name="kategori_level_one[]" id="new_transaction-kategori_level_one-{{ $i }}">
-                                <input type="hidden" name="kategori_level_two[]" id="new_transaction-kategori_level_two-{{ $i }}">
-                                <input type="hidden" name="related_user_id[]" id="new_transaction-related_user_id-{{ $i }}">
-                                <input type="hidden" name="pelanggan_nama[]" id="new_transaction-pelanggan_nama-{{ $i }}">
-                                <input type="hidden" name="pelanggan_id[]" id="new_transaction-pelanggan_id-{{ $i }}">
-                                <input type="hidden" name="related_desc[]" id="new_transaction-related_desc-{{ $i }}">
-                                <input type="hidden" name="related_user_instance_type[]" id="new_transaction-related_user_instance_type-{{ $i }}">
-                                <input type="hidden" name="related_user_instance_id[]" id="new_transaction-related_user_instance_id-{{ $i }}">
-                                <input type="hidden" name="related_user_instance_name[]" id="new_transaction-related_user_instance_name-{{ $i }}">
-                                <input type="hidden" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-{{ $i }}"> --}}
-                            </td>
-                            {{-- <td>
-                                <div>
-                                    <button type="button" id="toggle-opsi_relasi-{{ $i }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'opsi_relasi-{{ $i }}')">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                {{-- LOADING ANIMATION --}}
+                <div id="spinner" class="flex justify-center items-center">
+                    <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+                </div>
+                {{-- END - LOADING ANIMATION --}}
+                <div id="loading_to_hide">
+                    <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
+                    <form action="{{ route('accounting.store_transactions', $user_instance->id) }}" onsubmit="return set_scroll_here()" method="POST" class="mt-1 inline-block min-w-max">
+                        @csrf
+                        <table class="text-xs min-w-max" id="table_add_transactions">
+                            <tr class="text-slate-600">
+                                <th>tanggal</th><th>kode</th><th>deskripsi/keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th>
+                                {{-- <th>saldo</th> --}}
+                            </tr>
+                            @for ($i = 0; $i < 7; $i++)
+                            <tr>
+                                <td>
+                                    {{-- <input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"> --}}
+                                    <div class="flex items-center">
+                                        <input type="text" name="day[]" id="day-{{ $i }}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
+                                        <span>-</span>
+                                        <input type="text" name="month[]" id="month-{{ $i }}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
+                                        <span>-</span>
+                                        <input type="text" name="year[]" id="year-{{ $i }}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
+                                    </div>
+                                </td>
+                                <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ old('kode.' . $i) ? old('kode.' . $i) : $user_instance->kode }}"></td>
+                                <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
+                                <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
+                                <td>
+                                    <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-unformatted')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
+                                    <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted" value="{{ old('keluar.' . $i) }}">
+                                </td>
+                                <td>
+                                    <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-{{ $i }}-unformatted')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
+                                    <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted" value="{{ old('masuk.' . $i) }}">
+                                    <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
+                                </td>
+                                <td>
+                                    {{-- <input type="text" name="saldo[]" id="saldo-{{ $i }}" class="border p-1 text-xs w-36"> --}}
+                                    {{-- <input type="hidden" name="kategori_type[]" id="new_transaction-kategori_type-{{ $i }}">
+                                    <input type="hidden" name="kategori_level_one[]" id="new_transaction-kategori_level_one-{{ $i }}">
+                                    <input type="hidden" name="kategori_level_two[]" id="new_transaction-kategori_level_two-{{ $i }}">
+                                    <input type="hidden" name="related_user_id[]" id="new_transaction-related_user_id-{{ $i }}">
+                                    <input type="hidden" name="pelanggan_nama[]" id="new_transaction-pelanggan_nama-{{ $i }}">
+                                    <input type="hidden" name="pelanggan_id[]" id="new_transaction-pelanggan_id-{{ $i }}">
+                                    <input type="hidden" name="related_desc[]" id="new_transaction-related_desc-{{ $i }}">
+                                    <input type="hidden" name="related_user_instance_type[]" id="new_transaction-related_user_instance_type-{{ $i }}">
+                                    <input type="hidden" name="related_user_instance_id[]" id="new_transaction-related_user_instance_id-{{ $i }}">
+                                    <input type="hidden" name="related_user_instance_name[]" id="new_transaction-related_user_instance_name-{{ $i }}">
+                                    <input type="hidden" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-{{ $i }}"> --}}
+                                </td>
+                                {{-- <td>
+                                    <div>
+                                        <button type="button" id="toggle-opsi_relasi-{{ $i }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'opsi_relasi-{{ $i }}')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td> --}}
+                            </tr>
+                            {{-- <tr class="hidden" id="opsi_relasi-{{ $i }}">
+                                <td colspan="2">
+                                    <div class="text-slate-400">Related User:</div>
+                                    <select name="related_user_id[]" id="new_transaction-related_user_id-{{ $i }}" class="text-xs py-1 w-full">
+                                        <option value="">related user</option>
+                                        @foreach ($related_users as $related_user)
+                                        <option value="{{ $related_user->id }}">{{ $related_user->username }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="text-slate-400">Related Desc:</div>
+                                    <input type="text" name="related_desc[]" id="new_transaction-related_desc-{{ $i }}" class="border p-1 text-xs w-60" placeholder="keterangan u. related user">
+                                </td>
+                                <td>
+                                    <div class="text-slate-400">Pelanggan Terkait:</div>
+                                    <input type="text" name="pelanggan_nama[]" id="new_transaction-pelanggan_nama-{{ $i }}" class="border p-1 text-xs w-60" placeholder="nama pelanggan terkait">
+                                    <input type="hidden" name="pelanggan_id[]" id="new_transaction-pelanggan_id-{{ $i }}">
+                                </td>
+                                <td>
+                                    <div class="text-slate-400">(related user)Instance Type:</div>
+                                    <input type="text" name="related_user_instance_type[]" id="new_transaction-related_user_instance_type-{{ $i }}" class="border p-1 text-xs" placeholder="tipe instansi ...">
+                                    <input type="hidden" name="related_user_instance_id[]" id="new_transaction-related_user_instance_id-{{ $i }}">
+                                </td>
+                                <td>
+                                    <div class="text-slate-400">(related user)Instance Name:</div>
+                                    <input type="text" name="related_user_instance_name[]" id="new_transaction-related_user_instance_name-{{ $i }}" class="border p-1 text-xs" placeholder="nama instansi ...">
+                                </td>
+                                <td>
+                                    <div class="text-slate-400">(related user)Instance Branch:</div>
+                                    <input type="text" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-{{ $i }}" class="border p-1 text-xs" placeholder="cabang ...">
+                                </td>
+                            </tr> --}}
+                            @endfor
+                            <tr id="tr_add_transaction">
+                                <td>
+                                    <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                         </svg>
                                     </button>
-                                </div>
-                            </td> --}}
-                        </tr>
-                        {{-- <tr class="hidden" id="opsi_relasi-{{ $i }}">
-                            <td colspan="2">
-                                <div class="text-slate-400">Related User:</div>
-                                <select name="related_user_id[]" id="new_transaction-related_user_id-{{ $i }}" class="text-xs py-1 w-full">
-                                    <option value="">related user</option>
-                                    @foreach ($related_users as $related_user)
-                                    <option value="{{ $related_user->id }}">{{ $related_user->username }}</option>
-                                    @endforeach
-                                </select>
-                            </td>
-                            <td>
-                                <div class="text-slate-400">Related Desc:</div>
-                                <input type="text" name="related_desc[]" id="new_transaction-related_desc-{{ $i }}" class="border p-1 text-xs w-60" placeholder="keterangan u. related user">
-                            </td>
-                            <td>
-                                <div class="text-slate-400">Pelanggan Terkait:</div>
-                                <input type="text" name="pelanggan_nama[]" id="new_transaction-pelanggan_nama-{{ $i }}" class="border p-1 text-xs w-60" placeholder="nama pelanggan terkait">
-                                <input type="hidden" name="pelanggan_id[]" id="new_transaction-pelanggan_id-{{ $i }}">
-                            </td>
-                            <td>
-                                <div class="text-slate-400">(related user)Instance Type:</div>
-                                <input type="text" name="related_user_instance_type[]" id="new_transaction-related_user_instance_type-{{ $i }}" class="border p-1 text-xs" placeholder="tipe instansi ...">
-                                <input type="hidden" name="related_user_instance_id[]" id="new_transaction-related_user_instance_id-{{ $i }}">
-                            </td>
-                            <td>
-                                <div class="text-slate-400">(related user)Instance Name:</div>
-                                <input type="text" name="related_user_instance_name[]" id="new_transaction-related_user_instance_name-{{ $i }}" class="border p-1 text-xs" placeholder="nama instansi ...">
-                            </td>
-                            <td>
-                                <div class="text-slate-400">(related user)Instance Branch:</div>
-                                <input type="text" name="related_user_instance_branch[]" id="new_transaction-related_user_instance_branch-{{ $i }}" class="border p-1 text-xs" placeholder="cabang ...">
-                            </td>
-                        </tr> --}}
-                        @endfor
-                        <tr id="tr_add_transaction">
-                            <td>
-                                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
-                                </button>
-                                {{-- <input type="hidden" name="user_instance_id" value="{{ $user_instance->id }}"> --}}
-                            </td>
-                        </tr>
-                    </table>
-                    {{-- <div class="mt-3 text-xs border rounded p-1 inline-block border-yellow-500">
-                        <p>*) Keterangan Tambahan akan tertulis dalam tanda kurung pada ringkasan/laporan.</p>
-                    </div> --}}
-                    <div class="mt-3 text-center text-xs">
-                        <button type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2">CONFIRM</button>
-                    </div>
-                </form>
+                                    {{-- <input type="hidden" name="user_instance_id" value="{{ $user_instance->id }}"> --}}
+                                </td>
+                            </tr>
+                        </table>
+                        {{-- <div class="mt-3 text-xs border rounded p-1 inline-block border-yellow-500">
+                            <p>*) Keterangan Tambahan akan tertulis dalam tanda kurung pada ringkasan/laporan.</p>
+                        </div> --}}
+                        <div class="mt-3 text-center text-xs">
+                            <input id="loading_to_disable" type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2 hover:cursor-pointer" value="confirm" />
+                        </div>
+                    </form>
+                </div>
             </div>
             {{-- NOTIFIKASI --}}
             @if (Auth::user()->id === (int)$user_instance->user_id)
@@ -699,7 +706,19 @@
 
     setTimeout(() => {
         get_scroll();
+        $spinner = $('#spinner');
+        $spinner.hide();
     }, 1000);
+
+    const loading_animation = () => {
+        $loading_to_disable = $('#loading_to_disable')
+        $loading_to_disable.prop('disabled', true);
+        $loading_to_hide = $('#loading_to_hide');
+        $loading_to_hide.hide()
+        // console.log('loading_animation');
+        $spinner = $('#spinner');
+        $spinner.show();
+    }
 
     const get_scroll = () => {
         const scrollValue = localStorage.getItem("scrollValue")
@@ -711,9 +730,11 @@
 
     const set_scroll_here = () => {
         // console.log('test scroll');
+        loading_animation();
         localStorage.setItem('scrollValue', window.scrollY)
         return true;
     }
+
 </script>
 
 @endsection

@@ -394,7 +394,7 @@ class AccountingController extends Controller
                 'created_at'=>$created_at
             ]);
             sleep(1.5);
-            dump("$transaction_name->desc --> Rp " . number_format($jumlah,0,',','.') . ",- inputted");
+            // dump("$transaction_name->desc --> Rp " . number_format($jumlah,0,',','.') . ",- inputted");
         }
 
         $success_ .= '-transactions created-';
