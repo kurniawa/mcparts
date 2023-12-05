@@ -177,6 +177,12 @@
         </form>
     </div>
     {{-- END - ACCOUNTING --}}
+    <div>
+        <form action="{{ route('artisan.accounting_update_data_rupiah') }}" method="POST">
+            @csrf
+            <button type="submit" class="rounded bg-emerald-200 text-emerald-500 font-bold p-1">accounting_update_data_rupiah</button>
+        </form>
+    </div>
     <div class="h-16"></div>
   </main>
 </div>

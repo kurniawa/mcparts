@@ -68,6 +68,7 @@ Route::controller(SpkController::class)->group(function(){
     Route::post('/spks/{spk}/{spk_produk}/delete_item','delete_item')->name('spks.delete_item')->middleware('auth');
     Route::post('/spks/{spk}/{spk_produk}/edit_jumlah_deviasi','edit_jumlah_deviasi')->name('spks.edit_jumlah_deviasi')->middleware('auth');
     Route::post('/spks/{spk}/{spk_produk}/spk_produk_edit_keterangan','spk_produk_edit_keterangan')->name('spks.spk_produk_edit_keterangan')->middleware('auth');
+    Route::post('/spks/{spk}/{spk_produk_nota}/spk_produk_nota_edit_keterangan','spk_produk_nota_edit_keterangan')->name('spks.spk_produk_nota_edit_keterangan')->middleware('auth');
 });
 
 Route::controller(NotaController::class)->group(function(){
@@ -205,7 +206,7 @@ Route::controller(AccountingController::class)->group(function(){
 
 Route::controller(ArtisanController::class)->group(function(){
     Route::get('/artisan-command','index')->name('artisan.index')->middleware('auth');
-    Route::post('/artisan-command/accounting_update_data_rupiah','accounting_update_data_rupiah')->name('artisan.accounting_update_data_rupiah')->middleware('auth');
+    // Route::post('/artisan-command/accounting_update_data_rupiah','accounting_update_data_rupiah')->name('artisan.accounting_update_data_rupiah')->middleware('auth');
     // Route::post('/artisan-command/change-column-name','change_column_name')->name('artisan.change_column_name')->middleware('auth');
     // Route::post('/artisan-command/lower-case-role','lower_case_role')->name('artisan.lower_case_role')->middleware('auth');
     // Route::post('/artisan-command/create-spk-nota-relation','create_spk_nota_relation')->name('artisan.create_spk_nota_relation')->middleware('developer');
@@ -224,4 +225,5 @@ Route::controller(ArtisanController::class)->group(function(){
     // Route::post('/artisan-command/create_tables_for_accounting','create_tables_for_accounting')->name('artisan.create_tables_for_accounting')->middleware('developer');
     // Route::post('/artisan-command/create_table_for_transaction_names','create_table_for_transaction_names')->name('artisan.create_table_for_transaction_names')->middleware('developer');
     // Route::post('/artisan-command/filling_suppliers_dan_barangs','filling_suppliers_dan_barangs')->name('artisan.filling_suppliers_dan_barangs')->middleware('developer');
+    Route::post('/artisan-command/keterangan_untuk_spk_produk_nota','keterangan_untuk_spk_produk_nota')->name('artisan.keterangan_untuk_spk_produk_nota')->middleware('auth');
 });

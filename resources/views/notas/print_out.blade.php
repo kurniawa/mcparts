@@ -3,7 +3,7 @@
 
 <div class="no_print">
     <div class="flex mt-2 ml-2">
-        <button id="btn-asli+copy" onclick="toggle_light_instant('nota-all', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3">asli+copy</button>
+        {{-- <button id="btn-asli+copy" onclick="toggle_light_instant('nota-all', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3">asli+copy</button> --}}
         <button id="btn-asli" onclick="toggle_light_instant('nota-0', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3 ml-2">asli</button>
         <button id="btn-copy" onclick="toggle_light_instant('nota-1', [], ['bg-slate-200'], 'block')" class="rounded border border-slate-300 text-slate-500 font-semibold px-3 ml-2">copy</button>
     </div>
@@ -86,7 +86,16 @@
             @for ($i = 0; $i < count($spk_produk_notas); $i++)
             <tr class='tr-border-left-right font-1_1' style="font-size: 0.9rem">
                 <td class="toFormatNumber text-end pe-2">{{ $spk_produk_notas[$i]->jumlah }}</td>
-                <td class="ps-2 pe-2">{{ $spk_produk_notas[$i]->nama_nota }}</td>
+                <td class="ps-2 pe-2">
+                    <div>
+                        {{ $spk_produk_notas[$i]->nama_nota }}
+                    </div>
+                    @if ($spk_produk_notas[$i]->keterangan)
+                    <div class="text-xs text-slate-400 italic">
+                        {{ $spk_produk_notas[$i]->keterangan }}
+                    </div>
+                    @endif
+                </td>
                 <td class="ps-2 pe-2">
                     <div class="flex justify-between">
                         <span>Rp.</span>

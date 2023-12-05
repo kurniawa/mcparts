@@ -1313,4 +1313,16 @@ class ArtisanController extends Controller
         dump('data rupiah pada accounting diupdate.');
         // END - ACCOUNTING
     }
+
+    function keterangan_untuk_spk_produk_nota() {
+        $spk_produks = SpkProduk::all();
+        foreach ($spk_produks as $spk_produk) {
+            $spk_produk_notas = SpkProdukNota::where('spk_produk_id', $spk_produk->id)->get();
+            foreach ($spk_produk_notas as $spk_produk_nota) {
+                $spk_produk_nota->keterangan = $spk_produk->keterangan;
+                $spk_produk_nota->save();
+            }
+        }
+        return back()->with('success_', '-keterangan spk_produk_notas created-');
+    }
 }

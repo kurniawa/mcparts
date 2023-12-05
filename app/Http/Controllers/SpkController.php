@@ -680,4 +680,17 @@ class SpkController extends Controller
 
         return back()->with('success_', '-keterangan updated-');
     }
+
+    function spk_produk_nota_edit_keterangan(Spk $spk, SpkProdukNota $spk_produk_nota, Request $request) {
+        $post = $request->post();
+
+        // dump($post);
+        // dump($spk);
+        // dd($spk_produk_nota);
+
+        $spk_produk_nota->keterangan = $post['keterangan'];
+        $spk_produk_nota->save();
+
+        return back()->with('success_', '-keterangan updated-');
+    }
 }

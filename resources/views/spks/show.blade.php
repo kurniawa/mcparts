@@ -659,7 +659,16 @@
                             @foreach ($col_spk_produk_notas[$key_nota] as $key_spk_produk_nota => $spk_produk_nota)
                             <tr>
                                 <td><div class="text-center">{{ $spk_produk_nota->jumlah }}</div></td>
-                                <td onclick="toggle_element('spk_produk_nota_detail-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">{{ $spk_produk_nota->nama_nota }}</td>
+                                <td onclick="toggle_element('spk_produk_nota_detail-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
+                                    <div>
+                                        {{ $spk_produk_nota->nama_nota }}
+                                    </div>
+                                    @if ($spk_produk_nota->keterangan)
+                                    <div class="border text-slate-400 italic rounded">
+                                        {{ $spk_produk_nota->keterangan }}
+                                    </div>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="text-center" onclick="toggle_element('edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div>
                                     <div class="hidden text-center" id="edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
@@ -682,7 +691,7 @@
                             </tr>
                             {{-- SPK_PRODUK_NOTA_DETAIL --}}
                             <tr class="spk_produk_nota_detail-{{ $key_nota }} hidden" id="spk_produk_nota_detail-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
-                                <td colspan="3">
+                                <td colspan="4">
                                     <div class="flex">
                                         <div>
                                             <div class="border rounded border-orange-400 p-1 text-orange-400" onclick="toggle_element('spk_produk_nota-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
@@ -732,6 +741,18 @@
                                             </button>
                                         </form>
                                         {{-- END - FORM INPUT NOTA ITEM KE SJ --}}
+                                    </div>
+                                    <div>
+                                        <form action="{{ route('spks.spk_produk_nota_edit_keterangan', [$spk->id, $spk_produk_nota->id]) }}" method="POST" class="mt-2">
+                                            @csrf
+                                            <h5>Edit Keterangan:</h5>
+                                            <div>
+                                                <textarea name="keterangan" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400 w-full" placeholder="keterangan item...">{{ $spk_produk_nota->keterangan }}</textarea>
+                                                <div class="text-end my-1">
+                                                    <button type="submit" class="px-1 bg-emerald-200 text-emerald-500 rounded">confirm</button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

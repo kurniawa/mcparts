@@ -8,9 +8,9 @@
   <x-errors-any></x-errors-any>
   <x-validation-feedback></x-validation-feedback>
   <main class="text-xs m-5 p-3 bg-white shadow rounded">
-    <form action="{{ route('artisan.accounting_update_data_rupiah') }}" method="POST">
+    <form action="{{ route('artisan.keterangan_untuk_spk_produk_nota') }}" method="POST">
         @csrf
-        <button type="submit" class="rounded bg-emerald-200 text-emerald-500 font-bold p-1">accounting_update_data_rupiah</button>
+        <button type="submit" class="rounded bg-emerald-200 text-emerald-500 font-bold p-1">keterangan_untuk_spk_produk_nota</button>
     </form>
   </main>
 </div>
