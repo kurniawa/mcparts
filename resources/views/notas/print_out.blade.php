@@ -91,8 +91,8 @@
                         {{ $spk_produk_notas[$i]->nama_nota }}
                     </div>
                     @if ($spk_produk_notas[$i]->keterangan)
-                    <div class="text-xs text-slate-400 italic">
-                        {{ $spk_produk_notas[$i]->keterangan }}
+                    <div class="text-xs text-slate-500 font-semibold italic">
+                        ( {{ $spk_produk_notas[$i]->keterangan }} )
                     </div>
                     @endif
                 </td>
