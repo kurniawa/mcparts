@@ -221,8 +221,8 @@
             @foreach ($spks as $key => $spk)
             {{-- SPK --}}
             <div>
-                <div class="grid grid-cols-2 border-t pt-1">
-                    <div>
+                <div class="flex gap-2 border-t pt-1">
+                    <div class="grow">
                         <a href="{{ route('spks.show', $spk->id) }}" class="font-bold text-indigo-500" href="">{{ $spk->no_spk }}</a>
                         <div><a href="" class="text-indigo-800">{{ $nama_pelanggans[$key] }}</a></div>
                         <div>
@@ -233,7 +233,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-center">
+                    <div class="grow flex items-center">
                         <div class="flex">
                             @if ($spk->finished_at === null)
                             <div>
@@ -263,6 +263,13 @@
                             <span class="font-bold">--</span>
                             @endif
                         </div>
+                    </div>
+                    <div class="flex">
+                        @if ($spk::user($spk->created_by)->profile_picture)
+                            <div class="w-8 h-8 rounded-full overflow-hidden">
+                                <img class="w-full" src="{{ asset("storage/" . $spk::user($spk->created_by)->profile_picture) }}" alt="">
+                            </div>
+                        @endif
                     </div>
                 </div>
                 {{-- SPK Items --}}

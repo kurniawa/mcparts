@@ -97,6 +97,7 @@ class HomeController extends Controller
         // dd($spks);
 
         foreach ($spks as $spk) {
+            // dd($spk::user($spk->created_by));
             // SPK Items
             $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
             $col_spk_produks->push($spk_produks);

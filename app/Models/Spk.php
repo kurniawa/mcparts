@@ -259,4 +259,9 @@ class Spk extends Model
         $spk->jumlah_total = $jumlah_total;
         $spk->save();
     }
+
+    static function user($username) {
+        $user = User::where('username', $username)->first();
+        return $user;
+    }
 }
