@@ -64,7 +64,11 @@
                     <div>
                       <button type="button" class="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button" aria-expanded="false" aria-haspopup="true" onclick="toggleMenu('profile-menu', 'menu-close-layer')">
                         <span class="sr-only">Open user menu</span>
-                        <img class="h-8 w-8 rounded-full" src="{{ asset('images/srikandi-mascot.jpg') }}" alt="">
+                        @if (Auth::user()->profile_picture)
+                        <img class="h-8 w-8 rounded-full" src="{{ asset("storage/" . Auth::user()->profile_picture) }}" alt="Profile Picture">
+                        @else
+                        <img class="h-8 w-8 rounded-full" src="{{ asset('images/srikandi-mascot.jpg') }}" alt="Profile Picture">
+                        @endif
                       </button>
                     </div>
 

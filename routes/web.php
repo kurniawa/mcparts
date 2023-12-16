@@ -47,9 +47,11 @@ Route::controller(AuthController::class)->group(function(){
 
 Route::controller(UserController::class)->group(function(){
     Route::get('/user/profile','profile')->name('user.profile')->middleware('auth');
-    Route::post('/user/profile/update_nama','update_nama')->name('user.profile.update_nama')->middleware('auth');
-    Route::post('/user/profile/update_password','update_password')->name('user.profile.update_password')->middleware('auth');
-    Route::post('/user/profile/update_photo','update_photo')->name('user.profile.update_photo')->middleware('auth');
+    Route::post('/user/profile/{user}/update_nama','update_nama')->name('user.profile.update_nama')->middleware('auth');
+    Route::post('/user/profile/{user}/update_username','update_username')->name('user.profile.update_username')->middleware('auth');
+    Route::post('/user/profile/{user}/update_password','update_password')->name('user.profile.update_password')->middleware('auth');
+    Route::post('/user/profile/{user}/update_photo','update_photo')->name('user.profile.update_photo')->middleware('auth');
+    Route::post('/user/profile/{user}/delete_profile_picture','delete_profile_picture')->name('user.profile.delete_profile_picture')->middleware('auth');
 });
 
 Route::controller(SpkController::class)->group(function(){

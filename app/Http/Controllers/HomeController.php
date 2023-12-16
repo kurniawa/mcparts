@@ -13,6 +13,7 @@ use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
 use App\Models\Srjalan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -154,6 +155,7 @@ class HomeController extends Controller
             'col_spk_produk_nota_srjalans' => $col_spk_produk_nota_srjalans,
             'label_pelanggans' => $label_pelanggans,
             'label_produks' => $label_produks,
+            // 'user' => Auth::user(),
         ];
         // dump($user_role);
         // dd($spks[7]);
