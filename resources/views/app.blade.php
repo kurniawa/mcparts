@@ -221,7 +221,7 @@
             @foreach ($spks as $key => $spk)
             {{-- SPK --}}
             <div>
-                <div class="flex gap-2 border-t pt-1">
+                <div class="grid grid-cols-3 border-t pt-1">
                     <div class="grow">
                         <a href="{{ route('spks.show', $spk->id) }}" class="font-bold text-indigo-500" href="">{{ $spk->no_spk }}</a>
                         <div><a href="" class="text-indigo-800">{{ $nama_pelanggans[$key] }}</a></div>
@@ -233,7 +233,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="grow flex items-center">
+                    <div class="flex items-center">
                         <div class="flex">
                             @if ($spk->finished_at === null)
                             <div>
