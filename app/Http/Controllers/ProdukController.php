@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Photo;
 use App\Models\Produk;
 use App\Models\ProdukHarga;
+use App\Models\ProdukPhoto;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -121,6 +123,25 @@ class ProdukController extends Controller
 
         $produk_harga = ProdukHarga::where('produk_id', $produk->id)->where('status', 'DEFAULT')->latest()->first();
 
+        $produk_photo_default = ProdukPhoto::where('produk_id', $produk->id)->where('role', 'default')->first();
+        $produk_photo_subsidiary = ProdukPhoto::where('produk_id', $produk->id)->where('role', 'subsidiary')->get();
+
+        // dd($default_photo);
+
+        $default_photo = null;
+        $subsidiary_photos = [];
+
+        if ($produk_photo_default) {
+            $default_photo = Photo::find($produk_photo_default->photo_id);
+        }
+
+        if (count($produk_photo_subsidiary) > 0) {
+            foreach ($produk_photo_subsidiary as $produk_photo) {
+                $subsidiary_photo = Photo::find($produk_photo->photo_id);
+                $subsidiary_photos[] = $subsidiary_photo;
+            }
+        }
+
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'produks.index',
@@ -133,6 +154,10 @@ class ProdukController extends Controller
             'types' => Produk::get_types(),
             'tipe_packing' => Produk::get_tipe_packing(),
             'produk_harga' => $produk_harga,
+            'produk_photo_default' => $produk_photo_default,
+            'produk_photo_subsidiary' => $produk_photo_subsidiary,
+            'default_photo' => $default_photo,
+            'subsidiary_photos' => $subsidiary_photos,
         ];
 
         return view('produks.show', $data);

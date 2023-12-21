@@ -11,6 +11,7 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\ProdukPhotoController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\SrjalanController;
 use App\Http\Controllers\SupplierController;
@@ -146,6 +147,12 @@ Route::controller(ProdukController::class)->group(function(){
     Route::post('/produks/store','store')->name('produks.store');
     Route::post('/produks/{produk}/update','update')->name('produks.update');
     Route::post('/produks/{produk}/delete','delete')->name('produks.delete');
+});
+
+Route::controller(ProdukPhotoController::class)->group(function(){
+    Route::post('/produks/{produk}/store_photo','store_photo')->name('produks.store_photo');
+    Route::post('/produks/{produk}/{photo}/update_photo','update_photo')->name('produks.update_photo');
+    Route::post('/produks/{produk}/{produk_photo}/{photo}/delete_photo','delete_photo')->name('produks.delete_photo');
 });
 
 Route::controller(PenjualanController::class)->group(function(){
