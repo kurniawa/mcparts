@@ -23,12 +23,8 @@
                     </button>
                 </div>
                 @else
-                <div class="w-72 h-72 md:w-96 md:h-96">
-                    <div class="rounded-full overflow-hidden bg-orange-100 flex">
-                        <button type="button" href="https://www.flaticon.com/free-icons/superhero" title="superhero icons" target="_blank" rel="noopener noreferrer" onclick="showViewImage('default_image', 'close_layer')">
-                            <img class="object-cover" src="{{ asset('images/badger.png') }}" alt="Profile Picture">
-                        </button>
-                    </div>
+                <div class="w-72 h-72 md:w-96 md:h-96 rounded-lg overflow-hidden bg-white shadow drop-shadow p-2">
+                    <img class="object-cover" src="{{ asset('images/badger.png') }}" alt="Profile Picture">
                 </div>
                 @endif
             </div>
@@ -52,7 +48,7 @@
                     <div class="text-center">
                         <h3 class="text-lg font-bold">Tambah Foto Baru</h3>
                     </div>
-                    <form action="{{ route('produks.store_photo', $produk->id) }}" method="POST" class="mt-2" enctype="multipart/form-data">
+                    <form action="{{ route('produk_photos.store_photo', $produk->id) }}" method="POST" class="mt-2" enctype="multipart/form-data">
                         @csrf
                         <div class="flex justify-center">
                             <div class="w-5/6 h-auto">
@@ -212,13 +208,16 @@
     </div>
 
     {{-- VIEW IMAGE/PHOTO --}}
+    @if ($default_photo !== null)
     <div id="close_layer" class="absolute -top-28 right-0 -bottom-28 left-0 bg-slate-700 opacity-80 hidden" onclick="closeViewImage('default_image', 'close_layer')"></div>
     <div id="default_image" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden">
-        @if ($default_photo !== null)
-        <form action="{{ route('produks.update_photo', [$produk->id, $default_photo->id]) }}" method="POST" class="mt-3 text-center" enctype="multipart/form-data">
-        @else
-        <form action="{{ route('produks.store_photo', $produk->id) }}" method="POST" class="mt-3 text-center" enctype="multipart/form-data">
-        @endif
+        <div class="w-screen h-auto md:w-5/6 md:h-5/6 bg-white p-3 rounded-lg">
+            <img id="preview_photo" src={{ asset("storage/$default_photo->path") }} class="w-full">
+        </div>
+
+        {{-- <form action="{{ route('produks.update_photo', [$produk->id, $default_photo->id]) }}" method="POST" class="mt-3 text-center" enctype="multipart/form-data"> --}}
+        {{-- @else --}}
+        {{-- <form action="{{ route('produks.store_photo', $produk->id) }}" method="POST" class="mt-3 text-center" enctype="multipart/form-data">
             @csrf
             <div class="w-screen h-auto md:w-5/6 md:h-5/6 bg-white p-3 rounded-lg">
                 @if ($default_photo !== null)
@@ -228,7 +227,6 @@
                 @endif
                 <div class="mt-5">
                     <div>
-                        {{-- <div @click="$refs.choose_photo.click()">Upload Image</div> --}}
                         <input type="file" name="photo" value="photo" onchange="previewImage(this.files[0], 'preview_photo')">
                     </div>
                 </div>
@@ -251,25 +249,43 @@
                     </button>
                 </div>
             </div>
-        </form>
-        @if ($default_photo !== null)
-        <form action="{{ route('produks.delete_photo', [$produk->id, $produk_photo_default->id, $default_photo->id]) }}" onsubmit="return confirm('Yakin ingin menghapus foto ini?')" method="POST">
+        </form> --}}
+        {{-- <form action="{{ route('produks.delete_photo', [$produk->id, $produk_photo_default->id, $default_photo->id]) }}" onsubmit="return confirm('Yakin ingin menghapus foto ini?')" method="POST">
             @csrf
             <button type="submit" class="px-2 py-1 font-semibold text-xs bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700 focus:ring focus:ring-pink-300 rounded mt-1">Delete</button>
-        </form>
-        @endif
+        </form> --}}
+        <div class="flex gap-1 items-center">
+            <form action="{{ route('produk_photos.delete_photo', [$produk->id, $produk_photo_default->id, $default_photo->id]) }}" onsubmit="return confirm('Yakin ingin menghapus foto ini?')" method="POST">
+                @csrf
+                <button type="submit" class="px-2 py-1 font-semibold text-xs bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700 focus:ring focus:ring-pink-300 rounded mt-1 flex justify-center gap-1 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                    <span>Delete</span>
+                </button>
+            </form>
+            <form action="{{ route('produk_photos.jadikan_subsidiary', [$produk->id, $produk_photo_default->id, $default_photo->id]) }}" onsubmit="return confirm('Jadikan foto ini sebagai default?')" method="POST">
+                @csrf
+                <button type="submit" class="px-2 py-1 font-semibold text-xs bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 focus:ring focus:ring-emerald-300 rounded mt-1 flex justify-center gap-1 items-center">
+                    <span>Jadikan Default</span>
+                </button>
+            </form>
+        </div>
     </div>
+    @endif
 
     @foreach ($subsidiary_photos as $key => $sub_photo)
     <div id="close_layer-{{ $key }}" class="absolute -top-28 right-0 -bottom-28 left-0 bg-slate-700 opacity-80 hidden" onclick="closeViewImage('sub_image-{{ $key }}', 'close_layer-{{ $key }}')"></div>
     <div id="sub_image-{{ $key }}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden">
-        <form action="{{ route('produks.update_photo', [$produk->id, $sub_photo->id]) }}" method="POST" class="mt-3 text-center" enctype="multipart/form-data">
+        <div class="w-screen h-auto md:w-5/6 md:h-5/6 bg-white p-3 rounded-lg">
+            <img id="preview_photo-{{ $key }}" src={{ asset("storage/$sub_photo->path") }} class="w-full">
+        </div>
+        {{-- <form action="{{ route('produks.update_photo', [$produk->id, $produk_photo_subsidiary[$key]->id, $sub_photo->id]) }}" method="POST" class="mt-3 text-center" enctype="multipart/form-data">
             @csrf
             <div class="w-screen h-auto md:w-5/6 md:h-5/6 bg-white p-3 rounded-lg">
                 <img id="preview_photo-{{ $key }}" src={{ asset("storage/$sub_photo->path") }} class="w-full">
                 <div class="mt-5">
                     <div>
-                        {{-- <div @click="$refs.choose_photo.click()">Upload Image</div> --}}
                         <input type="file" name="photo" value="photo" onchange="previewImage(this.files[0], 'preview_photo-{{ $key }}')">
                     </div>
                 </div>
@@ -288,11 +304,24 @@
                     </button>
                 </div>
             </div>
-        </form>
-        <form action="{{ route('produks.delete_photo', [$produk->id, $produk_photo_subsidiary[$key]->id, $sub_photo->id]) }}" onsubmit="return confirm('Yakin ingin menghapus foto ini?')" method="POST">
-            @csrf
-            <button type="submit" class="px-2 py-1 font-semibold text-xs bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700 focus:ring focus:ring-pink-300 rounded mt-1">Delete</button>
-        </form>
+        </form> --}}
+        <div class="flex gap-1 items-center">
+            <form action="{{ route('produk_photos.delete_photo', [$produk->id, $produk_photo_subsidiary[$key]->id, $sub_photo->id]) }}" onsubmit="return confirm('Yakin ingin menghapus foto ini?')" method="POST">
+                @csrf
+                <button type="submit" class="px-2 py-1 font-semibold text-xs bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700 focus:ring focus:ring-pink-300 rounded mt-1 flex justify-center gap-1 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                    <span>Delete</span>
+                </button>
+            </form>
+            <form action="{{ route('produk_photos.jadikan_default', [$produk->id, $produk_photo_subsidiary[$key]->id, $sub_photo->id]) }}" onsubmit="return confirm('Jadikan foto ini sebagai default?')" method="POST">
+                @csrf
+                <button type="submit" class="px-2 py-1 font-semibold text-xs bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 focus:ring focus:ring-emerald-300 rounded mt-1 flex justify-center gap-1 items-center">
+                    <span>Jadikan Default</span>
+                </button>
+            </form>
+        </div>
     </div>
     @endforeach
     {{-- END - VIEW IMAGE/PHOTO --}}

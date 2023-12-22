@@ -53,7 +53,10 @@ class ProdukPhotoController extends Controller
         // dd($photo);
         // cek apakah ada produk yang menggunakan foto yang sama?
         $warnings_ = '';
+        $success_ = '';
         $other_produk_photos = ProdukPhoto::where('photo_id', $photo->id)->where('produk_id','!=',$produk->id)->get();
+
+        $is_photo_default = $produk_photo->role;
 
         if (count($other_produk_photos) === 0) {
             $produk_photo->delete();
@@ -65,9 +68,23 @@ class ProdukPhotoController extends Controller
             $warnings_ .= '-terdapat produk yang menggunakan foto yang sama, file foto tidak dihapus-';
         }
 
+
+        if ($is_photo_default === 'default') {
+            $produk_photo_aktual = ProdukPhoto::where('produk_id', $produk->id)->first();
+            if ($produk_photo_aktual !== null) {
+                $produk_photo_aktual->role = 'default';
+                $produk_photo_aktual->save();
+                $success_ .= '-another photo set to default-';
+            }
+        }
+
         $feedback = [
-            'warnings_' => $warnings_
+            'warnings_' => $warnings_,
+            'success_' => $success_
         ];
         return back()->with($feedback);
+    }
+
+    function jadikan_default(Produk $produk, ProdukPhoto $produk_photo, Photo $photo, Request $request) {
     }
 }

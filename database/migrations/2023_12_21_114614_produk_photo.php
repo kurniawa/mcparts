@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('produk_id')->constrained()->onDelete('cascade');
             $table->foreignId('photo_id')->constrained()->onDelete('cascade');
-            $table->string('status', 20)->default('sekunder');
+            $table->string('role', 20)->default('subsidiary'); // default or subsidiary
         });
     }
 
