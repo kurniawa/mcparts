@@ -150,11 +150,13 @@ Route::controller(ProdukController::class)->group(function(){
 });
 
 Route::controller(ProdukPhotoController::class)->group(function(){
+    Route::get('/produks/{produk}/add_photo','add_photo')->name('produk_photos.add_photo');
+    Route::post('/produks/{produk}/add_photo_from_other_product','add_photo_from_other_product')->name('produk_photos.add_photo_from_other_product');
     Route::post('/produks/{produk}/store_photo','store_photo')->name('produk_photos.store_photo');
     // Route::post('/produks/{produk}/{photo}/update_photo','update_photo')->name('produks.update_photo');
     Route::post('/produks/{produk}/{produk_photo}/{photo}/delete_photo','delete_photo')->name('produk_photos.delete_photo');
-    Route::post('/produks/{produk}/{produk_photo}/{photo}/jadikan_default','jadikan_default')->name('produk_photos.jadikan_default');
-    Route::post('/produks/{produk}/{produk_photo}/{photo}/jadikan_subsidiary','jadikan_subsidiary')->name('produk_photos.jadikan_subsidiary');
+    Route::post('/produks/{produk}/{produk_photo}/jadikan_default','jadikan_default')->name('produk_photos.jadikan_default');
+    Route::post('/produks/{produk}/{produk_photo}/jadikan_subsidiary','jadikan_subsidiary')->name('produk_photos.jadikan_subsidiary');
 });
 
 Route::controller(PenjualanController::class)->group(function(){
