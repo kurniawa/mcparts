@@ -117,10 +117,14 @@ function set_time_range(timerange) {
         from_day = 1;
         from_month = date.getMonth();
         from_year = date.getFullYear();
-        to_month = date.getMonth();
+        to_month = date.getMonth() + 1;
         to_year = date.getFullYear();
         to_day = new Date(to_year, to_month, 0).getDate();
-        console.log(to_day);
+        if (from_month === 0) {
+            from_month = 12;
+            from_year--;
+        }
+        // console.log(from_month, to_month);
     } else if (timerange === "tahun_ini") {
         const date = new Date();
         from_day = 1;
