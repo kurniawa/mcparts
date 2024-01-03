@@ -1325,4 +1325,14 @@ class ArtisanController extends Controller
         }
         return back()->with('success_', '-keterangan spk_produk_notas created-');
     }
+
+    function data_pelanggan_id_pada_spk_produk_nota() {
+        $spk_produk_notas = SpkProdukNota::all();
+        foreach ($spk_produk_notas as $spk_produk_nota) {
+            $spk = Spk::find($spk_produk_nota->spk_id);
+            $spk_produk_nota->pelanggan_id = $spk->pelanggan_id;
+            $spk_produk_nota->save();
+        }
+        return back()->with('success_', '-data pelanggan_id pada table spk_produk_notas berhasil ditambahkan-');
+    }
 }

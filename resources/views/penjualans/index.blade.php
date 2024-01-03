@@ -9,11 +9,11 @@
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
-        <div class="flex">
+        {{-- <div class="flex">
             <button id="btn_filter" class="border rounded border-yellow-300 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content',[],['bg-yellow-200'], 'block')">Filter</button>
-        </div>
+        </div> --}}
         {{-- SEARCH / FILTER --}}
-        <div class="mt-1 hidden" id="filter-content">
+        <div class="mt-1 flex justify-center" id="filter-content">
             <form action="" method="GET" class="rounded p-2 bg-white shadow drop-shadow inline-block">
                 <div class="ml-1 mt-2 flex">
                     <div>
@@ -26,6 +26,8 @@
                     <div class="flex items-center ml-2">
                         <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1">now</label></div>
                         <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
+                        <div class="ml-3"><input type="radio" name="timerange" value="triwulan" id="triwulan" onclick="set_time_range('triwulan')"><label for="triwulan" class="ml-1">triwulan</label></div>
+                        <div class="ml-3"><input type="radio" name="timerange" value="triwulan_lalu" id="triwulan_lalu" onclick="set_time_range('triwulan_lalu')"><label for="triwulan_lalu" class="ml-1">triwulan lalu</label></div>
                         {{-- <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1">30d</label></div> --}}
                         <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1">bulan ini</label></div>
                         <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
@@ -94,7 +96,35 @@
             </form>
         </div>
         {{-- END - SEARCH / FILTER --}}
-        <div class="flex mt-2 justify-center">
+        {{-- ITEM YANG BIASA DIAMBIL PELANGGAN --}}
+        @if ($item_pelanggans)
+        <div class="mt-2">
+            <div class="flex justify-center">
+                <div class="bg-white rounded shadow drop-shadow p-1">
+                    <h3 class="font-semibold ml-2">Barang Yang Pernah Di Order</h3>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <table class="table-nice mt-1">
+                    <tr><th>Tanggal</th><th>Nota</th><th>Nama Item</th><th>Jml.</th><th>Harga</th><th>Total</th></tr>
+                    @foreach ($item_pelanggans as $items)
+                    @foreach ($items as $item)
+                    <tr>
+                        <td>{{ date('d-m-Y', strtotime($item->created_at)) }}</td>
+                        <td>N-{{ $item->nota_id }}</td>
+                        <td>{{ $item->nama_nota }}</td>
+                        <td>{{ $item->jumlah }}</td>
+                        <td>{{ number_format($item->harga,0,',','.') }}</td>
+                        <td>{{ number_format($item->harga_t,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                    @endforeach
+                </table>
+            </div>
+        </div>
+        @endif
+        {{-- END - ITEM YANG BIASA DIAMBIL PELANGGAN --}}
+        <div class="flex flex-col md:flex-row gap-2 mt-2 justify-center">
             {{-- TOTAL_PENJUALAN_PELANGGAN --}}
             <div>
                 <div class="flex items-center">
@@ -127,7 +157,7 @@
                 </table>
             </div>
             {{-- END - TOTAL_PENJUALAN_PELANGGAN --}}
-            <div class="ml-2">
+            <div>
                 {{-- NOTA_SUBTOTAL --}}
                 <div>
                     <div class="flex items-center">

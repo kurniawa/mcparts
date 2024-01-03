@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use App\Models\Nota;
+use App\Models\Pelanggan;
 use App\Models\SpkProdukNota;
 use Illuminate\Http\Request;
 
@@ -16,6 +17,7 @@ class PenjualanController extends Controller
 
         $notas = collect();
 
+        $pelanggan_id = null;
         if (count($get) > 0) {
             // dd($get);
             $date_start = null;
@@ -28,8 +30,17 @@ class PenjualanController extends Controller
 
             if ($get['pelanggan_nama'] && $date_start && $date_end) {
                 $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->get();
+                $pelanggan = Pelanggan::where('nama', $get['pelanggan_nama'])->first();
+                $pelanggan_id = $pelanggan->id;
             } elseif ($get['pelanggan_nama'] && !$date_start && !$date_end) {
-                $notas = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->get();
+                $notas = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('id')->get();
+                $notas_orderby_date = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('created_at')->get();
+                $date_start = $notas_orderby_date[0]->created_at;
+                $date_start = date('Y-m-d', strtotime($date_start));
+                $date_end = $notas_orderby_date[count($notas_orderby_date) - 1]->created_at;
+                $date_end = date('Y-m-d', strtotime($date_end)) . " 23:59:59";
+                $pelanggan = Pelanggan::where('nama', $get['pelanggan_nama'])->first();
+                $pelanggan_id = $pelanggan->id;
             } elseif (!$get['pelanggan_nama'] && $date_start && $date_end) {
                 $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->get();
             } else {
@@ -43,10 +54,12 @@ class PenjualanController extends Controller
 
         // dump($notas);
         // dd($notas->groupBy('pelanggan_nama'));
+        // dd($date_start, $date_end);
         $notas_grouped_pelanggan = $notas->groupBy('pelanggan_nama');
         $total_penjualan_pelanggan_all = collect();
         $nota_subtotal_all = collect();
         $nota_detail_items_all = collect();
+        $spk_produk_nota_pelanggans = collect();
         $grand_total = 0;
         $key_class = 0;
         foreach ($notas_grouped_pelanggan as $notas_grouped) {
@@ -94,6 +107,10 @@ class PenjualanController extends Controller
                         'class' => $class,
                     ]);
 
+                    if ($pelanggan_id) {
+                        $spk_produk_nota_pelanggans->push($spk_produk_nota);
+                    }
+
                 }
             }
             $total_penjualan_pelanggan_all->push([
@@ -102,6 +119,14 @@ class PenjualanController extends Controller
             ]);
             $grand_total += $total_penjualan;
         }
+
+        // DATA ITEM YANG BIASA DIBELI OLEH PELANGGAN
+        $item_pelanggans = null;
+        if ($pelanggan_id) {
+            $item_pelanggans = $spk_produk_nota_pelanggans->groupBy('nama_nota');
+        }
+        // END - DATA ITEM YANG BIASA DIBELI OLEH PELANGGAN
+        // dd($item_pelanggans);
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'penjualans.index',
@@ -110,6 +135,7 @@ class PenjualanController extends Controller
             'nota_subtotal_all' => $nota_subtotal_all,
             'nota_detail_items_all' => $nota_detail_items_all,
             'grand_total' => $grand_total,
+            'item_pelanggans' => $item_pelanggans,
         ];
         // dd($nota_detail_items_all);
         // dd($data);
