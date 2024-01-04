@@ -101,7 +101,7 @@
         <div class="mt-2">
             <div class="flex justify-center">
                 <div class="bg-white rounded shadow drop-shadow p-1">
-                    <h3 class="font-semibold ml-2">Barang Yang Pernah Di Order</h3>
+                    <h3 class="font-semibold ml-2">Barang Yang Pernah Di Order Pada Rentang Waktu Terpilih</h3>
                 </div>
             </div>
             <div class="flex justify-center">

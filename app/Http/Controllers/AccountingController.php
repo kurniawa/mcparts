@@ -919,19 +919,34 @@ class AccountingController extends Controller
         $balance_total = $masuk_total - $keluar_total;
 
         $accountings_grouped = $accountings->groupBy('user_instance_id');
-        $keluar = $masuk = $balance = array();
+        $keluar = $masuk = $balance = $saldo_awals = $diff = array();
 
-        foreach ($accountings_grouped as $key_acconting_grouped => $accounting_grouped) {
-            $keluar[$key_acconting_grouped] = 0;
-            $masuk[$key_acconting_grouped] = 0;
-            foreach ($accounting_grouped as $accounting) {
+        // dd($accountings_grouped);
+        $i_accounting_grouped = 0;
+        foreach ($accountings_grouped as $key_accounting_grouped => $accounting_grouped) {
+
+            $keluar[$key_accounting_grouped] = 0;
+            $masuk[$key_accounting_grouped] = 0;
+            foreach ($accounting_grouped as $key_accounting => $accounting) {
+                if ($key_accounting == 0) {
+                    $accounting_awal = Accounting::where('user_instance_id', $accounting->user_instance_id)->where('created_at', '<', $from)->latest()->first();
+                    if ($accounting_awal) {
+                        $saldo_awals[$key_accounting_grouped] = $accounting_awal->saldo;
+                    } else {
+                        $saldo_awals[$key_accounting_grouped] = 0;
+                    }
+                }
                 if ($accounting->transaction_type === 'pengeluaran') {
-                    $keluar[$key_acconting_grouped] += $accounting->jumlah;
+                    $keluar[$key_accounting_grouped] += $accounting->jumlah;
                 } elseif ($accounting->transaction_type === 'pemasukan') {
-                    $masuk[$key_acconting_grouped] += $accounting->jumlah;
+                    $masuk[$key_accounting_grouped] += $accounting->jumlah;
                 }
             }
-            $balance[$key_acconting_grouped] = $masuk[$key_acconting_grouped] - $keluar[$key_acconting_grouped];
+            $diff[$key_accounting_grouped] = $masuk[$key_accounting_grouped] - $keluar[$key_accounting_grouped];
+            // dd($saldo_awals[$key_accounting_grouped]);
+            // dd($diff[$key_accounting_grouped]);
+            $balance[$key_accounting_grouped] = $diff[$key_accounting_grouped] + $saldo_awals[$key_accounting_grouped];
+            // $i_accounting_grouped++;
         }
 
         $user = Auth::user();
@@ -944,7 +959,7 @@ class AccountingController extends Controller
         // $transaction_names = TransactionName::all();
 
         // $notifications = Accounting::where('related_user_instance_id', $user_instance->id)->latest()->limit(100)->get();
-
+        // dd($saldo_awals);
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.show_transaction',
@@ -958,11 +973,12 @@ class AccountingController extends Controller
             'keluar_total' => $keluar_total,
             'masuk_total' => $masuk_total,
             'related_users' => $related_users,
-            // 'saldo_awal' => $saldo_awal,
+            'saldo_awals' => $saldo_awals,
             'balance_total' => $balance_total,
             'from' => $from,
             'keluar' => $keluar,
             'masuk' => $masuk,
+            'diff' => $diff,
             'balance' => $balance,
             // 'user_instance' => $user_instance,
             'label_deskripsi' => $label_deskripsi,

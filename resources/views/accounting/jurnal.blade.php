@@ -121,21 +121,21 @@
                     <th>
                         <div class="flex justify-between bg-pink-300">
                             <span>Rp</span>
-                            <span>{{ number_format($keluar_total,0,',','.') }}</span>
+                            <span>{{ number_format($keluar_total / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
                     <th>
                         <div class="flex justify-between bg-emerald-300">
                             <span>Rp</span>
-                            <span>{{ number_format($masuk_total,0,',','.') }}</span>
+                            <span>{{ number_format($masuk_total / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
                     <th>
                         <div class="flex justify-between bg-yellow-300">
                             <span>Rp</span>
-                            <span>{{ number_format($balance_total,0,',','.') }}</span>
+                            <span>{{ number_format($balance_total / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
@@ -166,21 +166,35 @@
                     <td>
                         <div class="flex justify-between font-semibold text-pink-500">
                             <span>Rp</span>
-                            <span>{{ number_format($keluar[$key_accountings],0,',','.') }}</span>
+                            <span>{{ number_format($keluar[$key_accountings] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
                     <td>
                         <div class="flex justify-between font-semibold text-emerald-500">
                             <span>Rp</span>
-                            <span>{{ number_format($masuk[$key_accountings],0,',','.') }}</span>
+                            <span>{{ number_format($masuk[$key_accountings] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
                     <td>
                         <div class="flex justify-between font-semibold text-violet-500">
                             <span>Rp</span>
-                            <span>{{ number_format($balance[$key_accountings],0,',','.') }}</span>
+                            <span>{{ number_format($balance[$key_accountings] / 100,2,',','.') }}</span>
+                            <span> ,-</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td><span class="text-orange-400 font-bold">SALDO AWAL</span></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <div class="flex justify-between text-orange-400 font-bold">
+                            <span>Rp</span>
+                            <span>{{ number_format($saldo_awals[$key_accountings] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
@@ -198,7 +212,7 @@
                         @if ($accounting->transaction_type === 'pengeluaran')
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->jumlah,0,',','.') }} ,-</span>
+                            <span>{{ number_format($accounting->jumlah / 100,2,',','.') }} ,-</span>
                         </div>
                         @endif
                     </td>
@@ -206,7 +220,7 @@
                         @if ($accounting->transaction_type === 'pemasukan')
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->jumlah,0,',','.') }} ,-</span>
+                            <span>{{ number_format($accounting->jumlah / 100,2,',','.') }} ,-</span>
                         </div>
                         @endif
                     </td>
@@ -275,6 +289,14 @@
                     <td>{{ $masuk[$key_accountings] }}</td>
                     <td>{{ $balance[$key_accountings] }}</td>
                 </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>SALDO AWAL</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{ $saldo_awals[$key_accountings] }}</td>
+                </tr>
                 @endif
                 <tr>
                     <td>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
@@ -286,12 +308,12 @@
                     @endif
                     <td>
                         @if ($accounting->transaction_type === 'pengeluaran')
-                        {{ $accounting->jumlah }}
+                        {{ (float)($accounting->jumlah / 100) }}
                         @endif
                     </td>
                     <td>
                         @if ($accounting->transaction_type === 'pemasukan')
-                        {{ $accounting->jumlah }}
+                        {{ (float)($accounting->jumlah / 100) }}
                         @endif
                     </td>
                 </tr>

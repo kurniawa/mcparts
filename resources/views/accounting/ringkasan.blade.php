@@ -112,21 +112,21 @@
                     <th>
                         <div class="flex justify-between bg-pink-300">
                             <span>Rp</span>
-                            <span>{{ number_format($keluar_total,0,',','.') }}</span>
+                            <span>{{ number_format($keluar_total / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
                     <th>
                         <div class="flex justify-between bg-emerald-300">
                             <span>Rp</span>
-                            <span>{{ number_format($masuk_total,0,',','.') }}</span>
+                            <span>{{ number_format($masuk_total / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
                     <th>
                         <div class="flex justify-between bg-yellow-300">
                             <span>Rp</span>
-                            <span>{{ number_format(($masuk_total - $keluar_total),0,',','.') }}</span>
+                            <span>{{ number_format(($masuk_total - $keluar_total) / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
@@ -164,7 +164,7 @@
                     <td>
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($kategori_level_two['jumlah'],0,',','.') }}</span>
+                            <span>{{ number_format($kategori_level_two['jumlah'] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
@@ -172,7 +172,7 @@
                     <td>
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($kategori_level_two['jumlah'],0,',','.') }}</span>
+                            <span>{{ number_format($kategori_level_two['jumlah'] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
@@ -187,7 +187,7 @@
                     <td>
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($kategori_level_one['jumlah'],0,',','.') }}</span>
+                            <span>{{ number_format($kategori_level_one['jumlah'] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
@@ -195,7 +195,7 @@
                     <td>
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($kategori_level_one['jumlah'],0,',','.') }}</span>
+                            <span>{{ number_format($kategori_level_one['jumlah'] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
@@ -237,9 +237,9 @@
                     <td>{{ $kategori_level_two['name'] }}</td>
                     @if ($ringkasan['type'] === 'UANG MASUK')
                     <td></td>
-                    <td>{{ $kategori_level_two['jumlah'] }}</td>
+                    <td>{{ (float)($kategori_level_two['jumlah'] / 100) }}</td>
                     @elseif ($ringkasan['type'] === 'UANG KELUAR')
-                    <td>{{ $kategori_level_two['jumlah'] }}</td>
+                    <td>{{ (float)($kategori_level_two['jumlah'] / 100) }}</td>
                     @endif
                 </tr>
                 @endforeach
@@ -248,9 +248,9 @@
                     <td>{{ $kategori_level_one['name'] }}</td>
                     @if ($ringkasan['type'] === 'UANG MASUK')
                     <td></td>
-                    <td>{{ $kategori_level_one['jumlah'] }}</td>
+                    <td>{{ (float)($kategori_level_one['jumlah'] / 100) }}</td>
                     @elseif ($ringkasan['type'] === 'UANG KELUAR')
-                    <td>{{ $kategori_level_one['jumlah'] }}</td>
+                    <td>{{ (float)($kategori_level_one['jumlah'] / 100) }}</td>
                     @endif
                 </tr>
                 @endif
