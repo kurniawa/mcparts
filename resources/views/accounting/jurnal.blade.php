@@ -133,14 +133,21 @@
                         </div>
                     </th>
                     <th>
-                        <div class="flex justify-between bg-yellow-300">
+                        <div class="flex justify-between bg-violet-300">
                             <span>Rp</span>
                             <span>{{ number_format($balance_total / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </th>
+                    <th>
+                        <div class="flex justify-between bg-yellow-300">
+                            <span>Rp</span>
+                            <span>{{ number_format($diff_total / 100,2,',','.') }}</span>
+                            <span> ,-</span>
+                        </div>
+                    </th>
                 </tr>
-                <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th></tr>
+                <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th><th>DIFF</th></tr>
 
                 {{-- <tr>
                     <td></td>
@@ -181,6 +188,13 @@
                         <div class="flex justify-between font-semibold text-violet-500">
                             <span>Rp</span>
                             <span>{{ number_format($balance[$key_accountings] / 100,2,',','.') }}</span>
+                            <span> ,-</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex justify-between font-semibold text-red-500">
+                            <span>Rp</span>
+                            <span>{{ number_format($diff[$key_accountings] / 100,2,',','.') }}</span>
                             <span> ,-</span>
                         </div>
                     </td>
@@ -279,7 +293,7 @@
                     <th>{{ $masuk_total }}</th>
                     <th>{{ $balance_total }}</th>
                 </tr>
-                <tr><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th></tr>
+                <tr><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th><th>DIFF</th></tr>
                 @foreach ($accountings->groupBy('user_instance_id') as $key_accountings => $accountings_grouped)
                 @foreach ($accountings_grouped as $key_accounting => $accounting)
                 @if ($key_accounting === 0)
@@ -288,6 +302,7 @@
                     <td>{{ $keluar[$key_accountings] }}</td>
                     <td>{{ $masuk[$key_accountings] }}</td>
                     <td>{{ $balance[$key_accountings] }}</td>
+                    <td>{{ $diff[$key_accountings] }}</td>
                 </tr>
                 <tr>
                     <td></td>

@@ -908,6 +908,7 @@ class AccountingController extends Controller
         // dump($accountings);
         $keluar_total = 0;
         $masuk_total = 0;
+        $balance_total = 0;
 
         foreach ($accountings as $accounting) {
             if ($accounting->transaction_type === 'pengeluaran') {
@@ -916,7 +917,7 @@ class AccountingController extends Controller
                 $masuk_total += $accounting->jumlah;
             }
         }
-        $balance_total = $masuk_total - $keluar_total;
+        $diff_total = $masuk_total - $keluar_total;
 
         $accountings_grouped = $accountings->groupBy('user_instance_id');
         $keluar = $masuk = $balance = $saldo_awals = $diff = array();
@@ -946,6 +947,7 @@ class AccountingController extends Controller
             // dd($saldo_awals[$key_accounting_grouped]);
             // dd($diff[$key_accounting_grouped]);
             $balance[$key_accounting_grouped] = $diff[$key_accounting_grouped] + $saldo_awals[$key_accounting_grouped];
+            $balance_total += $balance[$key_accounting_grouped];
             // $i_accounting_grouped++;
         }
 
@@ -975,6 +977,7 @@ class AccountingController extends Controller
             'related_users' => $related_users,
             'saldo_awals' => $saldo_awals,
             'balance_total' => $balance_total,
+            'diff_total' => $diff_total,
             'from' => $from,
             'keluar' => $keluar,
             'masuk' => $masuk,
