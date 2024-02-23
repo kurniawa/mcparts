@@ -232,14 +232,22 @@ class AccountingController extends Controller
             $keluar = htmlspecialchars(trim($post['keluar'][$i]));
             $masuk = htmlspecialchars(trim($post['masuk'][$i]));
 
-            dump($keluar);
-            dump($masuk);
+            // dump($keluar);
+            // dump($masuk);
             // dump(is_nan($keluar));
             // dump(is_nan($masuk));
-            dump(is_numeric($keluar));
-            dd(is_numeric($masuk));
+            // dump(is_numeric($keluar));
+            // dd(is_numeric($masuk));
 
-            if ($created_at !== null && $post['transaction_desc'][$i] !== null && ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null) ) {
+            if (!is_numeric($keluar)) {
+                $keluar = null;
+            }
+
+            if (!is_numeric($masuk)) {
+                $masuk = null;
+            }
+
+            if ($created_at !== null && $post['transaction_desc'][$i] !== null && ($keluar !== null || $masuk !== null) ) {
                 // dd($post['transaction_desc'][$i]);
                 $year_inputted = (int)date('Y', strtotime($created_at));
                 $year_now = (int)date('Y');
@@ -272,12 +280,12 @@ class AccountingController extends Controller
                     $request->validate(['error'=>'required'],['error.required'=>"transaction_name[$i]"]);
                 }
                 // dump($transaction_name);
-                // dd($post['masuk'][$i]);
-                if ($transaction_name->kategori_type === 'UANG MASUK' && $post['masuk'][$i] === null) {
+                // dd($masuk);
+                if ($transaction_name->kategori_type === 'UANG MASUK' && $masuk === null) {
                     // dump("index: $i - kategori_type = 'UANG MASUK' but post[masuk] = null?");
                     // dd($post);
                     $request->validate(['error'=>'required'],['error.required'=>"index: $i - kategori_type = 'UANG MASUK' but post[masuk] = null?"]);
-                } elseif ($transaction_name->kategori_type === 'UANG KELUAR' && $post['keluar'][$i] === null) {
+                } elseif ($transaction_name->kategori_type === 'UANG KELUAR' && $keluar === null) {
                     // dump("index: $i - kategori_type = 'UANG KELUAR' but post[keluar] = null?");
                     // dd($post);
                     $request->validate(['error'=>'required'],['error.required'=>"index: $i - kategori_type = 'UANG KELUAR' but post[keluar] = null?"]);
@@ -287,18 +295,18 @@ class AccountingController extends Controller
                 if ($i === 0) {
                     if ($created_at === null && $post['transaction_desc'][$i] !== null) {
                         // dd('created_at: ', $created_at);
-                        // dump('keluar: ', $post['keluar'][$i]);
-                        // dd('masuk: ', $post['masuk'][$i]);
+                        // dump('keluar: ', $keluar);
+                        // dd('masuk: ', $masuk);
                         $request->validate(['error'=>'required'],['error.required'=>"created_at[$i]: " . $created_at]);
                     } elseif ($created_at !== null && $post['transaction_desc'][$i] === null) {
                         // dd('transaction_desc: ', $post['transaction_desc'][$i]);
                         $request->validate(['error'=>'required'],['error.required'=>"transaction_desc[$i]: " . $post['transaction_desc'][$i]]);
-                    } elseif ($post['keluar'][$i] === null && $post['masuk'][$i] === null) {
+                    } elseif ($keluar === null && $masuk === null) {
                         $request->validate(['error'=>'required'],['error.required'=>"jumlah keluar / masuk ?? [$i]"]);
                     }
                 } else {
                     $working_index = $i;
-                    if ($post['transaction_desc'][$i] !== null || ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null)) {
+                    if ($post['transaction_desc'][$i] !== null || ($keluar !== null || $masuk !== null)) {
                         $warnings_ .= "-mulai dari input ke-[$i] tidak diproses (data tidak lengkap)-";
                     }
                     break;
@@ -318,10 +326,10 @@ class AccountingController extends Controller
 
             $jumlah = null;
             $transaction_type = 'pengeluaran';
-            if ($post['keluar'][$i] !== null) {
-                $jumlah = (float)$post['keluar'][$i] * 100;
-            } elseif ($post['masuk'][$i] !== null) {
-                $jumlah = (float)$post['masuk'][$i] * 100;
+            if ($keluar !== null) {
+                $jumlah = (float)$keluar * 100;
+            } elseif ($masuk !== null) {
+                $jumlah = (float)$masuk * 100;
                 $transaction_type = 'pemasukan';
             }
 
@@ -343,9 +351,9 @@ class AccountingController extends Controller
                 }
 
                 if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - (float)$post['keluar'][$i] * 100;
+                    $saldo = $saldo - (float)$keluar * 100;
                 } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + (float)$post['masuk'][$i] * 100;
+                    $saldo = $saldo + (float)$masuk * 100;
                 }
 
                 $saldo_next = $saldo;
@@ -366,9 +374,9 @@ class AccountingController extends Controller
                     $saldo = $last_transaction->saldo;
                 }
                 if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $saldo = $saldo - (float)$post['keluar'][$i] * 100;
+                    $saldo = $saldo - (float)$keluar * 100;
                 } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $saldo = $saldo + (float)$post['masuk'][$i] * 100;
+                    $saldo = $saldo + (float)$masuk * 100;
                 }
             }
 
@@ -647,10 +655,22 @@ class AccountingController extends Controller
         }
         $jumlah = null;
         $transaction_type = 'pengeluaran';
-        if ($post['keluar'] !== null) {
-            $jumlah = (float)$post['keluar'] * 100;
-        } elseif ($post['masuk'] !== null) {
-            $jumlah = (float)$post['masuk'] * 100;
+
+        $keluar = htmlspecialchars(trim($post['keluar']));
+        $masuk = htmlspecialchars(trim($post['masuk']));
+
+        if (!is_numeric($keluar)) {
+            $keluar = null;
+        }
+
+        if (!is_numeric($masuk)) {
+            $masuk = null;
+        }
+
+        if ($keluar !== null) {
+            $jumlah = (float)$keluar * 100;
+        } elseif ($masuk !== null) {
+            $jumlah = (float)$masuk * 100;
             $transaction_type = 'pemasukan';
         }
 
