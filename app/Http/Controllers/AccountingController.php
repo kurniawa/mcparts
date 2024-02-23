@@ -197,6 +197,7 @@ class AccountingController extends Controller
 
     function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
+        // dd($post);
         // dump($user_instance);
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
@@ -228,6 +229,15 @@ class AccountingController extends Controller
             // dump($post['keluar'][$i]);
             // dump("post['masuk'][i] : ");
             // dd($post['masuk'][$i]);
+            $keluar = htmlspecialchars(trim($post['keluar'][$i]));
+            $masuk = htmlspecialchars(trim($post['masuk'][$i]));
+
+            dump($keluar);
+            dump($masuk);
+            dump(is_nan($keluar));
+            dump(is_nan($masuk));
+            dump(is_numeric($keluar));
+            dd(is_numeric($masuk));
 
             if ($created_at !== null && $post['transaction_desc'][$i] !== null && ($post['keluar'][$i] !== null || $post['masuk'][$i] !== null) ) {
                 // dd($post['transaction_desc'][$i]);
@@ -1447,7 +1457,7 @@ class AccountingController extends Controller
             "created_at" => $created_at_2,
             "saldo" => (string)$saldo_2,
         ]);
-        
+
         // $accounting_to_compare->created_at = $created_at_2;
         // $accounting_to_compare->saldo = $saldo_2;
         // $accounting_to_compare->save();
