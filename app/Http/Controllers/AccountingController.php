@@ -649,7 +649,8 @@ class AccountingController extends Controller
             $status = 'not read yet';
         }
 
-        $saldo_to_update = $accounting->saldo;
+        // dd($accounting);
+        $saldo_to_update = (int)$accounting->saldo;
 
         if ($mode === 'tanggal_mundur') {
             // MODE TRANSAKSI MUNDUR
@@ -679,7 +680,7 @@ class AccountingController extends Controller
                 } elseif ($transaction_between->transaction_type === 'pemasukan') {
                     $saldo_akhir += (int)$transaction_between->jumlah;
                 }
-                $transaction_between->saldo = $saldo_akhir;
+                $transaction_between->saldo = (string)$saldo_akhir;
                 $transaction_between->save();
             }
 
@@ -705,7 +706,7 @@ class AccountingController extends Controller
                 } elseif ($transaction_between->transaction_type === 'pemasukan') {
                     $saldo_akhir += (int)$transaction_between->jumlah;
                 }
-                $transaction_between->saldo = $saldo_akhir;
+                $transaction_between->saldo = (string)$saldo_akhir;
                 $transaction_between->save();
             }
 
@@ -742,7 +743,7 @@ class AccountingController extends Controller
                 } elseif ($transaction_after->transaction_type === 'pemasukan') {
                     $saldo_akhir += (int)$transaction_after->jumlah;
                 }
-                $transaction_after->saldo = $saldo_akhir;
+                $transaction_after->saldo = (string)$saldo_akhir;
                 $transaction_after->save();
             }
 
@@ -776,7 +777,7 @@ class AccountingController extends Controller
             'supplier_nama'=>$transaction_name->supplier_nama,
             'keterangan'=>$post['keterangan'], // keterangan tambahan akan ditulis dalam tanda kurung
             'jumlah'=>$jumlah,
-            'saldo'=>$saldo_to_update,
+            'saldo'=>(string)$saldo_to_update,
             'status'=>$status, // read or not read yet by other user
             'created_at'=>$created_at_new
         ]);
@@ -1382,6 +1383,7 @@ class AccountingController extends Controller
         $saldo_2 = null;
         if ($post['up_down_transaction'] === 'up') {
             $accounting_to_compare = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<', $accounting->created_at)->latest()->first();
+            dump($accounting_to_compare);
             if ($accounting_to_compare === null) {
                 $request->validate(['error'=>'required'],['error.required'=>'no transaction to compare']);
             }
@@ -1395,6 +1397,8 @@ class AccountingController extends Controller
                 $saldo_2 = $saldo_1;
                 $saldo_2 += (int)$accounting_to_compare->jumlah;
             }
+            // dump($saldo_1);
+            // dd($saldo_2);
         } elseif ($post['up_down_transaction'] === 'down') {
             $accounting_to_compare = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '>', $accounting->created_at)->first();
             if ($accounting_to_compare === null) {
@@ -1431,13 +1435,22 @@ class AccountingController extends Controller
         // dump('saldo_1: ' . $saldo_1);
         // dd('saldo_2: ' . $saldo_2);
 
-        $accounting->created_at = $created_at_1;
-        $accounting->saldo = $saldo_1;
-        $accounting->save();
+        $accounting->update([
+            "created_at" => $created_at_1,
+            "saldo" => (string)$saldo_1,
+        ]);
+        // $accounting->created_at = $created_at_1;
+        // $accounting->saldo = $saldo_1;
+        // $accounting->save();
 
-        $accounting_to_compare->created_at = $created_at_2;
-        $accounting_to_compare->saldo = $saldo_2;
-        $accounting_to_compare->save();
+        $accounting_to_compare->update([
+            "created_at" => $created_at_2,
+            "saldo" => (string)$saldo_2,
+        ]);
+        
+        // $accounting_to_compare->created_at = $created_at_2;
+        // $accounting_to_compare->saldo = $saldo_2;
+        // $accounting_to_compare->save();
 
         return back()->with('success_', "-accounting's time swapped-");
     }
