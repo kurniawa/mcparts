@@ -234,10 +234,8 @@ class AccountingController extends Controller
 
             // dump($keluar);
             // dump($masuk);
-            // dump(is_nan($keluar));
-            // dump(is_nan($masuk));
             // dump(is_numeric($keluar));
-            // dd(is_numeric($masuk));
+            // dump(is_numeric($masuk));
 
             if (!is_numeric($keluar)) {
                 $keluar = null;
@@ -317,21 +315,43 @@ class AccountingController extends Controller
         // END - VALIDASI
 
         for ($i=0; $i < $working_index ; $i++) {
+            $keluar = htmlspecialchars(trim($post['keluar'][$i]));
+            $masuk = htmlspecialchars(trim($post['masuk'][$i]));
+
+            if (!is_numeric($keluar)) {
+                $keluar = null;
+            }
+
+            if (!is_numeric($masuk)) {
+                $masuk = null;
+            }
+
             if ($post['transaction_id'][$i] === null) {
                 $transaction_desc = strtoupper($post['transaction_desc'][$i]);
                 $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)->where('desc', $transaction_desc)->first();
             } else {
                 $transaction_name = TransactionName::find($post['transaction_id'][$i]);
             }
+            // dd($transaction_name);
 
             $jumlah = null;
             $transaction_type = 'pengeluaran';
-            if ($keluar !== null) {
-                $jumlah = (float)$keluar * 100;
-            } elseif ($masuk !== null) {
-                $jumlah = (float)$masuk * 100;
+
+            if ($transaction_name->kategori_type === 'UANG MASUK') {
                 $transaction_type = 'pemasukan';
+                $jumlah = (float)$masuk * 100;
+                $keluar = null;
+            } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
+                $jumlah = (float)$keluar * 100;
+                $masuk = null;
             }
+
+            // if ($keluar !== null) {
+            //     $jumlah = (float)$keluar * 100;
+            // } elseif ($masuk !== null) {
+            //     $jumlah = (float)$masuk * 100;
+            //     $transaction_type = 'pemasukan';
+            // }
 
             $status = null;
             if ($transaction_name->related_user_id !== null) {
@@ -667,12 +687,26 @@ class AccountingController extends Controller
             $masuk = null;
         }
 
-        if ($keluar !== null) {
-            $jumlah = (float)$keluar * 100;
-        } elseif ($masuk !== null) {
-            $jumlah = (float)$masuk * 100;
-            $transaction_type = 'pemasukan';
+        if ($transaction_name->kategori_type === 'UANG MASUK') {
+            if (!$masuk) {
+                $request->validate(['error'=>'required'],['error.required'=>'UANG MASUK, tapi kolom masuk === null']);
+            }
+        } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
+            if (!$keluar) {
+                $request->validate(['error'=>'required'],['error.required'=>'UANG KELUAR, tapi kolom keluar === null']);
+            }
         }
+
+        if ($transaction_name->kategori_type === 'UANG MASUK') {
+            $transaction_type = 'pemasukan';
+            $jumlah = (float)$masuk * 100;
+            $keluar = null;
+        } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
+            $jumlah = (float)$keluar * 100;
+            $masuk = null;
+        }
+
+        // dump($keluar);
 
         $status = null;
         if ($transaction_name->related_user_id !== null) {
