@@ -234,8 +234,8 @@ class AccountingController extends Controller
 
             dump($keluar);
             dump($masuk);
-            dump(is_nan($keluar));
-            dump(is_nan($masuk));
+            // dump(is_nan($keluar));
+            // dump(is_nan($masuk));
             dump(is_numeric($keluar));
             dd(is_numeric($masuk));
 
