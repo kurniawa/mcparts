@@ -675,9 +675,9 @@ class AccountingController extends Controller
 
             foreach ($transactions_between as $transaction_between) {
                 if ($transaction_between->transaction_type === 'pengeluaran') {
-                    $saldo_akhir -= $transaction_between->jumlah;
+                    $saldo_akhir -= (int)$transaction_between->jumlah;
                 } elseif ($transaction_between->transaction_type === 'pemasukan') {
-                    $saldo_akhir += $transaction_between->jumlah;
+                    $saldo_akhir += (int)$transaction_between->jumlah;
                 }
                 $transaction_between->saldo = $saldo_akhir;
                 $transaction_between->save();
@@ -701,9 +701,9 @@ class AccountingController extends Controller
 
             foreach ($transactions_between as $transaction_between) {
                 if ($transaction_between->transaction_type === 'pengeluaran') {
-                    $saldo_akhir -= $transaction_between->jumlah;
+                    $saldo_akhir -= (int)$transaction_between->jumlah;
                 } elseif ($transaction_between->transaction_type === 'pemasukan') {
-                    $saldo_akhir += $transaction_between->jumlah;
+                    $saldo_akhir += (int)$transaction_between->jumlah;
                 }
                 $transaction_between->saldo = $saldo_akhir;
                 $transaction_between->save();
@@ -738,9 +738,9 @@ class AccountingController extends Controller
 
             foreach ($transactions_after as $transaction_after) {
                 if ($transaction_after->transaction_type === 'pengeluaran') {
-                    $saldo_akhir -= $transaction_after->jumlah;
+                    $saldo_akhir -= (int)$transaction_after->jumlah;
                 } elseif ($transaction_after->transaction_type === 'pemasukan') {
-                    $saldo_akhir += $transaction_after->jumlah;
+                    $saldo_akhir += (int)$transaction_after->jumlah;
                 }
                 $transaction_after->saldo = $saldo_akhir;
                 $transaction_after->save();
@@ -1385,15 +1385,15 @@ class AccountingController extends Controller
             if ($accounting_to_compare === null) {
                 $request->validate(['error'=>'required'],['error.required'=>'no transaction to compare']);
             }
-            $saldo_1 = $accounting->saldo;
+            $saldo_1 = (int)$accounting->saldo;
             if ($accounting_to_compare->transaction_type === 'pengeluaran') {
-                $saldo_1 += $accounting_to_compare->jumlah;
+                $saldo_1 += (int)$accounting_to_compare->jumlah;
                 $saldo_2 = $saldo_1;
-                $saldo_2 -= $accounting_to_compare->jumlah;
+                $saldo_2 -= (int)$accounting_to_compare->jumlah;
             } elseif ($accounting_to_compare->transaction_type === 'pemasukan') {
-                $saldo_1 -= $accounting_to_compare->jumlah;
+                $saldo_1 -= (int)$accounting_to_compare->jumlah;
                 $saldo_2 = $saldo_1;
-                $saldo_2 += $accounting_to_compare->jumlah;
+                $saldo_2 += (int)$accounting_to_compare->jumlah;
             }
         } elseif ($post['up_down_transaction'] === 'down') {
             $accounting_to_compare = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '>', $accounting->created_at)->first();
@@ -1402,23 +1402,23 @@ class AccountingController extends Controller
             }
             $saldo_2 = $accounting->saldo;
             if ($accounting->transaction_type === 'pengeluaran') {
-                $saldo_2 += $accounting->jumlah;
+                $saldo_2 += (int)$accounting->jumlah;
             } elseif ($accounting->transaction_type === 'pemasukan') {
-                $saldo_2 -= $accounting->jumlah;
+                $saldo_2 -= (int)$accounting->jumlah;
             }
 
             if ($accounting_to_compare->transaction_type === 'pengeluaran') {
-                $saldo_2 -= $accounting_to_compare->jumlah;
+                $saldo_2 -= (int)$accounting_to_compare->jumlah;
             } elseif ($accounting_to_compare->transaction_type === 'pemasukan') {
-                $saldo_2 += $accounting_to_compare->jumlah;
+                $saldo_2 += (int)$accounting_to_compare->jumlah;
             }
 
             $saldo_1 = $saldo_2;
 
             if ($accounting->transaction_type === 'pengeluaran') {
-                $saldo_1 -= $accounting->jumlah;
+                $saldo_1 -= (int)$accounting->jumlah;
             } elseif ($accounting->transaction_type === 'pemasukan') {
-                $saldo_1 += $accounting->jumlah;
+                $saldo_1 += (int)$accounting->jumlah;
             }
 
         }
