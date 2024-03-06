@@ -12,7 +12,7 @@
 @for ($k = 0; $k < 2; $k++)
 <div class="containerDetailNota nota-all nota-{{ $k }}" id="">
     <div class="border-t mt-1 mb-1 pt-2"></div>
-    <div class="grid grid-cols-3 items-center">
+    <div class="grid grid-cols-4 items-center">
         <div class=""><img class="logo-mc" src="{{ asset('images/logo-mc.jpg') }}" alt="" style="width: 10rem;"></div>
         <div class="">
             <div class="fw-bold" style="font-size:1.3rem">NOTA</div>
@@ -21,7 +21,49 @@
             <div style="font-size: 0.8rem">Kec. Gn. Putri/Kab. Bogor</div>
             {{-- <br>0812 9335 218<br>0812 8655 6500 --}}
         </div>
-        <div class="">
+        <div style="font-size: 0.8rem">
+            <div>
+                No. : <span class="font-bold"></span>MCP/{{ date('m/y', strtotime($nota->created_at)) }}/...
+            </div>
+            <div>
+                Kepada :
+                @if ($nota->reseller_id)
+                <span class="font-bold">{{ $nota->reseller_nama }} - {{ $nota->pelanggan_nama }}</span>
+                @else
+                <span class="font-bold">{{ $nota->pelanggan_nama }}</span>
+                @endif
+            </div>
+            <div>
+                Tanggal : {{ date('d-m-Y', strtotime($nota->created_at)) }}
+            </div>
+            <div>
+                Alamat :
+                @if ($nota->cust_short!==null)
+                <span>{{ $nota->cust_short }}</span>
+                @else
+                    @if ($nota->cust_long !== null)
+                    @foreach (json_decode($nota->cust_long, true) as $long)
+                    <div>{{ $long }}</div>
+                    @endforeach
+                    @endif
+                    @if ($cust_kontak)
+                        @if ($cust_kontak->kodearea)
+                        <span>({{ $cust_kontak->kodearea }}) </span>
+                        @endif
+                    <span class="toFormatPhoneNumber">{{ $cust_kontak->nomor }}</span>
+                    @else
+                    @endif
+                @endif
+            </div>
+        </div>
+        <div style="font-weight:bold;font-size: 1.5rem" class="w-full text-center">
+            @if ($k === 1)
+            Copy
+            @else
+            Asli
+            @endif
+        </div>
+        {{-- <div class="">
             <div class="flex items-center">
                 <table style="font-size: 0.8rem" class="w-full">
                     <tr>
@@ -29,7 +71,6 @@
                         <td>
                             <div class="font-bold">
                                 MCP/{{ date('m/y', strtotime($nota->created_at)) }}/...
-                                {{-- {{ $nota->nomor_nota }} --}}
                             </div>
                         </td>
                     </tr>
@@ -47,9 +88,6 @@
                     <tr style="vertical-align: top"><td>Alamat</td><td>:</td>
                         <td>
                             @if ($nota->cust_short!==null)
-                            {{-- @foreach (json_decode($cust_long_ala,true) as $long)
-                            <div>{{ $long }}</div>
-                            @endforeach --}}
                             <div>{{ $nota->cust_short }}</div>
                             @else
                                 @if ($nota->cust_long !== null)
@@ -76,7 +114,7 @@
                     @endif
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
     <div class="pr-2">
         <table style="width: 100%;" class="mt-3 tableItemNota">

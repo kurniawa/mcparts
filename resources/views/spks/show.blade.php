@@ -501,7 +501,7 @@
                                 <td>Tgl.</td><td>:</td>
                                 <td>
                                     <div class="w-fit">
-                                        <div class="flex" onclick="toggle_element('form_edit_tanggal_nota')">
+                                        <div class="flex" onclick="toggle_element('form_edit_tanggal_nota-{{ $key_nota }}')">
                                             <div class="flex">
                                                 @if ($nota->finished_at === null)
                                                 <div>
@@ -535,7 +535,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="hidden" id="form_edit_tanggal_nota">
+                            <tr class="hidden" id="form_edit_tanggal_nota-{{ $key_nota }}">
                                 <td colspan="3">
                                     <form action="{{ route('notas.edit_tanggal', $nota->id) }}" method="POST" class="w-fit">
                                         @csrf
@@ -906,7 +906,7 @@
                                 <td>Tgl.</td><td>:</td>
                                 <td>
                                     <div class="w-fit">
-                                        <div class="flex" onclick="toggle_element('form_edit_tanggal_srjalan')">
+                                        <div class="flex" onclick="toggle_element('form_edit_tanggal_srjalan-{{ $key_srjalan }}')">
                                             <div class="flex">
                                                 @if ($srjalan->finished_at === null)
                                                 <div>
@@ -940,7 +940,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="hidden" id="form_edit_tanggal_srjalan">
+                            <tr class="hidden" id="form_edit_tanggal_srjalan-{{ $key_srjalan }}">
                                 <td colspan="3">
                                     <form action="{{ route('sjs.edit_tanggal', $srjalan->id) }}" method="POST" class="w-fit">
                                         @csrf
