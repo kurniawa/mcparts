@@ -164,6 +164,23 @@ class HomeController extends Controller
         // dd($data);
         // dd($col_spk_produk_notas[0]);
         // dd($label_pelanggans[0]);
+
+        $dump = false;
+        if ($dump) {
+            foreach ($spks as $key => $spk) {
+                foreach ($col_notas[$key] as $key2 => $nota) {
+                    if (isset($col_spk_produk_nota_srjalans[$key])) {
+                        if (isset($col_spk_produk_nota_srjalans[$key][$key2])) {
+                        } else {
+                            dump($nota->id);
+                        }
+                    } else {
+                        dump($nota->id);
+                    }
+                }
+            }
+            dd('cek error');
+        }
         return view('app', $data);
     }
 

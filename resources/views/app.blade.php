@@ -417,9 +417,15 @@
                     {{-- Srjalan Items --}}
                     <div class="border rounded px-1 hidden" id="srjalan-items-{{ $key }}-{{ $key2 }}-{{ $key_srjalan }}">
                         <table class="w-full text-xs">
+                            @if (isset($col_spk_produk_nota_srjalans[$key]))
+                            @if (isset($col_spk_produk_nota_srjalans[$key][$key2]))
                             @foreach ($col_spk_produk_nota_srjalans[$key][$key2] as $spk_produk_nota_srjalan)
                             <tr><td>{{ $spk_produk_nota_srjalan->spk_produk_nota->nama_nota }}</td><td>{{ $spk_produk_nota_srjalan->jumlah_packing }}</td><td>{{ $spk_produk_nota_srjalan->tipe_packing }}</td></tr>
                             @endforeach
+                            @endif
+                            @else
+                            <tr><td>nama nota ??</td><td>jumlah packing ??</td><td>tipe packing ??</td></tr>
+                            @endif
                         </table>
                     </div>
                     {{-- END - Srjalan Items --}}
