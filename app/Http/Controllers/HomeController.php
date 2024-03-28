@@ -165,17 +165,18 @@ class HomeController extends Controller
         // dd($col_spk_produk_notas[0]);
         // dd($label_pelanggans[0]);
 
-        $dump = false;
+        $dump = true;
         if ($dump) {
             foreach ($spks as $key => $spk) {
                 foreach ($col_notas[$key] as $key2 => $nota) {
                     if (isset($col_spk_produk_nota_srjalans[$key])) {
                         if (isset($col_spk_produk_nota_srjalans[$key][$key2])) {
                         } else {
-                            dump($nota->id);
+                            if (count($col_srjalans[$key][$key2]) !== 0) {
+                                dump($col_srjalans[$key][$key2]);
+                                dump($nota->id);
+                            }
                         }
-                    } else {
-                        dump($nota->id);
                     }
                 }
             }
