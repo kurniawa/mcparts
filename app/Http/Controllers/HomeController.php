@@ -165,7 +165,7 @@ class HomeController extends Controller
         // dd($col_spk_produk_notas[0]);
         // dd($label_pelanggans[0]);
 
-        $dump = true;
+        $dump = false;
         if ($dump) {
             foreach ($spks as $key => $spk) {
                 foreach ($col_notas[$key] as $key2 => $nota) {
