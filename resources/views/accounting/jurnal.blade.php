@@ -108,7 +108,7 @@
         <div class="mt-2">
             <table class="text-xs table-border w-3/4 max-w-full">
                 <tr>
-                    <th colspan="3">
+                    <th colspan="5">
                         <div class="flex gap-2 items-center">
                             <button class="rounded bg-emerald-400 text-white p-1" onclick="table_to_excel('table-jurnal')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -293,7 +293,7 @@
         <div class="hidden">
             <table id="table-jurnal">
                 <tr>
-                    <th></th><th></th><th></th>
+                    <th colspan="5"></th>
                     <th>{{ $keluar_total }}</th>
                     <th>{{ $masuk_total }}</th>
                     <th>{{ $balance_total }}</th>
@@ -303,7 +303,7 @@
                 @foreach ($accountings_grouped as $key_accounting => $accounting)
                 @if ($key_accounting === 0)
                 <tr>
-                    <td colspan="3">{{ $accounting->instance_type }} - {{ $accounting->instance_name }} - {{ $accounting->username }}</td>
+                    <td colspan="5">{{ $accounting->instance_type }} - {{ $accounting->instance_name }} - {{ $accounting->username }}</td>
                     <td>{{ $keluar[$key_accountings] }}</td>
                     <td>{{ $masuk[$key_accountings] }}</td>
                     <td>{{ $balance[$key_accountings] }}</td>
@@ -326,6 +326,8 @@
                     @else
                     <td>{{ $accounting->transaction_desc }}</td>
                     @endif
+                    <td class="kategori-1">{{ $accounting->kategori_level_one }}</td>
+                    <td class="kategori-2">{{ $accounting->kategori_level_two }}</td>
                     <td>@if($accounting->transaction_type === 'pengeluaran'){{ str_replace(".", ",", (float)($accounting->jumlah / 100)) }}@endif</td>
                     <td>@if($accounting->transaction_type === 'pemasukan'){{ str_replace(".", ",", (float)($accounting->jumlah / 100)) }}@endif</td>
                 </tr>
