@@ -108,16 +108,18 @@
         <div class="mt-2">
             <table class="text-xs table-border w-3/4 max-w-full">
                 <tr>
-                    <th>
-                        <div class="flex justify-start">
+                    <th colspan="3">
+                        <div class="flex gap-2 items-center">
                             <button class="rounded bg-emerald-400 text-white p-1" onclick="table_to_excel('table-jurnal')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                                 </svg>
                             </button>
+                            {{-- <div>
+                                <button id="btn-kategori" class="rounded border border-emerald-400 text-emerald-400 p-1" onclick="toggle_light_classes(this.id, ['kategori-1', 'kategori-2'], ['text-emerald-400'], ['text-white', 'border-emerald-300'])">KATEGORI</button>
+                            </div> --}}
                         </div>
                     </th>
-                    <th></th><th></th>
                     <th>
                         <div class="flex justify-between bg-pink-300">
                             <span>Rp</span>
@@ -147,7 +149,7 @@
                         </div>
                     </th>
                 </tr>
-                <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th><th>DIFF</th></tr>
+                <tr class="bg-blue-500 text-white"><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th class="kategori-1">KATEGORI 1</th><th class="kategori-2">KATEGORI 2</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th><th>DIFF</th></tr>
 
                 {{-- <tr>
                     <td></td>
@@ -165,11 +167,12 @@
                 @foreach ($accountings_grouped as $key_accounting => $accounting)
                 @if ($key_accounting === 0)
                 <tr>
-                    <td colspan="3">
+                    <td colspan="5">
                         <div class="bg-violet-200 py-1 pl-1 font-semibold text-slate-500">
                             {{ $accounting->instance_type }} - {{ $accounting->instance_name }} - {{ $accounting->username }}
                         </div>
                     </td>
+
                     <td>
                         <div class="flex justify-between font-semibold text-pink-500">
                             <span>Rp</span>
@@ -222,6 +225,8 @@
                     @else
                     <td>{{ $accounting->transaction_desc }}</td>
                     @endif
+                    <td class="kategori-1">{{ $accounting->kategori_level_one }}</td>
+                    <td class="kategori-2">{{ $accounting->kategori_level_two }}</td>
                     <td>
                         @if ($accounting->transaction_type === 'pengeluaran')
                         <div class="flex justify-between">
@@ -293,7 +298,7 @@
                     <th>{{ $masuk_total }}</th>
                     <th>{{ $balance_total }}</th>
                 </tr>
-                <tr><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th><th>DIFF</th></tr>
+                <tr><th>TANGGAL</th><th>KODE</th><th>KETERANGAN</th><th>KATEGORI 1</th><th>KATEGORI 2</th><th>KELUAR</th><th>MASUK</th><th>BALANCE</th><th>DIFF</th></tr>
                 @foreach ($accountings->groupBy('user_instance_id') as $key_accountings => $accountings_grouped)
                 @foreach ($accountings_grouped as $key_accounting => $accounting)
                 @if ($key_accounting === 0)
@@ -321,16 +326,8 @@
                     @else
                     <td>{{ $accounting->transaction_desc }}</td>
                     @endif
-                    <td>
-                        @if ($accounting->transaction_type === 'pengeluaran')
-                        {{ (float)($accounting->jumlah / 100) }}
-                        @endif
-                    </td>
-                    <td>
-                        @if ($accounting->transaction_type === 'pemasukan')
-                        {{ (float)($accounting->jumlah / 100) }}
-                        @endif
-                    </td>
+                    <td>@if($accounting->transaction_type === 'pengeluaran'){{ str_replace(".", ",", (float)($accounting->jumlah / 100)) }}@endif</td>
+                    <td>@if($accounting->transaction_type === 'pemasukan'){{ str_replace(".", ",", (float)($accounting->jumlah / 100)) }}@endif</td>
                 </tr>
                 @endforeach
                 @endforeach
@@ -351,7 +348,10 @@
 </style>
 
 <script>
+    const accountings = {!! json_encode($accountings, JSON_HEX_TAG) !!};
     const label_deskripsi = {!! json_encode($label_deskripsi, JSON_HEX_TAG) !!};
+
+    console.log(accountings);
 
     $(`#filter-desc`).autocomplete({
         source: label_deskripsi,
