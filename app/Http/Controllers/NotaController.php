@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alamat;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
 use App\Models\Pelanggan;
+use App\Models\PelangganKontak;
 use App\Models\PelangganProduk;
 use App\Models\Produk;
 use App\Models\ProdukHarga;
@@ -363,9 +365,27 @@ class NotaController extends Controller
 
     function edit_alamat(Spk $spk, Request $request) {
         $post = $request->post();
-        dump($post);
-        dd($spk);
+        // dump($post);
+        // dump($spk);
+        // dd($spk->notas);
         $success_ = '';
+
+        $alamat = Alamat::find($post['alamat_id']);
+        if ($post['nota_id'] == 'semua') {
+            foreach ($spk->notas as $nota) {
+                $nota->cust_long = $alamat->long;
+                $nota->alamat_id = $alamat->id;
+                $nota->cust_short = $alamat->short;
+                $nota->save();
+            }
+        } else {
+            $nota = Nota::find($post['nota_id']);
+            $nota->cust_long = $alamat->long;
+            $nota->alamat_id = $alamat->id;
+            $nota->cust_short = $alamat->short;
+            $nota->save();
+        }
+        $success_ .= '-alamat berhasil diubah-';
 
         $feedback = [
             'success_' => $success_,
@@ -375,9 +395,27 @@ class NotaController extends Controller
 
     function edit_kontak(Spk $spk, Request $request) {
         $post = $request->post();
-        dump($post);
-        dd($spk);
+        // dump($post);
+        // dump($spk);
+        // dd($spk->notas);
         $success_ = '';
+
+        $pelanggan_kontak = PelangganKontak::find($post['kontak_id']);
+        // dump($pelanggan_kontak);
+        // dd(json_encode($pelanggan_kontak));
+        if ($post['nota_id'] == 'semua') {
+            foreach ($spk->notas as $nota) {
+                $nota->kontak_id = $pelanggan_kontak->id;
+                $nota->cust_kontak = json_encode($pelanggan_kontak);
+                $nota->save();
+            }
+        } else {
+            $nota = Nota::find($post['nota_id']);
+            $nota->kontak_id = $pelanggan_kontak->id;
+            $nota->cust_kontak = json_encode($pelanggan_kontak);
+            $nota->save();
+        }
+        $success_ .= '-kontak berhasil diubah-';
 
         $feedback = [
             'success_' => $success_,

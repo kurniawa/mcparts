@@ -264,4 +264,8 @@ class Spk extends Model
         $user = User::where('username', $username)->first();
         return $user;
     }
+
+    function notas() {
+        return $this->belongsToMany(Nota::class, 'spk_notas', 'spk_id', 'nota_id');
+    }
 }
