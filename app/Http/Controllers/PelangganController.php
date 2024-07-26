@@ -115,6 +115,9 @@ class PelangganController extends Controller
 
         $label_ekspedisis = Ekspedisi::select('id', 'nama as label', 'nama as value')->get();
 
+        $label_resellers = Pelanggan::select('id', 'nama as label', 'nama as value')->where('is_reseller', 'yes')->get();
+        // dd($label_resellers);
+        // dd($pelanggan->reseller);
         $data = [
             // 'goback' => 'home',
             // 'user_role' => $user_role,
@@ -134,6 +137,7 @@ class PelangganController extends Controller
             'alamat_transits' => $alamat_transits,
             'label_ekspedisis' => $label_ekspedisis,
             'tipe_kontaks' => Alamat::tipe_kontaks(),
+            'label_resellers' => $label_resellers,
         ];
         // dd($alamats);
         // dd($alamat_ekspedisis);
@@ -552,5 +556,66 @@ class PelangganController extends Controller
         $pelanggan->save();
 
         return back()->with('success_', '-pelanggan_nama updated-');
+    }
+
+    function reseller_add(Pelanggan $pelanggan, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($pelanggan);
+        $request->validate([
+            'reseller_nama' => 'required',
+            'reseller_id' => 'required|numeric',
+        ]);
+
+        $reseller = Pelanggan::find($post['reseller_id']);
+        if ($reseller->is_reseller !== 'yes') {
+            $request->validate(['error'=>'required'],['error.required'=>'calon reseller belum ditetapkan sebagai reseller']);
+        }
+
+        $success_ = "";
+        $pelanggan->reseller_id = $reseller->id;
+        $pelanggan->save();
+        $success_ .= "Reseller telah ditetapkan!";
+
+        $feedback = [
+            "success_" => $success_
+        ];
+        return back()->with($feedback);
+    }
+
+    function reseller_update(Pelanggan $pelanggan, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($pelanggan);
+        $request->validate([
+            'reseller_nama' => 'required',
+            'reseller_id' => 'required|numeric',
+        ]);
+
+        $reseller = Pelanggan::find($post['reseller_id']);
+        if ($reseller->is_reseller !== 'yes') {
+            $request->validate(['error'=>'required'],['error.required'=>'calon reseller belum ditetapkan sebagai reseller']);
+        }
+
+        $success_ = "";
+        $pelanggan->reseller_id = $reseller->id;
+        $pelanggan->save();
+        $success_ .= "Reseller telah diupdate!";
+
+        $feedback = [
+            "success_" => $success_
+        ];
+        return back()->with($feedback);
+    }
+
+    function reseller_delete(Pelanggan $pelanggan) {
+        $warnings_ = '';
+        $pelanggan->reseller_id = null;
+        $pelanggan->save();
+        $warnings_ .= 'Reseller dihapus';
+        $feedback = [
+            'warnings_' => $warnings_
+        ];
+        return back()->with($feedback);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pelanggan extends Model
 {
@@ -201,5 +202,9 @@ class Pelanggan extends Model
 
     static function bentuks() {
         return ['individu', 'PT', 'CV', 'Toko', 'Gudang'];
+    }
+
+    function reseller() : HasOne {
+        return $this->hasOne(Pelanggan::class, 'id', 'reseller_id');
     }
 }

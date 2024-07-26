@@ -285,7 +285,7 @@
                     </svg>
                     <h5 class="font-semibold ml-2">Daftar Transit:</h5>
                 </div>
-                <button type="submit" class="rounded border border-violet-300 text-violet-500 ml-1" id="btn_transit_add" onclick="toggle_light(this.id, 'form_transit_add', [], ['bg-violet-200'], 'block')">
+                <button type="button" class="rounded border border-violet-300 text-violet-500 ml-1" id="btn_transit_add" onclick="toggle_light(this.id, 'form_transit_add', [], ['bg-violet-200'], 'block')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
@@ -346,6 +346,63 @@
                 @endforeach
             </div>
             {{-- END - TRANSIT --}}
+
+            {{-- RESELLER --}}
+            <div class="flex items-center mt-9">
+                <div class="flex items-center bg-white rounded shadow drop-shadow p-1">
+                    {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                    </svg> --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                    </svg>
+                    <h5 class="font-semibold ml-2">Reseller:</h5>
+                </div>
+                @if (!$pelanggan->reseller_id)
+                <button type="button" class="rounded border border-slate-300 text-slate-500 ml-1" id="btn_reseller_add" onclick="toggle_light(this.id, 'form_reseller_add', [], ['bg-slate-200'], 'block')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </button>
+                @endif
+            </div>
+            @if (!$pelanggan->reseller_id)
+            <div id="form_reseller_add" class="hidden">
+                <div class="flex items-center">
+                    <form action="{{ route('pelanggans.reseller_add', $pelanggan['id']) }}" method="POST" class="border rounded p-1 mt-1 bg-white shadow drop-shadow-sm">
+                        @csrf
+                        <div class="flex items-center">
+                            <span>Nama Reseller:</span>
+                            <input type="text" name="reseller_nama" id="reseller_nama" class="rounded text-xs p-1 ml-1">
+                            <button type="submit" class="px-1 rounded bg-emerald-300 text-emerald-500 ml-2" name="reseller_id" id="reseller_id">confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @else
+            <div id="form_reseller_edit">
+                <div class="flex items-center gap-2">
+                    <form action="{{ route('pelanggans.reseller_update', $pelanggan['id']) }}" method="POST" class="border rounded p-1 mt-1 bg-white shadow drop-shadow-sm">
+                        @csrf
+                        <div class="flex items-center">
+                            <span>Nama Reseller:</span>
+                            <input type="text" name="reseller_nama" id="reseller_nama" class="rounded text-xs p-1 ml-1" value="{{ $pelanggan->reseller->nama }}">
+                            <button type="submit" class="px-1 rounded bg-emerald-300 text-emerald-500 ml-2" name="reseller_id" id="reseller_id" value="{{ $pelanggan->reseller_id }}">Konfirmasi Edit</button>
+                        </div>
+                    </form>
+                    <form action="{{ route('pelanggans.reseller_delete', $pelanggan['id']) }}" method="POST" onsubmit="return confirm('yakin ingin hapus reseller ini?')">
+                        @csrf
+                        <button class="bg-rose-300 text-white rounded p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endif
+            {{-- END - RESELLER --}}
+            
         </div>
     </div>
     <form action="{{ route('pelanggans.delete', $pelanggan->id) }}" method="POST" class="flex justify-center mt-2 text-xs" onsubmit="return confirm('Yakin hapus pelanggan?')">
@@ -361,6 +418,8 @@
 
 <script>
     const label_ekspedisis = {!! json_encode($label_ekspedisis, JSON_HEX_TAG) !!};
+    const label_resellers = {!! json_encode($label_resellers, JSON_HEX_TAG) !!};
+
     setTimeout(() => {
         $('#ekspedisi_nama').autocomplete({
             source: label_ekspedisis,
@@ -377,6 +436,15 @@
                 // console.log(ui.item);
                 document.getElementById('transit_id').value = ui.item.id;
                 document.getElementById('transit_nama').value = ui.item.value;
+            }
+        });
+
+        $('#reseller_nama').autocomplete({
+            source: label_resellers,
+            select: function (event, ui) {
+                // console.log(ui.item);
+                document.getElementById('reseller_id').value = ui.item.id;
+                document.getElementById('reseller_nama').value = ui.item.value;
             }
         });
     }, 1000);
