@@ -345,4 +345,15 @@ class EkspedisiController extends Controller
         $ekspedisi_kontak->save();
         return back()->with('success_', '-kontak utama updated.-');
     }
+
+    function update_name(Ekspedisi $ekspedisi, Request $request) {
+        $post = $request->post();
+        // dump($ekspedisi);
+        // dd($post);
+
+        $ekspedisi->nama = $post['new_name'];
+        $ekspedisi->save();
+
+        return back()->with('success_', '-ekspedisi->nama updated!-');
+    }
 }

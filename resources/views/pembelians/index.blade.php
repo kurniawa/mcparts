@@ -338,7 +338,7 @@
                                     </div>
                                 </th>
                             </tr>
-                            @for ($i = 0; $i < count($pembelians); $i++)
+                        @for ($i = 0; $i < count($pembelians); $i++)
                             <tr class="border-b">
                                 <td>
                                     <div class="flex">

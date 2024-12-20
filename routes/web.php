@@ -133,6 +133,7 @@ Route::controller(EkspedisiController::class)->group(function(){
     Route::get('/ekspedisis','index')->name('ekspedisis.index');
     Route::get('/ekspedisis/{ekspedisi}/show','show')->name('ekspedisis.show');
     Route::post('/ekspedisis/store','store')->name('ekspedisis.store');
+    Route::post('/ekspedisis/{ekspedisi}/update-name','update_name')->name('ekspedisis.update_name');
     Route::post('/ekspedisis/{ekspedisi}/delete','delete')->name('ekspedisis.delete');
     Route::post('/ekspedisis/{ekspedisi}/alamat_add','alamat_add')->name('ekspedisis.alamat_add');
     Route::post('/ekspedisis/{ekspedisi}/{alamat}/alamat_utama','alamat_utama')->name('ekspedisis.alamat_utama');

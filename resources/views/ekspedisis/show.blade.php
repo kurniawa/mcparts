@@ -2,14 +2,28 @@
 @section('content')
 <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-xl font-bold tracking-tight text-gray-900">Data Ekspedisi: {{ $ekspedisi->nama }}</h1>
+        <div class="flex gap-2 items-center">
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">Data Ekspedisi: {{ $ekspedisi->nama }}</h1>
+            {{-- FORM UPDATE NAMA --}}
+            <button id="btn-update-name" type="button" class="border rounded border-orange-300 p-1 text-orange-400 text-xs font-bold" onclick="toggle_light(this.id, 'form-update-name', [], ['bg-orange-200'], 'block')">
+                Update Nama
+            </button>
+        </div>
+        <form action="{{ route('ekspedisis.update_name', $ekspedisi->id) }}" method="POST" class="text-xs hidden" id="form-update-name" onsubmit="return confirm('Anda yakin?')">
+            @csrf
+            <input type="text" name="new_name" id="new-name" value="{{ $ekspedisi->nama }}" class="mt-2 text-xs rounded text-slate-500 border-slate-400">
+            <div class="mt-1">
+                <button class="bg-emerald-200 p-1 text-emerald-500 rounded">Konfirmasi</button>
+            </div>
+        </form>
     </div>
-  </header>
+</header>
 <main class="mb-9">
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
     <div class="flex justify-center text-xs">
         <div class="lg:w-1/2 md:w-3/4 border rounded p-1 bg-white shadow drop-shadow-sm">
+            
             {{-- ALAMAT --}}
             <div class="flex items-center">
                 <div class="flex items-center bg-white rounded shadow drop-shadow p-1">
