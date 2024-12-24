@@ -303,7 +303,7 @@
                 <div>
                     <div class="grid grid-cols-2 border-t pt-1">
                         <div>
-                            <a class="font-bold text-emerald-400" href="">{{ $nota->no_nota }}</a>
+                            <a class="font-bold text-emerald-400" href="{{ route('spks.show', $spk->id) }}">{{ $nota->no_nota }}</a>
                             <div>
                                 <button id="toggle-nota-items-{{ $key }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'nota-items-{{ $key }}-{{ $key_nota }}')">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
@@ -369,7 +369,7 @@
                 <div>
                     <div class="grid grid-cols-2 border-t pt-1">
                         <div>
-                            <a class="font-bold text-sky-400" href="#">{{ $srjalan->no_srjalan }}</a>
+                            <a class="font-bold text-sky-400" href="{{ route('spks.show', $spk->id) }}">{{ $srjalan->no_srjalan }}</a>
                             <span>ekspedisi: </span><a href="#" class="text-sky-700">{{ $srjalan->ekspedisi_nama }}</a>
                             @if ($srjalan->transit_nama)
                             <span> - transit: </span><a href="#" class="text-sky-700">{{ $srjalan->transit_nama }}</a>

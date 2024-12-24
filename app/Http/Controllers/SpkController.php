@@ -235,6 +235,7 @@ class SpkController extends Controller
         $pilihan_srjalan = $pilihan_srjalan->unique('id');
         // dump($spk_notas);
         // END - DATA PACKING
+        $user = Auth::user();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'spks.create',
@@ -260,6 +261,7 @@ class SpkController extends Controller
             'pilihan_ekspedisi' => $pilihan_ekspedisi,
             'pilihan_transit' => $pilihan_transit,
             'pilihan_srjalan' => $pilihan_srjalan,
+            'user' => $user,
         ];
         // dump($data_spk_nota_srjalans['notas']);
         // dd($data_spk_nota_srjalans['col_srjalans']);

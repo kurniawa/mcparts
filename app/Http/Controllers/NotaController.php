@@ -476,4 +476,28 @@ class NotaController extends Controller
 
         return back()->with('success_', $success_);
     }
+
+    function hide(Nota $nota, Request $request) {
+        $post = $request->post();
+        // dump($nota);
+        // dd($post);
+        $success_ = '';
+        $warnings_ = '';
+
+        if ($post['hide'] == 'yes') {
+            $nota->copy = false;
+            $warnings_ .= '-nota hidden-';
+        } else {
+            $nota->copy = true;
+            $success_ .= '-nota available-';
+        }
+
+        $nota->save();
+
+        $feedback = [
+            'success_' => $success_,
+            'warnings_' => $warnings_,
+        ];
+        return back()->with($feedback);
+    }
 }
