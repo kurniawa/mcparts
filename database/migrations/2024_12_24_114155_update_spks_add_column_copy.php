@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
-        Schema::create('produk_photos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('produk_id')->constrained()->onDelete('cascade');
-            $table->foreignId('photo_id')->constrained()->onDelete('cascade');
-            $table->string('role', 20)->default('subsidiary'); // default or subsidiary
+        Schema::table('spks', function (Blueprint $table) {
+            $table->boolean('copy')->default(1)->after('status_bayar');
+            // php artisan migrate --path=database/migrations/2024_12_24_114155_update_nota_add_column_copy.php
         });
     }
 
@@ -25,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('spks', function (Blueprint $table) {
+            $table->dropColumn('copy');
+        });
     }
 };
