@@ -13,14 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('failed_jobs', function (Blueprint $table) {
+        Schema::create('pelanggan_alamats', function (Blueprint $table) {
             $table->id();
-            $table->string('uuid')->unique();
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
+            $table->foreignId('pelanggan_id')->constrained()->onDelete('CASCADE');
+            $table->foreignId('alamat_id')->constrained()->onDelete('CASCADE');
+            $table->enum('tipe',['UTAMA','CADANGAN'])->default('CADANGAN');
+            $table->timestamps();
         });
     }
 
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('failed_jobs');
+        Schema::dropIfExists('pelanggan_alamats');
     }
 };
