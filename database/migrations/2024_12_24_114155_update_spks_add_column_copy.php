@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('spks', function (Blueprint $table) {
-            $table->boolean('copy')->default(1)->after('status_bayar');
+            $table->boolean('copy')->default(1)->after('status_srjalan');
             // php artisan migrate --path=database/migrations/2024_12_24_114155_update_nota_add_column_copy.php
         });
     }
