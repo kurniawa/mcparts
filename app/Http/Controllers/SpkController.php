@@ -695,4 +695,28 @@ class SpkController extends Controller
 
         return back()->with('success_', '-keterangan updated-');
     }
+
+    function hide(Spk $spk, Request $request) {
+        $post = $request->post();
+        // dump($spk);
+        // dd($post);
+        $success_ = '';
+        $warnings_ = '';
+
+        if ($post['hide'] == 'yes') {
+            $spk->copy = false;
+            $warnings_ .= '-spk hidden-';
+        } else {
+            $spk->copy = true;
+            $success_ .= '-spk shown-';
+        }
+
+        $spk->save();
+
+        $feedback = [
+            'success_' => $success_,
+            'warnings_' => $warnings_,
+        ];
+        return back()->with($feedback);
+    }
 }
