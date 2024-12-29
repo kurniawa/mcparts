@@ -705,9 +705,25 @@ class SpkController extends Controller
 
         if ($post['hide'] == 'yes') {
             $spk->copy = false;
+
+            if (count($spk->notas)) {
+                foreach ($spk->notas as $nota) {
+                    $nota->copy = false;
+                    $nota->save();
+                }
+            }
+            
             $warnings_ .= '-spk hidden-';
         } else {
             $spk->copy = true;
+
+            if (count($spk->notas)) {
+                foreach ($spk->notas as $nota) {
+                    $nota->copy = true;
+                    $nota->save();
+                }
+            }
+
             $success_ .= '-spk shown-';
         }
 
