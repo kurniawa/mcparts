@@ -57,8 +57,7 @@ Route::controller(UserController::class)->group(function(){
 
 Route::controller(SpkController::class)->group(function(){
     // Route::get('/spks','index')->name('spks.index')->middleware('auth');
-    // Route::get('/spks/{spk}/show','show')->name('spks.show')->middleware(['checkSpkCopy', 'auth']);
-    Route::get('/spks/{spk}/show','show')->name('spks.show')->middleware(['check.spk.copy', 'auth']);
+    Route::get('/spks/{spk}/show','show')->name('spks.show')->middleware('auth');
     Route::get('/spks/{spk}/print_out','print_out')->name('spks.print_out')->middleware('auth');
     Route::get('/spks/create','create')->name('spks.create')->middleware('auth');
     Route::post('/spks/{spk}/edit_keterangan','edit_keterangan')->name('spks.edit_keterangan')->middleware('auth');
