@@ -215,6 +215,7 @@ class NotaController extends Controller
                 'reseller_kontak'=>$reseller_kontak,
                 'created_by'=>$user->username,
                 'updated_by'=>$user->username,
+                'copy'=>$spk->copy,
             ]);
             $nota->no_nota = "N-$nota->id";
             $nota->save();

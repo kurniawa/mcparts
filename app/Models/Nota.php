@@ -77,6 +77,7 @@ class Nota extends Model
             'reseller_kontak'=>$reseller_kontak,
             'created_by'=>$user->username,
             'updated_by'=>$user->username,
+            'copy'=>$spk->copy,
         ]);
         // UPDATE NO_NOTA
         $nota->no_nota = "N-$nota->id";
