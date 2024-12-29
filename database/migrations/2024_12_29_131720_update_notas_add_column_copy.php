@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('spks', function (Blueprint $table) {
-            $table->boolean('copy')->nullable()->default(1)->after('status_srjalan');
-            // php artisan migrate --path=database/migrations/2024_12_24_114155_update_nota_add_column_copy.php
+        Schema::table('notas', function (Blueprint $table) {
+            $table->boolean('copy')->nullable()->default(true);
         });
     }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('spks', function (Blueprint $table) {
+        Schema::table('notas', function (Blueprint $table) {
             $table->dropColumn('copy');
         });
     }
