@@ -37,13 +37,15 @@ class HomeController extends Controller
                 if ($get['nama_pelanggan'] !== null) {
                     if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'] === null || $get['to_day'] === null || $get['to_month'] === null || $get['to_year'] === null) {
                         // Filter Berdasarkan Nama Pelanggan - Tanpa Tanggal
-                        $spks = Spk::where('pelanggan_id', $get['pelanggan_id'])->orderByDesc('created_at')->get();
+                        $spks = Spk::where('pelanggan_id', $get['pelanggan_id'])
+                            ->orderByDesc('created_at')->get();
                         // End - Filter Berdasarkan Nama Pelanggan - Tanpa Tanggal
                     } else {
                         // Filter Berdasarkan Nama Pelanggan + Tanggal
                         $start_date = "$get[from_year]-$get[from_month]-$get[from_day]";
                         $end_date = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
-                        $spks = Spk::where('pelanggan_id', $get['pelanggan_id'])->whereBetween('created_at', [$start_date, $end_date])->orderByDesc('created_at')->get();
+                        $spks = Spk::where('pelanggan_id', $get['pelanggan_id'])
+                            ->whereBetween('created_at', [$start_date, $end_date])->orderByDesc('created_at')->get();
                         // End - Filter Berdasarkan Nama Pelanggan + Tanggal
                     }
                 } else {
@@ -54,7 +56,8 @@ class HomeController extends Controller
                         // Filter Berdasarkan Tanggal
                         $start_date = "$get[from_year]-$get[from_month]-$get[from_day]";
                         $end_date = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
-                        $spks = Spk::whereBetween('created_at', [$start_date, $end_date])->orderByDesc('created_at')->get();
+                        $spks = Spk::whereBetween('created_at', [$start_date, $end_date])
+                            ->orderByDesc('created_at')->get();
                         // End - Filter Berdasarkan Tanggal
                     }
                     // END - Filter hanya rentang waktu, tanpa nama_pelanggan

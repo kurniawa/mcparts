@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\IsAdmin::class,
         'developer' => \App\Http\Middleware\IsDeveloper::class,
+        'check.spk.copy' => \App\Http\Middleware\CheckSpkCopy::class,
     ];
 }
