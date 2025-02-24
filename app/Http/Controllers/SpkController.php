@@ -73,7 +73,7 @@ class SpkController extends Controller
             $cust_short=$alamat['short'];
         }
         // Data Pelanggan - Kontak
-        $cust_kontak=PelangganKontak::where('pelanggan_id',$pelanggan['id'])->where('is_aktual','yes')->first();
+        $cust_kontak=PelangganKontak::where('pelanggan_id',$pelanggan['id'])->where('is_actual','yes')->first();
 
         // Data Reseller
         $reseller=$reseller_id=$reseller_nama=$reseller_long=$reseller_short=$reseller_kontak=null;
@@ -91,7 +91,7 @@ class SpkController extends Controller
                 $reseller_short=$alamat_reseller['short'];
             }
             // Data Reseller - Kontak
-            $reseller_kontak=PelangganKontak::where('pelanggan_id',$reseller_id)->where('is_aktual','yes')->first();
+            $reseller_kontak=PelangganKontak::where('pelanggan_id',$reseller_id)->where('is_actual','yes')->first();
         }
         $created_at = date('Y-m-d', strtotime("$post[year]-$post[month]-$post[day]")) . " " . date("H:i:s");
         $new_spk = Spk::create([

@@ -33,7 +33,7 @@ class EkspedisiController extends Controller
             if ($ekspedisi_alamat !== null) {
                 $alamat = Alamat::find($ekspedisi_alamat->alamat_id);
             }
-            $ekspedisi_kontak = EkspedisiKontak::where('ekspedisi_id', $ekspedisi->id)->where('is_aktual', 'yes')->first();
+            $ekspedisi_kontak = EkspedisiKontak::where('ekspedisi_id', $ekspedisi->id)->where('is_actual', true)->first();
             $alamats->push($alamat);
             $ekspedisi_kontaks->push($ekspedisi_kontak);
         }
@@ -124,7 +124,7 @@ class EkspedisiController extends Controller
                 'tipe' => $post['tipe'],
                 'kodearea' => $post['kodearea'],
                 'nomor' => $post['nomor'],
-                'is_aktual' => 'yes',
+                'is_actual' => true,
             ]);
         }
         // END - STORE KONTAK
@@ -338,10 +338,10 @@ class EkspedisiController extends Controller
     function kontak_utama(Ekspedisi $ekspedisi, EkspedisiKontak $ekspedisi_kontak) {
         $ekspedisi_kontaks = EkspedisiKontak::where('ekspedisi_id', $ekspedisi->id)->get();
         foreach ($ekspedisi_kontaks as $element) {
-            $element->is_aktual = 'no';
+            $element->is_actual = false;
             $element->save();
         }
-        $ekspedisi_kontak->is_aktual = 'yes';
+        $ekspedisi_kontak->is_actual = true;
         $ekspedisi_kontak->save();
         return back()->with('success_', '-kontak utama updated.-');
     }

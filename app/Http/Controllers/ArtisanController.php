@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Accounting;
 use App\Models\Barang;
-use App\Models\Kategori;
+use App\Models\Category;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
@@ -151,38 +151,38 @@ class ArtisanController extends Controller
         $srjalans = Srjalan::all();
         foreach ($srjalans as $srjalan) {
             $spk_produk_nota_srjalans = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
-            $jml_dus = 0;
-            $jml_dus_pcs = 0;
-            $jml_colly = 0;
-            $jml_colly_pcs = 0;
-            $jml_rol = 0;
-            $jml_rol_pcs = 0;
+            $jumlah_dus = 0;
+            $jumlah_dus_pcs = 0;
+            $jumlah_colly = 0;
+            $jumlah_colly_pcs = 0;
+            $jumlah_rol = 0;
+            $jumlah_rol_pcs = 0;
             $jml_bal = 0;
             $jml_bal_pcs = 0;
             foreach ($spk_produk_nota_srjalans as $spk_produk_nota_srjalan) {
                 if ($spk_produk_nota_srjalan->tipe_packing === 'colly') {
-                    $jml_colly_pcs += $spk_produk_nota_srjalan->jumlah;
-                    $jml_colly = $srjalan->jml_colly;
+                    $jumlah_colly_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jumlah_colly = $srjalan->jumlah_colly;
                 } elseif ($spk_produk_nota_srjalan->tipe_packing === 'dus') {
-                    $jml_dus_pcs += $spk_produk_nota_srjalan->jumlah;
-                    $jml_dus = $srjalan->jml_dus;
+                    $jumlah_dus_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jumlah_dus = $srjalan->jumlah_dus;
                 } elseif ($spk_produk_nota_srjalan->tipe_packing === 'rol') {
-                    $jml_rol_pcs += $spk_produk_nota_srjalan->jumlah;
-                    $jml_rol = $srjalan->jml_rol;
+                    $jumlah_rol_pcs += $spk_produk_nota_srjalan->jumlah;
+                    $jumlah_rol = $srjalan->jumlah_rol;
                 } elseif ($spk_produk_nota_srjalan->tipe_packing === 'bal') {
                     $jml_bal_pcs += $spk_produk_nota_srjalan->jumlah;
                     $jml_bal += $spk_produk_nota_srjalan->jumlah_packing;
                 }
             }
             $jumlah_packing = array();
-            if ($jml_colly !== 0) {
-                $jumlah_packing[]=(["tipe_packing"=>"colly","jumlah"=>$jml_colly_pcs,"jumlah_packing"=>$jml_colly]);
+            if ($jumlah_colly !== 0) {
+                $jumlah_packing[]=(["tipe_packing"=>"colly","jumlah"=>$jumlah_colly_pcs,"jumlah_packing"=>$jumlah_colly]);
             }
-            if ($jml_dus !== 0) {
-                $jumlah_packing[]=(["tipe_packing"=>"dus","jumlah"=>$jml_dus_pcs,"jumlah_packing"=>$jml_dus]);
+            if ($jumlah_dus !== 0) {
+                $jumlah_packing[]=(["tipe_packing"=>"dus","jumlah"=>$jumlah_dus_pcs,"jumlah_packing"=>$jumlah_dus]);
             }
-            if ($jml_rol !== 0) {
-                $jumlah_packing[]=(["tipe_packing"=>"rol","jumlah"=>$jml_rol_pcs,"jumlah_packing"=>$jml_rol]);
+            if ($jumlah_rol !== 0) {
+                $jumlah_packing[]=(["tipe_packing"=>"rol","jumlah"=>$jumlah_rol_pcs,"jumlah_packing"=>$jumlah_rol]);
             }
             if ($jml_bal !== 0) {
                 $jumlah_packing[]=(["tipe_packing"=>"bal","jumlah"=>$jml_bal_pcs,"jumlah_packing"=>$jml_bal]);
@@ -326,7 +326,7 @@ class ArtisanController extends Controller
             $table->string('tipe', 20)->nullable(); // kantor, rumah, hp
             $table->string('kodearea', 10)->nullable();
             $table->string('nomor', 20)->nullable();
-            $table->enum('is_aktual',['yes','no'])->nullable()->default('no'); // ini untuk tujuan bila nomor terakhir belum tentu itu yang seharusnya otomatis tercantum di nota
+            $table->enum('is_actual',['yes','no'])->nullable()->default('no'); // ini untuk tujuan bila nomor terakhir belum tentu itu yang seharusnya otomatis tercantum di nota
             $table->string('lokasi',20)->nullable();// keterangan lokasi apabila di perlukan, terutama apabila nomor ini ber relasi dengan alamat.
             $table->timestamps();
         });
@@ -893,7 +893,7 @@ class ArtisanController extends Controller
             $table->string('kategori_level_two', 100)->nullable();
         });
 
-        $kategoris = Kategori::list_of_kategoris();
+        $kategoris = Category::list_of_kategoris();
 
         foreach ($kategoris as $kategori_types) {
             foreach ($kategori_types['kategori_level_one'] as $kategori_level_one) {
@@ -902,7 +902,7 @@ class ArtisanController extends Controller
                     // dump($kategori_types['kategori_level_two']);
                     foreach ($kategori_level_one['kategori_level_two'] as $kategori_level_two) {
                         try {
-                            Kategori::create([
+                            Category::create([
                                 'type'=>$kategori_types['type'],
                                 'kategori_level_one'=>$kategori_level_one['name'],
                                 'kategori_level_two' => $kategori_level_two['name']
@@ -915,7 +915,7 @@ class ArtisanController extends Controller
                         }
                     }
                 } else {
-                    Kategori::create([
+                    Category::create([
                         'type'=>$kategori_types['type'],
                         'kategori_level_one'=>$kategori_level_one['name'],
                         'kategori_level_two' => null

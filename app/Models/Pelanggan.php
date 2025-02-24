@@ -19,7 +19,7 @@ class Pelanggan extends Model
 
     static function kontak_aktual($pelanggan_id)
     {
-        $pelanggan_kontak_aktual = PelangganKontak::where('pelanggan_id', $pelanggan_id)->where('is_aktual', 'yes')->first();
+        $pelanggan_kontak_aktual = PelangganKontak::where('pelanggan_id', $pelanggan_id)->where('is_actual', true)->first();
         return $pelanggan_kontak_aktual;
     }
 
@@ -57,7 +57,7 @@ class Pelanggan extends Model
         }
         // Data Pelanggan - Kontak
         $kontak_id = $kontak = null;
-        $kontak=PelangganKontak::where('pelanggan_id',$pelanggan['id'])->where('is_aktual','yes')->first();
+        $kontak=PelangganKontak::where('pelanggan_id',$pelanggan['id'])->where('is_actual','yes')->first();
         if ($kontak !== null) {
             $kontak_id = $kontak->id;
         }

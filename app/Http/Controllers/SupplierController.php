@@ -33,7 +33,7 @@ class SupplierController extends Controller
             if ($supplier_alamat !== null) {
                 $alamat = Alamat::find($supplier_alamat->alamat_id);
             }
-            $supplier_kontak = SupplierKontak::where('supplier_id', $supplier->id)->where('is_aktual', 'yes')->first();
+            $supplier_kontak = SupplierKontak::where('supplier_id', $supplier->id)->where('is_actual', true)->first();
             $alamats->push($alamat);
             $supplier_kontaks->push($supplier_kontak);
         }
@@ -102,7 +102,7 @@ class SupplierController extends Controller
                 'tipe' => $post['tipe'],
                 'kodearea' => $post['kodearea'],
                 'nomor' => $post['nomor'],
-                'is_aktual' => 'yes',
+                'is_actual' => true,
             ]);
         }
         // END - STORE KONTAK
@@ -318,10 +318,10 @@ class SupplierController extends Controller
     function kontak_utama(Supplier $supplier, SupplierKontak $supplier_kontak) {
         $supplier_kontaks = SupplierKontak::where('supplier_id', $supplier->id)->get();
         foreach ($supplier_kontaks as $element) {
-            $element->is_aktual = 'no';
+            $element->is_actual = false;
             $element->save();
         }
-        $supplier_kontak->is_aktual = 'yes';
+        $supplier_kontak->is_actual = true;
         $supplier_kontak->save();
         return back()->with('success_', '-kontak utama updated.-');
     }

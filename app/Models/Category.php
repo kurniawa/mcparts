@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Kategori extends Model
+class Category extends Model
 {
     use HasFactory;
+    
     protected $guarded = ['id'];
     public $timestamps = false;
 
@@ -99,7 +100,3 @@ class Kategori extends Model
         ];
     }
 }
-// Cangcimen AQUATIC & TERRESTRIAL INDONESIA
-// CangciMen AQUATIC & TERRESTRIAL INDONESIA
-// CangciMEN AQUATIC & TERRESTRIAL INDONESIA
-// CibinongGuy AQUATIC & TERRESTRIAL INDONESIA

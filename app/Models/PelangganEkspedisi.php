@@ -30,7 +30,7 @@ class PelangganEkspedisi extends Model
                 $ekspedisi_long=$alamat_ekspedisi['long'];
                 $ekspedisi_short=$alamat_ekspedisi['short'];
             }
-            $ekspedisi_kontak=EkspedisiKontak::where('ekspedisi_id',$ekspedisi_id)->where('is_aktual','yes')->first();
+            $ekspedisi_kontak=EkspedisiKontak::where('ekspedisi_id',$ekspedisi_id)->where('is_actual','yes')->first();
             if ($ekspedisi_kontak!==null) {
                 $ekspedisi_kontak_id=$ekspedisi_kontak['id'];
                 $ekspedisi_kontak=json_encode($ekspedisi_kontak->toArray());

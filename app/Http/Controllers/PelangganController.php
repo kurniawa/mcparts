@@ -42,7 +42,7 @@ class PelangganController extends Controller
             if ($pelanggan_alamat !== null) {
                 $alamat = Alamat::find($pelanggan_alamat->alamat_id);
             }
-            $pelanggan_kontak = PelangganKontak::where('pelanggan_id', $pelanggan->id)->where('is_aktual', 'yes')->first();
+            $pelanggan_kontak = PelangganKontak::where('pelanggan_id', $pelanggan->id)->where('is_actual', true)->first();
             $alamats->push($alamat);
             $pelanggan_kontaks->push($pelanggan_kontak);
         }
@@ -209,7 +209,7 @@ class PelangganController extends Controller
                 'tipe' => $post['tipe'],
                 'kodearea' => $post['kodearea'],
                 'nomor' => $post['nomor'],
-                'is_aktual' => 'yes',
+                'is_actual' => true,
             ]);
         }
         // END - STORE KONTAK
@@ -421,10 +421,10 @@ class PelangganController extends Controller
     function kontak_utama(Pelanggan $pelanggan, PelangganKontak $pelanggan_kontak) {
         $pelanggan_kontaks = PelangganKontak::where('pelanggan_id', $pelanggan->id)->get();
         foreach ($pelanggan_kontaks as $element) {
-            $element->is_aktual = 'no';
+            $element->is_actual = false;
             $element->save();
         }
-        $pelanggan_kontak->is_aktual = 'yes';
+        $pelanggan_kontak->is_actual = true;
         $pelanggan_kontak->save();
         return back()->with('success_', '-kontak utama updated.-');
     }

@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('tipe_packing', 20)->nullable();
             // Penetapan Data Sr. Jalan Selesai:
             $table->smallInteger('jumlah');
-            $table->smallInteger('jml_packing')->nullable();
+            $table->smallInteger('jumlah_packing')->nullable();
             $table->timestamps();
         });
     }

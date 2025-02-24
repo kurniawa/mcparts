@@ -75,7 +75,7 @@
             <p>Srjalan: Add Column: jumlah_packing -> string -> nanti value nya string json, karena tipe_packing bisa macam2: colly, dus, rol</p>
             <p>comment: type: string json</p>
             <button class="bg-indigo-400 text-white font-semibold rounded px-3 py-2">SJ: srjalan_fix_jumlah_packing</button>
-            <p>Jangan dulu sampe bener2 yakin: Hapus jml_colly, jml_dus, jml_rol -> karena ini hardcoded, bad programming</p>
+            <p>Jangan dulu sampe bener2 yakin: Hapus jumlah_colly, jumlah_dus, jumlah_rol -> karena ini hardcoded, bad programming</p>
         </form>
     </div>
 

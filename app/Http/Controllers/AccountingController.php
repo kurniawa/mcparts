@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Accounting;
-use App\Models\Kategori;
+use App\Models\Category;
 use App\Models\Menu;
 use App\Models\Pelanggan;
 use App\Models\Supplier;
@@ -159,8 +159,8 @@ class AccountingController extends Controller
         $related_users = User::where('id', '!=', $user->id)->get();
 
         $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->where('user_instance_id', $user_instance->id)->orderBy('desc')->get();
-        // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
-        // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
+        // $label_kategori_level_one = Category::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
+        // $label_kategori_level_two = Category::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();
 
         $notifications = Accounting::where('related_user_instance_id', $user_instance->id)->latest()->limit(100)->get();
@@ -1021,8 +1021,8 @@ class AccountingController extends Controller
         $related_users = User::where('id', '!=', $user->id)->get();
 
         $label_deskripsi = TransactionName::select('desc as label', 'desc as value')->groupBy('desc')->orderBy('desc')->get();
-        // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
-        // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
+        // $label_kategori_level_one = Category::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
+        // $label_kategori_level_two = Category::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();
 
         // $notifications = Accounting::where('related_user_instance_id', $user_instance->id)->latest()->limit(100)->get();
@@ -1069,7 +1069,7 @@ class AccountingController extends Controller
     function ringkasan(Request $request) {
         $get = $request->query();
 
-        $kategories = Kategori::list_of_kategoris();
+        $kategories = Category::list_of_kategoris();
         $ringkasans = array();
 
         $from = null;
@@ -1296,8 +1296,8 @@ class AccountingController extends Controller
         $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->groupBy('id', 'desc')->orderBy('desc')->get();
         // dump($label_deskripsi_keluar);
         // dd($label_deskripsi_masuk);
-        $kategoris = Kategori::all();
-        // $label_kategori_level_one = Kategori::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
+        $kategoris = Category::all();
+        // $label_kategori_level_one = Category::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.transactions_relations',
@@ -1341,9 +1341,9 @@ class AccountingController extends Controller
         $exist_kategori = null;
 
         if ($post['kategori_level_two']) {
-            $exist_kategori = Kategori::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->where('kategori_level_two', $post['kategori_level_two'])->first();
+            $exist_kategori = Category::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->where('kategori_level_two', $post['kategori_level_two'])->first();
         } else {
-            $exist_kategori = Kategori::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->first();
+            $exist_kategori = Category::where('type', $post['type'])->where('kategori_level_one', $post['kategori_level_one'])->first();
             if ($exist_kategori->kategori_level_two !== null) {
                 dump($exist_kategori);
                 dd('kategori_level_two?');

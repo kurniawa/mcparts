@@ -364,7 +364,7 @@ class SrjalanController extends Controller
         $ekspedisi = Ekspedisi::find($post['ekspedisi_id']);
         $ekspedisi_alamat = EkspedisiAlamat::where('ekspedisi_id', $ekspedisi->id)->where('tipe', 'UTAMA')->first();
         $alamat_ekspedisi = Alamat::find($ekspedisi_alamat->alamat_id);
-        $ekspedisi_kontak = EkspedisiKontak::where('ekspedisi_id', $ekspedisi->id)->where('is_aktual', 'yes')->first();
+        $ekspedisi_kontak = EkspedisiKontak::where('ekspedisi_id', $ekspedisi->id)->where('is_actual', true)->first();
 
         // dump($ekspedisi);
         // dump($ekspedisi_alamat);
@@ -414,7 +414,7 @@ class SrjalanController extends Controller
         $transit = Ekspedisi::find($post['transit_id']);
         $transit_alamat = EkspedisiAlamat::where('ekspedisi_id', $transit->id)->where('tipe', 'UTAMA')->first();
         $alamat_transit = Alamat::find($transit_alamat->alamat_id);
-        $transit_kontak = EkspedisiKontak::where('ekspedisi_id', $transit->id)->where('is_aktual', 'yes')->first();
+        $transit_kontak = EkspedisiKontak::where('ekspedisi_id', $transit->id)->where('is_actual', true)->first();
 
         // dump($transit);
         // dump($transit_alamat);
