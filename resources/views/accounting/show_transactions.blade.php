@@ -102,7 +102,7 @@
                     <table class="text-xs">
                         <tr><td>Tipe Instansi</td><td>:</td><td><div class="ml-2">{{ $user_instance->instance_type }}</div></td></tr>
                         <tr><td>Nama Instansi</td><td>:</td><td><div class="ml-2">{{ $user_instance->instance_name }}</div></td></tr>
-                        <tr><td>Branch</td><td>:</td><td><div class="ml-2">{{ $user_instance->branch }}</div></td></tr>
+                        <tr><td>Branch</td><td>:</td><td><div class="ml-2">{{ $user_instance->instance_branch }}</div></td></tr>
                         @if ($user_instance->account_number)
                         <tr><td>Nomor Rek.</td><td>:</td><td><div class="ml-2">{{ $user_instance->account_number }}</div></td></tr>
                         @endif

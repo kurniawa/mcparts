@@ -90,7 +90,7 @@
                             <td>
                                 <div class="ml-2">
                                     <a href="{{ route('accounting.show_transactions', $user_ins->id) }}" target="" class="text-sky-500 font-bold">
-                                        <button>{{ $user_ins->instance_type }} - {{ $user_ins->instance_name }} - {{ $user_ins->branch }} >></button>
+                                        <button>{{ $user_ins->instance_type }} - {{ $user_ins->instance_name }} - {{ $user_ins->instance_branch }} >></button>
                                     </a>
                                 </div>
                             </td>
@@ -112,7 +112,7 @@
                             <td>{{ $user_instance->username }}</td>
                             <td>{{ $user_instance->instance_type }}</td>
                             <td>{{ $user_instance->instance_name }}</td>
-                            <td>{{ $user_instance->branch }}</td>
+                            <td>{{ $user_instance->instance_branch }}</td>
                             <td>
                                 <div class="ml-2">
                                     <a href="{{ route('accounting.show_transactions', $user_instance->id) }}" target="" class="text-sky-500 font-bold">

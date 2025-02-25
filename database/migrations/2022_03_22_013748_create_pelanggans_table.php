@@ -31,7 +31,7 @@ return new class extends Migration
             $table->date("tanggal_lahir")->nullable();
             $table->string("kategori", 20)->nullable()->default('pelanggan'); // bisa juga dia tukang kredit misalnya
             $table->string("keterangan")->nullable();
-            $table->enum("is_reseller", ['yes', 'no'])->nullable()->default('no');
+            $table->boolean("is_reseller")->nullable()->default(false);
             $table->bigInteger("reseller_id")->nullable();
             $table->string('creator', 50)->nullable();
             $table->string('updater', 50)->nullable();

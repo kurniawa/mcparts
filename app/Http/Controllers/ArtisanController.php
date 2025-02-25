@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Accounting;
 use App\Models\Barang;
-use App\Models\Category;
+use App\Models\Kategori;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
@@ -893,7 +893,7 @@ class ArtisanController extends Controller
             $table->string('kategori_level_two', 100)->nullable();
         });
 
-        $kategoris = Category::list_of_kategoris();
+        $kategoris = Kategori::list_of_kategoris();
 
         foreach ($kategoris as $kategori_types) {
             foreach ($kategori_types['kategori_level_one'] as $kategori_level_one) {
@@ -902,7 +902,7 @@ class ArtisanController extends Controller
                     // dump($kategori_types['kategori_level_two']);
                     foreach ($kategori_level_one['kategori_level_two'] as $kategori_level_two) {
                         try {
-                            Category::create([
+                            Kategori::create([
                                 'type'=>$kategori_types['type'],
                                 'kategori_level_one'=>$kategori_level_one['name'],
                                 'kategori_level_two' => $kategori_level_two['name']
@@ -915,7 +915,7 @@ class ArtisanController extends Controller
                         }
                     }
                 } else {
-                    Category::create([
+                    Kategori::create([
                         'type'=>$kategori_types['type'],
                         'kategori_level_one'=>$kategori_level_one['name'],
                         'kategori_level_two' => null

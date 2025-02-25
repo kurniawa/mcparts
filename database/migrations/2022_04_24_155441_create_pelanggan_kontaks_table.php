@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('pelanggan_id')->constrained()->onDelete('CASCADE');
             $table->string('tipe', 20)->nullable(); // kantor, rumah, hp
             $table->string('kodearea', 10)->nullable();
-            $table->string('nomor', 20)->nullable();
+            $table->string('nomor', 50)->nullable();
             $table->enum('is_actual',['yes','no'])->nullable()->default('no'); // ini untuk tujuan bila nomor terakhir belum tentu itu yang seharusnya otomatis tercantum di nota
             $table->string('lokasi',20)->nullable();// keterangan lokasi apabila di perlukan, terutama apabila nomor ini ber relasi dengan alamat.
             $table->timestamps();

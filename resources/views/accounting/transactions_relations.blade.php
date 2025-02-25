@@ -47,7 +47,7 @@
                                     @foreach ($user_instances_all as $key => $user_instance)
                                     <div class="flex mt-1">
                                         <input type="radio" name="user_instance_id" id="filter-user_instance_id-{{ $key }}" value="{{ $user_instance->id }}">
-                                        <label for="filter-user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
+                                        <label for="filter-user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->instance_branch }} - {{ $user_instance->account_number }}</label>
                                     </div>
                                     @endforeach
                                 </div>
@@ -114,7 +114,7 @@
                                         @if (Auth::user()->id === (int)$user_instance->user_id)
                                         <div class="flex mt-1">
                                             <input type="radio" name="user_instance_id" id="new_relasi_transaksi-user_instance_id-{{ $key }}" value="{{ $user_instance->id }}">
-                                            <label for="new_relasi_transaksi-user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
+                                            <label for="new_relasi_transaksi-user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->instance_branch }} - {{ $user_instance->account_number }}</label>
                                         </div>
                                         @endif
                                         @endforeach
@@ -165,7 +165,7 @@
                                         @foreach ($user_instances_all as $key => $user_instance)
                                         <div class="flex mt-1">
                                             <input type="radio" name="related_user_instance_id" id="new_relasi_transaksi-related_user_instance_id-{{ $key }}" value="{{ $user_instance->id }}">
-                                            <label for="new_relasi_transaksi-related_user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
+                                            <label for="new_relasi_transaksi-related_user_instance_id-{{ $key }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->instance_branch }} - {{ $user_instance->account_number }}</label>
                                         </div>
                                         @endforeach
                                     </div>
@@ -224,7 +224,7 @@
                     <tr class="bg-violet-300">
                         <td colspan="4">
                             <div class="font-semibold">
-                                {{ $user_instances[$key]->username }} - {{ $user_instances[$key]->instance_type }} - {{ $user_instances[$key]->instance_name }} - {{ $user_instances[$key]->branch }} - {{ $user_instances[$key]->account_number }} - {{ $user_instances[$key]->kode }}
+                                {{ $user_instances[$key]->username }} - {{ $user_instances[$key]->instance_type }} - {{ $user_instances[$key]->instance_name }} - {{ $user_instances[$key]->instance_branch }} - {{ $user_instances[$key]->account_number }} - {{ $user_instances[$key]->kode }}
                             </div>
                         </td>
                     </tr>
@@ -291,7 +291,7 @@
                                                     @else
                                                     <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}">
                                                     @endif
-                                                    <label for="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance_this->instance_type }} - {{ $user_instance_this->instance_name }} - {{ $user_instance_this->branch }} - {{ $user_instance_this->account_number }}</label>
+                                                    <label for="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance_this->instance_type }} - {{ $user_instance_this->instance_name }} - {{ $user_instance_this->instance_branch }} - {{ $user_instance_this->account_number }}</label>
                                                 </div>
                                                 @endforeach
                                             </div>
@@ -343,7 +343,7 @@
                                                     @else
                                                     <input type="radio" name="related_user_instance_id" id="edit-related_user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance->id }}">
                                                     @endif
-                                                    <label for="edit-related_user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->branch }} - {{ $user_instance->account_number }}</label>
+                                                    <label for="edit-related_user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance->instance_type }} - {{ $user_instance->instance_name }} - {{ $user_instance->instance_branch }} - {{ $user_instance->account_number }}</label>
                                                 </div>
                                                 @endforeach
                                             </div>

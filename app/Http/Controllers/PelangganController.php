@@ -568,7 +568,7 @@ class PelangganController extends Controller
         ]);
 
         $reseller = Pelanggan::find($post['reseller_id']);
-        if ($reseller->is_reseller !== 'yes') {
+        if (!$reseller->is_reseller) {
             $request->validate(['error'=>'required'],['error.required'=>'calon reseller belum ditetapkan sebagai reseller']);
         }
 
@@ -593,7 +593,7 @@ class PelangganController extends Controller
         ]);
 
         $reseller = Pelanggan::find($post['reseller_id']);
-        if ($reseller->is_reseller !== 'yes') {
+        if (!$reseller->is_reseller) {
             $request->validate(['error'=>'required'],['error.required'=>'calon reseller belum ditetapkan sebagai reseller']);
         }
 

@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('supplier_kontaks', function (Blueprint $table) {
+        Schema::create('contact_numbers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('supplier_id')->constrained()->onDelete('CASCADE');
-            $table->string('tipe', 20)->nullable();
-            $table->string('kodearea', 20)->nullable();
-            $table->string('nomor', 50)->nullable();
+            $table->string('reference_table', 50);
+            $table->string('type', 20)->nullable();
+            $table->string('code_area', 20)->nullable();
+            $table->string('number', 20)->nullable();
             $table->boolean('is_actual')->nullable()->default(true);
-            $table->string('lokasi', 20)->nullable();
+            $table->string('location', 20)->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('supplier_kontaks');
+        Schema::dropIfExists('contact_numbers');
     }
 };
