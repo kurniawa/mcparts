@@ -31,8 +31,13 @@ class BackupSeeder extends Seeder
     
             // Insert data ke tabel 'users'
             if (!empty($data)) {
-                DB::table($table)->insert($data);
+                $chunks = array_chunk($data, 1000); // Pecah data menjadi batch 1000 per insert
+
+                foreach ($chunks as $chunk) {
+                    DB::table($table)->insert($chunk);
+                }
                 $this->command->info("Data berhasil dimasukkan ke tabel $table.");
+                
             } else {
                 $this->command->warn("Tidak ada data yang ditemukan di file $table JSON.");
             }

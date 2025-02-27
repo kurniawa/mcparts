@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('bentuk', 20)->nullable();
             $table->string('nama', 100);
-            $table->string('owner', 100)->nullable();
+            $table->string('owner_name', 100)->nullable();
             $table->string('initial', 10)->nullable();
             $table->string('keterangan')->nullable();
             $table->string('created_by', 100)->nullable();

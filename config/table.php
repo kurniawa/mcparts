@@ -7,8 +7,7 @@
             'japstyles', 'japstyle_hargas', 'specs', 'spec_hargas', 'produk_bahans', 'produk_specs', 'kombinasis', 'kombinasi_hargas', 'produk_busastangs', 'produk_kombinasis', 'produk_tsixpacks',
             'produk_japstyles', 'produk_motifs', 'produk_standars', 'produk_stikers', 'produk_tankpads', 'jokassies', 'jokassy_hargas', 'produk_jokassies', 'rols', 'rotans', 'produk_rols',
             'produk_rotans', 'rol_hargas', 'rotan_hargas', 'produk_variasi_varians', 'photos', 'produk_photos', 'tipe_packings', 'kategoris', 'supplier_alamats',
-            'supplier_kontaks', 'barangs', 'user_instances', 'transaction_names', 'pembelians', 'pembelian_barangs', 'accountings'
-        ],
+            'supplier_kontaks', 'barangs', 'user_instances', 'transaction_names', 'pembelians', 'pembelian_barangs', 'accountings'],
         'new_list' => ['contact_numbers']
     ]; 
 ?>

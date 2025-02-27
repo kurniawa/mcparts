@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('user_instances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('username');
-            $table->foreignId('user_instance_id')->nullable()->constrained();
+            $table->foreignId('user_instance_id')->nullable()->constrained()->onDelete('set null');
             $table->string('instance_type', 50);
             $table->string('instance_name', 50);
             $table->string('instance_branch', 50);

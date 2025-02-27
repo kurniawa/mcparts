@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('supplier_kontak', 50)->nullable();
             $table->string('keterangan')->nullable();
             $table->string('isi')->nullable();
-            $table->decimal('harga_total', 15, 2)->nullable();
+            $table->decimal('harga_total', 20, 2)->nullable();
             $table->string('status_bayar', 20)->default('BELUM');
             $table->string('keterangan_bayar')->nullable();
             $table->timestamp('tanggal_lunas')->nullable();

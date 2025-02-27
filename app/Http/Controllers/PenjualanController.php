@@ -29,11 +29,11 @@ class PenjualanController extends Controller
             }
 
             if ($get['pelanggan_nama'] && $date_start && $date_end) {
-                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->get();
+                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->orderBy('created_at')->get();
                 $pelanggan = Pelanggan::where('nama', $get['pelanggan_nama'])->first();
                 $pelanggan_id = $pelanggan->id;
             } elseif ($get['pelanggan_nama'] && !$date_start && !$date_end) {
-                $notas = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('id')->get();
+                $notas = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('created_at')->get();
                 $notas_orderby_date = Nota::where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('created_at')->get();
                 $date_start = $notas_orderby_date[0]->created_at;
                 $date_start = date('Y-m-d', strtotime($date_start));
@@ -42,14 +42,14 @@ class PenjualanController extends Controller
                 $pelanggan = Pelanggan::where('nama', $get['pelanggan_nama'])->first();
                 $pelanggan_id = $pelanggan->id;
             } elseif (!$get['pelanggan_nama'] && $date_start && $date_end) {
-                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->get();
+                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get();
             } else {
                 $request->validate(['error'=>'required'],['error.required'=>'customer || time_range']);
             }
         } else {
             $date_start = date('Y') . "-" . date('m') . "-01";
             $date_end = date('Y') . "-" . date('m') . "-" . date('d') . " 23:59:59";
-            $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->get();
+            $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get();
         }
 
         // dump($notas);

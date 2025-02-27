@@ -24,34 +24,34 @@ return new class extends Migration
             $table->foreignId('alamat_id')->nullable()->constrained()->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
             $table->string('cust_long')->nullable();
             $table->string('cust_short')->nullable();
-            $table->foreignId('kontak_id')->nullable()->constrained('pelanggan_kontaks','id')->onDelete('SET NULL');
+            $table->foreignId('kontak_id')->nullable()->constrained('pelanggan_kontaks')->onDelete('SET NULL');
             $table->string('cust_kontak')->nullable();
 
             // Data Reseller
             $table->bigInteger('reseller_id')->nullable();
             $table->string('reseller_nama',50)->nullable();
-            $table->foreignId('reseller_alamat_id')->nullable()->constrained('alamats','id')->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
+            $table->foreignId('reseller_alamat_id')->nullable()->constrained('alamats')->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
             $table->string('reseller_long')->nullable();
             $table->string('reseller_short')->nullable();
-            $table->foreignId('reseller_kontak_id')->nullable()->constrained('pelanggan_kontaks','id')->onDelete('SET NULL');
+            $table->foreignId('reseller_kontak_id')->nullable()->constrained('pelanggan_kontaks')->onDelete('SET NULL');
             $table->string('reseller_kontak')->nullable();
 
             // Data Ekspedisi
             $table->foreignId('ekspedisi_id')->nullable()->constrained()->onDelete('SET NULL');// constrained tetapi ketika ekspedisi dihapus, surat jalan janganlah dihapus
             $table->string('ekspedisi_nama',50)->nullable();
-            $table->foreignId('ekspedisi_alamat_id')->nullable()->constrained('alamats','id')->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
-            $table->string('ekspedisi_long_')->nullable();
+            $table->foreignId('ekspedisi_alamat_id')->nullable()->constrained('alamats')->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
+            $table->string('ekspedisi_long')->nullable();
             $table->string('ekspedisi_short')->nullable();
-            $table->foreignId('ekspedisi_kontak_id')->nullable()->constrained('ekspedisi_kontaks','id')->onDelete('SET NULL');
+            $table->foreignId('ekspedisi_kontak_id')->nullable()->constrained('ekspedisi_kontaks')->onDelete('SET NULL');
             $table->string('ekspedisi_kontak')->nullable();
 
             // Data Transit
-            $table->foreignId('ekspedisi_transit_id')->nullable()->constrained('ekspedisis','id')->onDelete('SET NULL');
+            $table->foreignId('ekspedisi_transit_id')->nullable()->constrained('ekspedisis')->onDelete('SET NULL');
             $table->string('transit_nama',50)->nullable();
-            $table->foreignId('alamat_transit_id')->nullable()->constrained('alamats','id')->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
-            $table->string('transit_long_ala')->nullable();
+            $table->foreignId('transit_alamat_id')->nullable()->constrained('alamats')->onDelete('SET NULL'); // penting kalo sewaktu-waktu alamat utama pelanggan di edit.
+            $table->string('transit_long')->nullable();
             $table->string('transit_short')->nullable();
-            $table->foreignId('kontak_transit_id')->nullable()->constrained('ekspedisi_kontaks','id')->onDelete('SET NULL');
+            $table->foreignId('transit_kontak_id')->nullable()->constrained('ekspedisi_kontaks')->onDelete('SET NULL');
             $table->string('transit_kontak')->nullable();
             
             $table->string('status', 50)->default('PROSES KIRIM');

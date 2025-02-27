@@ -18,12 +18,12 @@ return new class extends Migration
             $table->string('nama');
             $table->string('satuan_main', 20)->nullable();
             $table->string('satuan_sub', 20)->nullable();
-            $table->decimal('harga_main', 11, 2)->nullable();
-            $table->decimal('harga_sub', 11, 2)->nullable();
+            $table->decimal('harga_main', 15, 2)->nullable();
+            $table->decimal('harga_sub', 15, 2)->nullable();
             $table->integer('jumlah_main')->nullable();
             $table->integer('jumlah_sub')->nullable();
-            $table->decimal('harga_total_main', 15, 2)->nullable();
-            $table->decimal('harga_total_sub', 15, 2)->nullable();
+            $table->decimal('harga_total_main', 20, 2)->nullable();
+            $table->decimal('harga_total_sub', 20, 2)->nullable();
             $table->string('keterangan')->nullable();
             $table->timestamps();
         });

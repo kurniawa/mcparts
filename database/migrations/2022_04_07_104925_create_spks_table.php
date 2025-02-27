@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('status', 20)->nullable()->default('PROSES');
             $table->string('status_nota', 20)->nullable()->default('BELUM');
             $table->string('status_srjalan', 20)->nullable()->default('BELUM');
+            $table->boolean('copy')->nullable()->default(true);
             $table->string('keterangan')->nullable();
             // $table->text('data_spk_item');
             $table->integer('jumlah_selesai')->nullable()->default(0);

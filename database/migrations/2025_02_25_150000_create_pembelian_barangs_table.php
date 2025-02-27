@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('barang_nama');
             $table->string('satuan_main', 20);
             $table->integer('jumlah_main');
-            $table->decimal('harga_main', 15, 2);
+            $table->decimal('harga_main', 20, 2);
             $table->string('satuan_sub', 20)->nullable();
             $table->integer('jumlah_sub')->nullable();
-            $table->decimal('harga_sub', 15, 2)->nullable();
-            $table->decimal('harga_t', 15, 2);
+            $table->decimal('harga_sub', 20, 2)->nullable();
+            $table->decimal('harga_t', 20, 2);
             $table->string('keterangan')->nullable();
             $table->string('status_bayar', 20)->default('BELUM');
             $table->string('keterangan_bayar')->nullable();

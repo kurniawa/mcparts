@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('transaction_names', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('username');
-            $table->foreignId('user_instance_id')->nullable()->constrained();
+            $table->foreignId('user_instance_id')->nullable()->constrained()->onDelete('set null');
             $table->string('user_instance_type', 50);
             $table->string('user_instance_name', 50);
             $table->string('user_instance_branch', 50);
@@ -23,14 +23,14 @@ return new class extends Migration
             $table->string('kategori_type', 100)->nullable();
             $table->string('kategori_level_one', 100)->nullable();
             $table->string('kategori_level_two', 100)->nullable();
-            $table->foreignId('pelanggan_id')->nullable()->constrained();
+            $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('set null');
             $table->string('pelanggan_nama', 100)->nullable();
-            $table->foreignId('supplier_id')->nullable()->constrained();
+            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
             $table->string('supplier_nama', 100)->nullable();
             $table->foreignId('related_user_id')->nullable()->constrained('users');
             $table->string('related_username', 100)->nullable();
             $table->string('related_desc')->nullable();
-            $table->foreignId('related_user_instance_id')->nullable()->constrained('user_instances');
+            $table->foreignId('related_user_instance_id')->nullable()->constrained('user_instances')->onDelete('set null');
             $table->string('related_user_instance_type', 50)->nullable();
             $table->string('related_user_instance_name', 50)->nullable();
             $table->string('related_user_instance_branch', 50)->nullable();
