@@ -36,7 +36,7 @@ class PenjualanController extends Controller
                 $pelanggans = Pelanggan::where('nama', 'like', "%$get[pelanggan_nama]%")->get();
                 $notas = collect();
                 foreach ($pelanggans as $key => $pelanggan) {
-                    $notas = $notas->merge(Nota::where('pelanggan_nama', $pelanggan->nama)->latest()->limit(300)->get());
+                    $notas = $notas->merge(Nota::where('pelanggan_nama', $pelanggan->nama)->latest()->limit(300)->get()->sortBy('created_at'));
                 }
                 // $notas_orderby_date = $notas->sortBy('created_at');
                 // $date_start = $notas_orderby_date[0]->created_at;
