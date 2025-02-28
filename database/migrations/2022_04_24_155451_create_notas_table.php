@@ -35,9 +35,9 @@ return new class extends Migration
             $table->foreignId('reseller_kontak_id')->nullable()->constrained('pelanggan_kontaks')->onDelete('SET NULL');
             $table->string('reseller_kontak')->nullable();
 
-            $table->integer('jumlah_total')->nullable();
-            $table->integer('harga_total')->nullable();
-            $table->string('status_bayar', 50)->default('BELUM');
+            $table->mediumInteger('jumlah_total')->nullable();
+            $table->decimal('harga_total', 20, 2)->nullable();
+            $table->string('status_bayar', 50)->default('BELUM-LUNAS');
             $table->boolean('copy')->nullable()->default(true);
             $table->string('created_by');
             $table->string('updated_by');

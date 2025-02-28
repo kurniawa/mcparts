@@ -104,6 +104,10 @@ class BackupDatabaseToJSON extends Command
                         $item['reseller_kontak'] = $reseller_kontak;
                     }
 
+                    if ($item['status_bayar'] === 'belum' || $item['status_bayar'] === 'BELUM') {
+                        $item['status_bayar'] = 'BELUM-LUNAS';
+                    }
+
                     return $item;
                 });
             } elseif ($table === 'srjalans') {
