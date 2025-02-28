@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('spks', function (Blueprint $table) {
             $table->id();
             $table->string('no_spk', 20)->nullable();
-            $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggans')->onDelete('SET NULL');
+            $table->foreignId('pelanggan_id')->nullable()->constrained()->onDelete('SET NULL');
             $table->foreignId('reseller_id')->nullable()->constrained('pelanggans')->onDelete('SET NULL');
             $table->string('status', 20)->nullable()->default('PROSES');
             $table->string('status_nota', 20)->nullable()->default('BELUM');

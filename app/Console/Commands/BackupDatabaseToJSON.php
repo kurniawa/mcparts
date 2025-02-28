@@ -30,7 +30,22 @@ class BackupDatabaseToJSON extends Command
         $tables = config('table.list');
         // $concerned_table = ['pelanggans', 'suppliers', 'srjalans'];
         foreach ($tables as $key => $table) {
-            if ($table === 'pelanggans') {
+            if ($table === 'users') {
+                $data = DB::connection('mysql_old')->table($table)->get()->map(function ($item) {
+                    $item = json_decode(json_encode($item), true); // Ubah object menjadi array
+
+                    $item['clearance_level'] = 1;
+                    if ($item['id'] === 1) {
+                        $item['clearance_level'] = 5;
+                    } elseif ($item['id'] === 2) {
+                        $item['clearance_level'] = 3;
+                    } elseif ($item['id'] === 6 || $item['id'] === 7) {
+                        $item['clearance_level'] = 2;
+                    }
+                    
+                    return $item;
+                });
+            } elseif ($table === 'pelanggans') {
                 $data = DB::connection('mysql_old')->table($table)->get()->map(function ($item) {
                     $item->is_reseller = ($item->is_reseller === 'yes') ? 1 : 0;
                     return $item;
@@ -45,6 +60,15 @@ class BackupDatabaseToJSON extends Command
                         unset($item['nama_pemilik']); // Hapus kolom lama
                         unset($item['creator']); // Hapus kolom lama
                         unset($item['updater']); // Hapus kolom lama
+                    }
+                    return $item;
+                });
+            } elseif ($table === 'spks') {
+                $data = DB::connection('mysql_old')->table($table)->get()->map(function ($item) {
+                    $item = json_decode(json_encode($item), true); // Ubah object menjadi array
+                    $item['pxr_name'] = null;
+                    if ($item['reseller_id']) {
+                        $item['pxr_name'] = "$item[reseller_nama] - $item[pelanggan_nama]";
                     }
                     return $item;
                 });
@@ -203,6 +227,15 @@ class BackupDatabaseToJSON extends Command
                     $item['instance_branch'] = $item['branch'];
                     // Hapus kolom lama
                     unset($item['branch']);
+
+                    return $item;
+                });
+            } elseif ($table === 'pembelians' || $table === 'pembelian_barangs') {
+                $data = DB::connection('mysql_old')->table($table)->get()->map(function ($item) {
+                    $item = json_decode(json_encode($item), true); // Ubah object menjadi array
+                    if ($item['status_bayar'] === 'belum' || $item['status_bayar'] === 'BELUM') {
+                        $item['status_bayar'] = 'BELUM-LUNAS';
+                    }
 
                     return $item;
                 });
