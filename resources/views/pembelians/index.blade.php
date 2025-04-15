@@ -621,12 +621,13 @@
                         </tr>
                         <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>{{ $grand_total - $lunas_total }}</td><td>{{ $lunas_total }}</td><td>{{ $grand_total }}</td></tr>
                         <tr>
-                            <th>tanggal</th><th>supplier</th><th>nomor nota</th><th>nama barang</th><th>keterangan</th><th>jumlah sub</th><th>jumlah main</th><th>harga</th><th>harga total</th>
+                            <th>tanggal</th><th>tanggal lunas</th><th>supplier</th><th>nomor nota</th><th>nama barang</th><th>keterangan</th><th>jumlah sub</th><th>jumlah main</th><th>harga</th><th>harga total</th>
                         </tr>
                         @for ($i = 0; $i < count($pembelians); $i++)
                         @foreach ($pembelian_barangs_all[$i] as $key_pembelian_barang => $pembelian_barang)
                         <tr class="border-b">
                             <td>{{ date('d-m-Y',strtotime($pembelians[$i]->created_at)) }}</td>
+                            <td>{{ $pembelians[$i]->tanggal_lunas ? date('d-m-Y',strtotime($pembelians[$i]->tanggal_lunas)) : "" }}</td>
                             <td>
                                 @if ($alamats[$i] !== null)
                                 {{ $pembelians[$i]['supplier_nama'] }} - {{ $alamats[$i]['short'] }}
