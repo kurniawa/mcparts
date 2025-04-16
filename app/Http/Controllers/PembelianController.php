@@ -319,6 +319,7 @@ class PembelianController extends Controller
 
 
         $pembelian_barangs_all = collect();
+        $real_count_grand_total = 0;
         $alamats = collect();
         $kontaks = collect();
         $grand_total = 0;
@@ -326,7 +327,14 @@ class PembelianController extends Controller
 
         foreach ($pembelians as $pembelian) {
             $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->get();
+            // Menghitung $real_count_grand_total
+            $harga_total = 0;
+            foreach ($pembelian_barangs as $pembelian_barang) {
+                $harga_total += $pembelian_barang->harga_t;
+            }
             $pembelian_barangs_all->push($pembelian_barangs);
+            $real_count_grand_total += $harga_total;
+
             $supplier_alamat = SupplierAlamat::where('supplier_id', $pembelian->supplier_id)->where('tipe', 'UTAMA')->first();
             if ($supplier_alamat!== null) {
                 $alamat = Alamat::find($supplier_alamat->alamat_id);
@@ -381,6 +389,7 @@ class PembelianController extends Controller
             'pembelian_menus' => Menu::get_pembelian_menus(),
             'pembelians' => $pembelians,
             'pembelian_barangs_all' => $pembelian_barangs_all,
+            'real_count_grand_total' => $real_count_grand_total,
             'alamats' => $alamats,
             'kontaks' => $kontaks,
             'label_supplier' => $label_supplier,

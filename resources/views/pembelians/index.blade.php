@@ -617,11 +617,11 @@
                 <div class="border rounded p-2">
                     <table id="pembelian-to-excel">
                         <tr>
-                            <th></th><th></th><th></th><th></th><th></th><th></th><th>belum lunas</th><th>sudah lunas</th><th>grand total</th>
+                            <th></th><th></th><th></th><th></th><th></th><th></th><th>belum lunas</th><th>sudah lunas</th><th>grand total</th><th>real count grand total</th>
                         </tr>
-                        <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>{{ $grand_total - $lunas_total }}</td><td>{{ $lunas_total }}</td><td>{{ $grand_total }}</td></tr>
+                        <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>{{ str_replace('.', ',', ($grand_total - $lunas_total)) }}</td><td>{{ str_replace('.', ',', $lunas_total) }}</td><td>{{ str_replace('.', ',', $grand_total) }}</td><td>{{ str_replace('.', ',', $real_count_grand_total) }}</td></tr>
                         <tr>
-                            <th>tanggal</th><th>tanggal lunas</th><th>supplier</th><th>nomor nota</th><th>nama barang</th><th>keterangan</th><th>jumlah sub</th><th>jumlah main</th><th>harga</th><th>harga total</th>
+                            <th>tanggal</th><th>tanggal lunas</th><th>supplier</th><th>nomor nota</th><th>nama barang</th><th>keterangan</th><th colspan="2">jumlah sub</th><th colspan="2">jumlah main</th><th>harga</th><th>harga total</th>
                         </tr>
                         @for ($i = 0; $i < count($pembelians); $i++)
                         @foreach ($pembelian_barangs_all[$i] as $key_pembelian_barang => $pembelian_barang)
@@ -638,10 +638,10 @@
                             <td>{{ $pembelians[$i]->nomor_nota }}</td>
                             <td>{{ $pembelian_barang->barang_nama }}</td>
                             <td>{{ $pembelians[$i]->keterangan_bayar }}</td>
-                            <td>{{ $pembelian_barang->jumlah_sub / 100 }} {{ $pembelian_barang->satuan_sub }}</td>
-                            <td>{{ $pembelian_barang->jumlah_main / 100 }} {{ $pembelian_barang->satuan_main }}</td>
-                            <td>{{ $pembelian_barang->harga_main }}</td>
-                            <td>{{ $pembelian_barang->harga_t }}</td>
+                            <td class="text-center">{{ $pembelian_barang->jumlah_sub / 100 }}</td><td>{{ $pembelian_barang->satuan_sub }}</td>
+                            <td class="text-center">{{ $pembelian_barang->jumlah_main / 100 }}</td><td>{{ $pembelian_barang->satuan_main }}</td>
+                            <td>{{ str_replace('.', ',', $pembelian_barang->harga_main) }}</td>
+                            <td>{{ str_replace('.', ',', $pembelian_barang->harga_t) }}</td>
                         </tr>
                         @endforeach
                         @endfor
