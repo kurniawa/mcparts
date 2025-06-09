@@ -345,7 +345,23 @@ class NotaController extends Controller
     function print_out(Nota $nota) {
         // dd($nota);
         $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
-        $rest_row = 16 - count($spk_produk_notas);
+        $added_rows_because_of_the_name_length_or_item_description = 0;
+        foreach ($spk_produk_notas as $spk_produk_nota) {
+            $produk = Produk::find($spk_produk_nota->produk_id);
+            if (strlen($spk_produk_nota->nama_nota) > 69) {
+                $added_rows_because_of_the_name_length_or_item_description++;
+            }
+            if ($spk_produk_nota->keterangan) {
+                $description_length = strlen($spk_produk_nota->keterangan);
+                $added_rows = ceil($description_length / 69);
+                $added_rows_because_of_the_name_length_or_item_description += $added_rows;
+            }
+        }
+        // SJ Motif NMAX 2 + Lg.Byng Warna uk.SuperJB97x53 + jht.SUPER JUMBO
+        $rest_row = 16 - (count($spk_produk_notas) + $added_rows_because_of_the_name_length_or_item_description);
+        if ($rest_row < 0) {
+            $rest_row = 0;
+        }
         $cust_kontak = null;
         if ($nota->cust_kontak) {
             $cust_kontak = json_decode($nota->cust_kontak, true);

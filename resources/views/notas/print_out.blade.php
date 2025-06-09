@@ -123,7 +123,7 @@
             </tr>
             @for ($i = 0; $i < count($spk_produk_notas); $i++)
             <tr class='tr-border-left-right font-1_1' style="font-size: 0.9rem">
-                <td class="toFormatNumber text-end pe-2">{{ $spk_produk_notas[$i]->jumlah }}</td>
+                <td class="toFormatNumber text-end pe-2 align-top">{{ $spk_produk_notas[$i]->jumlah }}</td>
                 <td class="ps-2 pe-2">
                     <div>
                         {{ $spk_produk_notas[$i]->nama_nota }}
