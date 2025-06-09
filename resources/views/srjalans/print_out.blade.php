@@ -52,7 +52,7 @@
     </div>
 
     <div class="hr-line border-top border-2 mt-1 mb-1"></div>
-    <div class="grid grid-cols-3 items-center">
+    <div class="grid {{ ($srjalan->transit_nama) ? "grid-cols-4" : "grid-cols-3" }} items-center">
         <div class="text-center">
             <div class="font-bold">Untuk:</div>
             @if ($srjalan->nama_tertera)
@@ -102,34 +102,34 @@
                                 </div>
                                 @endif
                             </div>
-
-                            @if ($srjalan->transit_nama !== null)
-                            <div class="ms-3">
-                                <div style="color: red" class="font-bold">Via Ekspedisi:</div>
-                                <span class="font-bold">{{ $srjalan->transit_nama }}</span>
-                                @if ($srjalan->transit_long !== null)
-                                @foreach (json_decode($srjalan->transit_long, true) as $long)
-                                <div>{{ $long }}</div>
-                                @endforeach
-                                @endif
-                                @if ($srjalan->transit_kontak !== null)
-                                <div>
-                                    @if ($srjalan->transit_kontak->kodearea !== null)
-                                    <span>{{ $srjalan->transit_kontak->kodearea }} </span>
-                                    @endif
-                                    <span>{{ $srjalan->transit_kontak->nomor }}</span>
-                                </div>
-                                @endif
-
-                            </div>
-                            @endif
-
                         </div>
                     </td>
 
                 </tr>
             </table>
         </div>
+        @if ($srjalan->transit_nama !== null)
+        <div class="text-xs">
+            <div class="ms-3">
+                <div style="color: red" class="font-bold">Via Ekspedisi:</div>
+                <span class="font-bold">{{ $srjalan->transit_nama }}</span>
+                @if ($srjalan->transit_long !== null)
+                @foreach (json_decode($srjalan->transit_long, true) as $long)
+                <div>{{ $long }}</div>
+                @endforeach
+                @endif
+                @if ($srjalan->transit_kontak !== null)
+                <div>
+                    @if ($srjalan->transit_kontak->kodearea !== null)
+                    <span>{{ $srjalan->transit_kontak->kodearea }} </span>
+                    @endif
+                    <span>{{ $srjalan->transit_kontak->nomor }}</span>
+                </div>
+                @endif
+
+            </div>
+        </div>
+        @endif
     </div>
 
     <table class="tableItemsj">
