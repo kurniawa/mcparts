@@ -133,6 +133,11 @@
                             <button class="bg-violet-400 text-white font-semibold p-1 rounded">Lihat Ringkasan >></button>
                         </a>
                     </div>
+                    <div class="mt-2">
+                        <a href="{{ route('accounting.laba_rugi') }}" target="">
+                            <button class="bg-violet-400 text-white font-semibold p-1 rounded">Laporan Laba-Rugi >></button>
+                        </a>
+                    </div>
                 </div>
 
             </div>

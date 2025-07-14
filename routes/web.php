@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\AccountingController2;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
@@ -220,6 +221,10 @@ Route::controller(AccountingController::class)->group(function(){
     Route::post('/accounting/store_transactions_relations','store_transactions_relations')->name('accounting.store_transactions_relations')->middleware('auth');
     Route::post('/accounting/{transaction_name}/delete_transaction_relation','delete_transaction_relation')->name('accounting.delete_transaction_relation')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/up_down_transaction','up_down_transaction')->name('accounting.up_down_transaction')->middleware('auth');
+});
+
+Route::controller(AccountingController2::class)->group(function(){
+    Route::get('/accounting/laba-rugi','laba_rugi')->name('accounting.laba_rugi')->middleware('auth');
 });
 
 Route::controller(ArtisanController::class)->group(function(){
