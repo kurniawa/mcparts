@@ -225,7 +225,32 @@ class BarangController extends Controller
     }
 
     function show(Barang $barang) {
-        dd($barang);
+        $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
+        $label_produk = \App\Models\Produk::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        
+        $defaultPhoto = null;
+        $subsidiaryPhotos = [];
+        $priceChartData = $barang->goodsPrices()->orderBy('created_at')->get();
+        list($pembelians, $pembelians_barangs) = $barang->pembelians();
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'barangs.index',
+            'parent_route' => 'pembelians.index',
+            'profile_menus' => Menu::get_profile_menus(),
+            'pembelian_menus' => Menu::get_pembelian_menus(),
+            'label_supplier' => $label_supplier,
+            'label_barang' => $label_barang,
+            'label_produk' => $label_produk,
+            'barang' => $barang,
+            'defaultPhoto' => $defaultPhoto,
+            'subsidiaryPhotos' => $subsidiaryPhotos,
+            'priceChartData' => $priceChartData,
+            'pembelians' => $pembelians,
+            'pembelians_barangs' => $pembelians_barangs,
+        ];
+
+        return view('barangs.show', $data);
     }
 
     function delete(Barang $barang) {
