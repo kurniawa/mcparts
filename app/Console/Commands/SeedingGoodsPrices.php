@@ -30,7 +30,7 @@ class SeedingGoodsPrices extends Command
         $barangs = \App\Models\Barang::all();
         foreach ($barangs as $barang) {
             $pembelian_barangs = PembelianBarang::where('barang_id', $barang->id)
-                ->orderBy('created_at', 'desc')
+                ->orderBy('created_at', 'asc')
                 ->get()
                 ->unique('harga_main')
                 ->values();
@@ -48,20 +48,7 @@ class SeedingGoodsPrices extends Command
                 ]);
             }
 
-            // Update the latest price for each barang
-            $latestPrice = $barang->latestPrice();
-            if ($latestPrice) {
-                if ($barang->harga_main !== $latestPrice->price) {
-                    $harga_total_main = $latestPrice->price * $barang->jumlah_main;
-                    $harga_total_sub = $harga_total_main;
-                    $barang->update([
-                        'harga_main' => $latestPrice->price,
-                        'harga_total_main' => $harga_total_main,
-                        'harga_total_sub' => $harga_total_sub,
-                        'updated_at' => $latestPrice->created_at,
-                    ]);
-                }
-            }
+            
         }
     }
 }
