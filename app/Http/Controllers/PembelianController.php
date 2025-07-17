@@ -467,6 +467,7 @@ class PembelianController extends Controller
                 'creator' => $user->username,
                 'created_at' => $createdAt,
             ]);
+            $isiMap = [];
             foreach ($post['barang_id'] as $i => $barang_id) {
                 $barang = $barangList[$barang_id] ?? null;
                 $harga_t = (float) $post['harga_t'][$i];
@@ -501,7 +502,7 @@ class PembelianController extends Controller
                 // Insert ke tabel goods_prices apabila harga_main tidak sama dengan harga_main terakhir
                 $harga_total_main = round($harga_main * (int)$post['jumlah_main'][$i],2);
                 $harga_total_sub = round($harga_sub * (int)$post['jumlah_sub'][$i],2);
-                $last_goods_price = GoodsPrice::where('barang_id', $barang->id)->orderByDesc('created_at')->first();
+                $last_goods_price = GoodsPrice::where('goods_id', $barang->id)->orderByDesc('created_at')->first();
                 if ($last_goods_price->price != $harga_main) {
                     GoodsPrice::create([
                         'goods_id' => $barang->id,
@@ -525,9 +526,8 @@ class PembelianController extends Controller
                     $success_ .= '-barang updated-';
                 }
     
-                $isiMap = [];
     
-                $key_main = $pembelian_barang->satuan_main;
+                $key_main = ctype_upper($pembelian_barang->satuan_main) ? strtolower($pembelian_barang->satuan_main) : $pembelian_barang->satuan_main;
                 $isiMap[$key_main] = ($isiMap[$key_main] ?? 0) + $pembelian_barang->jumlah_main;
     
                 if ($pembelian_barang->satuan_sub) {
@@ -572,105 +572,6 @@ class PembelianController extends Controller
          * coba cek apakah isi pembelian terupdate di tabel pembelian
          * coba cek apakah perhitungan harga_sub sudah benar
          */
-        // for ($i=0; $i < count($indexes_to_process); $i++) {
-        //     $barang = Barang::find($post['barang_id'][$indexes_to_process[$i]]);
-        //     // dump($barang);
-        //     // dump((float)$post['harga_t'][$indexes_to_process[$i]]);
-        //     // dd((int)$post['jumlah_main'][$indexes_to_process[$i]]);
-        //     // if ($barang == null || (float)$post['harga_t'][$indexes_to_process[$i]] == 0 || (int)$post['jumlah_main'][$indexes_to_process[$i]] == 0) {
-        //     //     break;
-        //     // }
-        //     $harga_main = round((float)$post['harga_main'][$indexes_to_process[$i]],2);
-        //     $harga_sub = round($harga_main * (int)$post['jumlah_main'][$indexes_to_process[$i]],2);
-
-        //     $pembelian_barang = PembelianBarang::create([
-        //         'pembelian_id' => $pembelian_new->id,
-        //         'barang_id' => $barang->id,
-        //         'barang_nama' => $barang->nama,
-        //         'satuan_main' => $barang->satuan_main,
-        //         'jumlah_main' => (int)$post['jumlah_main'][$indexes_to_process[$i]] * 100,
-        //         'harga_main' => $harga_main,
-        //         'satuan_sub' => $barang->satuan_sub,
-        //         'jumlah_sub' => (int)$post['jumlah_sub'][$indexes_to_process[$i]] * 100,
-        //         'harga_sub' => $harga_sub,
-        //         'harga_t' => round((float)$post['harga_t'][$indexes_to_process[$i]],2),
-        //         // 'status_bayar' => null,
-        //         // 'keterangan_bayar' => null,
-        //         // 'tanggal_lunas' => null,
-        //         // 'created_at' => $pembelian_barang->created_at, // sudah otomatis
-        //         // 'updated_at' => $pembelian_barang->updated_at,
-        //         'creator' => $user->username,
-        //         // 'updater' => $user->username,
-        //     ]);
-
-        //     $success_ .= '-pembelian_barang created-';
-
-        //     $exist_satuan_main = false;
-        //     $exist_satuan_sub = false;
-        //     if (count($isi) != 0) {
-        //         for ($j=0; $j < count($isi); $j++) {
-        //             if ($isi[$j]['satuan'] == $pembelian_barang->satuan_main) {
-        //                 $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_main);
-        //                 // dump($isi[$j]['jumlah']);
-        //                 // dump($pembelian_barang->jumlah_main);
-        //                 // dump('isi:');
-        //                 // dump($isi);
-        //                 $exist_satuan_main = true;
-        //             }
-        //             if ($isi[$j]['satuan'] == $pembelian_barang->satuan_sub) {
-        //                 $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
-        //                 $exist_satuan_sub = true;
-        //             }
-        //         }
-        //         // foreach ($isi as $isi_item) {
-        //         //     if ($isi_item['satuan'] == $pembelian_barang->satuan_main) {
-        //         //         $isi_item['jumlah'] = (int)$isi_item['jumlah'] + (int)($pembelian_barang->jumlah_main);
-        //         //         dump($isi_item['jumlah']);
-        //         //         dump($pembelian_barang->jumlah_main);
-        //         //         dump('isi:');
-        //         //         dump($isi);
-        //         //         $exist_satuan_main = true;
-        //         //     }
-        //         //     if ($isi_item['satuan'] == $pembelian_barang->satuan_sub) {
-        //         //         $isi_item['jumlah'] = (int)$isi_item['jumlah'] + (int)($pembelian_barang->jumlah_sub);
-        //         //         $exist_satuan_sub = true;
-        //         //     }
-        //         // }
-        //     }
-        //     if (!$exist_satuan_main) {
-        //         // $isi->push([
-        //         //     'satuan' => $pembelian_barang->satuan_main,
-        //         //     'jumlah' => (int)($pembelian_barang->jumlah_main),
-        //         // ]);
-        //         $isi[]=[
-        //             'satuan' => $pembelian_barang->satuan_main,
-        //             'jumlah' => (int)($pembelian_barang->jumlah_main),
-        //         ];
-        //         // dump('first isi:');
-        //         // dump((int)($pembelian_barang->jumlah_main));
-        //     }
-        //     if (!$exist_satuan_sub) {
-        //         if ($pembelian_barang->satuan_sub != null) {
-        //             // $isi->push([
-        //             //     'satuan' => $pembelian_barang->satuan_sub,
-        //             //     'jumlah' => (int)($pembelian_barang->jumlah_sub),
-        //             // ]);
-        //             $isi[]=[
-        //                 'satuan' => $pembelian_barang->satuan_sub,
-        //                 'jumlah' => (int)($pembelian_barang->jumlah_sub),
-        //             ];
-        //         }
-        //     }
-        // }
-        // dump('isi:');
-        // dump($isi);
-        // cek apakah ada yang diinput ke pembelian_barang?
-        // $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian_new->id)->get();
-        // if (count($pembelian_barangs) == 0) {
-        //     $pembelian_new->delete();
-        //     return back()->with('warnings_', '-pembelian di cancel karena tidak terdeteksi adanya barang-');
-        // }
-
         
 
         $feedback = [
