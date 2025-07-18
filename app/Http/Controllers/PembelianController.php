@@ -429,35 +429,20 @@ class PembelianController extends Controller
             'harga_t' => 'required|array',
             'jumlah_main' => 'required|array',
             'jumlah_sub' => 'nullable|array',
+            'harga_main.*' => 'nullable|numeric|min:1',
+            'jumlah_main.*' => 'nullable|integer|min:1',
+            'jumlah_sub.*' => 'nullable|integer|min:1',
+
         ]);
 
         $supplier = Supplier::find($post['supplier_id']);
         $user = Auth::user();
 
-        
-
-        // $isi = collect();
-        // $isi = array();
         $success_ = '';
         $warnings_ = '';
 
-        // $indexes_to_process = array();
-
         $barangList = Barang::whereIn('id', $post['barang_id'])->get()->keyBy('id');
 
-        // for ($i=0; $i < count($post['barang_id']); $i++) {
-        //     $barang = $barangList[$post['barang_id'][$i]] ?? null;
-        //     // $barang = Barang::find($post['barang_id'][$i]);
-        //     // // dump($barang);
-        //     // // dump((float)$post['harga_t'][$i]);
-        //     // // dump((int)$post['jumlah_main'][$i]);
-        //     if ($barang !== null && (float)$post['harga_t'][$i] !== 0.0 && (int)$post['jumlah_main'][$i] !== 0) {
-        //         $indexes_to_process[] = $i;
-        //     } else {
-        //         $warnings_ .= "-failed to process-index: $i-";
-        //     }
-        // }
-        // dd('end');
         DB::beginTransaction();
         try {
             $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', "{$post['year']}-{$post['month']}-{$post['day']} " . now()->format('H:i:s'));
@@ -479,7 +464,6 @@ class PembelianController extends Controller
                 }
     
                 // proses pembelian_barang...
-                $barang = Barang::find($post['barang_id'][$i]);
                 $harga_main = round((float)$post['harga_main'][$i],2);
                 $harga_sub = round($harga_main * (int)$post['jumlah_main'][$i],2);
     
@@ -531,14 +515,15 @@ class PembelianController extends Controller
                 $isiMap[$key_main] = ($isiMap[$key_main] ?? 0) + $pembelian_barang->jumlah_main;
     
                 if ($pembelian_barang->satuan_sub) {
-                    $key_sub = $pembelian_barang->satuan_sub;
+                    $key_sub = ctype_upper($pembelian_barang->satuan_sub) ? strtolower($pembelian_barang->satuan_sub) : $pembelian_barang->satuan_sub;
                     $isiMap[$key_sub] = ($isiMap[$key_sub] ?? 0) + $pembelian_barang->jumlah_sub;
                 }
     
-                $isi = [];
-                foreach ($isiMap as $satuan => $jumlah) {
-                    $isi[] = ['satuan' => $satuan, 'jumlah' => $jumlah];
-                }
+            }
+            
+            $isi = [];
+            foreach ($isiMap as $satuan => $jumlah) {
+                $isi[] = ['satuan' => $satuan, 'jumlah' => $jumlah];
             }
 
             $nomor_nota = "N-$pembelian_new->id";
@@ -562,17 +547,6 @@ class PembelianController extends Controller
             DB::rollBack();
             return back()->withErrors('Gagal menyimpan data: ' . $e->getMessage());
         }
-        /**
-         * Checklist:
-         * Coba lakukan pembelian biasa dengan ada satu barang
-         * Coba lakukan pembelian biasa dengan ada beberapa barang
-         * coba lakukan pembelian dengan tanpa barang
-         * coba lakukan pembelian dengan kombinasi kolom yang kosong dan terisi
-         * coba cek apakah harga barang terupdate di tabel barang dan goods_prices
-         * coba cek apakah isi pembelian terupdate di tabel pembelian
-         * coba cek apakah perhitungan harga_sub sudah benar
-         */
-        
 
         $feedback = [
             'success_' => $success_,
