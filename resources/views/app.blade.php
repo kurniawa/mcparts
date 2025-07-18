@@ -301,7 +301,7 @@
                 @else
                 @foreach ($col_notas[$key] as $key_nota => $nota)
                 <div>
-                    <div class="grid grid-cols-2 border-t pt-1">
+                    <div class="grid grid-cols-3 border-t pt-1">
                         <div>
                             <a class="font-bold text-emerald-400" href="{{ route('spks.show', $spk->id) }}">{{ $nota->no_nota }}</a>
                             <div>
@@ -312,7 +312,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="flex">
+                        <div class="flex justify-center">
                             <div class="flex">
                                 @if ($nota->finished_at === null)
                                 <div>
@@ -343,6 +343,7 @@
                                 @endif
                             </div>
                         </div>
+                        <div class="text-right">{{ number_format($nota->harga_total,0,',','.') }}</div>
                     </div>
 
                     {{-- Nota Items --}}

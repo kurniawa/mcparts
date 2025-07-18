@@ -24,13 +24,13 @@ class HomeController extends Controller
         $get = $request->query();
         // dump($get);
 
-        $spks = collect();
-        $nama_pelanggans = collect(); // Ini diperlukan untuk menampilkan nama reseller, apabila ada reseller.
-        $col_spk_produks = collect();
-        $col_notas = collect();
-        $col_spk_produk_notas = collect();
-        $col_srjalans = collect();
-        $col_spk_produk_nota_srjalans = collect();
+        $spks = [];
+        $nama_pelanggans = []; // Ini diperlukan untuk menampilkan nama reseller, apabila ada reseller.
+        $col_spk_produks = [];
+        $col_notas = [];
+        $col_spk_produk_notas = [];
+        $col_srjalans = [];
+        $col_spk_produk_nota_srjalans = [];
 
         if (isset($get['tipe_filter'])) {
             if ($get['tipe_filter'] === 'spk') {
@@ -103,7 +103,7 @@ class HomeController extends Controller
             // dd($spk::user($spk->created_by));
             // SPK Items
             $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
-            $col_spk_produks->push($spk_produks);
+            $col_spk_produks[] = $spk_produks;
             // END - SPK Items
 
             // NAMA PELANGGANS
@@ -111,7 +111,7 @@ class HomeController extends Controller
             if ($spk->reseller_nama !== null) {
                 $nama_pelanggan = "$spk->reseller_nama - $spk->pelanggan_nama";
             }
-            $nama_pelanggans->push($nama_pelanggan);
+            $nama_pelanggans[] = $nama_pelanggan;
             // END - NAMA PELANGGANS
             $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
             $notas = collect();
@@ -121,21 +121,21 @@ class HomeController extends Controller
             $spk_produk_nota_srjalans = collect();
             foreach ($spk_notas as $spk_nota) {
                 $nota = Nota::find($spk_nota->nota_id);
-                $notas->push($nota);
+                $notas[] = $nota;
                 $nota_srjalans = NotaSrjalan::where('nota_id', $nota->id)->get();
-                $spk_produk_notas->push(SpkProdukNota::where('nota_id', $nota->id)->get());
+                $spk_produk_notas[] = SpkProdukNota::where('nota_id', $nota->id)->get();
                 $srjalans = collect();
                 foreach ($nota_srjalans as $nota_srjalan) {
                     $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
-                    $srjalans->push($srjalan);
-                    $spk_produk_nota_srjalans->push(SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get());
+                    $srjalans[] = $srjalan;
+                    $spk_produk_nota_srjalans[] = SpkProdukNotaSrjalan::where('srjalan_id', $srjalan->id)->get();
                 }
-                $arr_srjalans->push($srjalans);
+                $arr_srjalans[] = $srjalans;
             }
-            $col_notas->push($notas);
-            $col_srjalans->push($arr_srjalans);
-            $col_spk_produk_notas->push($spk_produk_notas);
-            $col_spk_produk_nota_srjalans->push($spk_produk_nota_srjalans);
+            $col_notas[] = $notas;
+            $col_srjalans[] = $arr_srjalans;
+            $col_spk_produk_notas[] = $spk_produk_notas;
+            $col_spk_produk_nota_srjalans[] = $spk_produk_nota_srjalans;
         }
 
         // dump($col_notas);
