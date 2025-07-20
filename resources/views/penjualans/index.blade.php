@@ -19,11 +19,11 @@
         {{-- END - SEARCH / FILTER --}}
         <div class="flex justify-center mt-2">
             <button id="btn-index-penjualan" type="button" class="p-2 border"
-                onclick="show_hide(['index-penjualan'], ['piutang-penjualan'], [this.id], ['btn-piutang-penjualan'], ['bg-gray-200'], ['bg-gray-200'], 'block')">
+                onclick="show_hide(['index-penjualan'], ['piutang-penjualan'], [this.id], ['btn-piutang-penjualan'], ['bg-sky-200'], ['bg-sky-200'], 'block')">
                 Index
             </button>
             <button id="btn-piutang-penjualan" type="button" class="p-2 border"
-                onclick="show_hide(['piutang-penjualan'], ['index-penjualan'], [this.id], ['btn-index-penjualan'], ['bg-gray-200'], ['bg-gray-200'], 'block')">
+                onclick="show_hide(['piutang-penjualan'], ['index-penjualan'], [this.id], ['btn-index-penjualan'], ['bg-sky-200'], ['bg-sky-200'], 'block')">
                 Piutang Penjualan
             </button>
         </div>
@@ -80,8 +80,15 @@
         @endforeach
     </table>
     {{-- END - VERSI UNTUK DOWNLOAD --}}
+    {{-- Supaya background terbaca oleh web --}}
     <div class="bg-orange-50"></div>
     <div class="bg-sky-100"></div>
+    <div class="bg-green-100"></div>
+    <div class="bg-red-100"></div>
+    <div class="bg-orange-100"></div>
+    <div class="bg-green-200"></div>
+    <div class="bg-red-200"></div>
+    <div class="bg-orange-200"></div>
 </main>
 
 <script>

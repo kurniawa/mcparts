@@ -268,9 +268,28 @@ class NotaController extends Controller
         }
         $nota->jumlah_total = $jumlah_total;
         $nota->harga_total = $harga_total;
+
+        // UPDATE status_bayar, total_payment dan remaining_payment
+        if ($nota->total_payment) {
+            if ($nota->total_payment == 0) {
+                $nota->status_bayar = 'belum';
+            } elseif ($nota->total_payment < $nota->harga_total) {
+                $nota->status_bayar = 'sebagian';
+            } elseif ($nota->total_payment == $nota->harga_total) {
+                $nota->status_bayar = 'lunas';
+            }
+            $nota->remaining_payment = $nota->harga_total - $nota->total_payment;
+        } else {
+            $nota->status_bayar = 'belum';
+            $nota->total_payment = 0;
+            $nota->remaining_payment = $nota->harga_total;
+        }
+
         $nota->save();
-        $success_ .= '- update nota: jumlah_total, harga_total -';
+        $success_ .= '- update nota: jumlah_total, harga_total, status_bayar, total_payment, remaining_payment -';
         // END - UPDATE NOTA: jumlah_total dan harga_total
+
+        
         return back()->with('success_', $success_);
     }
 

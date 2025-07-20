@@ -68,7 +68,6 @@ class PenjualanController extends Controller
         $notaDetailItemsAll = [];
         $spk_produk_nota_pelanggans = collect();
         $grandTotal = 0;
-        $key_class = 0;
 
         // Untuk component PiutangPenjualan
         $spk_produk_nota_pelanggans_for_piutang = collect();
@@ -78,17 +77,17 @@ class PenjualanController extends Controller
         $grandTotalForPiutang = 0;
 
         foreach ($notas_grouped_pelanggan as $notas_grouped) {
-            $class = 'bg-sky-100';
-            if ($key_class === 1) {
-                $class = 'bg-orange-100';
-            }
-            $key_class++;
-            if ($key_class > 1) {
-                $key_class = 0;
-            }
+            // $class = 'bg-sky-100';
+            // $class = 'bg-red-100';
             $total_penjualan = 0;
             $total_penjualan_for_piutang = 0;
             foreach ($notas_grouped as $key_nota => $nota) {
+                $class = 'bg-red-200';
+                if ($nota->status_bayar === 'lunas') {
+                    $class = 'bg-green-200';
+                } elseif ($nota->status_bayar === 'sebagian') {
+                    $class = 'bg-orange-200';
+                }
                 $total_penjualan += $nota->harga_total;
                 if ($key_nota === count($notas_grouped) - 1) {
                     $notaSubtotalAll[] = [

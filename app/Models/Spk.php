@@ -20,7 +20,7 @@ class Spk extends Model
         $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
         // dd($spk_produks);
         $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
-        $notas = collect();
+        $notas = [];
         $arr_notas = array(); // akan digunakan nanti untuk data tambahan spk_produks di bawah
         $arr_srjalan = array(); // akan digunakan nanti untuk data tambahan spk_produks di bawah
         $cust_kontaks = collect();
@@ -31,9 +31,16 @@ class Spk extends Model
         foreach ($spk_notas as $spk_nota) {
             // DATA NOTA
             $nota = Nota::find($spk_nota->nota_id);
+            if ($nota->total_payment === null) {
+                /**
+                 * Kalau total_payment null, maka total_payment, remaining_payment dan status_bayar
+                 * belum diupdate
+                 */
+                $nota->update_payment();
+            }
             $arr_notas[] = $nota->id;
             $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
-            $notas->push($nota);
+            $notas[] = $nota->toArray();
             $col_spk_produk_notas->push($spk_produk_notas);
             // END - DATA NOTA
             // CUST KONTAK

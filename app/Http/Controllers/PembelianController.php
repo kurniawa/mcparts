@@ -511,11 +511,13 @@ class PembelianController extends Controller
                 }
     
     
-                $key_main = ctype_upper($pembelian_barang->satuan_main) ? strtolower($pembelian_barang->satuan_main) : $pembelian_barang->satuan_main;
+                // $key_main = ctype_upper($pembelian_barang->satuan_main) ? strtolower($pembelian_barang->satuan_main) : $pembelian_barang->satuan_main;
+                $key_main = strtolower($pembelian_barang->satuan_main);
                 $isiMap[$key_main] = ($isiMap[$key_main] ?? 0) + $pembelian_barang->jumlah_main;
     
                 if ($pembelian_barang->satuan_sub) {
-                    $key_sub = ctype_upper($pembelian_barang->satuan_sub) ? strtolower($pembelian_barang->satuan_sub) : $pembelian_barang->satuan_sub;
+                    // $key_sub = ctype_upper($pembelian_barang->satuan_sub) ? strtolower($pembelian_barang->satuan_sub) : $pembelian_barang->satuan_sub;
+                    $key_sub = strtolower($pembelian_barang->satuan_sub);
                     $isiMap[$key_sub] = ($isiMap[$key_sub] ?? 0) + $pembelian_barang->jumlah_sub;
                 }
     

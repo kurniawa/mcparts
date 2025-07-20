@@ -403,8 +403,8 @@
                             @csrf
                             @foreach ($notas as $key_pilih_nota => $nota)
                             <div class="flex items-center mt-1">
-                                <input type="radio" name="nota_id" id="pilih_nota_id-{{ $key_pilih_nota }}" value="{{ $nota->id }}">
-                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                <input type="radio" name="nota_id" id="pilih_nota_id-{{ $key_pilih_nota }}" value="{{ $nota['id'] }}">
+                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
                             </div>
                             @endforeach
                             <div class="flex items-center mt-1">
@@ -421,6 +421,7 @@
                 {{-- END - OPSI SPK --}}
             </div>
             {{-- END - SPK --}}
+            {{-- NOTA --}}
             <div>
                 @if (count($notas) === 0)
                 {{-- <div class="flex border-t pt-1 justify-center">
@@ -458,8 +459,8 @@
                                 </div>
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
-                                    <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}" value="{{ $nota->id }}">
-                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                    <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}" value="{{ $nota['id'] }}">
+                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -492,8 +493,8 @@
                                 </div>
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
-                                    <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}" value="{{ $nota->id }}">
-                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota->no_nota }}</label>
+                                    <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}" value="{{ $nota['id'] }}">
+                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -507,7 +508,7 @@
                     <div class="grid grid-cols-2">
                         <table class="w-full">
                             <tr>
-                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota->no_nota }}</div></td>
+                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['no_nota'] }}</div></td>
                             </tr>
                             <tr>
                                 <td>Tgl.</td><td>:</td>
@@ -515,28 +516,28 @@
                                     <div class="w-fit">
                                         <div class="flex" onclick="toggle_element('form_edit_tanggal_nota-{{ $key_nota }}')">
                                             <div class="flex">
-                                                @if ($nota->finished_at === null)
+                                                @if ($nota['finished_at'] === null)
                                                 <div>
                                                     <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
-                                                        <div>{{ date('d',strtotime($nota->created_at)) }}</div>
-                                                        <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                                        <div>{{ date('d',strtotime($nota['created_at'])) }}</div>
+                                                        <div>{{ date('m-y',strtotime($nota['created_at'])) }}</div>
                                                     </div>
                                                 </div>
                                                 @else
                                                 <div>
                                                     <div class="rounded p-1 bg-yellow-500 text-white font-bold text-center">
-                                                        <div>{{ date('d',strtotime($nota->created_at)) }}</div>
-                                                        <div>{{ date('m-y',strtotime($nota->created_at)) }}</div>
+                                                        <div>{{ date('d',strtotime($nota['created_at'])) }}</div>
+                                                        <div>{{ date('m-y',strtotime($nota['created_at'])) }}</div>
                                                     </div>
                                                 </div>
                                                 @endif
                                             </div>
                                             <div class="flex ml-1 items-center">
-                                                @if ($nota->finished_at !== null)
+                                                @if ($nota['finished_at'] !== null)
                                                 <div>
                                                     <div class="rounded p-1 bg-emerald-500 text-white font-bold text-center">
-                                                        <div>{{ date('d',strtotime($nota->finished_at)) }}</div>
-                                                        <div>{{ date('m-y',strtotime($nota->finished_at)) }}</div>
+                                                        <div>{{ date('d',strtotime($nota['finished_at'])) }}</div>
+                                                        <div>{{ date('m-y',strtotime($nota['finished_at'])) }}</div>
                                                     </div>
                                                 </div>
                                                 @else
@@ -549,27 +550,27 @@
                             </tr>
                             <tr class="hidden" id="form_edit_tanggal_nota-{{ $key_nota }}">
                                 <td colspan="3">
-                                    <form action="{{ route('notas.edit_tanggal', $nota->id) }}" method="POST" class="w-fit">
+                                    <form action="{{ route('notas.edit_tanggal', $nota['id']) }}" method="POST" class="w-fit">
                                         @csrf
                                         <div>tgl. pembuatan:</div>
                                         <div class="flex items-center">
                                             <div class="flex">
                                                 <select name="created_day" id="created_day" class="rounded text-xs pl-0 pr-7">
-                                                    <option value="{{ date('d',strtotime($nota->created_at)) }}">{{ date('d',strtotime($nota->created_at)) }}</option>
+                                                    <option value="{{ date('d',strtotime($nota['created_at'])) }}">{{ date('d',strtotime($nota['created_at'])) }}</option>
                                                     <option value="">-</option>
                                                     @for ($i = 1; $i < 32; $i++)
                                                     <option value="{{ $i }}">{{ $i }}</option>
                                                     @endfor
                                                 </select>
                                                 <select name="created_month" id="created_month" class="rounded text-xs pl-0 pr-7 ml-1">
-                                                    <option value="{{ date('m',strtotime($nota->created_at)) }}">{{ date('m',strtotime($nota->created_at)) }}</option>
+                                                    <option value="{{ date('m',strtotime($nota['created_at'])) }}">{{ date('m',strtotime($nota['created_at'])) }}</option>
                                                     <option value="">-</option>
                                                     @for ($i = 1; $i < 13; $i++)
                                                     <option value="{{ $i }}">{{ $i }}</option>
                                                     @endfor
                                                 </select>
                                                 <select name="created_year" id="created_year" class="rounded text-xs pl-0 pr-7 ml-1">
-                                                    <option value="{{ date('Y',strtotime($nota->created_at)) }}">{{ date('Y',strtotime($nota->created_at)) }}</option>
+                                                    <option value="{{ date('Y',strtotime($nota['created_at'])) }}">{{ date('Y',strtotime($nota['created_at'])) }}</option>
                                                     <option value="">-</option>
                                                     @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
                                                     <option value="{{ $i }}">{{ $i }}</option>
@@ -578,24 +579,24 @@
                                             </div>
                                         </div>
                                         <div class="mt-1">tgl. selesai:</div>
-                                        @if ($nota->finished_at !== null)
+                                        @if ($nota['finished_at'] !== null)
                                         <div class="flex">
                                             <select name="finished_day" id="finished_day" class="rounded text-xs pl-0 pr-7">
-                                                <option value="{{ date('d',strtotime($nota->finished_at)) }}">{{ date('d',strtotime($nota->finished_at)) }}</option>
+                                                <option value="{{ date('d',strtotime($nota['finished_at'])) }}">{{ date('d',strtotime($nota['finished_at'])) }}</option>
                                                 <option value="">-</option>
                                                 @for ($i = 1; $i < 32; $i++)
                                                 <option value="{{ $i }}">{{ $i }}</option>
                                                 @endfor
                                             </select>
                                             <select name="finished_month" id="finished_month" class="rounded text-xs pl-0 pr-7 ml-1">
-                                                <option value="{{ date('m',strtotime($nota->finished_at)) }}">{{ date('m',strtotime($nota->finished_at)) }}</option>
+                                                <option value="{{ date('m',strtotime($nota['finished_at'])) }}">{{ date('m',strtotime($nota['finished_at'])) }}</option>
                                                 <option value="">-</option>
                                                 @for ($i = 1; $i < 13; $i++)
                                                 <option value="{{ $i }}">{{ $i }}</option>
                                                 @endfor
                                             </select>
                                             <select name="finished_year" id="finished_year" class="rounded text-xs pl-0 pr-7 ml-1">
-                                                <option value="{{ date('Y',strtotime($nota->finished_at)) }}">{{ date('Y',strtotime($nota->finished_at)) }}</option>
+                                                <option value="{{ date('Y',strtotime($nota['finished_at'])) }}">{{ date('Y',strtotime($nota['finished_at'])) }}</option>
                                                 <option value="">-</option>
                                                 @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
                                                 <option value="{{ $i }}">{{ $i }}</option>
@@ -635,8 +636,8 @@
                             <tr>
                                 <td class="align-top">Alamat</td><td class="align-top">:</td>
                                 <td class="align-top">
-                                    @if ($nota->cust_long!==null)
-                                    @foreach (json_decode($nota->cust_long,true) as $long)
+                                    @if ($nota['cust_long']!==null)
+                                    @foreach (json_decode($nota['cust_long'],true) as $long)
                                     <div>{{ $long }}</div>
                                     @endforeach
                                     @endif
@@ -684,7 +685,7 @@
                                 <td>
                                     <div class="text-center" onclick="toggle_element('edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">{{ number_format($spk_produk_nota->harga,0,',','.') }}</div>
                                     <div class="hidden text-center" id="edit_harga_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
-                                        <form action="{{ route('notas.edit_harga_item', [$spk->id, $nota->id, $spk_produk_nota->id]) }}" method="POST">
+                                        <form action="{{ route('notas.edit_harga_item', [$spk->id, $nota['id'], $spk_produk_nota->id]) }}" method="POST">
                                             @csrf
                                             <input type="text" class="rounded p-0 text-xs w-16" value="{{ number_format($spk_produk_nota->harga,0,',','.') }}" onchange="formatNumber(this, 'harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}')">
                                             <input type="hidden" id="harga_nota_item-{{ $key_nota }}-{{ $key_spk_produk_nota }}" name="harga" value="{{ $spk_produk_nota->harga }}">
@@ -718,7 +719,7 @@
                                             </div>
                                             {{-- FORM INPUT NOTA ITEM KE SJ --}}
                                             <div class="mt-1 hidden" id="spk_produk_nota-{{ $key_nota }}-{{ $key_spk_produk_nota }}">
-                                                <form action="{{ route('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan', [$spk->id, $nota->id, $spk_produk_nota->spk_produk_id, $spk_produk_nota->id]) }}" method="POST" class="border rounded p-1">
+                                                <form action="{{ route('sjs.create_or_edit_jumlah_spk_produk_nota_srjalan', [$spk->id, $nota['id'], $spk_produk_nota->spk_produk_id, $spk_produk_nota->id]) }}" method="POST" class="border rounded p-1">
                                                     @csrf
                                                     <table class="text-xs">
                                                         @foreach ($data_spk_produk_notas[$key_nota][$key_spk_produk_nota] as $data_srjalan)
@@ -771,32 +772,39 @@
                             {{-- END - SPK_PRODUK_NOTA_DETAIL --}}
                             @endforeach
                             <tr><td></td><td><div class="text-center">-----</div></td><td></td><td><div class="text-center">---</div></td></tr>
-                            <tr><th></th><th>Total</th><th></th><th>{{ number_format($nota->harga_total,0,',','.') }}</th></tr>
+                            <tr><th></th><th>Total</th><th></th><th>{{ number_format($nota['harga_total'],0,',','.') }}</th></tr>
                         </table>
                     </div>
                     {{-- END - Nota Items --}}
                     {{-- OPSI NOTA --}}
-                    <div class="flex justify-end mt-1 mb-2 items-center gap-1">
-                        <a href="{{ route('notas.print_out', $nota->id) }}" class="rounded text-slate-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
-                            </svg>
-                        </a>
-                        <button type="button" class="ml-1 border border-yellow-200 text-yellow-500 rounded font-bold text-md px-1" id="btn_pilihan_srjalan-{{ $key_nota }}" onclick="toggle_light(this.id,'pilihan_srjalan-{{ $key_nota }}',[],['bg-yellow-200'], 'block')">SJ</button>
-                        <form action="{{ route('notas.delete',[$spk->id, $nota->id]) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Warning: Hapus Nota akan menghapus Surat Jalan terkait!')">
-                            @csrf
-                            <button type="submit" class="bg-red-200 text-red-500 rounded" name="nota_id" value="{{ $nota->id }}">
+                    <div class="flex justify-between">
+                        <div class="font-bold">
+                            <p>status: {{ $nota['status_bayar'] }}</p>
+                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['total_payment'],0,',','.') }}</p>
+                            <p class="text-red-500">sisa bayar: {{ number_format($nota['remaining_payment'],0,',','.') }}</p>
+                        </div>
+                        <div class="flex justify-end mt-1 mb-2 items-center gap-1">
+                            <a href="{{ route('notas.print_out', $nota['id']) }}" class="rounded text-slate-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                                 </svg>
-                            </button>
-                        </form>
+                            </a>
+                            <button type="button" class="ml-1 border border-yellow-200 text-yellow-500 rounded font-bold text-md px-1" id="btn_pilihan_srjalan-{{ $key_nota }}" onclick="toggle_light(this.id,'pilihan_srjalan-{{ $key_nota }}',[],['bg-yellow-200'], 'block')">SJ</button>
+                            <form action="{{ route('notas.delete',[$spk->id, $nota['id']]) }}" method="POST" class="ml-1 flex" onsubmit="return confirm('Warning: Hapus Nota akan menghapus Surat Jalan terkait!')">
+                                @csrf
+                                <button type="submit" class="bg-red-200 text-red-500 rounded" name="nota_id" value="{{ $nota['id'] }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     {{-- END - OPSI NOTA --}}
                     {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}
                     <div class="hidden" id="pilihan_srjalan-{{ $key_nota }}">
                         <div class="mt-1 flex justify-end">
-                            <form action="{{ route('sjs.srjalan_all', [$spk->id, $nota->id]) }}" method="POST" class="border border-yellow-300 rounded p-1 text-yellow-500" onsubmit="return confirm('Yakin input semua item Nota ke Srjalan terpilih?')">
+                            <form action="{{ route('sjs.srjalan_all', [$spk->id, $nota['id']]) }}" method="POST" class="border border-yellow-300 rounded p-1 text-yellow-500" onsubmit="return confirm('Yakin input semua item Nota ke Srjalan terpilih?')">
                                 @csrf
                                 @foreach ($pilihan_srjalan as $key_pilih_srjalan => $srjalan)
                                 <div class="flex items-center mt-1">

@@ -38,7 +38,7 @@
             <table class="table-nice mt-1">
                 <tr><th>No.</th><th>Customer</th><th>Total Penjualan</th></tr>
                 @foreach ($totalPenjualanPelangganAll as $key_total_penjualan => $total_penjualan_pelanggan)
-                <tr>
+                <tr class="bg-sky-100">
                     <td>{{ $key_total_penjualan + 1 }}.</td><td>{{ $total_penjualan_pelanggan['pelanggan_nama'] }}</td>
                     <td>
                         <div class="flex justify-between">

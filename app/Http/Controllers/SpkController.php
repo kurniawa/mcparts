@@ -175,8 +175,8 @@ class SpkController extends Controller
         $alamat_id_terpilih = null;
         $kontak_id_terpilih = null;
         if (count($data_spk_nota_srjalans['notas']) !== 0) {
-            $alamat_id_terpilih = $data_spk_nota_srjalans['notas'][0]->alamat_id;
-            $kontak_id_terpilih = $data_spk_nota_srjalans['notas'][0]->kontak_id;
+            $alamat_id_terpilih = $data_spk_nota_srjalans['notas'][0]['alamat_id'];
+            $kontak_id_terpilih = $data_spk_nota_srjalans['notas'][0]['kontak_id'];
         }
         foreach ($pelanggan_alamats as $pelanggan_alamat) {
             $alamat = Alamat::find($pelanggan_alamat->alamat_id);
