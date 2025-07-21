@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use App\Models\Nota;
+use App\Models\TransactionName;
 use Illuminate\Http\Request;
 
 class AccountingController2 extends Controller
@@ -52,5 +53,25 @@ class AccountingController2 extends Controller
             'penjualan_barang_dan_jasa' => $penjualan_barang_dan_jasa,
         ];
         return view('accounting.laba_rugi', $data);
+    }
+
+    function getRelatedNotYetPaidOffInvoices(TransactionName $transactionName) {
+        // Get the related invoice for the transaction name
+        if (!isset($transactionName)) {
+            return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
+        }
+        if (!$transactionName) {
+            return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
+        }
+        if ($transactionName->pelanggan_id) {
+            $notYetPaidOffInvoices = $transactionName->getRelatedNotYetPaidOffInvoices();
+            if (!$notYetPaidOffInvoices) {
+                return response()->json(['message' => 'Data not found'], 404);
+            }
+    
+            return response()->json($notYetPaidOffInvoices);
+        } else {
+            return response()->json(['message' => 'Transaction name does not have a related customer'], 400);
+        }
     }
 }

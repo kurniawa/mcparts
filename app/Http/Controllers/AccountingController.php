@@ -82,8 +82,8 @@ class AccountingController extends Controller
         return back()->with('success_', '-user_instance created-');
     }
 
-    function show_transactions(UserInstance $user_instance, Request $request) {
-        // dd($user_instance);
+    function show_transactions(UserInstance $userInstance, Request $request) {
+        // dd($userInstance);
         $get = $request->query();
 
         $fitur_up_down_transaction = true;
@@ -92,7 +92,7 @@ class AccountingController extends Controller
         $from = null;
         $until = null;
         if (count($get) === 0) {
-            if ($user_instance->timerange === 'triwulan') {
+            if ($userInstance->timerange === 'triwulan') {
                 $month = (int)date('m');
                 if ($month <= 3) {
                     $from = date('Y') . "-01" . "-01";
@@ -112,7 +112,7 @@ class AccountingController extends Controller
                     $until = date('Y') . "-12" . "-$t" . " 23:59:59";
                 }
             }
-            $accountings = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at',[$from, $until])->oldest()->get();
+            $accountings = Accounting::where('user_instance_id', $userInstance->id)->whereBetween('created_at',[$from, $until])->oldest()->get();
         } else {
             if ($get['desc'] === null) {
                 if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
@@ -121,14 +121,14 @@ class AccountingController extends Controller
                 } else {
                     dd('date?', $get);
                 }
-                $accountings = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at',[$from, $until])->oldest()->get();
+                $accountings = Accounting::where('user_instance_id', $userInstance->id)->whereBetween('created_at',[$from, $until])->oldest()->get();
             } else {
                 if ($get['from_day'] && $get['from_month'] && $get['from_year'] && $get['to_day'] && $get['to_month'] && $get['to_year']) {
                     $from = "$get[from_year]-$get[from_month]-$get[from_day]";
                     $until = "$get[to_year]-$get[to_month]-$get[to_day] 23:59:59";
-                    $accountings = Accounting::where('user_instance_id', $user_instance->id)->where('transaction_desc', 'like', "%$get[desc]%")->whereBetween('created_at',[$from, $until])->oldest()->get();
+                    $accountings = Accounting::where('user_instance_id', $userInstance->id)->where('transaction_desc', 'like', "%$get[desc]%")->whereBetween('created_at',[$from, $until])->oldest()->get();
                 } else {
-                    $accountings = Accounting::where('user_instance_id', $user_instance->id)->where('transaction_desc', 'like', "%$get[desc]%")->oldest()->limit(500)->get();
+                    $accountings = Accounting::where('user_instance_id', $userInstance->id)->where('transaction_desc', 'like', "%$get[desc]%")->oldest()->limit(500)->get();
                 }
                 $fitur_up_down_transaction = false;
             }
@@ -136,7 +136,7 @@ class AccountingController extends Controller
 
         $last_transaction = null;
         if ($from) {
-            $last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<', $from)->latest()->first();
+            $last_transaction = Accounting::where('user_instance_id', $userInstance->id)->where('created_at', '<', $from)->latest()->first();
         }
         $saldo_awal = 0;
         if ($last_transaction !== null) {
@@ -158,12 +158,12 @@ class AccountingController extends Controller
 
         $related_users = User::where('id', '!=', $user->id)->get();
 
-        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->where('user_instance_id', $user_instance->id)->orderBy('desc')->get();
+        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->where('user_instance_id', $userInstance->id)->orderBy('desc')->get();
         // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
         // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();
 
-        $notifications = Accounting::where('related_user_instance_id', $user_instance->id)->latest()->limit(100)->get();
+        // $notifications = Accounting::where('related_user_instance_id', $userInstance->id)->latest()->limit(100)->get();
 
         $data = [
             'menus' => Menu::get(),
@@ -175,14 +175,14 @@ class AccountingController extends Controller
             'instance_types' => Accounting::get_instance_types(),
             'instance_names' => Accounting::get_instance_names(),
             'accountings' => $accountings,
-            'user_instance' => $user_instance,
+            'userInstance' => $userInstance,
             'keluar_total' => $keluar_total,
             'masuk_total' => $masuk_total,
             'related_users' => $related_users,
             'label_deskripsi' => $label_deskripsi,
             'saldo_awal' => $saldo_awal,
             'from' => $from,
-            'notifications' => $notifications,
+            // 'notifications' => $notifications,
             'fitur_up_down_transaction' => $fitur_up_down_transaction,
             // 'label_kategori_level_one' => $label_kategori_level_one,
             // 'label_kategori_level_two' => $label_kategori_level_two,

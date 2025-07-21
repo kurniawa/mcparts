@@ -225,6 +225,7 @@ Route::controller(AccountingController::class)->group(function(){
 
 Route::controller(AccountingController2::class)->group(function(){
     Route::get('/accounting/laba-rugi','laba_rugi')->name('accounting.laba_rugi')->middleware('auth');
+    Route::get('/accounting/{transaction_name}/get-related-not-yet-paid-off-invoices','getRelatedNotYetPaidOffInvoices')->name('accounting.get_related_not_yet_paid_off_invoices')->middleware('auth');
 });
 
 Route::controller(ArtisanController::class)->group(function(){

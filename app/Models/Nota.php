@@ -156,7 +156,7 @@ class Nota extends Model
     function update_payment() {
         if ($this->total_payment) {
             if ($this->total_payment == 0) {
-                $this->status_bayar = 'belum';
+                $this->status_bayar = 'belum_lunas';
             } elseif ($this->total_payment < $this->harga_total) {
                 $this->status_bayar = 'sebagian';
             } elseif ($this->total_payment == $this->harga_total) {
@@ -164,7 +164,7 @@ class Nota extends Model
             }
             $this->remaining_payment = $this->harga_total - $this->total_payment;
         } else {
-            $this->status_bayar = 'belum';
+            $this->status_bayar = 'belum_lunas';
             $this->total_payment = 0;
             $this->remaining_payment = $this->harga_total;
         }

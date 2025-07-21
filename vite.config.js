@@ -8,4 +8,14 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    // server: {
+    //     host: 'mcparts-sas-v2.test',
+    //     port: 5173,
+    //     origin: 'http://mcparts-sas-v2.test:5173', // <- penting
+    //     hmr: {
+    //         host: 'mcparts-sas-v2.test',
+    //         protocol: 'http',
+    //         port: 5173,
+    //     },
+    // },
 });
