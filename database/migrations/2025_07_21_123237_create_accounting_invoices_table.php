@@ -8,13 +8,34 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Tabel accounting_invoices ini dibutuhkan, karena terkadang satu transaksi yang tercatat pada accountings,
+     * terkait dengan beberapa nota/invoices. Misal Jhon Motor membayar 3 nota sekaligus.
+     * Demikian juga sebaliknya, satu nota/invoice bisa terkait dengan beberapa transaksi.
+     * Misal Jhon Motor membayar 3 kali untuk satu nota/invoice.
+     * Maka kita perlu tabel accounting_invoices untuk menyimpan informasi ini.
+     * 
+     * Kolom accounting_id boleh null. Artinya invoice terkait baru saja dibuat,
+     * belum ada transaksi untuk pembayaran invoice tersebut.
+     * Apabila sudah ada transaksi/accounting yang terkait dengan invoice ini,
+     * maka kolom accounting_id akan diupdate, yakni diisi dengan id dari transaksi/accounting tersebut.
+     * 
+     * Lalu apabila ada transaksi/accounting tambahan yang terkait dengan invoice yang sama,
+     * maka perlu untuk membuat record baru di tabel accounting_invoices.
+     * Dengan demikian, satu invoice bisa terkait dengan beberapa transaksi/accounting, begitu pula sebaliknya.
      */
     public function up(): void
     {
-        Schema::table('accounting_invoices', function (Blueprint $table) {
+        Schema::create('accounting_invoices', function (Blueprint $table) {
             $table->foreignId('invoice_id')->nullable()->onDelete('set null');
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();
+            $table->foreignId('accounting_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('transaction_name_id')->nullable()->constrained('transaction_names')->onDelete('set null');
+            $table->string('transaction_name')->nullable(); // e.g., 'Pembayaran Nota', 'Pembayaran Hutang'
+            $table->foreignId('customer_id')->nullable()->constrained('pelanggans')->onDelete('set null');
+            $table->string('customer_name', 100)->nullable(); // e.g., 'Jhon Motor'
+            $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
+            $table->string('supplier_name', 100)->nullable(); //
             $table->string('payment_status', 50)->nullable(); // e.g., paid, unpaid, partial
             $table->string('payment_method', 50)->nullable(); // e.g., cash, bank transfer, credit card
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment

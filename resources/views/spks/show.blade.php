@@ -780,8 +780,8 @@
                     <div class="flex justify-between">
                         <div class="font-bold">
                             <p>status: {{ $nota['status_bayar'] }}</p>
-                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['total_payment'],0,',','.') }}</p>
-                            <p class="text-red-500">sisa bayar: {{ number_format($nota['remaining_payment'],0,',','.') }}</p>
+                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'],0,',','.') }}</p>
+                            <p class="text-red-500">sisa bayar: {{ number_format($nota['amount_due'],0,',','.') }}</p>
                         </div>
                         <div class="flex justify-end mt-1 mb-2 items-center gap-1">
                             <a href="{{ route('notas.print_out', $nota['id']) }}" class="rounded text-slate-500">

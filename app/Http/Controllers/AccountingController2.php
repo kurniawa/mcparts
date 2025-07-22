@@ -59,19 +59,19 @@ class AccountingController2 extends Controller
         // Get the related invoice for the transaction name
         if (!isset($transactionName)) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
-        }
-        if (!$transactionName) {
+        } elseif (!$transactionName) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
-        }
-        if ($transactionName->pelanggan_id) {
-            $notYetPaidOffInvoices = $transactionName->getRelatedNotYetPaidOffInvoices();
-            if (!$notYetPaidOffInvoices) {
-                return response()->json(['message' => 'Data not found'], 404);
-            }
-    
-            return response()->json($notYetPaidOffInvoices);
         } else {
-            return response()->json(['message' => 'Transaction name does not have a related customer'], 400);
+            if ($transactionName->pelanggan_id) {
+                $notYetPaidOffInvoices = $transactionName->getRelatedNotYetPaidOffInvoices();
+                if (!$notYetPaidOffInvoices) {
+                    return response()->json(['message' => 'Data not found'], 404);
+                }
+        
+                return response()->json(['message' => 'Data found', 'notas' => $notYetPaidOffInvoices], 200);
+            } else {
+                return response()->json(['message' => 'Transaction name does not have a related customer'], 400);
+            }
         }
     }
 }

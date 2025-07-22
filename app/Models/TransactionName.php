@@ -17,8 +17,16 @@ class TransactionName extends Model
     public function getRelatedNotYetPaidOffInvoices()
     {
         $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
+            ->where('customer_id', $this->pelanggan_id)
             ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
-            ->get();
+            ->get()
+            ->map(function ($invoice) {
+                $invoice->pelanggan_id = $invoice->customer_id;
+                $invoice->harga_total = $invoice->total_amount;
+                return $invoice;
+            })
+            ->toArray();
+            
         if (!count($accountingInvoices) ) {
             $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where('status_bayar', 'belum_lunas')
                 ->orWhere('status_bayar', 'sebagian')

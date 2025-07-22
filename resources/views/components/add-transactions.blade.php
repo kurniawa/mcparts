@@ -16,7 +16,7 @@
                             {{-- <th>saldo</th> --}}
                         </tr>
                         @for ($i = 0; $i < 7; $i++)
-                        <tr>
+                        <tr id="tr_add_transaction-{{ $i }}">
                             <td>
                                 {{-- <input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"> --}}
                                 <div class="flex items-center">
@@ -42,6 +42,8 @@
                             <td>
                             </td>
                         </tr>
+
+                        
                         @endfor
                         <tr id="tr_add_transaction">
                             <td>
@@ -114,7 +116,7 @@
     </div>
 
     <script>
-        function accountingGetRelatedInvoice(transactionNameId) {
+        function accountingGetRelatedInvoice(transactionNameId, trAddTransactionId) {
             // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
             //     .then(response => {
             //         if (!response.ok) {
@@ -135,13 +137,52 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    console.log(data);
+                    console.log(data.message);
+                    if (data.notas.length > 0) {
+                        let trAddTransaction = document.getElementById(trAddTransactionId);
+                        let elementToAppend = `<tr><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Total Bayar</th></tr>`;
+                        data.notas.forEach(relatedInvoice => {
+                            elementToAppend = `<tr>
+                                <td>
+                                    <input type="checkbox" name="related_not_yet_paid_off_invoices-nota_id[]" id="related_not_yet_paid_off_invoices-nota_id-${trAddTransactionId}">
+                                    <label for="related_not_yet_paid_off_invoices-nota_id" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
+                                </td>
+                                <td>
+                                    <input type="text" name="related_not_yet_paid_off_invoices-harga_total[]" id="related_not_yet_paid_off_invoices-harga_total-${trAddTransactionId}" value="${relatedInvoice.harga_total}" class="text-xs p-0 border-none text-center" readonly>
+                                </td>
+                                <td>
+                                    <input type="text" name="related_not_yet_paid_off_invoices-amount_due[]" id="related_not_yet_paid_off_invoices-amount_due-${trAddTransactionId}" value="${relatedInvoice.amount_due}" class="text-xs p-0 border-none text-center" readonly>
+                                </td>
+                                <td>
+                                    <input type="text" name="related_not_yet_paid_off_invoices-amount_paid[]" id="related_not_yet_paid_off_invoices-amount_paid-${trAddTransactionId}" value="${relatedInvoice.amount_paid}" class="text-xs p-1" min="0" step="0.01">
+                                </td>
+                            </tr>`;
+                        });
+
+                        elementToAppend += `</table></div></div></td></tr>`;
+
+                        trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
+                        applyEventListenerFormatNumber(`related_not_yet_paid_off_invoices-harga_total-${trAddTransactionId}`, `related_not_yet_paid_off_invoices-harga_total[${trAddTransactionId}][]`);
+                        applyEventListenerFormatNumber(`related_not_yet_paid_off_invoices-amount_due-${trAddTransactionId}`, `related_not_yet_paid_off_invoices-amount_due[${trAddTransactionId}][]`);
+                        applyEventListenerFormatNumber(`related_not_yet_paid_off_invoices-amount_paid-${trAddTransactionId}`, `related_not_yet_paid_off_invoices-amount_paid[${trAddTransactionId}][]`);
+                    }
                 },
                 error: function(err) {
                     console.error('Error:', err);
                     console.error('message:', err.responseJSON?.message);
                     // alert(err.responseJSON?.message ?? 'Terjadi kesalahan');
                 }
+            });
+        }
+
+        function applyEventListenerFormatNumber(elementId, inputName) {
+            let element = document.getElementById(`${elementId}`);
+            elements.forEach(element => {
+                let htmlHiddenUnformatted = `<input type="hidden" name="${inputName}" id="${elementId}-unformatted">`;
+                element.insertAdjacentHTML('afterend', htmlHiddenUnformatted);
+                element.addEventListener('change', function() {
+                    formatNumber(elementId, `${elementId}-unformatted`);
+                });
             });
         }
     </script>

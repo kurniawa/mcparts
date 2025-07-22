@@ -31,12 +31,12 @@ class Spk extends Model
         foreach ($spk_notas as $spk_nota) {
             // DATA NOTA
             $nota = Nota::find($spk_nota->nota_id);
-            if ($nota->total_payment === null) {
+            if ($nota->amount_paid === null) {
                 /**
-                 * Kalau total_payment null, maka total_payment, remaining_payment dan status_bayar
+                 * Kalau amount_paid null, maka amount_paid, amount_due dan status_bayar
                  * belum diupdate
                  */
-                $nota->update_payment();
+                $nota->updatePaymentAndAccountingInvoice();
             }
             $arr_notas[] = $nota->id;
             $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
