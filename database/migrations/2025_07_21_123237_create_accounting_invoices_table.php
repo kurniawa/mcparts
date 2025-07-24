@@ -26,6 +26,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounting_invoices', function (Blueprint $table) {
+            $table->id();
+            $table->bigInteger('time_key')->unique(); // Unique key untuk pengaturan urutan waktu
             $table->foreignId('invoice_id')->nullable()->onDelete('set null');
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();

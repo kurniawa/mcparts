@@ -233,6 +233,9 @@ function table_to_excel(table_id) {
 
 function formatHarga(harga) {
     // console.log(harga);
+    if (typeof harga !== "string") {
+        harga = harga.toString();
+    }
     let harga_ohne_titik = harga.replace(".", "");
     if (harga_ohne_titik.length < 4) {
         return harga;
@@ -338,6 +341,8 @@ function formatNumber(ipt, hidden_id) {
     // console.log(isNaN(ipt.value));
     // console.log(ipt.value[ipt.value.length - 2]);
     var num = ipt.value;
+    // console.log(num);
+    // console.log(typeof num);
     // console.log(num);
     // console.log(ipt.value.length);
     // console.log(num[ipt.value.length - 2]);

@@ -21,6 +21,7 @@ class TransactionName extends Model
             ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
             ->get()
             ->map(function ($invoice) {
+                $invoice->no_nota = $invoice->invoice_number;
                 $invoice->pelanggan_id = $invoice->customer_id;
                 $invoice->harga_total = $invoice->total_amount;
                 return $invoice;
@@ -30,14 +31,14 @@ class TransactionName extends Model
         if (!count($accountingInvoices) ) {
             $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where('status_bayar', 'belum_lunas')
                 ->orWhere('status_bayar', 'sebagian')
-                ->get();
+                ->get()->toArray();
             if (count($notas) > 0) {
-                return $notas->toArray();
+                return $notas;
             } else {
                 return [];
             }
         } else {
-            return $accountingInvoices->toArray();
+            return $accountingInvoices;
         }
     }
 }

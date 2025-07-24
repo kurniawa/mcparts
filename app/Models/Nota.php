@@ -170,11 +170,12 @@ class Nota extends Model
         }
         $relatedAccountingInvoice = AccountingInvoice::where('invoice_id', $this->id)
             ->where('invoice_table', 'notas')
-            ->first();
+            ->latest('time_key')->first();
 
         if ($relatedAccountingInvoice && $relatedAccountingInvoice->accounting_id == null) {
             /**
              * Apabila ditemukan adanya tranksaksi/accounting yang terkait dengan invoice ini,
+             * yakni ketika accounting_id !== null,
              * tidak boleh melakukan update data record tersebut.
              * Maka perlu untuk membuat record baru di tabel accounting_invoices.
              */
@@ -192,6 +193,7 @@ class Nota extends Model
                 'payment_status' => $this->status_bayar,
                 'amount_due' => $this->amount_due,
                 'amount_paid' => $this->amount_paid,
+                'total_amount' => $this->harga_total,
             ]);
         }
         // Update the status of the nota

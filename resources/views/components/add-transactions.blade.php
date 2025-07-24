@@ -31,12 +31,12 @@
                             <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
                             <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
                             <td>
-                                <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-unformatted')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
-                                <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-unformatted" value="{{ old('keluar.' . $i) }}">
+                                <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-real')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
+                                <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-real" value="{{ old('keluar.' . $i) }}">
                             </td>
                             <td>
-                                <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-{{ $i }}-unformatted')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
-                                <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-unformatted" value="{{ old('masuk.' . $i) }}">
+                                <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-{{ $i }}-real')" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
+                                <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-real" value="{{ old('masuk.' . $i) }}">
                                 <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
                             </td>
                             <td>
@@ -116,7 +116,7 @@
     </div>
 
     <script>
-        function accountingGetRelatedInvoice(transactionNameId, trAddTransactionId) {
+        function accountingGetRelatedInvoice(transactionNameId, trId) {
             // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
             //     .then(response => {
             //         if (!response.ok) {
@@ -138,23 +138,31 @@
                 dataType: 'json',
                 success: function(data) {
                     console.log(data.message);
+                    console.log(data.notas);
                     if (data.notas.length > 0) {
-                        let trAddTransaction = document.getElementById(trAddTransactionId);
+                        let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
                         let elementToAppend = `<tr><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Total Bayar</th></tr>`;
                         data.notas.forEach(relatedInvoice => {
-                            elementToAppend = `<tr>
+                            elementToAppend += `<tr>
                                 <td>
-                                    <input type="checkbox" name="related_not_yet_paid_off_invoices-nota_id[]" id="related_not_yet_paid_off_invoices-nota_id-${trAddTransactionId}">
+                                    <input type="checkbox" name="related_not_yet_paid_off_invoices-nota_id[${trId}][]" id="related_not_yet_paid_off_invoices-nota_id-${trId}-${relatedInvoice.id}" value="${relatedInvoice.id}" class="hover:cursor-pointer">
                                     <label for="related_not_yet_paid_off_invoices-nota_id" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
                                 </td>
                                 <td>
-                                    <input type="text" name="related_not_yet_paid_off_invoices-harga_total[]" id="related_not_yet_paid_off_invoices-harga_total-${trAddTransactionId}" value="${relatedInvoice.harga_total}" class="text-xs p-0 border-none text-center" readonly>
+                                    <input type="text" value="${formatHarga((relatedInvoice.harga_total).toString())}" class="text-xs p-0 border-none text-center" readonly>
+                                    <input type="hidden" name="related_not_yet_paid_off_invoices-harga_total[${trId}][]" id="related_not_yet_paid_off_invoices-harga_total-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.harga_total}">
                                 </td>
                                 <td>
-                                    <input type="text" name="related_not_yet_paid_off_invoices-amount_due[]" id="related_not_yet_paid_off_invoices-amount_due-${trAddTransactionId}" value="${relatedInvoice.amount_due}" class="text-xs p-0 border-none text-center" readonly>
+                                    <div class="text-xs p-0 border-none text-center">${formatHarga((relatedInvoice.amount_due).toString())}</div>
+                                    <div>
+                                        <span class="text-orange-400">=></span>
+                                        <input type="text" id="related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}" value="${formatHarga((relatedInvoice.amount_due).toString())}" class="text-xs p-0 border-none text-center text-orange-400" readonly>
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices-amount_due[${trId}][]" id="related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.amount_due}">
+                                    </div>
                                 </td>
                                 <td>
-                                    <input type="text" name="related_not_yet_paid_off_invoices-amount_paid[]" id="related_not_yet_paid_off_invoices-amount_paid-${trAddTransactionId}" value="${relatedInvoice.amount_paid}" class="text-xs p-1" min="0" step="0.01">
+                                    <input type="text" id="related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}" value="${formatHarga((relatedInvoice.amount_paid).toString())}" class="text-xs p-1">
+                                    <input type="hidden" id="related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}-real" name="related_not_yet_paid_off_invoices-amount_paid[${trId}][]" value="${relatedInvoice.amount_paid}">
                                 </td>
                             </tr>`;
                         });
@@ -162,9 +170,11 @@
                         elementToAppend += `</table></div></div></td></tr>`;
 
                         trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
-                        applyEventListenerFormatNumber(`related_not_yet_paid_off_invoices-harga_total-${trAddTransactionId}`, `related_not_yet_paid_off_invoices-harga_total[${trAddTransactionId}][]`);
-                        applyEventListenerFormatNumber(`related_not_yet_paid_off_invoices-amount_due-${trAddTransactionId}`, `related_not_yet_paid_off_invoices-amount_due[${trAddTransactionId}][]`);
-                        applyEventListenerFormatNumber(`related_not_yet_paid_off_invoices-amount_paid-${trAddTransactionId}`, `related_not_yet_paid_off_invoices-amount_paid[${trAddTransactionId}][]`);
+
+                        data.notas.forEach(relatedInvoice => {
+                            applyFormatNumber(`related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}`);
+                            applyFormatNumberAndCountAmountDue(trId, relatedInvoice.id);
+                        });
                     }
                 },
                 error: function(err) {
@@ -175,15 +185,30 @@
             });
         }
 
-        function applyEventListenerFormatNumber(elementId, inputName) {
+        function applyFormatNumber(elementId) {
             let element = document.getElementById(`${elementId}`);
-            elements.forEach(element => {
-                let htmlHiddenUnformatted = `<input type="hidden" name="${inputName}" id="${elementId}-unformatted">`;
-                element.insertAdjacentHTML('afterend', htmlHiddenUnformatted);
-                element.addEventListener('change', function() {
-                    formatNumber(elementId, `${elementId}-unformatted`);
-                });
+            element.addEventListener('change', function() {
+                formatNumber(element, `${elementId}-real`);
             });
+        }
+
+        function applyFormatNumberAndCountAmountDue(trId, invoiceId) {
+            let amountPaid = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}`);
+            amountPaid.addEventListener('change', function() {
+                formatNumber(amountPaid, `related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}-real`);
+                let realTotalAmount = document.getElementById(`related_not_yet_paid_off_invoices-harga_total-${trId}-${invoiceId}-real`).value;
+                let realAmountPaid = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}-real`).value;
+                let realAmountDue = realTotalAmount - realAmountPaid;
+                let amountDue = document.getElementById(`related_not_yet_paid_off_invoices-amount_due-${trId}-${invoiceId}`);
+                amountDue.value = formatHarga(realAmountDue.toString());
+                let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices-amount_due-${trId}-${invoiceId}-real`);
+                amountDueReal.value = realAmountDue;
+            });
+        }
+
+        function countAmountDue(amountPaid, index) {
+
+            amountDue.value = formatHarga((parseFloat(totalAmount.replace(/\./g, '')) - parseFloat(amountPaid.replace(/\./g, ''))).toString());
         }
     </script>
 </div>

@@ -33,6 +33,7 @@ class SeedingAccountingInvoices extends Command
         foreach ($notas as $nota) {
             if ($nota->status_bayar === 'belum_lunas' || $nota->status_bayar === 'sebagian') {
                 AccountingInvoice::create([
+                    'time_key' => $nota->created_at->timestamp,
                     'invoice_id' => $nota->id,
                     'invoice_table' => 'notas',
                     'invoice_number' => $nota->no_nota,
@@ -41,6 +42,7 @@ class SeedingAccountingInvoices extends Command
                     'payment_status' => $nota->status_bayar,
                     'amount_due' => $nota->amount_due,
                     'amount_paid' => $nota->amount_paid,
+                    'total_amount' => $nota->harga_total,
                 ]);
             }
         }
