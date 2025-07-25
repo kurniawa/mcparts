@@ -24,6 +24,7 @@ class TransactionName extends Model
                 $invoice->no_nota = $invoice->invoice_number;
                 $invoice->pelanggan_id = $invoice->customer_id;
                 $invoice->harga_total = $invoice->total_amount;
+                $invoice->status_bayar = $invoice->payment_status;
                 return $invoice;
             })
             ->toArray();

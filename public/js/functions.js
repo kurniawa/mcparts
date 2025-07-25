@@ -431,3 +431,45 @@ function remove_photo(
     el_container_preview_photo.classList.add("hidden");
     el_label_choose_photo.classList.remove("hidden");
 }
+
+function formatHargaIndo(angka) {
+    // Pastikan input berupa angka
+    if (typeof angka !== "number") {
+        angka = parseFloat(angka);
+    }
+    if (isNaN(angka)) return "-";
+
+    // Pisahkan angka dan desimal
+    let [bilangan, desimal] = angka.toFixed(2).split(".");
+
+    // Format ribuan
+    let formattedBilangan = bilangan.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    // Cek desimal
+    if (desimal === "00") {
+        return formattedBilangan + ",-";
+    } else {
+        return formattedBilangan + "," + desimal;
+    }
+}
+
+function formatHargaIndoTanpaDesimal(angka) {
+    // Pastikan input berupa angka
+    if (typeof angka !== "number") {
+        angka = parseFloat(angka);
+    }
+    if (isNaN(angka)) return "-";
+
+    // Pisahkan angka dan desimal
+    let [bilangan, desimal] = angka.toFixed(2).split(".");
+
+    // Format ribuan
+    let formattedBilangan = bilangan.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    // Jika desimal adalah 00, maka hilangkan
+    if (desimal === "00") {
+        return formattedBilangan;
+    } else {
+        return formattedBilangan + "," + desimal;
+    }
+}

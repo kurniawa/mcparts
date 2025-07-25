@@ -31,7 +31,7 @@
                             <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
                             <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
                             <td>
-                                <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-real')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
+                                <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
                                 <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-real" value="{{ old('keluar.' . $i) }}">
                             </td>
                             <td>
@@ -116,6 +116,23 @@
     </div>
 
     <script>
+        document.querySelectorAll('[id^="keluar-"]').forEach(input => {
+            if (!input.id.includes('-real')) {
+                input.addEventListener('change', function() {
+                    formatNumber(input, `${input.id}-real`);
+                });
+            }
+        });
+
+        function applyFormatNumberForKeluar(trId) {
+            document.querySelectorAll('[id^="keluar-"]').forEach(input => {
+                if (!input.id.includes('-real')) {
+                    input.addEventListener('change', function() {
+                        formatNumber(input, `keluar-${trId}-real`);
+                    });
+                }
+            });
+        }
         function accountingGetRelatedInvoice(transactionNameId, trId) {
             // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
             //     .then(response => {
@@ -141,40 +158,63 @@
                     console.log(data.notas);
                     if (data.notas.length > 0) {
                         let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
-                        let elementToAppend = `<tr><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Total Bayar</th></tr>`;
-                        data.notas.forEach(relatedInvoice => {
-                            elementToAppend += `<tr>
+                        let elementToAppend = `<tr><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th>Balance.K</th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Status Bayar</th><th>Total Bayar</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="remaining_balance_keluar-${trId}" class="text-xs p-1"></div>
+                                    <input type="hidden" id="remaining_balance_keluar-${trId}-real" name="remaining_balance_keluar[${trId}]">
+                                </td>`;
+                            data.notas.forEach(relatedInvoice => {
+                            elementToAppend += `
                                 <td>
                                     <input type="checkbox" name="related_not_yet_paid_off_invoices-nota_id[${trId}][]" id="related_not_yet_paid_off_invoices-nota_id-${trId}-${relatedInvoice.id}" value="${relatedInvoice.id}" class="hover:cursor-pointer">
                                     <label for="related_not_yet_paid_off_invoices-nota_id" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
                                 </td>
                                 <td>
-                                    <input type="text" value="${formatHarga((relatedInvoice.harga_total).toString())}" class="text-xs p-0 border-none text-center" readonly>
+                                    <input type="text" value="${formatHargaIndo(relatedInvoice.harga_total)}" class="text-xs p-0 border-none text-center" readonly>
                                     <input type="hidden" name="related_not_yet_paid_off_invoices-harga_total[${trId}][]" id="related_not_yet_paid_off_invoices-harga_total-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.harga_total}">
                                 </td>
                                 <td>
-                                    <div class="text-xs p-0 border-none text-center">${formatHarga((relatedInvoice.amount_due).toString())}</div>
+                                    <div class="text-xs p-0 border-none text-center">${formatHargaIndo(relatedInvoice.amount_due)}</div>
                                     <div>
-                                        <span class="text-orange-400">=></span>
-                                        <input type="text" id="related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}" value="${formatHarga((relatedInvoice.amount_due).toString())}" class="text-xs p-0 border-none text-center text-orange-400" readonly>
+                                        <span class="text-orange-400">=><input type="text" id="related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}" value="${formatHargaIndo(relatedInvoice.amount_due)}" class="text-xs p-0 border-none text-center" readonly></span>
                                         <input type="hidden" name="related_not_yet_paid_off_invoices-amount_due[${trId}][]" id="related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.amount_due}">
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="text" id="related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}" value="${formatHarga((relatedInvoice.amount_paid).toString())}" class="text-xs p-1">
-                                    <input type="hidden" id="related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}-real" name="related_not_yet_paid_off_invoices-amount_paid[${trId}][]" value="${relatedInvoice.amount_paid}">
+                                    <div class="text-xs p-1">${relatedInvoice.status_bayar}</div>
+                                    <span class="text-emerald-400">=><input type="text" id="related_not_yet_paid_off_invoices-payment_status-${trId}-${relatedInvoice.id}" class="text-xs p-0 border-none" value="${relatedInvoice.status_bayar}"></span>
                                 </td>
-                            </tr>`;
+                                <td id="td-related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}" class="hidden">
+                                    <input type="text" id="related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}" value="${formatHargaIndoTanpaDesimal(relatedInvoice.amount_paid)}" class="text-xs p-1">
+                                    <input type="hidden" id="related_not_yet_paid_off_invoices-amount_paid-${trId}-${relatedInvoice.id}-real" name="related_not_yet_paid_off_invoices-amount_paid[${trId}][]" value="${relatedInvoice.amount_paid}">
+                                </td>`;
                         });
 
-                        elementToAppend += `</table></div></div></td></tr>`;
+                        elementToAppend += `</tr></table></div></div></td></tr>`;
 
                         trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
 
                         data.notas.forEach(relatedInvoice => {
                             applyFormatNumber(`related_not_yet_paid_off_invoices-amount_due-${trId}-${relatedInvoice.id}`);
                             applyFormatNumberAndCountAmountDue(trId, relatedInvoice.id);
+                            ELtoggleCheckboxInvoiceChangeAmountPaid(trId, relatedInvoice.id);
                         });
+
+                        // Set remainingBalanceKeluar value
+                        let keluarRealValue = document.getElementById(`keluar-${trId}-real`).value;
+                        let remainingBalanceKeluar = document.getElementById(`remaining_balance_keluar-${trId}`);
+                        let remainingBalanceKeluarReal = document.getElementById(`remaining_balance_keluar-${trId}-real`);
+                        // console.log('element remainingBalanceKeluar:', remainingBalanceKeluar);
+                        if (keluarRealValue) {
+                            remainingBalanceKeluar.innerHTML = formatHargaIndo(keluarRealValue);
+                            remainingBalanceKeluarReal.value = keluarRealValue;
+                        } else {
+                            remainingBalanceKeluar.innerHTML = 0;
+                            remainingBalanceKeluarReal.value = 0;
+                        }
+                        theChangeOfKeluarChangeThePayment(trId);                        
                     }
                 },
                 error: function(err) {
@@ -200,15 +240,73 @@
                 let realAmountPaid = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}-real`).value;
                 let realAmountDue = realTotalAmount - realAmountPaid;
                 let amountDue = document.getElementById(`related_not_yet_paid_off_invoices-amount_due-${trId}-${invoiceId}`);
-                amountDue.value = formatHarga(realAmountDue.toString());
+                amountDue.value = formatHargaIndo(realAmountDue.toString());
                 let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices-amount_due-${trId}-${invoiceId}-real`);
                 amountDueReal.value = realAmountDue;
             });
         }
 
-        function countAmountDue(amountPaid, index) {
+        function theChangeOfKeluarChangeThePayment(trId) {
+            let keluar = document.getElementById(`keluar-${trId}`);
+            keluar.addEventListener('change', function() {
+                console.log('theChangeOfKeluarChangeThePayment');
+                let keluarReal = document.getElementById(`keluar-${trId}-real`);
+                let remainingBalanceKeluar = document.getElementById(`remaining_balance_keluar-${trId}`);
+                let remainingBalanceKeluarReal = document.getElementById(`remaining_balance_keluar-${trId}-real`);
+                console.log('keluarReal.value:', keluarReal.value);
+                console.log('remainingBalanceKeluar:', remainingBalanceKeluar);
+                console.log('remainingBalanceKeluarReal:', remainingBalanceKeluarReal);
+                if (keluarReal.value) {
+                    console.log('keluarReal.value: yes');
+                    remainingBalanceKeluar.innerHTML = formatHargaIndo(keluarReal.value);
+                    remainingBalanceKeluarReal.value = keluarReal.value;
+                } else {
+                    remainingBalanceKeluar.innerHTML = 0;
+                    remainingBalanceKeluarReal.value = 0;
+                }
+                // Apabila ada related_not_yet_paid_off_invoices, update the remaining payment
+                let relatedNotYetPaidOffInvoices = document.querySelectorAll(`input[name="related_not_yet_paid_off_invoices-nota_id[${trId}][]"]`);
+                if (relatedNotYetPaidOffInvoices.length > 0) {
+                    let totalAmountPaidRealValue = 0;
+                    let totalAmountDueRealValue = 0;
+                    relatedNotYetPaidOffInvoices.forEach(invoice => {
+                        if (invoice.checked) {
+                            let amountPaidReal = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoice.value}-real`).value;
+                            totalAmountPaidRealValue += parseFloat(amountPaidReal);
+                            let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices-amount_due-${trId}-${invoice.value}-real`).value;
+                            totalAmountDueRealValue += parseFloat(amountDueReal);
+                        }
+                    });
+                    let remainingBalanceKeluarVal = keluarReal.value - totalAmountPaidRealValue;
+                    remainingBalanceKeluar.innerHTML = formatHargaIndo(remainingBalanceKeluarVal);
+                    remainingBalanceKeluarReal.value = remainingBalanceKeluarVal;
+                }
+            });
+        }
 
-            amountDue.value = formatHarga((parseFloat(totalAmount.replace(/\./g, '')) - parseFloat(amountPaid.replace(/\./g, ''))).toString());
+        function ELtoggleCheckboxInvoiceChangeAmountPaid(trId, invoiceId) {
+            let checkbox = document.getElementById(`related_not_yet_paid_off_invoices-nota_id-${trId}-${invoiceId}`);
+            checkbox.addEventListener('change', function() {
+                let tdAmountPaid = document.getElementById(`td-related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}`);
+                let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices-amount_due-${trId}-${invoiceId}-real`);
+                let amountPaid = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}`);
+                let amountPaidReal = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}-real`);
+                if (checkbox.checked) {
+                    if (tdAmountPaid.classList.contains('hidden')) {
+                        tdAmountPaid.classList.remove('hidden');
+                    }
+                    let balanceKeluarRealValue = document.getElementById(`remaining_balance_keluar-${trId}-real`).value;
+                    let amountPaidRealValue = balanceKeluarRealValue - amountDueReal.value;
+                    amountPaidReal.value = amountPaidRealValue;
+                    amountPaid.value = formatHargaIndoTanpaDesimal(amountPaidRealValue);
+                } else {
+                    if (!tdAmountPaid.classList.contains('hidden')) {
+                        tdAmountPaid.classList.add('hidden');
+                    }
+                    let amountPaid = document.getElementById(`related_not_yet_paid_off_invoices-amount_paid-${trId}-${invoiceId}`);
+                    amountPaid.value = 0;
+                }
+            });
         }
     </script>
 </div>
