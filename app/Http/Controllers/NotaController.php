@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 
 class NotaController extends Controller
 {
-    function create_or_edit_jumlah_spk_produk_nota(Spk $spk, SpkProduk $spk_produk, Request $request) {
+    public function create_or_edit_jumlah_spk_produk_nota(Spk $spk, SpkProduk $spk_produk, Request $request) {
         $post = $request->post();
         // dump($post['jumlah']);
         // dump($post);
@@ -270,9 +270,14 @@ class NotaController extends Controller
 
             $nota->jumlah_total = $jumlah_total;
             $nota->harga_total = $harga_total;
+            $nota->amount_paid = 0;
+            $nota->amount_due = $harga_total;
+            $nota->save();
+            // dd($nota);
 
             // Update status pembayaran dan related accounting_invoices
-            $nota->updatePaymentAndAccountingInvoices();
+
+            $nota->updatePaymentAndAccountingInvoice();
             $success_ .= ' - nota diperbarui -';
 
             DB::commit();

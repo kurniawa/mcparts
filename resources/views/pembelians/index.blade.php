@@ -545,8 +545,8 @@
                                                     <div class="flex">
                                                         @if ($pembelians[$i]->status_bayar === 'LUNAS')
                                                         <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d', strtotime($pembelians[$i]->tanggal_lunas)) }}">
-                                                        <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m'), strtotime($pembelians[$i]->tanggal_lunas) }}">
-                                                        <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y'), strtotime($pembelians[$i]->tanggal_lunas) }}">
+                                                        <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m', strtotime($pembelians[$i]->tanggal_lunas)) }}">
+                                                        <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y', strtotime($pembelians[$i]->tanggal_lunas)) }}">
                                                         @else
                                                         <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
                                                         <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">

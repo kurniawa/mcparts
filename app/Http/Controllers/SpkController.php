@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SpkController extends Controller
 {
-    function create() {
+    public function create() {
         $label_pelanggans = Pelanggan::label_pelanggans();
         $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
 
@@ -48,7 +48,7 @@ class SpkController extends Controller
         return view('spks.create', $data);
     }
 
-    function store(Request $request) {
+    public function store(Request $request) {
         $post = $request->post();
         // dump($post);
         // VALIDASI DATA
@@ -155,7 +155,7 @@ class SpkController extends Controller
         // return redirect()->route('spks.show', $new_spk->id)->with($feedback);
     }
 
-    function show(Spk $spk) {
+    public function show(Spk $spk) {
         // dd($spk);
         // $test_array = [["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16],];
         // $encoded_test_array = json_encode($test_array);
@@ -271,7 +271,7 @@ class SpkController extends Controller
         return view('spks.show', $data);
     }
 
-    function spk_item_tetapkan_selesai(SpkProduk $spk_produk, Request $request) {
+    public function spk_item_tetapkan_selesai(SpkProduk $spk_produk, Request $request) {
         $post = $request->post();
         // dump($post);
         // dd($spk_produk);

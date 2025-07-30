@@ -23,17 +23,18 @@ return new class extends Migration
      * maka perlu untuk membuat record baru di tabel accounting_invoices.
      * Dengan demikian, satu invoice bisa terkait dengan beberapa transaksi/accounting, begitu pula sebaliknya.
      */
+
     public function up(): void
     {
         Schema::create('accounting_invoices', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('time_key')->unique(); // Unique key untuk pengaturan urutan waktu
-            $table->foreignId('invoice_id')->nullable()->onDelete('set null');
+            $table->foreignId('invoice_id')->nullable();
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();
             $table->foreignId('accounting_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('transaction_name_id')->nullable()->constrained('transaction_names')->onDelete('set null');
-            $table->string('transaction_name')->nullable(); // e.g., 'Pembayaran Nota', 'Pembayaran Hutang'
+            $table->string('transaction_name_desc')->nullable(); // e.g., 'Pembayaran Nota', 'Pembayaran Hutang'
             $table->foreignId('customer_id')->nullable()->constrained('pelanggans')->onDelete('set null');
             $table->string('customer_name', 100)->nullable(); // e.g., 'Jhon Motor'
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');

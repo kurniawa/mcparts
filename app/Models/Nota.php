@@ -11,7 +11,7 @@ class Nota extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
-    static function create_from_spk_produk($spk, $spk_produk, $jumlah_total) {
+    public static function create_from_spk_produk($spk, $spk_produk, $jumlah_total) {
         $alamat_id = null;
         $kontak_id = null;
         $cust_long = null;
@@ -101,7 +101,7 @@ class Nota extends Model
         ]);
     }
 
-    static function kaji_ulang_spk_dan_spk_produk($spk) {
+    public static function kaji_ulang_spk_dan_spk_produk($spk) {
         $spk_produks = SpkProduk::where('spk_id', $spk->id)->get();
         $jumlah_sudah_nota_gabungan = 0;
         foreach ($spk_produks as $spk_produk) {
@@ -130,7 +130,7 @@ class Nota extends Model
         $spk->save();
     }
 
-    static function update_data_nota_srjalan($spk) {
+    public static function update_data_nota_srjalan($spk) {
         $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
         foreach ($spk_notas as $spk_nota) {
             $nota = Nota::find($spk_nota->nota_id);
@@ -153,7 +153,8 @@ class Nota extends Model
         }
     }
 
-    function updatePaymentAndAccountingInvoice() {
+    public function updatePaymentAndAccountingInvoice() {
+        // dd($this);
         if ($this->amount_paid) {
             if ($this->amount_paid == 0) {
                 $this->status_bayar = 'belum_lunas';
@@ -168,26 +169,50 @@ class Nota extends Model
             $this->amount_paid = 0;
             $this->amount_due = $this->harga_total;
         }
+        
+        /**
+         * Ketika nota pertama kali dibuat, maka belum ada transaksi pembayaran nota,
+         * maka tidak ada AccountingInvoice terkait nota baru tersebut.
+         * Apabila ditemukan adanya tranksaksi/accounting yang terkait dengan invoice ini,
+         * yakni ketika accounting_id !== null,
+         * tidak boleh melakukan update data record tersebut.
+         * Maka perlu untuk membuat record baru di tabel accounting_invoices.
+         */
         $relatedAccountingInvoice = AccountingInvoice::where('invoice_id', $this->id)
             ->where('invoice_table', 'notas')
             ->latest('time_key')->first();
 
         if ($relatedAccountingInvoice && $relatedAccountingInvoice->accounting_id == null) {
-            /**
-             * Apabila ditemukan adanya tranksaksi/accounting yang terkait dengan invoice ini,
-             * yakni ketika accounting_id !== null,
-             * tidak boleh melakukan update data record tersebut.
-             * Maka perlu untuk membuat record baru di tabel accounting_invoices.
-             */
             $relatedAccountingInvoice->payment_status = $this->status_bayar;
             $relatedAccountingInvoice->amount_paid = $this->amount_paid;
             $relatedAccountingInvoice->amount_due = $this->amount_due;
             $relatedAccountingInvoice->save();
-        } else {
+        } elseif ($relatedAccountingInvoice && $relatedAccountingInvoice->accounting_id != null) {
+            /**
+             * Apabila ditemukan AccountingInvoice terkait, dimana telah terjadi transaksi pembayaran
+             * maka perlu dilihat terlebih dahulu, berapa sisa pembayaran yang perlu dilakukan
+             */
+            dd('Telah terjadi transaksi pembayaran pada nota terkait');
             AccountingInvoice::create([
+                'time_key' => strtotime($this->created_at),
                 'invoice_id' => $this->id,
                 'invoice_table' => 'notas',
                 'invoice_number' => $this->no_nota,
+                'customer_id' => $this->pelanggan_id,
+                'customer_name' => $this->pelanggan_nama,
+                'payment_status' => $this->status_bayar,
+                'amount_due' => $this->amount_due,
+                'amount_paid' => $this->amount_paid,
+                'total_amount' => $this->harga_total,
+            ]);
+        } else {
+            AccountingInvoice::create([
+                'time_key' => strtotime($this->created_at),
+                'invoice_id' => $this->id,
+                'invoice_table' => 'notas',
+                'invoice_number' => $this->no_nota,
+                // 'transaction_name_id' => $related_transaction_name->id,
+                // 'transaction_name_desc' => $related_transaction_name->desc,
                 'customer_id' => $this->pelanggan_id,
                 'customer_name' => $this->pelanggan_nama,
                 'payment_status' => $this->status_bayar,

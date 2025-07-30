@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Accounting;
+use App\Models\AccountingInvoice;
 use App\Models\Kategori;
 use App\Models\Menu;
+use App\Models\Nota;
 use App\Models\Pelanggan;
 use App\Models\Supplier;
 use App\Models\TransactionName;
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class AccountingController extends Controller
 {
-    function index() {
+    public function index() {
         $user = Auth::user();
 
         $user_instance_this = UserInstance::where('user_id', $user->id)->get();
@@ -39,7 +41,7 @@ class AccountingController extends Controller
         return view('accounting.index', $data);
     }
 
-    function create_kas(Request $request) {
+    public function create_kas(Request $request) {
         $post = $request->post();
         // dd($post);
 
@@ -82,7 +84,7 @@ class AccountingController extends Controller
         return back()->with('success_', '-user_instance created-');
     }
 
-    function show_transactions(UserInstance $userInstance, Request $request) {
+    public function show_transactions(UserInstance $userInstance, Request $request) {
         // dd($userInstance);
         $get = $request->query();
 
@@ -195,7 +197,7 @@ class AccountingController extends Controller
         return view('accounting.show_transactions', $data);
     }
 
-    function store_transactions(UserInstance $user_instance, Request $request) {
+    public function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
         dd($post);
         // dump($user_instance);
@@ -413,7 +415,7 @@ class AccountingController extends Controller
                 }
 
                 // Simpan transaksi baru
-                Accounting::create([
+                $new_accounting = Accounting::create([
                     'user_id' => $user->id,
                     'username' => $user->username,
                     'user_instance_id' => $user_instance->id,
@@ -445,6 +447,38 @@ class AccountingController extends Controller
                     'time_key' => $time_key,
                     'created_at' => $created_at,
                 ]);
+
+                /**
+                 * Apabila transaksi/accounting terkait dengan nota/invoice tertentu, maka:
+                 * insert relasi antara accountings dengan invoices/notas,
+                 * yakni pada tabel 'accounting_invoices'.
+                 */
+    
+                if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
+                    $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
+                    $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
+                    
+                    $relatedAccountingInvoice = AccountingInvoice::where('invoice_id', $this->id)
+                        ->where('invoice_table', 'notas')
+                        ->latest('time_key')->first();
+
+                    if ($relatedAccountingInvoice) {
+                        
+                    }
+                    AccountingInvoice::create([
+                        'time_key' => $time_key,
+                        'invoice_id' => $related_nota->id,
+                        'invoice_table' => 'notas',
+                        'invoice_number' => $related_nota->no_nota,
+                        'accounting_id' => $new_accounting->id,
+                        'transaction_name_id' => $related_transaction_name->id,
+                        'transaction_name_desc' => $related_transaction_name->desc,
+                        'customer_id' => $new_accounting->pelanggan_id,
+                        'customer_name' => $new_accounting->pelanggan_nama,
+                        'payment_status' =>
+                    ]);
+                }
+
             }
 
             DB::commit();

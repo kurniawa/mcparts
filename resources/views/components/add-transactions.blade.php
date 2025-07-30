@@ -158,42 +158,42 @@
                     console.log(data.notas);
                     if (data.notas.length > 0) {
                         let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
-                        let elementToAppend = `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th>Balance.K</th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Status Bayar</th><th>Total Bayar</th>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div id="remaining_balance_masuk-${trId}" class="text-xs p-1"></div>
-                                    <input type="hidden" id="remaining_balance_masuk-${trId}-real" name="remaining_balance_masuk[${trId}]">
-                                </td>`;
+                        let elementToAppend = `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th>Balance.K</th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
                             data.notas.forEach(relatedInvoice => {
-                            elementToAppend += `
-                                <td>
-                                    <input type="checkbox" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.id}" value="${relatedInvoice.id}" class="checkbox-${trId} hover:cursor-pointer">
-                                    <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
-                                </td>
-                                <td>
-                                    <input type="text" value="${formatHargaIndo(relatedInvoice.harga_total)}" class="text-xs p-0 border-none text-center" readonly>
-                                    <input type="hidden" name="related_not_yet_paid_off_invoices[harga_total][${trId}][]" id="related_not_yet_paid_off_invoices[harga_total]-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.harga_total}">
-                                </td>
-                                <td>
-                                    <div class="text-xs p-0 border-none text-center">${formatHargaIndo(relatedInvoice.amount_due)}</div>
-                                    <div>
-                                        <span class="text-orange-400">=><input type="text" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.id}" value="${formatHargaIndo(relatedInvoice.amount_due)}" class="text-xs p-0 border-none text-center" readonly></span>
-                                        <input type="hidden" name="related_not_yet_paid_off_invoices[amount_due][${trId}][]" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.amount_due}">
-                                        <input type="hidden" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.id}-real-unchanged" value="${relatedInvoice.amount_due}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="text-xs p-1">${relatedInvoice.status_bayar}</div>
-                                    <span class="text-emerald-400">=><input type="text" id="related_not_yet_paid_off_invoices[payment_status]-${trId}-${relatedInvoice.id}" name="related_not_yet_paid_off_invoices[payment_status][${trId}][${relatedInvoice.id}]" class="text-xs p-0 border-none" value="${relatedInvoice.status_bayar}"></span>
-                                </td>
-                                <td id="td-related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.id}" class="hidden">
-                                    <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.id}" value="${formatHargaIndoTanpaDesimal(relatedInvoice.amount_paid)}" class="text-xs p-1">
-                                    <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="${relatedInvoice.amount_paid}">
-                                </td>`;
-                        });
+                                elementToAppend += `
+                                <tr>
+                                    <td>
+                                        <div id="remaining_balance_masuk-${trId}" class="text-xs p-1"></div>
+                                        <input type="hidden" id="remaining_balance_masuk-${trId}-real" name="remaining_balance_masuk[${trId}]">
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.id}" value="${relatedInvoice.id}" class="checkbox-${trId} hover:cursor-pointer">
+                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
+                                    </td>
+                                    <td>
+                                        <input type="text" value="${formatHargaIndo(relatedInvoice.harga_total)}" class="text-xs p-0 border-none text-center" readonly>
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices[harga_total][${trId}][]" id="related_not_yet_paid_off_invoices[harga_total]-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.harga_total}">
+                                    </td>
+                                    <td>
+                                        <div class="text-xs p-0 border-none text-center">${formatHargaIndo(relatedInvoice.amount_due)}</div>
+                                        <div>
+                                            <span class="text-orange-400">=><input type="text" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.id}" value="${formatHargaIndo(relatedInvoice.amount_due)}" class="text-xs p-0 border-none text-center" readonly></span>
+                                            <input type="hidden" name="related_not_yet_paid_off_invoices[amount_due][${trId}][]" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.id}-real" value="${relatedInvoice.amount_due}">
+                                            <input type="hidden" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.id}-real-unchanged" value="${relatedInvoice.amount_due}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-xs p-1">${relatedInvoice.status_bayar}</div>
+                                        <span class="text-emerald-400">=><input type="text" id="related_not_yet_paid_off_invoices[payment_status]-${trId}-${relatedInvoice.id}" name="related_not_yet_paid_off_invoices[payment_status][${trId}][${relatedInvoice.id}]" class="text-xs p-0 border-none" value="${relatedInvoice.status_bayar}"></span>
+                                    </td>
+                                    <td id="td-related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.id}" class="hidden">
+                                        <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.id}" value="${formatHargaIndoTanpaDesimal(relatedInvoice.amount_paid)}" class="text-xs p-1">
+                                        <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="${relatedInvoice.amount_paid}">
+                                    </td>
+                                </tr>`;
+                            });
 
-                        elementToAppend += `</tr></table></div></div></td></tr>`;
+                        elementToAppend += `</table></div></div></td></tr>`;
 
                         trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
 
