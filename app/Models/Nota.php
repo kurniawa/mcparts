@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -153,83 +154,106 @@ class Nota extends Model
         }
     }
 
-    public function updatePaymentAndAccountingInvoice() {
-        // dd($this);
-        if ($this->amount_paid) {
-            if ($this->amount_paid == 0) {
-                $this->status_bayar = 'belum_lunas';
-            } elseif ($this->amount_paid < $this->harga_total) {
-                $this->status_bayar = 'sebagian';
-            } elseif ($this->amount_paid == $this->harga_total) {
-                $this->status_bayar = 'lunas';
-            }
-            $this->amount_due = $this->harga_total - $this->amount_paid;
-        } else {
-            $this->status_bayar = 'belum_lunas';
-            $this->amount_paid = 0;
-            $this->amount_due = $this->harga_total;
-        }
-        
+    public function updatePaymentAndAccountingInvoice_NewInvoice() : void {
         /**
          * Ketika nota pertama kali dibuat, maka belum ada transaksi pembayaran nota,
          * maka tidak ada AccountingInvoice terkait nota baru tersebut.
+         * 
+         * Perhatikan pada kasus ini, accounting_id => null,
+         * karena belum ada transaksi pembayaran terkait dengan invoice ini,
+         * karena invoice baru saja dibuat.
+         */
+        AccountingInvoice::create([
+            'time_key' => strtotime($this->created_at),
+            'invoice_id' => $this->id,
+            'invoice_table' => 'notas',
+            'invoice_number' => $this->no_nota,
+            // 'transaction_name_id' => $related_transaction_name->id,
+            // 'transaction_name_desc' => $related_transaction_name->desc,
+            'customer_id' => $this->pelanggan_id,
+            'customer_name' => $this->pelanggan_nama,
+            'payment_status' => $this->status_bayar,
+            'amount_due' => $this->harga_total,
+            'amount_paid' => 0,
+            'total_amount' => $this->harga_total,
+        ]);
+
+        // Update the status_bayar pada nota
+        if ($this->amount_paid == 0) {
+            $this->status_bayar = 'belum_lunas';
+        } elseif ($this->amount_paid < $this->harga_total) {
+            $this->status_bayar = 'sebagian';
+        } elseif ($this->amount_paid >= $this->harga_total) {
+            $this->status_bayar = 'lunas';
+            $this->finished_at = now();
+        }
+
+        $this->amount_due = $this->harga_total - $this->amount_paid;
+
+        // Save the changes to the nota
+        $this->updated_by = Auth::user()->username;
+        $this->save();
+    }
+    public function updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist($accounting, $accounting_invoice, $transaction_name, $amount_due, $amount_paid, $payment_status) {
+        /**
+         * Validasi $amount_due, $amount_paid, $payment_status
+         */
+        $amount_due_to_compare = $accounting_invoice->amount_due - $amount_paid;
+        if ($amount_due_to_compare < 0) {
+            $amount_due_to_compare = 0;
+        }
+        $payment_status_to_compare = "belum_lunas";
+        if ($amount_due_to_compare == 0) {
+            $payment_status_to_compare = 'lunas';
+        } elseif ($amount_due_to_compare > 0 && $amount_due_to_compare < $this->harga_total) {
+            $payment_status_to_compare = 'sebagian';
+        }
+
+        if ($amount_due_to_compare != $amount_due || $payment_status_to_compare !== $payment_status) {
+            throw new Exception("ERR - updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist:\n$transaction_name->desc\n$amount_due_to_compare != $amount_due || $payment_status_to_compare !== $payment_status");
+        }
+        /**
          * Apabila ditemukan adanya tranksaksi/accounting yang terkait dengan invoice ini,
          * yakni ketika accounting_id !== null,
          * tidak boleh melakukan update data record tersebut.
          * Maka perlu untuk membuat record baru di tabel accounting_invoices.
          */
-        $relatedAccountingInvoice = AccountingInvoice::where('invoice_id', $this->id)
-            ->where('invoice_table', 'notas')
-            ->latest('time_key')->first();
-
-        if ($relatedAccountingInvoice && $relatedAccountingInvoice->accounting_id == null) {
-            $relatedAccountingInvoice->payment_status = $this->status_bayar;
-            $relatedAccountingInvoice->amount_paid = $this->amount_paid;
-            $relatedAccountingInvoice->amount_due = $this->amount_due;
-            $relatedAccountingInvoice->save();
-        } elseif ($relatedAccountingInvoice && $relatedAccountingInvoice->accounting_id != null) {
+        if ($accounting_invoice->accounting_id == null) {
+            $accounting_invoice->accounting_id = $accounting->id;
+            $accounting_invoice->transaction_id = $transaction_name->id;
+            $accounting_invoice->transaction_desc = $transaction_name->desc;
+            $accounting_invoice->payment_status = $payment_status;
+            $accounting_invoice->amount_paid = $amount_paid;
+            $accounting_invoice->amount_due = $amount_due;
+            $accounting_invoice->save();
+        } elseif ($accounting_invoice->accounting_id != null) {
+            // dd('Telah terjadi transaksi pembayaran pada nota terkait');
             /**
-             * Apabila ditemukan AccountingInvoice terkait, dimana telah terjadi transaksi pembayaran
-             * maka perlu dilihat terlebih dahulu, berapa sisa pembayaran yang perlu dilakukan
+             * Telah terjadi transaksi pembayaran sebelumnya pada nota ini.
+             * maka perlu dihitung berapa pembayaran yang telah dilakukan sebelumnya dan
+             * berapa sisa pembayaran yang perlu dilunasi.
              */
-            dd('Telah terjadi transaksi pembayaran pada nota terkait');
             AccountingInvoice::create([
                 'time_key' => strtotime($this->created_at),
                 'invoice_id' => $this->id,
                 'invoice_table' => 'notas',
                 'invoice_number' => $this->no_nota,
+                'transaction_name_id' => $transaction_name->id,
+                'transaction_name_desc' => $transaction_name->desc,
                 'customer_id' => $this->pelanggan_id,
                 'customer_name' => $this->pelanggan_nama,
-                'payment_status' => $this->status_bayar,
-                'amount_due' => $this->amount_due,
-                'amount_paid' => $this->amount_paid,
+                'payment_status' => $payment_status,
+                'amount_due' => $amount_due,
+                'amount_paid' => $amount_paid,
                 'total_amount' => $this->harga_total,
             ]);
         } else {
-            AccountingInvoice::create([
-                'time_key' => strtotime($this->created_at),
-                'invoice_id' => $this->id,
-                'invoice_table' => 'notas',
-                'invoice_number' => $this->no_nota,
-                // 'transaction_name_id' => $related_transaction_name->id,
-                // 'transaction_name_desc' => $related_transaction_name->desc,
-                'customer_id' => $this->pelanggan_id,
-                'customer_name' => $this->pelanggan_nama,
-                'payment_status' => $this->status_bayar,
-                'amount_due' => $this->amount_due,
-                'amount_paid' => $this->amount_paid,
-                'total_amount' => $this->harga_total,
-            ]);
         }
-        // Update the status of the nota
-        if ($this->status_bayar === 'lunas') {
-            $this->finished_at = now();
-        } else {
-            $this->finished_at = null;
-        }
-        // Save the changes to the nota
+        // Update the status_bayar pada nota
+        $this->amount_paid = $amount_paid;
+        $this->amount_due = $amount_due;
+        $this->status_bayar = $payment_status;
         $this->updated_by = Auth::user()->username;
-        $this->updated_at = now();
         $this->save();
     }
 }

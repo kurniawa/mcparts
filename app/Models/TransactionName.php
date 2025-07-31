@@ -16,11 +16,21 @@ class TransactionName extends Model
      */
     public function getRelatedNotYetPaidOffInvoices()
     {
+        $accountingInvoiceOverpayment = AccountingInvoice::where('invoice_table', 'notas')
+            ->where('customer_id', $this->pelanggan_id)
+            ->where('is_overpayment_exist', true)
+            ->latest()->first();
+
         $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
             ->where('customer_id', $this->pelanggan_id)
             ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
             ->get()
-            ->map(function ($invoice) {
+            ->map(function ($invoice) use ($accountingInvoiceOverpayment) {
+                if ($accountingInvoiceOverpayment) {
+                    $invoice->overpayment = $accountingInvoiceOverpayment->overpayment;
+                    $invoice->overpayment_time = $accountingInvoiceOverpayment->overpayment_time;
+                    $invoice->is_overpayment_exist = $accountingInvoiceOverpayment->is_overpayment_exist;
+                }
                 $invoice->no_nota = $invoice->invoice_number;
                 $invoice->pelanggan_id = $invoice->customer_id;
                 $invoice->harga_total = $invoice->total_amount;

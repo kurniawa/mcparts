@@ -457,26 +457,19 @@ class AccountingController extends Controller
                 if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
                     $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
                     $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
-                    
-                    $relatedAccountingInvoice = AccountingInvoice::where('invoice_id', $this->id)
+
+                    $related_accounting_invoice = AccountingInvoice::where('invoice_id', $related_nota->id)
                         ->where('invoice_table', 'notas')
                         ->latest('time_key')->first();
 
-                    if ($relatedAccountingInvoice) {
-                        
-                    }
-                    AccountingInvoice::create([
-                        'time_key' => $time_key,
-                        'invoice_id' => $related_nota->id,
-                        'invoice_table' => 'notas',
-                        'invoice_number' => $related_nota->no_nota,
-                        'accounting_id' => $new_accounting->id,
-                        'transaction_name_id' => $related_transaction_name->id,
-                        'transaction_name_desc' => $related_transaction_name->desc,
-                        'customer_id' => $new_accounting->pelanggan_id,
-                        'customer_name' => $new_accounting->pelanggan_nama,
-                        'payment_status' =>
-                    ]);
+                    $related_nota->updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist(
+                        $new_accounting,
+                        $related_accounting_invoice,
+                        $related_transaction_name,
+                        $post['related_not_yet_paid_off_invoices']['amount_due'][$i],
+                        $post['related_not_yet_paid_off_invoices']['amount_paid'][$i],
+                        $post['related_not_yet_paid_off_invoices']['payment_status'][$i],
+                    );
                 }
 
             }

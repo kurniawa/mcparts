@@ -43,6 +43,9 @@ return new class extends Migration
             $table->string('payment_method', 50)->nullable(); // e.g., cash, bank transfer, credit card
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
+            $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
+            $table->bigInteger('overpayment_time')->nullable(); // Untuk identifikasi apakah masih ada overpayment terkait
+            $table->boolean('is_overpayment_exist')->default(false); // Untuk identifikasi apakah masih ada overpayment terkait
             $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice
             $table->date('due_date')->nullable(); // Due date for payment
             $table->string('currency', 10)->default('IDR'); // Currency of the invoice, defaulting to IDR
