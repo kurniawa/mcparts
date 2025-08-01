@@ -484,8 +484,8 @@ class PembelianController extends Controller
                 $success_ .= '-pembelian_barang created-';
 
                 // Insert ke tabel goods_prices apabila harga_main tidak sama dengan harga_main terakhir
-                $harga_total_main = round($harga_main * (int)$post['jumlah_main'][$i],2);
-                $harga_total_sub = round($harga_sub * (int)$post['jumlah_sub'][$i],2);
+                $harga_total_main = $harga_main * $post['jumlah_main'][$i];
+                $harga_total_sub = $harga_sub * $post['jumlah_sub'][$i];
                 $last_goods_price = GoodsPrice::where('goods_id', $barang->id)->orderByDesc('created_at')->first();
                 if ($last_goods_price->price != $harga_main) {
                     GoodsPrice::create([
