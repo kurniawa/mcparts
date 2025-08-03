@@ -489,7 +489,7 @@ class AccountingController extends Controller
 
     }
 
-    function mark_as_read_or_unread(UserInstance $user_instance, Accounting $accounting, Request $request) {
+    public function mark_as_read_or_unread(UserInstance $user_instance, Accounting $accounting, Request $request) {
         $post = $request->post();
         // dump($post);
         // dump($user_instance);

@@ -116,6 +116,10 @@
     </div>
 
     <script>
+        // console.log("21" == "21.00");
+        // console.log((21).toString() == (21.00).toString());
+        // console.log(21 == 21.00);
+        // console.log(parseFloat(21) == parseFloat(21.00));
         document.querySelectorAll('[id^="masuk-"]').forEach(input => {
             if (!input.id.includes('-real')) {
                 input.addEventListener('change', function() {
@@ -156,6 +160,7 @@
                 success: function(data) {
                     console.log(data.message);
                     console.log(data.notas);
+                    console.log(data.customerBalance);
                     if (data.notas.length > 0) {
                         let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
                         let elementToAppend = `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><div class="flex justify-center my-1"><div class="border p-2"><table><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
@@ -167,13 +172,17 @@
                                     <div class="font-bold">Balance.M</div>
                                     <div id="remaining_balance_masuk-${trId}" class="text-xs p-1"></div>
                                     <input type="hidden" id="remaining_balance_masuk-${trId}-real" name="remaining_balance_masuk[${trId}]">
-                                    <div id="div-overpayment-${trId}">
-                                        <div class="font-bold">Overpayment/div>
-                                        <div id="overpayment-${trId}" class="text-xs p-1"></div>
-                                        <input type="hidden" id="overpayment-${trId}-real" name="overpayment[${trId}]">
+                                    <div id="div-saldo-${trId}">
+                                        <div class="font-bold"><input type="checkbox" id="checkbox-saldo-${trId}" name="checkbox-saldo[${trId}]" value="yes">Saldo</div>
+                                        <div id="saldo-${trId}" class="text-xs p-1">${data.customerBalance ? formatHargaIndo(data.customerBalance.amount) : 0}</div>
+                                        <div id="saldo-${trId}-recalculate" class="text-xs p-1 text-indigo-500">${data.customerBalance ? `=> ${formatHargaIndo(data.customerBalance.amount)}` : ""}</div>
+                                        <input type="hidden" id="saldo-${trId}-real" name="saldo[${trId}]" value="${data.customerBalance ? data.customerBalance.amount : 0}">
+                                        <input type="hidden" id="saldo-${trId}-real-unchanged" name="saldo[${trId}]" value="${data.customerBalance ? data.customerBalance.amount : 0}" readonly>
                                     </div>
                                 </td>
                                 `;
+                            } else {
+                                htmlRemainingBalanceMasuk = "";
                             }
                             elementToAppend += `
                             <tr>${htmlRemainingBalanceMasuk}
@@ -205,7 +214,7 @@
 
                             indexNota++;
                         });
-
+                        let htmlTotalDuePaidOverpayment = `<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                         elementToAppend += `</table></div></div></td></tr>`;
 
                         trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
@@ -268,21 +277,19 @@
             let masuk = document.getElementById(`masuk-${trId}`);
             masuk.addEventListener('change', function() {
                 console.log('theChangeOfMasukChangeThePayment');
-                let masukReal = document.getElementById(`masuk-${trId}-real`);
-                let remainingBalanceMasuk = document.getElementById(`remaining_balance_masuk-${trId}`);
-                let remainingBalanceMasukReal = document.getElementById(`remaining_balance_masuk-${trId}-real`);
-                // console.log('masukReal.value:', masukReal.value);
-                // console.log('remainingBalanceMasuk:', remainingBalanceMasuk);
-                // console.log('remainingBalanceMasukReal:', remainingBalanceMasukReal);
                 recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
             });
         }
 
         function toggleCheckboxRecalculate_BalanceMasuk_TotalDue_TotalPaid(trId, invoiceId) {
             let checkbox = document.getElementById(`related_not_yet_paid_off_invoices[nota_id]-${trId}-${invoiceId}`);
+            let checkboxSaldo = document.getElementById(`checkbox-saldo-${trId}`);
             checkbox.addEventListener('change', function() {
                 recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
             });
+            checkboxSaldo.addEventListener('change', function () {
+                recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
+            })
         }
 
         function recalculateBalanceMasuk_TotalDue_TotalPaid(trId) {
@@ -296,10 +303,16 @@
             // console.log('masukReal.value:', masukReal.value);
             remainingBalanceMasuk.innerHTML = formatHargaIndo(masukReal.value);
             remainingBalanceMasukReal.value = masukReal.value;
-            // Apabila ada related_not_yet_paid_off_invoices, update the remaining payment
-            console.log('remainingBalanceMasukReal:', remainingBalanceMasukReal.value);
 
+            /*
+            Melakukan perhitungan saldo terlebih dahulu.
+            Apabila pelanggan memiliki saldo, maka perlu dikurangkan dulu dari saldo yang dia punya.
+            */
+            recalculateSaldoAndOverpayment(trId);
+            
             let relatedNotYetPaidOffInvoices = document.querySelectorAll(`input[name="related_not_yet_paid_off_invoices[nota_id][${trId}][]"]`);
+            
+            // Mulai Perhitungan
             if (relatedNotYetPaidOffInvoices.length > 0) {
                 relatedNotYetPaidOffInvoices.forEach(invoice => {
                     let tdAmountPaid = document.getElementById(`td-related_not_yet_paid_off_invoices[amount_paid]-${trId}-${invoice.value}`);
@@ -309,28 +322,33 @@
                     let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real`);
                     let amountDueRealUnchanged = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real-unchanged`);
                     let paymentStatus = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${trId}-${invoice.value}`);
+                    let amountPaidRealValue = parseFloat(amountPaidReal.value);
+                    let amountDueRealUnchangedValue = parseFloat(amountDueRealUnchanged.value);
+                    let amountDueRealValue = parseFloat(amountDueReal.value);
+                    
                     if (invoice.checked) {
+                        // console.log('checked')
                         if (tdAmountPaid.classList.contains('hidden')) {
                             tdAmountPaid.classList.remove('hidden');
                         }
                         // console.log(`amountPaidReal.value = ${amountPaidReal.value}`);
                         if (amountPaidReal.value == 0) {
                             // console.log('amountPaidReal.value == 0');
-                            if (remainingBalanceMasukReal.value >= amountDueRealUnchanged.value) {
-                                // console.log('remainingBalanceMasukReal.value >= amountDueRealUnchanged.value');
+                            if (remainingBalanceMasukReal.value >= amountDueRealValue) {
+                                // console.log('remainingBalanceMasukReal.value >= amountDueRealValue');
                                 amountPaidReal.value = amountDueReal.value;
-                                remainingBalanceMasukReal.value -= amountDueRealUnchanged.value;
+                                remainingBalanceMasukReal.value -= amountDueRealValue;
                             } else {
-                                // console.log('remainingBalanceMasukReal.value < amountDueRealUnchanged.value');
+                                // console.log('remainingBalanceMasukReal.value < amountDueRealValue');
                                 amountPaidReal.value = remainingBalanceMasukReal.value;
                                 remainingBalanceMasukReal.value = 0;
                             }
                         } else {
-                            // console.log('amountPaidReal.value !== 0')
-                            if (remainingBalanceMasukReal.value >= amountPaidReal.value) {
-                                remainingBalanceMasukReal.value -= amountPaidReal.value;
+                            // console.log('amountPaidRealValue !== 0')
+                            if (remainingBalanceMasukReal.value >= amountPaidRealValue) {
+                                remainingBalanceMasukReal.value -= amountPaidRealValue;
                             } else {
-                                amountPaidReal.value = remainingBalanceMasukReal.value;
+                                amountPaidRealValue = remainingBalanceMasukReal.value;
                                 remainingBalanceMasukReal.value = 0;
                             }
                         }
@@ -347,13 +365,67 @@
                     remainingBalanceMasuk.innerHTML = formatHargaIndo(remainingBalanceMasukReal.value);
                     // console.log('remainingBalanceMasukReal:', remainingBalanceMasukReal.value);
                     // Update payment_status
-                    if (amountPaidReal.value == amountDueRealUnchanged.value) {
-                        paymentStatus.value = 'lunas';
-                    } else if (amountPaidReal.value == 0) {
-                        paymentStatus.value = 'belum_lunas';
+                    // all numbers to be compared in floating number for the true results
+                    setTimeout(() => {
+                        console.log(amountPaidRealValue, amountDueRealValue);
+                        // console.log(amountDueRealValue);
+                        if (amountPaidRealValue >= amountDueRealValue) {
+                            paymentStatus.value = 'lunas';
+                        } else if (amountPaidRealValue == 0) {
+                            paymentStatus.value = 'belum_lunas';
+                        } else {
+                            paymentStatus.value = 'sebagian'
+                        }
+                        console.log(paymentStatus.value);
+                    }, 1000);
+                });
+            }
+        }
+
+        function recalculateSaldoAndOverpayment(trId) {
+            let checkboxSaldo = document.getElementById(`checkbox-saldo-${trId}`);
+            let customerBalanceRecalculate = document.getElementById(`saldo-${trId}-recalculate`);
+            let customerBalanceReal = document.getElementById(`saldo-${trId}-real`);
+            let customerBalanceRealUnchanged = document.getElementById(`saldo-${trId}-real-unchanged`);
+            // set nilai awal dikembalikan ke semula
+            customerBalanceReal.value = customerBalanceRealUnchanged.value;
+            let customerBalanceRealValue = parseFloat(customerBalanceReal.value);
+
+            if (!checkboxSaldo.checked || customerBalanceRealValue == 0) {
+                return false;
+            }
+            
+            let relatedNotYetPaidOffInvoices = document.querySelectorAll(`input[name="related_not_yet_paid_off_invoices[nota_id][${trId}][]"]`);
+            if (relatedNotYetPaidOffInvoices.length > 0) {
+                // looping untuk set nilai awal kembali ke semula
+                relatedNotYetPaidOffInvoices.forEach(invoice => {
+                    let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real`);
+                    let amountDueRealUnchanged = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real-unchanged`);
+                    amountDueReal.value = amountDueRealUnchanged.value;
+                });
+                
+                // looping untuk mulai perhitungan
+                relatedNotYetPaidOffInvoices.forEach(invoice => {
+                    let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real`);
+                    let amountDueRealValue = parseFloat(amountDueReal.value);
+                    
+                    if (invoice.checked) {
+                        if (tdAmountPaid.classList.contains('hidden')) {
+                            tdAmountPaid.classList.remove('hidden');
+                        }
+                        if (customerBalanceRealValue <= amountDueRealValue) {
+                            customerBalanceReal.value = 0
+                            amountDueReal.value = amountDueRealValue - customerBalanceRealValue;
+                        } else {
+                            customerBalanceReal.value = customerBalanceRealValue - amountDueRealValue;
+                            amountDueReal.value = 0;
+                        }
                     } else {
-                        paymentStatus.value = 'sebagian'
+                        if (!tdAmountPaid.classList.contains('hidden')) {
+                            tdAmountPaid.classList.add('hidden');
+                        }
                     }
+                    
                 });
             }
         }

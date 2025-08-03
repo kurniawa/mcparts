@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\GoodsPrice;
 use App\Models\Menu;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BarangController extends Controller
 {
@@ -295,6 +297,7 @@ class BarangController extends Controller
         ]);
 
         $success_ = '';
+        $user = Auth::user();
 
         $satuan_sub = $post['satuan_sub'];
         $jumlah_sub = null;
@@ -310,7 +313,7 @@ class BarangController extends Controller
             $harga_sub = $post['harga_sub'];
             $harga_total_sub = $post['harga_total_sub'];
         }
-
+        $harga_main_old = $barang->harga_main;
         $barang->update([
             'supplier_id' => $post['supplier_id'],
             'supplier_nama' => $post['supplier_nama'],
@@ -325,6 +328,25 @@ class BarangController extends Controller
             'harga_total_sub' => $harga_total_sub,
             'keterangan' => $post['keterangan'],
         ]);
+
+        // Update harga barang di tabel good_prices juga
+        $goods_price = GoodsPrice::where('goods_id', $barang->id)->where('unit', $barang->satuan_main)->where('price', $harga_main_old)->first();
+        if ($goods_price) {
+            $goods_price->harga_main = $post['harga_main'];
+            $goods_price->save();
+            $success_ .= '-GoodsPrice updated-';
+        } else {
+            GoodsPrice::create([
+                'goods_id' => $barang->id,
+                'goods_slug' => $barang->nama,
+                'supplier_id' => $barang->supplier_id,
+                'supplier_name' => $barang->supplier_nama,
+                'unit' => $barang->satuan_main,
+                'price' => $post['harga_main'],
+                'created_by' => $user->username,
+            ]);
+            $success_ .= '-new GoodsPrice created-';
+        }
 
         $success_ .= '-barang updated-';
 
