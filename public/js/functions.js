@@ -338,6 +338,7 @@ function pin_formatted_number_on_certain_element(value, element_id) {
 
 function formatNumber(ipt, hidden_id) {
     // console.log(ipt);
+    // console.log(hidden_id);
     // console.log(isNaN(ipt.value));
     // console.log(ipt.value[ipt.value.length - 2]);
     var num = ipt.value;

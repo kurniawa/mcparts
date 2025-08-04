@@ -455,21 +455,23 @@ class AccountingController extends Controller
                  */
     
                 if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
-                    $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
-                    $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
-
-                    $related_accounting_invoice = AccountingInvoice::where('invoice_id', $related_nota->id)
-                        ->where('invoice_table', 'notas')
-                        ->latest('time_key')->first();
-
-                    $related_nota->updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist(
-                        $new_accounting,
-                        $related_accounting_invoice,
-                        $related_transaction_name,
-                        $post['related_not_yet_paid_off_invoices']['amount_due'][$i],
-                        $post['related_not_yet_paid_off_invoices']['amount_paid'][$i],
-                        $post['related_not_yet_paid_off_invoices']['payment_status'][$i],
-                    );
+                    for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
+                        $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                        $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
+    
+                        $related_accounting_invoice = AccountingInvoice::where('invoice_id', $related_nota->id)
+                            ->where('invoice_table', 'notas')
+                            ->latest('time_key')->first();
+    
+                        $related_nota->updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist(
+                            $new_accounting,
+                            $related_accounting_invoice,
+                            $related_transaction_name,
+                            $post['related_not_yet_paid_off_invoices']['amount_due'][$i],
+                            $post['related_not_yet_paid_off_invoices']['amount_paid'][$i],
+                            $post['related_not_yet_paid_off_invoices']['payment_status'][$i],
+                        );
+                    }
                 }
 
             }

@@ -487,7 +487,19 @@ class PembelianController extends Controller
                 $harga_total_main = $harga_main * $post['jumlah_main'][$i];
                 $harga_total_sub = $harga_sub * $post['jumlah_sub'][$i];
                 $last_goods_price = GoodsPrice::where('goods_id', $barang->id)->orderByDesc('created_at')->first();
-                if ($last_goods_price->price != $harga_main) {
+                
+                if (!$last_goods_price) {
+                    GoodsPrice::create([
+                        'goods_id' => $barang->id,
+                        'goods_slug' => $barang->nama,
+                        'supplier_id' => $barang->supplier_id,
+                        'supplier_name' => $barang->supplier_nama,
+                        'unit' => $barang->satuan_main,
+                        'price' => $harga_main,
+                        'created_by' => $user->username,
+                    ]);
+                    $success_ .= '-goods_price created-';
+                } elseif ($last_goods_price->price != $harga_main) {
                     GoodsPrice::create([
                         'goods_id' => $barang->id,
                         'goods_slug' => $barang->nama,
