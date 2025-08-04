@@ -348,7 +348,7 @@
                             if (remainingBalanceMasukReal.value >= amountPaidRealValue) {
                                 remainingBalanceMasukReal.value -= amountPaidRealValue;
                             } else {
-                                amountPaidRealValue = remainingBalanceMasukReal.value;
+                                amountPaidReal.value = remainingBalanceMasukReal.value;
                                 remainingBalanceMasukReal.value = 0;
                             }
                         }
@@ -359,15 +359,17 @@
                         amountPaid.value = 0;
                         amountPaidReal.value = 0;
                     }
-                    amountDueReal.value = amountDueRealUnchanged.value - amountPaidReal.value;
+                    amountDueReal.value = amountDueRealValue - amountPaidReal.value;
                     amountPaid.value = formatHargaIndo(amountPaidReal.value);
                     amountDue.value = formatHargaIndo(amountDueReal.value);
                     remainingBalanceMasuk.innerHTML = formatHargaIndo(remainingBalanceMasukReal.value);
+                    amountDueRealValue = parseFloat(amountDueReal.value);
+                    amountPaidRealValue = parseFloat(amountPaidReal.value);
                     // console.log('remainingBalanceMasukReal:', remainingBalanceMasukReal.value);
                     // Update payment_status
                     // all numbers to be compared in floating number for the true results
                     setTimeout(() => {
-                        console.log(amountPaidRealValue, amountDueRealValue);
+                        // console.log(amountPaidRealValue, amountDueRealValue);
                         // console.log(amountDueRealValue);
                         if (amountPaidRealValue >= amountDueRealValue) {
                             paymentStatus.value = 'lunas';
@@ -376,7 +378,7 @@
                         } else {
                             paymentStatus.value = 'sebagian'
                         }
-                        console.log(paymentStatus.value);
+                        // console.log(paymentStatus.value);
                     }, 1000);
                 });
             }
