@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('barangs', function (Blueprint $table) {
-            $table->decimal('harga_main', 15, 2)->change();
-            $table->decimal('harga_sub', 15, 2)->change();
+            $table->decimal('harga_main', 15, 2)->nullable()->change();
+            $table->decimal('harga_sub', 15, 2)->nullable()->change();
         });
     }
 
@@ -23,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('barangs', function (Blueprint $table) {
-            $table->bigInteger('harga_main')->change();
-            $table->bigInteger('harga_sub')->change();
+            $table->bigInteger('harga_main')->nullable()->change();
+            $table->bigInteger('harga_sub')->nullable()->change();
         });
     }
 };
