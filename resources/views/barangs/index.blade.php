@@ -158,15 +158,13 @@
                             <td>
                                 <div class="flex justify-between font-semibold">
                                     <span>Rp</span>
-                                    {{ number_format($barangs[$i][$j]->harga_main,0,',','.') }}
-                                    <span>,-</span>
+                                    {{ number_format($barangs[$i][$j]->harga_main,2,',','.') }}
                                 </div>
                             </td>
                             <td>
                                 <div class="flex justify-between font-semibold">
                                     <span>Rp</span>
-                                    {{ number_format($barangs[$i][$j]->harga_total_main,0,',','.') }}
-                                    <span>,-</span>
+                                    {{ number_format($barangs[$i][$j]->harga_total_main,2,',','.') }}
                                 </div>
                             </td>
                             <td>
@@ -183,16 +181,16 @@
                                     <tr>
                                         <td>Satuan Utama</td><td>:</td><td>{{ $barangs[$i][$j]->satuan_main }}</td>
                                         <td>Jumlah</td><td>:</td><td>{{ $barangs[$i][$j]->jumlah_main / 100 }}</td>
-                                        <td>Harga</td><td>:</td><td>{{ number_format($barangs[$i][$j]->harga_main,0,',','.') }}</td>
-                                        <td>Total</td><td>:</td><td>{{ number_format($barangs[$i][$j]->harga_total_main,0,',','.') }}</td>
+                                        <td>Harga</td><td>:</td><td>{{ number_format($barangs[$i][$j]->harga_main,2,',','.') }}</td>
+                                        <td>Total</td><td>:</td><td>{{ number_format($barangs[$i][$j]->harga_total_main,2,',','.') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Satuan Sub</td><td>:</td><td>@if ($barangs[$i][$j]->satuan_sub){{ $barangs[$i][$j]->satuan_sub }}@else-@endif</td>
                                         <td>Jumlah</td><td>:</td>
                                         <td>@if ($barangs[$i][$j]->jumlah_sub){{ $barangs[$i][$j]->jumlah_sub / 100 }}@else-@endif</td>
                                         <td>Harga</td><td>:</td>
-                                        <td>@if ($barangs[$i][$j]->harga_sub){{ number_format($barangs[$i][$j]->harga_sub,0,',','.') }}@else-@endif</td>
-                                        <td>Total</td><td>:</td><td>@if ($barangs[$i][$j]->harga_total_sub){{ number_format($barangs[$i][$j]->harga_total_sub,0,',','.') }}@else-@endif</td>
+                                        <td>@if ($barangs[$i][$j]->harga_sub){{ number_format($barangs[$i][$j]->harga_sub,2,',','.') }}@else-@endif</td>
+                                        <td>Total</td><td>:</td><td>@if ($barangs[$i][$j]->harga_total_sub){{ number_format($barangs[$i][$j]->harga_total_sub,2,',','.') }}@else-@endif</td>
                                     </tr>
                                 </table>
                             </td>
