@@ -541,12 +541,14 @@
         });
     }
 
-    setTimeout(() => {
-        get_scroll();
-        $spinner = $('#spinner');
-        $spinner.hide();
-    }, 1000);
+    // setTimeout(() => {
+    //     get_scroll();
+    //     $spinner = $('#spinner');
+    //     $spinner.hide();
+    // }, 1000);
 
+    $spinner = $('#spinner');
+    $spinner.hide(500);
     const loading_animation = () => {
         $loading_to_disable = $('#loading_to_disable')
         $loading_to_disable.prop('disabled', true);
@@ -557,20 +559,20 @@
         $spinner.show();
     }
 
-    const get_scroll = () => {
-        const scrollValue = localStorage.getItem("scrollValue")
-        if (scrollValue !== null) {
-            window.scrollTo(0, scrollValue ? scrollValue : 0)
-        }
-        // console.log(scrollValue);
-    }
+    // const get_scroll = () => {
+    //     const scrollValue = localStorage.getItem("scrollValue")
+    //     if (scrollValue !== null) {
+    //         window.scrollTo(0, scrollValue ? scrollValue : 0)
+    //     }
+    //     // console.log(scrollValue);
+    // }
 
-    const set_scroll_here = () => {
-        // console.log('test scroll');
-        loading_animation();
-        localStorage.setItem('scrollValue', window.scrollY)
-        return true;
-    }
+    // const set_scroll_here = () => {
+    //     // console.log('test scroll');
+    //     loading_animation();
+    //     localStorage.setItem('scrollValue', window.scrollY)
+    //     return true;
+    // }
 
 </script>
 

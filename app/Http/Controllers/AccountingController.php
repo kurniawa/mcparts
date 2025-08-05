@@ -7,6 +7,7 @@ use App\Models\AccountingInvoice;
 use App\Models\Kategori;
 use App\Models\Menu;
 use App\Models\Nota;
+use App\Models\Overpayment;
 use App\Models\Pelanggan;
 use App\Models\Supplier;
 use App\Models\TransactionName;
@@ -199,7 +200,7 @@ class AccountingController extends Controller
 
     public function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        dd($post);
+        // dd($post);
         // dump($user_instance);
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
@@ -245,6 +246,7 @@ class AccountingController extends Controller
 
             $is_valid_entry = $created_at !== null && $desc !== null && ($keluar !== null || $masuk !== null);
 
+            $transaction_name = null; // Definisi transaction_name disini karena akan digunakan nantinya untuk validasi data untuk kategori "PENERIMAAN PIUTANG"
             if ($is_valid_entry) {
                 $year_inputted = (int) date('Y', strtotime($created_at));
                 $year_now = (int) date('Y');
@@ -272,20 +274,7 @@ class AccountingController extends Controller
                                 'error.required' => "Deskripsi tidak ditemukan pada baris ke-$i"
                             ]);
                         }
-
-                        if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
-                            $validasi_penerimaan_piutang = $request->validate([
-                                "remaining_balance_keluar.$i" => "required|numeric",
-                                "related_not_yet_paid_off_invoices.nota_id.$i" => "required|array",
-                                "related_not_yet_paid_off_invoices.nota_id.$i.*" => "numeric",
-                                "related_not_yet_paid_off_invoices.harga_total.$i" => "required|array",
-                                "related_not_yet_paid_off_invoices.harga_total.$i.*" => "numeric",
-                                "related_not_yet_paid_off_invoices.amount_due.$i" => "required|array",
-                                "related_not_yet_paid_off_invoices.amount_due.$i.*" => "numeric",
-                                "related_not_yet_paid_off_invoices.amount_paid.$i" => "required|array",
-                                "related_not_yet_paid_off_invoices.amount_paid.$i.*" => "numeric",
-                            ]);
-                        }
+                        
                     }
                 } else {
                     $transaction_name = TransactionName::find($trans_id);
@@ -333,6 +322,12 @@ class AccountingController extends Controller
 
                     break;
                 }
+            }
+
+            // dump($post);
+            if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
+                Accounting::validasi_data_untuk_penerimaan_piutang($request, $i);
+                dd('VALID');
             }
         }
 
@@ -455,23 +450,23 @@ class AccountingController extends Controller
                  */
     
                 if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
-                    for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
-                        $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
-                        $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
+                    // for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
+                    //     $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                    //     $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
     
-                        $related_accounting_invoice = AccountingInvoice::where('invoice_id', $related_nota->id)
-                            ->where('invoice_table', 'notas')
-                            ->latest('time_key')->first();
+                    //     $related_accounting_invoice = AccountingInvoice::where('invoice_id', $related_nota->id)
+                    //         ->where('invoice_table', 'notas')
+                    //         ->latest('time_key')->first();
     
-                        $related_nota->updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist(
-                            $new_accounting,
-                            $related_accounting_invoice,
-                            $related_transaction_name,
-                            $post['related_not_yet_paid_off_invoices']['amount_due'][$i],
-                            $post['related_not_yet_paid_off_invoices']['amount_paid'][$i],
-                            $post['related_not_yet_paid_off_invoices']['payment_status'][$i],
-                        );
-                    }
+                    //     $related_nota->updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist(
+                    //         $new_accounting,
+                    //         $related_accounting_invoice,
+                    //         $related_transaction_name,
+                    //         $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
+                    //         $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                    //         $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
+                    //     );
+                    // }
                 }
 
             }

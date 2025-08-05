@@ -38,14 +38,14 @@ class TransactionName extends Model
         if (!count($accountingInvoices) ) {
             $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where('status_bayar', 'belum_lunas')
                 ->orWhere('status_bayar', 'sebagian')
-                ->get()->toArray();
-            if (count($notas) > 0) {
-                return $notas;
-            } else {
-                return [];
-            }
-        } else {
-            return [$accountingInvoices, $customerBalance];
+                ->get()->map(function ($nota) {
+                    $nota->invoice_id = $nota->id;
+                    return $nota;
+                })
+                ->toArray();
+            $accountingInvoices = $notas;
         }
+        
+        return [$accountingInvoices, $customerBalance];
     }
 }

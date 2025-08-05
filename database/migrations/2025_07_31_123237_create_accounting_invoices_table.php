@@ -41,6 +41,9 @@ return new class extends Migration
             $table->string('supplier_name', 100)->nullable(); //
             $table->string('payment_status', 50)->nullable(); // e.g., paid, unpaid, partial
             $table->string('payment_method', 50)->nullable(); // e.g., cash, bank transfer, credit card
+            $table->decimal('discount_percentage', 5, 2)->nullable();
+            $table->decimal('total_discount', 15, 2)->nullable();
+            $table->decimal('discount_description', 15, 2)->nullable();
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
             $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
