@@ -271,7 +271,7 @@ class AccountingController extends Controller
 
                         if (!$transaction_name) {
                             $request->validate(['error' => 'required'], [
-                                'error.required' => "Deskripsi tidak ditemukan pada baris ke-$i"
+                                'error.required' => "Tidak ditemukan TransactionName yang sesuai dengan deskripsi pada baris ke-$i"
                             ]);
                         }
                         
@@ -327,7 +327,8 @@ class AccountingController extends Controller
             // dump($post);
             if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
                 Accounting::validasi_data_untuk_penerimaan_piutang($request, $i);
-                dd('VALID');
+                // dump('VALID');
+                // dd($post);
             }
         }
 
@@ -450,25 +451,121 @@ class AccountingController extends Controller
                  */
     
                 if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
-                    // for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
-                    //     $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
-                    //     $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
+                    $success_ .= "penerimaan piutang-";
+                    $total_balance_used = 0;
+                    $saldo_awal = $post['saldo_awal'][$i];
+                    $sisa_saldo = $post['sisa_saldo'][$i];
+                    for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) {
+                        $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                        /**
+                         * Create / Update data akan dilakukan apabila memang terjadi pembayaran.
+                         * Artinya ada perubahan nilai amount_due atau amount_paid antara yang lama dan yang baru.
+                         */
+                        $amount_due_new = $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j];
+                        $amount_paid_new = $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j];
+                        if ($amount_due_new == $related_nota->amount_due || $amount_paid_new == $related_nota->amount_paid_new) {
+                            continue;
+                        }
+                        // Update data nota terkait
+                        $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
+                        $finished_at = null;
+                        if ($payment_status == 'lunas') {
+                            $finished_at = $created_at;
+                        }
+                        $related_nota->update([
+                            'status_bayar' => $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
+                            'discount_percentage' => $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
+                            'total_discount' => $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
+                            'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                            'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
+                            'finished_at' => $finished_at,
+                        ]);
+                        $success_ .= "related_nota updated-";
+                        // $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
     
-                    //     $related_accounting_invoice = AccountingInvoice::where('invoice_id', $related_nota->id)
-                    //         ->where('invoice_table', 'notas')
-                    //         ->latest('time_key')->first();
-    
-                    //     $related_nota->updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist(
-                    //         $new_accounting,
-                    //         $related_accounting_invoice,
-                    //         $related_transaction_name,
-                    //         $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
-                    //         $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
-                    //         $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
-                    //     );
-                    // }
-                }
+                        /**
+                         * CREATE OR UPDATE AccountingInvoice
+                         * ----------------------------------
+                         * Apabila ditemukan adanya tranksaksi/accounting yang terkait dengan invoice ini,
+                         * yakni ketika accounting_id !== null,
+                         * tidak boleh melakukan update data record tersebut.
+                         * Maka perlu untuk membuat record baru di tabel accounting_invoices.
+                         */
+                        $related_accounting_invoice = AccountingInvoice::where('invoice_table', 'notas')
+                            ->where('invoice_id', $related_nota->id)
+                            ->latest('time_key')->first();
 
+                        while(AccountingInvoice::where('time_key', $time_key)->first()) {
+                            $time_key++;
+                        }
+
+                        if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
+                            AccountingInvoice::create([
+                                'time_key' => $time_key,
+                                'invoice_id' => $related_nota->id,
+                                'invoice_table' => 'notas',
+                                'invoice_number' => $related_nota->no_nota,
+                                'accounting_id' => $new_accounting->id,
+                                'transaction_name_id' => $transaction_name->id,
+                                'transaction_name_desc' => $transaction_name->desc,
+                                'customer_id' => $related_nota->pelanggan_id,
+                                'customer_name' => $related_nota->pelanggan_nama,
+                                'payment_status' => $related_nota->status_bayar,
+                                'amount_due' => $related_nota->amount_due,
+                                'amount_paid' => $related_nota->amount_paid,
+                                'balance_used' => $related_nota->balance_used,
+                                'total_amount' => $related_nota->harga_total,
+                            ]);
+                            $success_ .= "AccountingInvoice created-";
+                        } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
+                            $related_accounting_invoice->update([
+                                'time_key' => $time_key,
+                                'invoice_id' => $related_nota->id,
+                                'invoice_table' => 'notas',
+                                'invoice_number' => $related_nota->no_nota,
+                                'accounting_id' => $new_accounting->id,
+                                'transaction_name_id' => $transaction_name->id,
+                                'transaction_name_desc' => $transaction_name->desc,
+                                'customer_id' => $related_nota->pelanggan_id,
+                                'customer_name' => $related_nota->pelanggan_nama,
+                                'payment_status' => $related_nota->status_bayar,
+                                'amount_due' => $related_nota->amount_due,
+                                'amount_paid' => $related_nota->amount_paid,
+                                'balance_used' => $related_nota->balance_used,
+                                'total_amount' => $related_nota->harga_total,
+                                'updated_by' => $user->username,
+                            ]);
+                            $success_ .= "AccountingInvoice updated-";
+                        }
+
+                        $total_balance_used += (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
+                    }
+                    /**
+                     * CREATE or UPDATE customer_balance / overpayment
+                     */
+                    $remaining_balance_masuk = (float)$post['remaining_balance_masuk'][$i];
+                    if ( $remaining_balance_masuk != 0 || ($total_balance_used > 0 && $saldo_awal != $sisa_saldo) ) {
+                        $overpayment = Overpayment::where('customer_id', $related_nota->id)->first();
+                        $sisa_saldo_real = $remaining_balance_masuk + $sisa_saldo;
+                        if ($overpayment) {
+                            $overpayment->update([
+                                'time_key' => $time_key,
+                                'accounting_id' => $new_accounting->id,
+                                'customer_id' => $transaction_name->pelanggan_id,
+                                'amount' => $sisa_saldo_real
+                            ]);
+                        } else {
+                            Overpayment::create([
+                                'time_key' => $time_key,
+                                'accounting_id' => $new_accounting->id,
+                                'customer_id' => $transaction_name->pelanggan_id,
+                                'amount' => $sisa_saldo_real
+                            ]);
+                        }
+                        $success_ .= 'overpayment created/updated-';
+                    }
+                }
             }
 
             DB::commit();

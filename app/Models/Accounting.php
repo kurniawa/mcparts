@@ -100,7 +100,7 @@ class Accounting extends Model
 
             // Validasi Payment Status
             $payment_status_new = 'error';
-            if ($amount_due_new == 0) {
+            if ($amount_due_new <= 0) {
                 $payment_status_new = 'lunas';
             } else if ($amount_due_new == ($amount_due_old - $total_discount_new)) {
                 $payment_status_new = 'belum_lunas'; 

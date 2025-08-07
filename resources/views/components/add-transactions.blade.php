@@ -379,7 +379,7 @@
                     setTimeout(() => {
                         // console.log(amountPaidRealValue, amountDueRealValue);
                         // console.log(amountDueRealValue);
-                        if (amountDueRealValue == 0) {
+                        if (amountDueRealValue <= 0) {
                             paymentStatus.value = 'lunas';
                         } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue)) {
                             paymentStatus.value = 'belum_lunas'; 

@@ -46,6 +46,7 @@ return new class extends Migration
             $table->decimal('discount_description', 15, 2)->nullable();
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
+            $table->decimal('balance_used', 15, 2)->default(0.00); // Amount already paid
             $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
             $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice
             $table->date('due_date')->nullable(); // Due date for payment
