@@ -367,7 +367,6 @@ class AccountingController extends Controller
 
                 // Hitung tanggal dan time_key
                 $datetime = new DateTime("{$post['year'][$i]}-{$post['month'][$i]}-{$post['day'][$i]} " . date('H:i:s'));
-                $created_at = $datetime->format('Y-m-d H:i:s');
                 $time_key = $datetime->getTimestamp();
 
                 // Pastikan time_key unik
@@ -377,6 +376,7 @@ class AccountingController extends Controller
 
                 // Hitung saldo
                 $saldo = 0;
+                $created_at = date('Y-m-d H:i:s', $time_key);
                 $after_trans = Accounting::where('user_instance_id', $user_instance->id)
                     ->where('created_at', '>', $created_at)
                     ->orderBy('created_at')
@@ -496,10 +496,6 @@ class AccountingController extends Controller
                             ->where('invoice_id', $related_nota->id)
                             ->latest('time_key')->first();
 
-                        while(AccountingInvoice::where('time_key', $time_key)->first()) {
-                            $time_key++;
-                        }
-
                         if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
                             AccountingInvoice::create([
                                 'time_key' => $time_key,
@@ -516,6 +512,7 @@ class AccountingController extends Controller
                                 'amount_paid' => $related_nota->amount_paid,
                                 'balance_used' => $related_nota->balance_used,
                                 'total_amount' => $related_nota->harga_total,
+                                'created_at' => $created_at,
                             ]);
                             $success_ .= "AccountingInvoice created-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
@@ -535,6 +532,7 @@ class AccountingController extends Controller
                                 'balance_used' => $related_nota->balance_used,
                                 'total_amount' => $related_nota->harga_total,
                                 'updated_by' => $user->username,
+                                'created_at' => $created_at,
                             ]);
                             $success_ .= "AccountingInvoice updated-";
                         }
@@ -1001,33 +999,74 @@ class AccountingController extends Controller
 
         $warnings_ = '';
 
-        $saldo = 0;
-        // Cari apakah ada transaksi dengan tanggal yang setelahnya?
-        $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
+        DB::beginTransaction();
+        try {
+            $saldo = 0;
+            // Cari apakah ada transaksi dengan tanggal yang setelahnya?
+            $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
 
-        if (count($last_transactions) !== 0) {
-            $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$accounting->created_at)->latest()->first();
-            // dump('before_last_transaction: ', $before_last_transaction);
-            if ($before_last_transaction !== null) {
-                $saldo = $before_last_transaction->saldo;
-            }
-
-            $saldo_next = $saldo;
-            foreach ($last_transactions as $last_transaction) {
-                if ($last_transaction->transaction_type === 'pengeluaran') {
-                    $saldo_next -= $last_transaction->jumlah;
-                } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                    $saldo_next += $last_transaction->jumlah;
+            if (count($last_transactions) !== 0) {
+                $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$accounting->created_at)->latest()->first();
+                // dump('before_last_transaction: ', $before_last_transaction);
+                if ($before_last_transaction !== null) {
+                    $saldo = $before_last_transaction->saldo;
                 }
-                $last_transaction->saldo = $saldo_next;
-                $last_transaction->save();
+
+                $saldo_next = $saldo;
+                foreach ($last_transactions as $last_transaction) {
+                    if ($last_transaction->transaction_type === 'pengeluaran') {
+                        $saldo_next -= $last_transaction->jumlah;
+                    } elseif ($last_transaction->transaction_type === 'pemasukan') {
+                        $saldo_next += $last_transaction->jumlah;
+                    }
+                    $last_transaction->saldo = $saldo_next;
+                    $last_transaction->save();
+                }
+                $warnings_ .= '-jumlah saldo editted-';
+
             }
-            $warnings_ .= '-jumlah saldo editted-';
 
+            $accounting->delete();
+            $warnings_ .= '-transaction deleted-';
+
+            /**
+             * DELETE AccountingInvoice terkait pada time_key terkait.
+             * dan UPDATE Nota terkait.
+             * Tabel yang perlu diperhatikan: Nota, AccountingInvoice, Overpayment
+             */
+            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->where('time_key', $accounting->time_key)->get();
+            foreach ($accounting_invoices as $accounting_invoice) {
+                if ($accounting_invoice->invoice_table == 'notas') {
+                    $nota = Nota::find($accounting_invoice->invoice_id);
+                    $nota->discount_percentage = $accounting_invoice->discount_percentage_old;
+                    $nota->total_discount = $accounting_invoice->total_discount_old;
+                    $nota->discount_description = $accounting_invoice->discount_description_old;
+                    $nota->amount_due = $accounting_invoice->amount_due_old;
+                    $nota->amount_paid = $accounting_invoice->amount_paid_old;
+                    $nota->balance_used = $accounting_invoice->balance_used_old;
+                    $nota->save();
+
+                    if ($accounting_invoice->overpayment != 0) {
+                        $overpayment = Overpayment::where('customer_id', $nota->pelanggan_id)->first();
+                        if ($overpayment) {
+                            $overpayment->amount -= $accounting_invoice->overpayment;
+                            if ($overpayment->amount == 0) {
+                                $overpayment->delete();
+                            } else {
+                                $overpayment->save();
+                            }
+                        }
+                    }
+                }
+
+                // Hapus AccountingInvoice terkait
+                $accounting_invoice->delete();
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withErrors(['errors_' => 'Gagal menyimpan transaksi: ' . $th->getMessage()]);
         }
-
-        $accounting->delete();
-        $warnings_ .= '-transaction deleted-';
 
         return back()->with('warnings_', $warnings_);
     }

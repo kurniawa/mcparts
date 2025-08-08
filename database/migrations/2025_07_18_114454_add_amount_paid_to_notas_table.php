@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('amount_due', 15, 2)->after('discount_description')->default(0.00);
             $table->decimal('amount_paid', 15, 2)->after('amount_due')->default(0.00);
             $table->decimal('balance_used', 15, 2)->after('amount_paid')->default(0.00);
+            $table->decimal('overpayment', 15, 2)->after('balance_used')->default(0.00);
         });
     }
 
@@ -33,6 +34,7 @@ return new class extends Migration
             $table->dropColumn('amount_due');
             $table->dropColumn('amount_paid');
             $table->dropColumn('balance_used');
+            $table->dropColumn('overpayment');
         });
     }
 };

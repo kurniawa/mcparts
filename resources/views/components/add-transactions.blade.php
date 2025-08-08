@@ -8,7 +8,7 @@
             {{-- END - LOADING ANIMATION --}}
             <div id="loading_to_hide">
                 <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
-                <form action="{{ route('accounting.store_transactions', $userInstance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
+                <form id="form-add-transactions" action="{{ route('accounting.store_transactions', $userInstance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
                     @csrf
                     <table class="text-xs min-w-max" id="table_add_transactions">
                         <tr class="text-slate-600">
@@ -127,6 +127,7 @@
             }
         });
 
+        let listOfTrID = [];
         function accountingGetRelatedInvoice(transactionNameId, trId) {
             // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
             //     .then(response => {
@@ -152,7 +153,12 @@
                     console.log(data.notas);
                     // console.log(data.customerBalance);
                     if (data.notas.length > 0) {
+                        let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
                         let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
+                        let resetElement = document.getElementById(`tr-penerimaan-piutang-${trId}`);
+                        if (resetElement) {
+                            resetElement.remove();
+                        }
                         let elementToAppend = `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
                         let indexNota = 0;
                         let htmlRemainingBalanceMasuk = "";
@@ -217,6 +223,7 @@
                             </tr>`;
 
                             indexNota++;
+                            listOfInvoiceID.push(relatedInvoice.invoice_id);
                         });
                         let htmlTotalDuePaidOverpayment = `<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                         elementToAppend += `</table></div></div></td></tr>`;
@@ -234,6 +241,7 @@
 
                         // console.log('trId-masuk', trId);
                         applyEvent(`masuk-${trId}`, trId);
+                        listOfTrID.push({trId:trId, invoiceIDs:listOfInvoiceID});
                     }
                 },
                 error: function(err) {
@@ -246,6 +254,7 @@
                     // alert(err.responseJSON?.message ?? 'Terjadi kesalahan');
                 }
             });
+            console.log(listOfTrID);
         }
 
         function applyFormatNumber(elementId) {
@@ -409,6 +418,11 @@
                 sessionStorage.removeItem("scrollY"); // Hapus agar tidak mengganggu navigasi normal
             }
         });
+
+        document.getElementById('form-add-transactions').addEventListener('submit', (event) => {
+            event.preventDefault();
+            console.log('submit');
+        })
     </script>
 
     <style>

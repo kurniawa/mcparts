@@ -28,7 +28,7 @@ return new class extends Migration
     {
         Schema::create('accounting_invoices', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('time_key')->unique(); // Unique key untuk pengaturan urutan waktu
+            $table->bigInteger('time_key')->nullable(); // untuk koneksi ke accounting
             $table->foreignId('invoice_id')->nullable();
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();
@@ -39,16 +39,28 @@ return new class extends Migration
             $table->string('customer_name', 100)->nullable(); // e.g., 'Jhon Motor'
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
             $table->string('supplier_name', 100)->nullable(); //
-            $table->string('payment_status', 50)->nullable(); // e.g., paid, unpaid, partial
+            $table->string('payment_status', 50)->default('belum_lunas'); // e.g., paid, unpaid, partial
             $table->string('payment_method', 50)->nullable(); // e.g., cash, bank transfer, credit card
-            $table->decimal('discount_percentage', 5, 2)->nullable();
-            $table->decimal('total_discount', 15, 2)->nullable();
-            $table->decimal('discount_description', 15, 2)->nullable();
+            $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice
+
+            // Data Pembayaran
+            $table->decimal('discount_percentage', 5, 2)->default(0.00);
+            $table->decimal('total_discount', 15, 2)->default(0.00);
+            $table->decimal('discount_description', 15, 2)->default(0.00);
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
-            $table->decimal('balance_used', 15, 2)->default(0.00); // Amount already paid
+            $table->decimal('balance_used', 15, 2)->default(0.00);
             $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
-            $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice
+            $table->decimal('balance', 15, 2)->default(0.00);
+
+            $table->decimal('discount_percentage_old', 5, 2)->default(0.00);
+            $table->decimal('total_discount_old', 15, 2)->default(0.00);
+            $table->decimal('discount_description_old', 15, 2)->default(0.00);
+            $table->decimal('amount_due_old', 15, 2)->default(0.00);
+            $table->decimal('amount_paid_old', 15, 2)->default(0.00);
+            $table->decimal('overpayment_old', 15, 2)->default(0.00);
+            $table->decimal('balance_old', 15, 2)->default(0.00);
+
             $table->date('due_date')->nullable(); // Due date for payment
             $table->string('currency', 10)->default('IDR'); // Currency of the invoice, defaulting to IDR
             $table->string('notes', 255)->nullable();

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('overpayments', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('time_key')->nullable(); // Untuk identifikasi apakah masih ada overpayment terkait
             $table->foreignId('accounting_id')->constrained()->onDelete('cascade');
             $table->foreignId('customer_id')->nullable()->constrained('pelanggans')->onDelete('set null');
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
