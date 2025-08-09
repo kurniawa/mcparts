@@ -61,6 +61,7 @@
                     <div class="mt-3 text-center text-xs">
                         <input id="loading_to_disable" type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2 hover:cursor-pointer" value="confirm" />
                     </div>
+                    <div class="max-w-4xl"></div>
                 </form>
             </div>
         </div>
@@ -226,7 +227,8 @@
                             listOfInvoiceID.push(relatedInvoice.invoice_id);
                         });
                         let htmlTotalDuePaidOverpayment = `<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-                        elementToAppend += `</table></div></div></td></tr>`;
+                        let htmlErrorFeedback = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=7><div class="text-center max-w-4xl"><p id="p-error-feedback-${trId}" class="text-red-500 font-bold"></p></div></td></tr>`;
+                        elementToAppend += `${htmlErrorFeedback}</table></div></div></td></tr>`;
 
                         trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
 
@@ -241,7 +243,22 @@
 
                         // console.log('trId-masuk', trId);
                         applyEvent(`masuk-${trId}`, trId);
-                        listOfTrID.push({trId:trId, invoiceIDs:listOfInvoiceID});
+                        /*
+                        Cek apakah array object listOfTrID memiliki trId yang sama.
+                        Kalau sama, maka lakukan overwrite invoiceIDs pada object dengan index terkait.
+                        Kalau tidak maka lakukan:
+                        listOfTrID.push({trId:trId, invoiceIDs:listOfInvoiceID})
+                        */
+                        // Cek apakah sudah ada trId yang sama
+                        let indexTrId = listOfTrID.findIndex(item => item.trId === trId);
+
+                        if (indexTrId !== -1) {
+                            // Kalau ada, overwrite invoiceIDs
+                            listOfTrID[indexTrId].invoiceIDs = listOfInvoiceID;
+                        } else {
+                            // Kalau tidak ada, tambahkan data baru
+                            listOfTrID.push({ trId: trId, invoiceIDs: listOfInvoiceID });
+                        }
                     }
                 },
                 error: function(err) {
@@ -422,6 +439,86 @@
         document.getElementById('form-add-transactions').addEventListener('submit', (event) => {
             event.preventDefault();
             console.log('submit');
+            /*
+            Filter array object listOfTrID, apabila ditemukan duplicate dari listOfInvoiceID,
+            maka submit akan dibatalkan
+            */
+            const seen = new Set();
+            const hasDuplicate = listOfTrID.some(item => {
+                if (seen.has(item.listOfInvoiceID)) return true;
+                seen.add(item.listOfInvoiceID);
+                return false;
+            });
+
+            if (hasDuplicate) {
+                alert('Terdapat duplikat Invoice ID, submit dibatalkan.');
+                return;
+            }
+
+            let errorMessage = 'ERROR: ';
+            let adaError = false;
+            listOfTrID.forEach(item => {
+                let remainingBalanceMasukRealValue = parseFloat(document.getElementById(`remaining_balance_masuk-${item.trId}-real`).value);
+                let masukRealValue = parseFloat(document.getElementById(`masuk-${item.trId}-real`).value);
+                let sisaSaldoRealValue = parseFloat(document.getElementById(`sisa-saldo-${item.trId}-real`).value);
+                let saldoAwalRealValue = parseFloat(document.getElementById(`saldo-awal-${item.trId}-real`).value);
+                // Reset element feedback to hidden
+                let trErrorFeedback = document.getElementById(`tr-error-feedback-${item.trId}`);
+                let pErrorFeedback = document.getElementById(`p-error-feedback-${item.trId}`);
+                if (!trErrorFeedback.classList.contains('hidden')) {
+                    trErrorFeedback.classList.add('hidden');
+                    pErrorFeedback.textContent = "";
+                }
+
+                console.log(masukRealValue);
+                
+                let totalSaldoUsed = 0;
+                item.invoiceIDs.forEach(invoiceID => {
+                    let amountPaidRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_paid]-${item.trId}-${invoiceID}-real`).value);
+                    let amountDueRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${item.trId}-${invoiceID}-real`).value);
+                    let amountDueRealUnchangedValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${item.trId}-${invoiceID}-real-unchanged`).value);
+                    let paymentStatusValue = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${item.trId}-${invoiceID}`).value;
+                    let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${item.trId}-${invoiceID}`).value);
+                    let totalDiscountRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${item.trId}-${invoiceID}-real`).value);
+                    let balanceUsedRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${item.trId}-${invoiceID}-real`).value);
+                    totalSaldoUsed += balanceUsedRealValue;
+
+                    // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo
+                    // Validasi nilai 0 pada amount_paid dan saldo
+                    if (amountPaidRealValue <= 0 || balanceUsedRealValue <= 0) {
+                        errorMessage += '[Nilai tidak sesuai pada balance masuk yang digunakan / saldo yang digunakan.]';
+                        adaError = true;
+                    }
+
+                    // Validasi payment_status tidak error
+                    if (paymentStatusValue == "error") {
+                        errorMessage += '[Error pada status_bayar.]';
+                        adaError = true;
+                    }
+                });
+
+                // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
+                if (isNaN(masukRealValue) || masukRealValue <= 0) {
+                    errorMessage += '[Input penerimaan_piutang harus ada nilai masuk]';
+                    adaError = true;
+                }
+
+                // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
+                if (totalSaldoUsed > saldoAwalRealValue) {
+                    errorMessage += '[Total saldo yang digunakan melebihi saldo awal.]';
+                    adaError = true;
+                }
+                
+                if (adaError) {
+                    if (trErrorFeedback.classList.contains('hidden')) {
+                        trErrorFeedback.classList.remove('hidden');
+                        pErrorFeedback.textContent = errorMessage;
+                    }
+                }
+            });
+
+
+            // event.target.submit();
         })
     </script>
 
