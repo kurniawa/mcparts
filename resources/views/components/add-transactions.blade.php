@@ -40,6 +40,7 @@
                                 <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
                             </td>
                             <td>
+                                <input type="hidden" name="trId[]" value="{{ $i }}">
                             </td>
                         </tr>
 
@@ -128,150 +129,157 @@
             }
         });
 
-        let listOfTrID = [];
-        function accountingGetRelatedInvoice(transactionNameId, trId) {
-            // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
-            //     .then(response => {
-            //         if (!response.ok) {
-            //             throw new Error('Data not found');
-            //         }
-            //         return response.json();
-            //     })
-            //     .then(data => {
-            //         console.log(data);
-            //         // You can handle the data as needed, e.g., display it in a modal or alert
-            //     })
-            //     .catch(error => {
-            //         console.error('Error:', error);
-            //         alert(error.message);
-            //     });
-            $.ajax({
-                url: `/accounting/${transactionNameId}/get-related-not-yet-paid-off-invoices`,
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    // console.log(data.message);
-                    console.log(data.notas);
-                    // console.log(data.customerBalance);
-                    if (data.notas.length > 0) {
-                        let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
-                        let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
-                        let resetElement = document.getElementById(`tr-penerimaan-piutang-${trId}`);
-                        if (resetElement) {
-                            resetElement.remove();
-                        }
-                        let elementToAppend = `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
-                        let indexNota = 0;
-                        let htmlRemainingBalanceMasuk = "";
-                        data.notas.forEach(relatedInvoice => {
-                            if (indexNota === 0) {
-                                htmlRemainingBalanceMasuk = `<td rowspan="${data.notas.length}">
-                                    <div class="font-bold">Balance.M</div>
-                                    <div id="remaining_balance_masuk-${trId}" class="text-xs p-1">0</div>
-                                    <input type="hidden" id="remaining_balance_masuk-${trId}-real" name="remaining_balance_masuk[${trId}]" value="0">
-                                    <div id="div-saldo-${trId}">
-                                        <div class="font-bold">Saldo Awal</div>
-                                        <div id="saldo-awal-${trId}" class="text-xs p-1">${data.customerBalance ? formatHargaIndo(data.customerBalance.amount) : 0}</div>
-                                        <input type="hidden" id="saldo-awal-${trId}-real" name="saldo_awal[${trId}]" value="${data.customerBalance ? data.customerBalance.amount : 0}" readonly>
-                                        <div class="font-bold">Sisa Saldo</div>
-                                        <div id="sisa-saldo-${trId}" class="text-xs p-1 text-indigo-500">${data.customerBalance ? `=> ${formatHargaIndo(data.customerBalance.amount)}` : 0}</div>
-                                        <input type="hidden" id="sisa-saldo-${trId}-real" name="sisa_saldo[${trId}]" value="${data.customerBalance ? data.customerBalance.amount : 0}">
-                                    </div>
-                                </td>
-                                `;
-                            } else {
-                                htmlRemainingBalanceMasuk = "";
+        function accountingGetRelatedInvoice(transactionNameId, trId, kategori_level_one) {
+            let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
+            let elementToAppend = "";
+            if (kategori_level_one == "PENERIMAAN PIUTANG") {
+                // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
+                //     .then(response => {
+                //         if (!response.ok) {
+                //             throw new Error('Data not found');
+                //         }
+                //         return response.json();
+                //     })
+                //     .then(data => {
+                //         console.log(data);
+                //         // You can handle the data as needed, e.g., display it in a modal or alert
+                //     })
+                //     .catch(error => {
+                //         console.error('Error:', error);
+                //         alert(error.message);
+                //     });
+                
+                $.ajax({
+                    url: `/accounting/${transactionNameId}/get-related-not-yet-paid-off-invoices`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // console.log(data.message);
+                        console.log(data.notas);
+                        // console.log(data.customerBalance);
+                        if (data.notas.length > 0) {
+                            // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
+                            let resetElement = document.getElementById(`tr-penerimaan-piutang-${trId}`);
+                            if (resetElement) {
+                                resetElement.remove();
                             }
-                            elementToAppend += `
-                            <tr>${htmlRemainingBalanceMasuk}
-                                <td>
-                                    <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
-                                    <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
-                                </td>
-                                <td>
-                                    <input type="text" value="${formatHargaIndo(relatedInvoice.harga_total)}" class="text-xs p-0 border-none text-center" readonly>
-                                    <input type="hidden" name="related_not_yet_paid_off_invoices[harga_total][${trId}][]" id="related_not_yet_paid_off_invoices[harga_total]-${trId}-${relatedInvoice.invoice_id}-real" value="${relatedInvoice.harga_total}">
-                                </td>
-                                <td>
-                                    <div class="text-xs p-0 border-none text-center">${formatHargaIndo(relatedInvoice.amount_due)}</div>
-                                    <div>
-                                        <span class="text-orange-400">=><input type="text" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}" value="${formatHargaIndo(relatedInvoice.amount_due)}" class="text-xs p-0 border-none text-center" readonly></span>
-                                        <input type="hidden" name="related_not_yet_paid_off_invoices[amount_due][${trId}][]" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}-real" value="${relatedInvoice.amount_due}">
-                                        <input type="hidden" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}-real-unchanged" value="${relatedInvoice.amount_due}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="text-center">
-                                        <input type="number" id="related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[discount_percentage][${trId}][]" value="0" class="text-xs p-1 w-12">%
-                                    </div>
-                                    <input type="text" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1 text-center">
-                                    <input type="hidden" name="related_not_yet_paid_off_invoices[total_discount][${trId}][]" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
-                                </td>
-                                <td>
-                                    <div class="text-xs p-1 text-center">${relatedInvoice.status_bayar}</div>
-                                    <div class="text-xs text-center">
-                                        <span class="text-emerald-400">=><input type="text" id="related_not_yet_paid_off_invoices[payment_status]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[payment_status][${trId}][]" class="text-xs p-0 border-none" value="${relatedInvoice.status_bayar}" readonly></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="font-bold text-xs">Dari Balance.M</div>
-                                    <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}" value="${formatHargaIndoTanpaDesimal(relatedInvoice.amount_paid)}" class="text-xs p-1">
-                                    <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="${relatedInvoice.amount_paid}">
-                                    <div class="font-bold text-xs">Dari Saldo</div>
-                                    <input type="text" id="related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1">
-                                    <input type="hidden" id="related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[balance_used][${trId}][]" value="0">
-                                </td>
-                            </tr>`;
-
-                            indexNota++;
-                            listOfInvoiceID.push(relatedInvoice.invoice_id);
-                        });
-                        let htmlTotalDuePaidOverpayment = `<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-                        let htmlErrorFeedback = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=7><div class="text-center max-w-4xl"><p id="p-error-feedback-${trId}" class="text-red-500 font-bold"></p></div></td></tr>`;
-                        elementToAppend += `${htmlErrorFeedback}</table></div></div></td></tr>`;
-
-                        trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
-
-                        data.notas.forEach(relatedInvoice => {
-                            // console.log('trId', trId);
-                            applyFormatNumber(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}`);
-                            applyEvent(`related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                            applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                            applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                            applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                        });
-
-                        // console.log('trId-masuk', trId);
-                        applyEvent(`masuk-${trId}`, trId);
-                        /*
-                        Cek apakah array object listOfTrID memiliki trId yang sama.
-                        Kalau sama, maka lakukan overwrite invoiceIDs pada object dengan index terkait.
-                        Kalau tidak maka lakukan:
-                        listOfTrID.push({trId:trId, invoiceIDs:listOfInvoiceID})
-                        */
-                        // Cek apakah sudah ada trId yang sama
-                        let indexTrId = listOfTrID.findIndex(item => item.trId === trId);
-
-                        if (indexTrId !== -1) {
-                            // Kalau ada, overwrite invoiceIDs
-                            listOfTrID[indexTrId].invoiceIDs = listOfInvoiceID;
-                        } else {
-                            // Kalau tidak ada, tambahkan data baru
-                            listOfTrID.push({ trId: trId, invoiceIDs: listOfInvoiceID });
+                            elementToAppend += `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
+                            let indexNota = 0;
+                            let htmlRemainingBalanceMasuk = "";
+                            data.notas.forEach(relatedInvoice => {
+                                if (indexNota === 0) {
+                                    htmlRemainingBalanceMasuk = `<td rowspan="${data.notas.length}">
+                                        <div class="font-bold">Balance.M</div>
+                                        <div id="remaining_balance_masuk-${trId}" class="text-xs p-1">0</div>
+                                        <input type="hidden" id="remaining_balance_masuk-${trId}-real" name="remaining_balance_masuk[${trId}]" value="0">
+                                        <div id="div-saldo-${trId}">
+                                            <div class="font-bold">Saldo Awal</div>
+                                            <div id="saldo-awal-${trId}" class="text-xs p-1">${data.customerBalance ? formatHargaIndo(data.customerBalance.amount) : 0}</div>
+                                            <input type="hidden" id="saldo-awal-${trId}-real" name="saldo_awal[${trId}]" value="${data.customerBalance ? data.customerBalance.amount : 0}" readonly>
+                                            <div class="font-bold">Sisa Saldo</div>
+                                            <div id="sisa-saldo-${trId}" class="text-xs p-1 text-indigo-500">${data.customerBalance ? `=> ${formatHargaIndo(data.customerBalance.amount)}` : 0}</div>
+                                            <input type="hidden" id="sisa-saldo-${trId}-real" name="sisa_saldo[${trId}]" value="${data.customerBalance ? data.customerBalance.amount : 0}">
+                                        </div>
+                                    </td>
+                                    `;
+                                } else {
+                                    htmlRemainingBalanceMasuk = "";
+                                }
+                                elementToAppend += `
+                                <tr>${htmlRemainingBalanceMasuk}
+                                    <td>
+                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
+                                        <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
+                                    </td>
+                                    <td>
+                                        <input type="text" value="${formatHargaIndo(relatedInvoice.harga_total)}" class="text-xs p-0 border-none text-center" readonly>
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices[harga_total][${trId}][]" id="related_not_yet_paid_off_invoices[harga_total]-${trId}-${relatedInvoice.invoice_id}-real" value="${relatedInvoice.harga_total}">
+                                    </td>
+                                    <td>
+                                        <div class="text-xs p-0 border-none text-center">${formatHargaIndo(relatedInvoice.amount_due)}</div>
+                                        <div>
+                                            <span class="text-orange-400">=><input type="text" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}" value="${formatHargaIndo(relatedInvoice.amount_due)}" class="text-xs p-0 border-none text-center" readonly></span>
+                                            <input type="hidden" name="related_not_yet_paid_off_invoices[amount_due][${trId}][]" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}-real" value="${relatedInvoice.amount_due}">
+                                            <input type="hidden" id="related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}-real-unchanged" value="${relatedInvoice.amount_due}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <input type="number" id="related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[discount_percentage][${trId}][]" value="0" class="text-xs p-1 w-12">%
+                                        </div>
+                                        <input type="text" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1 text-center">
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices[total_discount][${trId}][]" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
+                                    </td>
+                                    <td>
+                                        <div class="text-xs p-1 text-center">${relatedInvoice.status_bayar}</div>
+                                        <div class="text-xs text-center">
+                                            <span class="text-emerald-400">=><input type="text" id="related_not_yet_paid_off_invoices[payment_status]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[payment_status][${trId}][]" class="text-xs p-0 border-none" value="${relatedInvoice.status_bayar}" readonly></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-bold text-xs">Dari Balance.M</div>
+                                        <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}" value="${formatHargaIndoTanpaDesimal(relatedInvoice.amount_paid)}" class="text-xs p-1">
+                                        <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="${relatedInvoice.amount_paid}">
+                                        <div class="font-bold text-xs">Dari Saldo</div>
+                                        <input type="text" id="related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1">
+                                        <input type="hidden" id="related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[balance_used][${trId}][]" value="0">
+                                        <input type="hidden" name="invoiceID[${trId}][]" value="${relatedInvoice.invoice_id}">
+                                    </td>
+                                </tr>`;
+    
+                                indexNota++;
+                                // listOfInvoiceID.push(relatedInvoice.invoice_id);
+                            });
+                            let htmlTotalDuePaidOverpayment = `<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                            let htmlErrorFeedback = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=7><div class="text-center max-w-4xl"><p id="p-error-feedback-${trId}" class="text-red-500 font-bold"></p></div></td></tr>`;
+                            elementToAppend += `${htmlErrorFeedback}</table></div></div></td></tr>`;
+    
+                            trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
+    
+                            data.notas.forEach(relatedInvoice => {
+                                // console.log('trId', trId);
+                                applyFormatNumber(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}`);
+                                applyEvent(`related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                            });
+    
+                            // console.log('trId-masuk', trId);
+                            applyEvent(`masuk-${trId}`, trId);
+                            /*
+                            Cek apakah array object listOfTrID memiliki trId yang sama.
+                            Kalau sama, maka lakukan overwrite invoiceIDs pada object dengan index terkait.
+                            Kalau tidak maka lakukan:
+                            listOfTrID.push({trId:trId, invoiceIDs:listOfInvoiceID})
+                            */
+                            // Cek apakah sudah ada trId yang sama
+                            // let indexTrId = listOfTrID.findIndex(item => item.trId === trId);
+    
+                            // if (indexTrId !== -1) {
+                            //     // Kalau ada, overwrite invoiceIDs
+                            //     listOfTrID[indexTrId].invoiceIDs = listOfInvoiceID;
+                            // } else {
+                            //     // Kalau tidak ada, tambahkan data baru
+                            //     listOfTrID.push({ trId: trId, invoiceIDs: listOfInvoiceID });
+                            // }
                         }
+                    },
+                    error: function(err) {
+                        console.error('Error:', err);
+                        console.error('message:', err.responseJSON?.message);
+                        let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-${trId}`);
+                        if (trPenerimaanPiutang) {
+                            trPenerimaanPiutang.remove();
+                        }
+                        // alert(err.responseJSON?.message ?? 'Terjadi kesalahan');
                     }
-                },
-                error: function(err) {
-                    console.error('Error:', err);
-                    console.error('message:', err.responseJSON?.message);
-                    let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-${trId}`);
-                    if (trPenerimaanPiutang) {
-                        trPenerimaanPiutang.remove();
-                    }
-                    // alert(err.responseJSON?.message ?? 'Terjadi kesalahan');
-                }
-            });
-            console.log(listOfTrID);
+                });
+                // console.log(listOfTrID);
+            } else {
+                elementToAppend = `<tr><td colspan=6><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"></td></tr>`;
+                trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
+            }
         }
 
         function applyFormatNumber(elementId) {
@@ -436,6 +444,7 @@
             }
         });
 
+        // VALIDASI SECARA FRONTEND
         document.getElementById('form-add-transactions').addEventListener('submit', (event) => {
             event.preventDefault();
             console.log('submit');
@@ -443,79 +452,91 @@
             Filter array object listOfTrID, apabila ditemukan duplicate dari listOfInvoiceID,
             maka submit akan dibatalkan
             */
-            const seen = new Set();
-            const hasDuplicate = listOfTrID.some(item => {
-                if (seen.has(item.listOfInvoiceID)) return true;
-                seen.add(item.listOfInvoiceID);
-                return false;
-            });
+            // const seen = new Set();
+            // const hasDuplicate = listOfTrID.some(item => {
+            //     if (seen.has(item.listOfInvoiceID)) return true;
+            //     seen.add(item.listOfInvoiceID);
+            //     return false;
+            // });
 
-            if (hasDuplicate) {
-                alert('Terdapat duplikat Invoice ID, submit dibatalkan.');
-                return;
-            }
+            // if (hasDuplicate) {
+            //     alert('Terdapat duplikat Invoice ID, submit dibatalkan.');
+            //     return;
+            // }
 
-            let errorMessage = 'ERROR: ';
             let adaError = false;
-            listOfTrID.forEach(item => {
-                let remainingBalanceMasukRealValue = parseFloat(document.getElementById(`remaining_balance_masuk-${item.trId}-real`).value);
-                let masukRealValue = parseFloat(document.getElementById(`masuk-${item.trId}-real`).value);
-                let sisaSaldoRealValue = parseFloat(document.getElementById(`sisa-saldo-${item.trId}-real`).value);
-                let saldoAwalRealValue = parseFloat(document.getElementById(`saldo-awal-${item.trId}-real`).value);
-                // Reset element feedback to hidden
-                let trErrorFeedback = document.getElementById(`tr-error-feedback-${item.trId}`);
-                let pErrorFeedback = document.getElementById(`p-error-feedback-${item.trId}`);
-                if (!trErrorFeedback.classList.contains('hidden')) {
-                    trErrorFeedback.classList.add('hidden');
-                    pErrorFeedback.textContent = "";
-                }
+            let trIDs = document.getElementsByName(`trId[]`);
+            // console.log(trIDs);
+            // console.log(trIDs.length);
+            for (let i = 0; i < trIDs.length; i++) {
+                let errorMessage = 'ERROR: ';
+                // console.log(`input-kategori-level-one-${i}`);
+                let kategoriLevelOne = document.getElementById(`input-kategori-level-one-${i}`);
+                if (kategoriLevelOne && kategoriLevelOne.value == "PENERIMAAN PIUTANG") {
+                    let notaIDs = document.getElementsByName(`related_not_yet_paid_off_invoices[nota_id][${i}][]`);
+                    // console.log(notaIDs);
+                    let remainingBalanceMasukRealValue = parseFloat(document.getElementById(`remaining_balance_masuk-${i}-real`).value);
+                    let masukRealValue = parseFloat(document.getElementById(`masuk-${i}-real`).value);
+                    let sisaSaldoRealValue = parseFloat(document.getElementById(`sisa-saldo-${i}-real`).value);
+                    let saldoAwalRealValue = parseFloat(document.getElementById(`saldo-awal-${i}-real`).value);
+                    // Reset element feedback to hidden
+                    let trErrorFeedback = document.getElementById(`tr-error-feedback-${i}`);
+                    let pErrorFeedback = document.getElementById(`p-error-feedback-${i}`);
+                    if (!trErrorFeedback.classList.contains('hidden')) {
+                        trErrorFeedback.classList.add('hidden');
+                        pErrorFeedback.textContent = "";
+                    }
 
-                console.log(masukRealValue);
-                
-                let totalSaldoUsed = 0;
-                item.invoiceIDs.forEach(invoiceID => {
-                    let amountPaidRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_paid]-${item.trId}-${invoiceID}-real`).value);
-                    let amountDueRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${item.trId}-${invoiceID}-real`).value);
-                    let amountDueRealUnchangedValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${item.trId}-${invoiceID}-real-unchanged`).value);
-                    let paymentStatusValue = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${item.trId}-${invoiceID}`).value;
-                    let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${item.trId}-${invoiceID}`).value);
-                    let totalDiscountRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${item.trId}-${invoiceID}-real`).value);
-                    let balanceUsedRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${item.trId}-${invoiceID}-real`).value);
-                    totalSaldoUsed += balanceUsedRealValue;
+                    // console.log(masukRealValue);
+                    
+                    let totalSaldoUsed = 0;
+                    notaIDs.forEach(notaID => {
+                        let amountPaidRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_paid]-${i}-${notaID.value}-real`).value);
+                        let amountDueRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real`).value);
+                        let amountDueRealUnchangedValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real-unchanged`).value);
+                        let paymentStatusValue = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${i}-${notaID.value}`).value;
+                        let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${i}-${notaID.value}`).value);
+                        let totalDiscountRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${i}-${notaID.value}-real`).value);
+                        let balanceUsedRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${i}-${notaID.value}-real`).value);
+                        totalSaldoUsed += balanceUsedRealValue;
 
-                    // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo
-                    // Validasi nilai 0 pada amount_paid dan saldo
-                    if (amountPaidRealValue <= 0 || balanceUsedRealValue <= 0) {
-                        errorMessage += '[Nilai tidak sesuai pada balance masuk yang digunakan / saldo yang digunakan.]';
+                        // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo
+                        // Validasi nilai 0 pada amount_paid dan saldo
+                        if (amountPaidRealValue <= 0 || balanceUsedRealValue <= 0) {
+                            errorMessage += '[Nilai tidak sesuai pada balance masuk yang digunakan / saldo yang digunakan.]';
+                            adaError = true;
+                        }
+
+                        // Validasi payment_status tidak error
+                        if (paymentStatusValue == "error") {
+                            errorMessage += '[Error pada status_bayar.]';
+                            adaError = true;
+                        }
+                    });
+
+                    // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
+                    if (isNaN(masukRealValue) || masukRealValue <= 0) {
+                        errorMessage += '[Input penerimaan_piutang harus ada nilai masuk]';
                         adaError = true;
                     }
 
-                    // Validasi payment_status tidak error
-                    if (paymentStatusValue == "error") {
-                        errorMessage += '[Error pada status_bayar.]';
+                    // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
+                    if (totalSaldoUsed > saldoAwalRealValue) {
+                        errorMessage += '[Total saldo yang digunakan melebihi saldo awal.]';
                         adaError = true;
                     }
-                });
-
-                // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
-                if (isNaN(masukRealValue) || masukRealValue <= 0) {
-                    errorMessage += '[Input penerimaan_piutang harus ada nilai masuk]';
-                    adaError = true;
-                }
-
-                // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
-                if (totalSaldoUsed > saldoAwalRealValue) {
-                    errorMessage += '[Total saldo yang digunakan melebihi saldo awal.]';
-                    adaError = true;
-                }
-                
-                if (adaError) {
-                    if (trErrorFeedback.classList.contains('hidden')) {
-                        trErrorFeedback.classList.remove('hidden');
-                        pErrorFeedback.textContent = errorMessage;
+                    
+                    if (adaError) {
+                        if (trErrorFeedback.classList.contains('hidden')) {
+                            trErrorFeedback.classList.remove('hidden');
+                            pErrorFeedback.textContent = errorMessage;
+                        }
                     }
                 }
-            });
+            }
+            // listOfTrID.forEach(item => {
+                
+            // });
 
 
             // event.target.submit();
