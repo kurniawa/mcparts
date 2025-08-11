@@ -488,7 +488,7 @@
                 document.getElementById(`transaction_id-${index}`).value = ui.item.id;
                 // autofill_transaction(index, ui.item.value);
                 // console.log("autocomplete_deskripsi: " + ui.item.id);
-                accountingGetRelatedInvoice(ui.item.id, index, ui.item.kategori_level_one);
+                accountingGetRelatedInvoice(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
             }
         });
     }

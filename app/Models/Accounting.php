@@ -98,6 +98,14 @@ class Accounting extends Model
                 ]);
             }
 
+            // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo
+            // Validasi nilai 0 pada amount_paid dan saldo
+            if ($amount_paid <= 0 || $balance_used <= 0) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "[Nilai tidak sesuai pada balance masuk yang digunakan / saldo yang digunakan.]"
+                ]);
+            }
+
             // Validasi Payment Status
             $payment_status_new = 'error';
             if ($amount_due_new <= 0) {
@@ -139,12 +147,25 @@ class Accounting extends Model
             ]);
         }
 
-        // Validasi Remaining Balance Masuk
-        $remaining_balance_new = (float)$post['masuk'][$i] - $total_amount_paid_posted;
-        if ($remaining_balance_new != $post['remaining_balance_masuk'][$i]) {
+        // Validasi Remaining Balance Masuk - Uang Masuk tidak boleh kosong atau kurang dari 0
+        if ($post['masuk'][$i] && (float)$post['masuk'][$i] > 0) {
+            $remaining_balance_new = (float)$post['masuk'][$i] - $total_amount_paid_posted;
+            if ($remaining_balance_new != $post['remaining_balance_masuk'][$i]) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != $post[related_not_yet_paid_off_invoices][payment_status][$i][$j]"
+                ]);
+            }
+        } else {
             $request->validate(['error' => 'required'], [
-                'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != $post[related_not_yet_paid_off_invoices][payment_status][$i][$j]"
+                'error.required' => "input uang masuk[$i][$j] --> $post[masuk][$i]"
             ]);
         }
+
+        // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
+        // if ($total_saldo_used > saldoAwalRealValue) {
+        //     $request->validate(['error' => 'required'], [
+        //         'error.required' => "input uang masuk[$i][$j] --> $post[masuk][$i]"
+        //     ]);
+        // }
     }
 }

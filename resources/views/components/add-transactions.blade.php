@@ -129,7 +129,7 @@
             }
         });
 
-        function accountingGetRelatedInvoice(transactionNameId, trId, kategori_level_one) {
+        function accountingGetRelatedInvoice(transactionNameId, trId, kategori_level_one, kategori_type) {
             let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
             let elementToAppend = "";
             if (kategori_level_one == "PENERIMAAN PIUTANG") {
@@ -277,7 +277,11 @@
                 });
                 // console.log(listOfTrID);
             } else {
-                elementToAppend = `<tr><td colspan=6><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"></td></tr>`;
+                elementToAppend = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=6>
+                    <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
+                    <input id="input-kategori-type-${trId}" type="hidden" name="kategori_type[]" value="${kategori_type}">
+                    <div class="text-center max-w-4xl"><p id="p-error-feedback-${trId}" class="text-red-500 font-bold"></p></div>
+                </td></tr>`;
                 trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
             }
         }
@@ -469,24 +473,28 @@
             // console.log(trIDs);
             // console.log(trIDs.length);
             for (let i = 0; i < trIDs.length; i++) {
-                let errorMessage = 'ERROR: ';
                 // console.log(`input-kategori-level-one-${i}`);
+                let errorMessage = 'ERROR: ';
                 let kategoriLevelOne = document.getElementById(`input-kategori-level-one-${i}`);
+                let kategoriType = document.getElementById(`input-kategori-type-${i}`);
+                let masukReal = document.getElementById(`masuk-${i}-real`);
+                let keluarReal = document.getElementById(`keluar-${i}-real`);
+
+                // Reset element feedback to hidden
+                let trErrorFeedback = document.getElementById(`tr-error-feedback-${i}`);
+                let pErrorFeedback = document.getElementById(`p-error-feedback-${i}`);
+                if (!trErrorFeedback.classList.contains('hidden')) {
+                    trErrorFeedback.classList.add('hidden');
+                    pErrorFeedback.textContent = "";
+                }
+
                 if (kategoriLevelOne && kategoriLevelOne.value == "PENERIMAAN PIUTANG") {
                     let notaIDs = document.getElementsByName(`related_not_yet_paid_off_invoices[nota_id][${i}][]`);
                     // console.log(notaIDs);
                     let remainingBalanceMasukRealValue = parseFloat(document.getElementById(`remaining_balance_masuk-${i}-real`).value);
-                    let masukRealValue = parseFloat(document.getElementById(`masuk-${i}-real`).value);
                     let sisaSaldoRealValue = parseFloat(document.getElementById(`sisa-saldo-${i}-real`).value);
                     let saldoAwalRealValue = parseFloat(document.getElementById(`saldo-awal-${i}-real`).value);
-                    // Reset element feedback to hidden
-                    let trErrorFeedback = document.getElementById(`tr-error-feedback-${i}`);
-                    let pErrorFeedback = document.getElementById(`p-error-feedback-${i}`);
-                    if (!trErrorFeedback.classList.contains('hidden')) {
-                        trErrorFeedback.classList.add('hidden');
-                        pErrorFeedback.textContent = "";
-                    }
-
+                    
                     // console.log(masukRealValue);
                     
                     let totalSaldoUsed = 0;
@@ -515,7 +523,7 @@
                     });
 
                     // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
-                    if (isNaN(masukRealValue) || masukRealValue <= 0) {
+                    if (isNaN(masukReal.value) || masukReal.value <= 0) {
                         errorMessage += '[Input penerimaan_piutang harus ada nilai masuk]';
                         adaError = true;
                     }
@@ -526,14 +534,30 @@
                         adaError = true;
                     }
                     
-                    if (adaError) {
-                        if (trErrorFeedback.classList.contains('hidden')) {
-                            trErrorFeedback.classList.remove('hidden');
-                            pErrorFeedback.textContent = errorMessage;
+                    
+                } else {
+                    errorMessage += 'ERROR: ';
+                    if (kategoriType == "UANG MASUK") {
+                        if (!masukReal || masukReal.value <= 0) {
+                            errorMessage += '[UANG MASUK?]';
+                            adaError = true;
+                        }
+                    } else {
+                        if (!keluarReal || keluarReal.value <= 0) {
+                            errorMessage += '[UANG KELUAR?]';
+                            adaError = true;
                         }
                     }
                 }
+
+                if (adaError) {
+                    if (trErrorFeedback.classList.contains('hidden')) {
+                        trErrorFeedback.classList.remove('hidden');
+                        pErrorFeedback.textContent = errorMessage;
+                    }
+                }
             }
+
             // listOfTrID.forEach(item => {
                 
             // });
