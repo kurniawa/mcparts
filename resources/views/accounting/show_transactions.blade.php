@@ -391,7 +391,7 @@
 
         {{-- STORE NEW TRANSACTIONS --}}
         @if ((int)$userInstance->user_id === $user->id)
-        <x-add-transactions :userInstance="$userInstance"></x-add-transactions>
+        <x-add-transactions :userInstance="$userInstance" :labelDeskripsi="$labelDeskripsi"></x-add-transactions>
         @endif
         {{-- END - STORE NEW TRANSACTIONS --}}
     </div>
@@ -408,7 +408,6 @@
 
 <script>
     const related_users = {!! json_encode($related_users, JSON_HEX_TAG) !!};
-    const label_deskripsi = {!! json_encode($label_deskripsi, JSON_HEX_TAG) !!};
     const user_instance = {!! json_encode($userInstance, JSON_HEX_TAG) !!};
     const count_accountings = {!! json_encode(count($accountings), JSON_HEX_TAG) !!};
 
@@ -428,70 +427,51 @@
 
     // console.log(html_option_related_users);
 
-    let transaction_index = 7;
-    function add_transaction(tr_id, parent_id) {
-        document.getElementById(tr_id).remove();
-        let parent = document.getElementById(parent_id);
-        parent.insertAdjacentHTML('beforeend',
-        `
-        <tr>
-            <td>
-                <div class="flex items-center">
-                    <input type="text" name="day[]" id="day-${transaction_index}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
-                    <span>-</span>
-                    <input type="text" name="month[]" id="month-${transaction_index}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
-                    <span>-</span>
-                    <input type="text" name="year[]" id="year-${transaction_index}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
-                </div>
-            </td>
-            <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs w-20" value="${user_instance.kode}"></td>
-            <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
-            <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>
-            <td>
-                <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
-                <input type="hidden" name="keluar[]" id="keluar-${transaction_index}-unformatted">
-            </td>
-            <td>
-                <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
-                <input type="hidden" name="masuk[]" id="masuk-${transaction_index}-unformatted">
-                <input type="hidden" name="transaction_id[]" id="transaction_id-${transaction_index}">
-            </td>
-        </tr>
-        <tr id="tr_add_transaction">
-            <td>
-                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </button>
-            </td>
-        </tr>
-        `);
-        setTimeout(() => {
-            // setAutocompleteSPKItem(`produk_nama-${transaction_index}`, `produk_nama-${transaction_index}`, `produk_id-${transaction_index}`);
-            autocomplete_deskripsi(transaction_index);
-            transaction_index++;
-        }, 100);
-    }
-
-    for (let i = 0; i < transaction_index; i++) {
-        autocomplete_deskripsi(i);
-    }
-
-    function autocomplete_deskripsi(index) {
-        $(`#transaction_desc-${index}`).autocomplete({
-            source: label_deskripsi,
-            select: function (event, ui) {
-                // console.log(ui.item);
-                // document.getElementById(`transaction_desc-${index}`).value = ui.item.id;
-                document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
-                document.getElementById(`transaction_id-${index}`).value = ui.item.id;
-                // autofill_transaction(index, ui.item.value);
-                // console.log("autocomplete_deskripsi: " + ui.item.id);
-                accountingGetRelatedInvoice(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
-            }
-        });
-    }
+    // let transaction_index = 7;
+    // function add_transaction(tr_id, parent_id) {
+    //     document.getElementById(tr_id).remove();
+    //     let parent = document.getElementById(parent_id);
+    //     parent.insertAdjacentHTML('beforeend',
+    //     `
+    //     <tr>
+    //         <td>
+    //             <div class="flex items-center">
+    //                 <input type="text" name="day[]" id="day-${transaction_index}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
+    //                 <span>-</span>
+    //                 <input type="text" name="month[]" id="month-${transaction_index}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
+    //                 <span>-</span>
+    //                 <input type="text" name="year[]" id="year-${transaction_index}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
+    //             </div>
+    //         </td>
+    //         <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs w-20" value="${user_instance.kode}"></td>
+    //         <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
+    //         <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>
+    //         <td>
+    //             <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
+    //             <input type="hidden" name="keluar[]" id="keluar-${transaction_index}-unformatted">
+    //         </td>
+    //         <td>
+    //             <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
+    //             <input type="hidden" name="masuk[]" id="masuk-${transaction_index}-unformatted">
+    //             <input type="hidden" name="transaction_id[]" id="transaction_id-${transaction_index}">
+    //         </td>
+    //     </tr>
+    //     <tr id="tr_add_transaction">
+    //         <td>
+    //             <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
+    //                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+    //                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    //                 </svg>
+    //             </button>
+    //         </td>
+    //     </tr>
+    //     `);
+    //     setTimeout(() => {
+    //         // setAutocompleteSPKItem(`produk_nama-${transaction_index}`, `produk_nama-${transaction_index}`, `produk_id-${transaction_index}`);
+    //         autocomplete_deskripsi(transaction_index);
+    //         transaction_index++;
+    //     }, 100);
+    // }
 
     setTimeout(() => {
         for (let j = 0; j < count_accountings; j++) {

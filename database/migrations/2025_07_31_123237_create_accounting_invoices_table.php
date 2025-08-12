@@ -52,14 +52,15 @@ return new class extends Migration
             $table->decimal('balance_used', 15, 2)->default(0.00);
             $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
             $table->decimal('balance', 15, 2)->default(0.00);
+            $table->enum('status', ['active', 'inactive'])->default('active');
 
-            $table->decimal('discount_percentage_old', 5, 2)->default(0.00);
-            $table->decimal('total_discount_old', 15, 2)->default(0.00);
-            $table->decimal('discount_description_old', 15, 2)->default(0.00);
-            $table->decimal('amount_due_old', 15, 2)->default(0.00);
-            $table->decimal('amount_paid_old', 15, 2)->default(0.00);
-            $table->decimal('overpayment_old', 15, 2)->default(0.00);
-            $table->decimal('balance_old', 15, 2)->default(0.00);
+            // $table->decimal('discount_percentage_old', 5, 2)->default(0.00);
+            // $table->decimal('total_discount_old', 15, 2)->default(0.00);
+            // $table->decimal('discount_description_old', 15, 2)->default(0.00);
+            // $table->decimal('amount_due_old', 15, 2)->default(0.00);
+            // $table->decimal('amount_paid_old', 15, 2)->default(0.00);
+            // $table->decimal('overpayment_old', 15, 2)->default(0.00);
+            // $table->decimal('balance_old', 15, 2)->default(0.00);
 
             $table->date('due_date')->nullable(); // Due date for payment
             $table->string('currency', 10)->default('IDR'); // Currency of the invoice, defaulting to IDR

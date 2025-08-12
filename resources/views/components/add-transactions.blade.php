@@ -117,6 +117,42 @@
     </div>
 
     <script>
+        const label_deskripsi = {!! json_encode($labelDeskripsi, JSON_HEX_TAG) !!};
+        
+        for (let i = 0; i < 15; i++) {
+            autocomplete_deskripsi(i);
+        }
+
+        function autocomplete_deskripsi(index) {
+            $(`#transaction_desc-${index}`).autocomplete({
+                source: label_deskripsi,
+                select: function (event, ui) {
+                    // console.log(ui.item);
+                    // document.getElementById(`transaction_desc-${index}`).value = ui.item.id;
+                    document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
+                    document.getElementById(`transaction_id-${index}`).value = ui.item.id;
+                    // autofill_transaction(index, ui.item.value);
+                    // console.log("autocomplete_deskripsi: " + ui.item.id);
+                    accountingGetRelatedInvoice(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
+                }
+            });
+
+            /*
+            Add event listener to transaction_desc input
+            Kalau value transaction_desc == "", maka remove tr penerimaan piutang
+            */
+            document.getElementById(`transaction_desc-${index}`).addEventListener('change', function() {
+                let transactionDescValue = this.value.trim();
+                let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-${index}`);
+                let trErrorFeedback = document.getElementById(`tr-error-feedback-${index}`);
+                if (transactionDescValue === "" && trPenerimaanPiutang) {
+                    trPenerimaanPiutang.remove();
+                }
+                if (transactionDescValue === "" && trErrorFeedback) {
+                    trErrorFeedback.remove();
+                }
+            });
+        }
         // console.log("21" == "21.00");
         // console.log((21).toString() == (21.00).toString());
         // console.log(21 == 21.00);
@@ -128,10 +164,20 @@
                 });
             }
         });
-
+        
         function accountingGetRelatedInvoice(transactionNameId, trId, kategori_level_one, kategori_type) {
             let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
             let elementToAppend = "";
+            // Reset tr penerimaan piutang jika sudah ada
+            let resetElement = document.getElementById(`tr-penerimaan-piutang-${trId}`);
+            if (resetElement) {
+                resetElement.remove();
+            }
+            // Reset tr penerimaan piutang jika kategori_level_one bukan PENERIMAAN PIUTANG
+            let trErrorFeedback = document.getElementById(`tr-error-feedback-${trId}`);
+            if (trErrorFeedback) {
+                trErrorFeedback.remove();
+            }
             if (kategori_level_one == "PENERIMAAN PIUTANG") {
                 // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
                 //     .then(response => {
@@ -155,14 +201,10 @@
                     dataType: 'json',
                     success: function(data) {
                         // console.log(data.message);
-                        console.log(data.notas);
+                        // console.log(data.notas);
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
-                            let resetElement = document.getElementById(`tr-penerimaan-piutang-${trId}`);
-                            if (resetElement) {
-                                resetElement.remove();
-                            }
                             elementToAppend += `<tr id="tr-penerimaan-piutang-${trId}"><td colspan="6"><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
                             let indexNota = 0;
                             let htmlRemainingBalanceMasuk = "";
@@ -218,8 +260,8 @@
                                     </td>
                                     <td>
                                         <div class="font-bold text-xs">Dari Balance.M</div>
-                                        <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}" value="${formatHargaIndoTanpaDesimal(relatedInvoice.amount_paid)}" class="text-xs p-1">
-                                        <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="${relatedInvoice.amount_paid}">
+                                        <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1">
+                                        <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="0">
                                         <div class="font-bold text-xs">Dari Saldo</div>
                                         <input type="text" id="related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1">
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[balance_used][${trId}][]" value="0">
@@ -268,15 +310,26 @@
                     error: function(err) {
                         console.error('Error:', err);
                         console.error('message:', err.responseJSON?.message);
+                        // Reset tr penerimaan piutang jika terjadi error
                         let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-${trId}`);
                         if (trPenerimaanPiutang) {
                             trPenerimaanPiutang.remove();
                         }
+                        elementToAppend += `<tr id="tr-penerimaan-piutang-${trId}" class="hidden"><td colspan="6">
+                            <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
+                            <input id="is-data-found-${trId}" type="hidden" value="no">
+                            <div class="flex justify-center my-1"><div>`;
+                        // Tambahkan elemen error feedback
+                        let htmlErrorFeedback = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=6><div class="text-center max-w-4xl border border-red-4000"><p id="p-error-feedback-${trId}" class="text-red-500 font-bold"></p></div></td></tr>`;
+                        elementToAppend += `${htmlErrorFeedback}</div></div></td></tr>`;
+                        
+                        trAddTransaction.insertAdjacentHTML('afterend', elementToAppend);
                         // alert(err.responseJSON?.message ?? 'Terjadi kesalahan');
                     }
                 });
                 // console.log(listOfTrID);
             } else {
+                
                 elementToAppend = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=6>
                     <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
                     <input id="input-kategori-type-${trId}" type="hidden" name="kategori_type[]" value="${kategori_type}">
@@ -451,7 +504,7 @@
         // VALIDASI SECARA FRONTEND
         document.getElementById('form-add-transactions').addEventListener('submit', (event) => {
             event.preventDefault();
-            console.log('submit');
+            // console.log('submit');
             /*
             Filter array object listOfTrID, apabila ditemukan duplicate dari listOfInvoiceID,
             maka submit akan dibatalkan
@@ -474,14 +527,22 @@
             // console.log(trIDs.length);
             for (let i = 0; i < trIDs.length; i++) {
                 // console.log(`input-kategori-level-one-${i}`);
-                let errorMessage = 'ERROR: ';
+                let errorMessage = '';
                 let kategoriLevelOne = document.getElementById(`input-kategori-level-one-${i}`);
                 let kategoriType = document.getElementById(`input-kategori-type-${i}`);
+                let masuk = document.getElementById(`masuk-${i}`);
+                let keluar = document.getElementById(`keluar-${i}`);
                 let masukReal = document.getElementById(`masuk-${i}-real`);
                 let keluarReal = document.getElementById(`keluar-${i}-real`);
 
                 // Reset element feedback to hidden
+                // Kalau pada baris terkait, input deskripsi belum diisi apapun, maka element tr tidak akan di create
                 let trErrorFeedback = document.getElementById(`tr-error-feedback-${i}`);
+
+                if (!trErrorFeedback && !masuk.value.trim() && !keluar.value.trim()) {
+                    continue; // Skip to the next iteration if trErrorFeedback does not exist
+                }
+
                 let pErrorFeedback = document.getElementById(`p-error-feedback-${i}`);
                 if (!trErrorFeedback.classList.contains('hidden')) {
                     trErrorFeedback.classList.add('hidden');
@@ -489,54 +550,76 @@
                 }
 
                 if (kategoriLevelOne && kategoriLevelOne.value == "PENERIMAAN PIUTANG") {
-                    let notaIDs = document.getElementsByName(`related_not_yet_paid_off_invoices[nota_id][${i}][]`);
-                    // console.log(notaIDs);
-                    let remainingBalanceMasukRealValue = parseFloat(document.getElementById(`remaining_balance_masuk-${i}-real`).value);
-                    let sisaSaldoRealValue = parseFloat(document.getElementById(`sisa-saldo-${i}-real`).value);
-                    let saldoAwalRealValue = parseFloat(document.getElementById(`saldo-awal-${i}-real`).value);
-                    
-                    // console.log(masukRealValue);
-                    
-                    let totalSaldoUsed = 0;
-                    notaIDs.forEach(notaID => {
-                        let amountPaidRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_paid]-${i}-${notaID.value}-real`).value);
-                        let amountDueRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real`).value);
-                        let amountDueRealUnchangedValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real-unchanged`).value);
-                        let paymentStatusValue = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${i}-${notaID.value}`).value;
-                        let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${i}-${notaID.value}`).value);
-                        let totalDiscountRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${i}-${notaID.value}-real`).value);
-                        let balanceUsedRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${i}-${notaID.value}-real`).value);
-                        totalSaldoUsed += balanceUsedRealValue;
-
-                        // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo
-                        // Validasi nilai 0 pada amount_paid dan saldo
-                        if (amountPaidRealValue <= 0 || balanceUsedRealValue <= 0) {
-                            errorMessage += '[Nilai tidak sesuai pada balance masuk yang digunakan / saldo yang digunakan.]';
+                    // remove class hidden pada tr penerimaan piutang
+                    let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-${i}`);
+                    if (trPenerimaanPiutang.classList.contains('hidden')) {
+                        trPenerimaanPiutang.classList.remove('hidden');
+                    }
+                    // apabila tidak ditemukan data nota, meskiput pun kategori_level_one adalah PENERIMAAN PIUTANG
+                    let isDataFound = document.getElementById(`is-data-found-${i}`);
+                    if (isDataFound && isDataFound.value == "no") {
+                        adaError = true;
+                        errorMessage += 'ERROR: [Data Nota tidak ditemukan!]';
+                    } else {
+                        let errorMessage2 = 'ERROR: ';
+                        let notaIDs = document.getElementsByName(`related_not_yet_paid_off_invoices[nota_id][${i}][]`);
+                        // console.log(notaIDs);
+                        let remainingBalanceMasukRealValue = parseFloat(document.getElementById(`remaining_balance_masuk-${i}-real`).value);
+                        let sisaSaldoRealValue = parseFloat(document.getElementById(`sisa-saldo-${i}-real`).value);
+                        let saldoAwalRealValue = parseFloat(document.getElementById(`saldo-awal-${i}-real`).value);
+                        
+                        // console.log(masukRealValue);
+                        
+                        let totalSaldoUsed = 0;
+                        notaIDs.forEach(notaID => {
+                            let amountPaidRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_paid]-${i}-${notaID.value}-real`).value);
+                            let amountDueRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real`).value);
+                            let amountDueRealUnchangedValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real-unchanged`).value);
+                            let paymentStatusValue = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${i}-${notaID.value}`).value;
+                            let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${i}-${notaID.value}`).value);
+                            let totalDiscountRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${i}-${notaID.value}-real`).value);
+                            let balanceUsedRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${i}-${notaID.value}-real`).value);
+                            totalSaldoUsed += balanceUsedRealValue;
+    
+                            // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo dan pada amount_due(sisa bayar)
+                            // Validasi nilai 0 pada amount_paid dan saldo
+                            if (amountPaidRealValue < 0) {
+                                errorMessage2 += '[Nilai tidak sesuai pada saldo yang digunakan.]';
+                                adaError = true;
+                            }
+                            if (balanceUsedRealValue < 0) {
+                                errorMessage2 += '[Nilai tidak sesuai pada balance masuk yang digunakan]';
+                                adaError = true;
+                            }
+                            if (amountDueRealValue < 0) {
+                                errorMessage2 += '[Nilai tidak sesuai pada sisa bayar.]';
+                                adaError = true;
+                            }
+    
+                            // Validasi payment_status tidak error
+                            if (paymentStatusValue == "error") {
+                                errorMessage2 += '[Error pada status_bayar.]';
+                                adaError = true;
+                            }
+                        });
+    
+                        // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
+                        if (isNaN(masukReal.value) || masukReal.value <= 0) {
+                            errorMessage2 += '[Input penerimaan_piutang harus ada nilai masuk]';
+                            adaError = true;
+                        }
+    
+                        // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
+                        if (totalSaldoUsed > saldoAwalRealValue) {
+                            errorMessage2 += '[Total saldo yang digunakan melebihi saldo awal.]';
                             adaError = true;
                         }
 
-                        // Validasi payment_status tidak error
-                        if (paymentStatusValue == "error") {
-                            errorMessage += '[Error pada status_bayar.]';
-                            adaError = true;
+                        if (adaError) {
+                            errorMessage += errorMessage2;
                         }
-                    });
-
-                    // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
-                    if (isNaN(masukReal.value) || masukReal.value <= 0) {
-                        errorMessage += '[Input penerimaan_piutang harus ada nilai masuk]';
-                        adaError = true;
                     }
-
-                    // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
-                    if (totalSaldoUsed > saldoAwalRealValue) {
-                        errorMessage += '[Total saldo yang digunakan melebihi saldo awal.]';
-                        adaError = true;
-                    }
-                    
-                    
                 } else {
-                    errorMessage += 'ERROR: ';
                     if (kategoriType == "UANG MASUK") {
                         if (!masukReal || masukReal.value <= 0) {
                             errorMessage += '[UANG MASUK?]';
@@ -558,12 +641,12 @@
                 }
             }
 
-            // listOfTrID.forEach(item => {
-                
-            // });
-
-
-            // event.target.submit();
+            if (adaError) {
+                return false; // Batalkan submit
+            } else {
+                // Jika tidak ada error, lanjutkan submit
+                event.target.submit();
+            }
         })
     </script>
 

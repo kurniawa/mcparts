@@ -161,7 +161,7 @@ class AccountingController extends Controller
 
         $related_users = User::where('id', '!=', $user->id)->get();
 
-        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value', 'kategori_level_one', 'kategori_type')->where('user_instance_id', $userInstance->id)->orderBy('desc')->get();
+        $labelDeskripsi = TransactionName::select('id', 'desc as label', 'desc as value', 'kategori_level_one', 'kategori_type')->where('user_instance_id', $userInstance->id)->orderBy('desc')->get();
         // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
         // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();
@@ -182,7 +182,7 @@ class AccountingController extends Controller
             'keluar_total' => $keluar_total,
             'masuk_total' => $masuk_total,
             'related_users' => $related_users,
-            'label_deskripsi' => $label_deskripsi,
+            'labelDeskripsi' => $labelDeskripsi,
             'saldo_awal' => $saldo_awal,
             'from' => $from,
             // 'notifications' => $notifications,
@@ -193,7 +193,7 @@ class AccountingController extends Controller
         ];
 
         // dd($label_kategori_level_two);
-        // dump($label_deskripsi);
+        // dump($labelDeskripsi);
         // dump($accountings);
         return view('accounting.show_transactions', $data);
     }
@@ -332,7 +332,7 @@ class AccountingController extends Controller
             }
         }
 
-        dd($post);
+        // dd($post);
         DB::beginTransaction();
         try {
             for ($i = 0; $i < $working_index; $i++) {
@@ -470,8 +470,10 @@ class AccountingController extends Controller
                         // Update data nota terkait
                         $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
                         $finished_at = null;
+                        $accounting_invoice_status = 'active';
                         if ($payment_status == 'lunas') {
                             $finished_at = $created_at;
+                            $accounting_invoice_status = 'inactive';
                         }
                         $related_nota->update([
                             'status_bayar' => $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
@@ -544,25 +546,30 @@ class AccountingController extends Controller
                      * CREATE or UPDATE customer_balance / overpayment
                      */
                     $remaining_balance_masuk = (float)$post['remaining_balance_masuk'][$i];
-                    if ( $remaining_balance_masuk != 0 || ($total_balance_used > 0 && $saldo_awal != $sisa_saldo) ) {
-                        $overpayment = Overpayment::where('customer_id', $related_nota->id)->first();
-                        $sisa_saldo_real = $remaining_balance_masuk + $sisa_saldo;
-                        if ($overpayment) {
-                            $overpayment->update([
+                    $overpayment_new = $remaining_balance_masuk + $sisa_saldo;
+                    $overpayment_old = Overpayment::where('customer_id', $related_nota->id)->first();
+                    if ($overpayment_new > 0) {
+                        if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {
+                            $overpayment_old->update([
                                 'time_key' => $time_key,
                                 'accounting_id' => $new_accounting->id,
                                 'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $sisa_saldo_real
+                                'amount' => $overpayment_new
                             ]);
-                        } else {
+                        } elseif (!$overpayment_old) {
                             Overpayment::create([
                                 'time_key' => $time_key,
                                 'accounting_id' => $new_accounting->id,
                                 'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $sisa_saldo_real
+                                'amount' => $overpayment_new
                             ]);
+                            $success_ .= 'overpayment created-';
                         }
-                        $success_ .= 'overpayment created/updated-';
+                    } elseif ($overpayment_new == 0) {
+                        if ($overpayment_old) {
+                            $overpayment_old->delete();
+                        }
+                        $success_ .= 'overpayment deleted-';
                     }
                 }
             }

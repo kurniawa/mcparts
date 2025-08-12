@@ -98,11 +98,20 @@ class Accounting extends Model
                 ]);
             }
 
-            // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo
-            // Validasi nilai 0 pada amount_paid dan saldo
-            if ($amount_paid <= 0 || $balance_used <= 0) {
+            // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo dan sisa bayar
+            if ($amount_paid < 0) {
                 $request->validate(['error' => 'required'], [
-                    'error.required' => "[Nilai tidak sesuai pada balance masuk yang digunakan / saldo yang digunakan.]"
+                    'error.required' => "[Nilai tidak sesuai pada balance masuk yang digunakan]"
+                ]);
+            }
+            if ($balance_used < 0) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "[Nilai tidak sesuai pada saldo yang digunakan.]"
+                ]);
+            }
+            if ($amount_due_new < 0) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "[Nilai tidak sesuai pada sisa bayar.]"
                 ]);
             }
 

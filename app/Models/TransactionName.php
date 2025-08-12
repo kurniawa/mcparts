@@ -25,6 +25,7 @@ class TransactionName extends Model
         $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
             ->where('customer_id', $this->pelanggan_id)
             ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
+            ->where('status', 'active')
             ->get()
             ->map(function ($invoice) {
                 $invoice->no_nota = $invoice->invoice_number;
