@@ -32,8 +32,13 @@ class SeedingAccountingInvoices extends Command
         $notas = \App\Models\Nota::where('status_bayar', 'belum_lunas')->get();
         foreach ($notas as $nota) {
             if ($nota->status_bayar === 'belum_lunas' || $nota->status_bayar === 'sebagian') {
+                $time_key = $nota->created_at->timestamp;
+                while (AccountingInvoice::where('time_key', $time_key)->exists()) {
+                    $time_key++;
+                }
                 AccountingInvoice::create([
-                    'time_key' => $nota->created_at->timestamp,
+                    'accounting_time_key' => $nota->created_at->timestamp,
+                    'time_key' => $time_key,
                     'invoice_id' => $nota->id,
                     'invoice_table' => 'notas',
                     'invoice_number' => $nota->no_nota,

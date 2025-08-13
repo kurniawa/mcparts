@@ -28,7 +28,8 @@ return new class extends Migration
     {
         Schema::create('accounting_invoices', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('time_key')->nullable(); // untuk koneksi ke accounting
+            $table->bigInteger('accounting_time_key')->nullable(); // untuk koneksi ke accounting
+            $table->bigInteger('time_key')->nullable()->unique(); // untuk sorting
             $table->foreignId('invoice_id')->nullable();
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();
@@ -50,8 +51,9 @@ return new class extends Migration
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
             $table->decimal('balance_used', 15, 2)->default(0.00);
-            $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
+            $table->decimal('remaining_funds', 15, 2)->default(0.00);
             $table->decimal('balance', 15, 2)->default(0.00);
+            $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
             $table->enum('status', ['active', 'inactive'])->default('active');
 
             // $table->decimal('discount_percentage_old', 5, 2)->default(0.00);

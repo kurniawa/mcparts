@@ -201,7 +201,7 @@
                     dataType: 'json',
                     success: function(data) {
                         // console.log(data.message);
-                        // console.log(data.notas);
+                        console.log(data.notas);
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
@@ -431,6 +431,7 @@
                     let totalDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${invoice.value}-real`);
                     let balanceUsed = document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${invoice.value}`);
                     let balanceUsedReal = document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${invoice.value}-real`);
+                    let totalPrice = document.getElementById(`related_not_yet_paid_off_invoices[harga_total]-${trId}-${invoice.value}-real`);
                     
                     // parseFloat beberapa Value
                     let discountPercentageValue = parseFloat(discountPercentage.value);
@@ -438,6 +439,7 @@
                     let amountPaidRealValue = parseFloat(amountPaidReal.value);
                     let amountDueRealUnchangedValue = parseFloat(amountDueRealUnchanged.value);
                     let amountDueRealValue = parseFloat(amountDueReal.value);
+                    let totalPriceValue = parseFloat(totalPrice.value);
 
                     // Hitung Potongan Harga
                     let totalDiscountRealValue = parseFloat(totalDiscountReal.value);
@@ -472,9 +474,9 @@
                         // console.log(amountDueRealValue);
                         if (amountDueRealValue <= 0) {
                             paymentStatus.value = 'lunas';
-                        } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue)) {
+                        } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) && amountDueRealValue == totalPriceValue) {
                             paymentStatus.value = 'belum_lunas'; 
-                        } else if (amountDueRealValue > 0 && amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue)) {
+                        } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
                             paymentStatus.value = 'sebagian';
                         } else {
                             paymentStatus.value = 'error';

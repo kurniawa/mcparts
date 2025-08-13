@@ -256,4 +256,25 @@ class Nota extends Model
         $this->updated_by = Auth::user()->username;
         $this->save();
     }
+
+    public function UpdatePaymentStatus() {
+        // Validasi Payment Status
+        $payment_status = 'error';
+        if ($amount_due_new <= 0) {
+            $payment_status = 'lunas';
+        } else if ($amount_due_new == ($amount_due_old - $total_discount_new)) {
+            $payment_status = 'belum_lunas'; 
+        } else if ($amount_due_new > 0 && $amount_due_new < ($amount_due_old - $total_discount_new)) {
+            $payment_status = 'sebagian';
+        }
+        if ($payment_status == 'error') {
+            $request->validate(['error' => 'required'], [
+                'error.required' => "payment_status == error --> $payment_status == error"
+            ]);
+        } elseif ($payment_status != $payment_status) {
+            $request->validate(['error' => 'required'], [
+                'error.required' => "payment_status == post[payment_status][$i][$j] --> $payment_status == $post[payment_status][$i][$j]"
+            ]);
+        }
+    }
 }

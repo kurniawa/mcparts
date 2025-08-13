@@ -456,7 +456,11 @@ class AccountingController extends Controller
                     $total_balance_used = 0;
                     $saldo_awal = $post['saldo_awal'][$i];
                     $sisa_saldo = $post['sisa_saldo'][$i];
-                    for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) {
+                    $array_accounting_invoice = []; // Untuk diupdate nanti.
+                    $array_related_nota = []; // Untuk diupdate nanti.
+                    $nota_id_number = count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
+                    $this_time_key = time(); 
+                    for ($j=0; $j <$nota_id_number; $j++) {
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         /**
                          * Create / Update data akan dilakukan apabila memang terjadi pembayaran.
@@ -485,6 +489,7 @@ class AccountingController extends Controller
                             'finished_at' => $finished_at,
                         ]);
                         $success_ .= "related_nota updated-";
+                        $array_related_nota[] = $related_nota;
                         // $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
     
                         /**
@@ -495,13 +500,29 @@ class AccountingController extends Controller
                          * tidak boleh melakukan update data record tersebut.
                          * Maka perlu untuk membuat record baru di tabel accounting_invoices.
                          */
+
                         $related_accounting_invoice = AccountingInvoice::where('invoice_table', 'notas')
                             ->where('invoice_id', $related_nota->id)
-                            ->latest('time_key')->first();
+                            ->where('status', 'active')
+                            ->latest('accounting_time_key')->first();
 
                         if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
-                            AccountingInvoice::create([
-                                'time_key' => $time_key,
+                            if ($related_accounting_invoice) {
+                                $related_accounting_invoice->update([
+                                    'status' => 'inactive',
+                                    'updated_by' => $user->username,
+                                    'finished_at' => $created_at,
+                                ]);
+                                $success_ .= "related_accounting_invoice->status updated to inactive-";
+                            }
+                            // Pastikan bahwa time_key unik
+                            while (AccountingInvoice::where('time_key', $this_time_key)->exists()) {
+                                $this_time_key++;
+                            }
+                            // Buat record baru di tabel accounting_invoices
+                            $related_accounting_invoice = AccountingInvoice::create([
+                                'accounting_time_key' => $time_key,
+                                'time_key' => $this_time_key,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
                                 'invoice_number' => $related_nota->no_nota,
@@ -515,12 +536,13 @@ class AccountingController extends Controller
                                 'amount_paid' => $related_nota->amount_paid,
                                 'balance_used' => $related_nota->balance_used,
                                 'total_amount' => $related_nota->harga_total,
+                                'status' => $accounting_invoice_status,
                                 'created_at' => $created_at,
                             ]);
                             $success_ .= "AccountingInvoice created-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
                             $related_accounting_invoice->update([
-                                'time_key' => $time_key,
+                                'accounting_time_key' => $time_key,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
                                 'invoice_number' => $related_nota->no_nota,
@@ -534,43 +556,64 @@ class AccountingController extends Controller
                                 'amount_paid' => $related_nota->amount_paid,
                                 'balance_used' => $related_nota->balance_used,
                                 'total_amount' => $related_nota->harga_total,
+                                'status' => $accounting_invoice_status,
                                 'updated_by' => $user->username,
                                 'created_at' => $created_at,
                             ]);
                             $success_ .= "AccountingInvoice updated-";
                         }
+                        $array_accounting_invoice[] = $related_accounting_invoice;
 
                         $total_balance_used += (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
                     }
                     /**
                      * CREATE or UPDATE customer_balance / overpayment
                      */
+                    $last_index = $nota_id_number - 1;
                     $remaining_balance_masuk = (float)$post['remaining_balance_masuk'][$i];
                     $overpayment_new = $remaining_balance_masuk + $sisa_saldo;
-                    $overpayment_old = Overpayment::where('customer_id', $related_nota->id)->first();
+                    $overpayment_old = Overpayment::where('customer_id', $related_nota->pelanggan_id)->first();
                     if ($overpayment_new > 0) {
                         if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {
                             $overpayment_old->update([
-                                'time_key' => $time_key,
+                                'time_key' => $this_time_key,
                                 'accounting_id' => $new_accounting->id,
                                 'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $overpayment_new
+                                'amount' => $overpayment_new,
+                                'updated_by' => $user->username,
                             ]);
                         } elseif (!$overpayment_old) {
                             Overpayment::create([
-                                'time_key' => $time_key,
+                                'time_key' => $this_time_key,
                                 'accounting_id' => $new_accounting->id,
                                 'customer_id' => $transaction_name->pelanggan_id,
                                 'amount' => $overpayment_new
                             ]);
                             $success_ .= 'overpayment created-';
                         }
+                        
+                        /**
+                         * UPDATE $related_nota dan $related_accounting_invoice,
+                         * apabila terdapat overpayment yang baru.
+                         * UPDATE hanya dilakukan pada nota terakhir yang di proses pada iterasi ini.
+                         */
+                        $array_related_nota[$last_index]->update([
+                            'overpayment' => $overpayment_new,
+                        ]);
+                        $array_accounting_invoice[$last_index]->update([
+                            'remaining_funds' => $remaining_balance_masuk,
+                            'balance' => $sisa_saldo,
+                            'overpayment' => $overpayment_new,
+                            'updated_by' => $user->username,
+                        ]);
                     } elseif ($overpayment_new == 0) {
                         if ($overpayment_old) {
                             $overpayment_old->delete();
                         }
                         $success_ .= 'overpayment deleted-';
                     }
+                    
+                    
                 }
             }
 
@@ -816,6 +859,8 @@ class AccountingController extends Controller
         if ($transaction_name === null) {
             dump("transaction_name?");
             dd($post);
+        } elseif ($transaction_name && $transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG') {
+            $request->validate(['error'=>'required'],['error.required'=>'Belum mendukung edit entri dengan kategori PENERIMAAN PIUTANG']);
         }
         $jumlah = null;
         $transaction_type = 'pengeluaran';
@@ -1042,33 +1087,51 @@ class AccountingController extends Controller
              * dan UPDATE Nota terkait.
              * Tabel yang perlu diperhatikan: Nota, AccountingInvoice, Overpayment
              */
-            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->where('time_key', $accounting->time_key)->get();
+            $funds_in = (float)$accounting->jumlah / 100;
+            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->where('accounting_time_key', $accounting->time_key)->latest('time_key')->get();
+            $total_overpayment = 0;
+            $total_amount_paid = 0;
             foreach ($accounting_invoices as $accounting_invoice) {
-                if ($accounting_invoice->invoice_table == 'notas') {
-                    $nota = Nota::find($accounting_invoice->invoice_id);
-                    $nota->discount_percentage = $accounting_invoice->discount_percentage_old;
-                    $nota->total_discount = $accounting_invoice->total_discount_old;
-                    $nota->discount_description = $accounting_invoice->discount_description_old;
-                    $nota->amount_due = $accounting_invoice->amount_due_old;
-                    $nota->amount_paid = $accounting_invoice->amount_paid_old;
-                    $nota->balance_used = $accounting_invoice->balance_used_old;
-                    $nota->save();
-
-                    if ($accounting_invoice->overpayment != 0) {
-                        $overpayment = Overpayment::where('customer_id', $nota->pelanggan_id)->first();
-                        if ($overpayment) {
-                            $overpayment->amount -= $accounting_invoice->overpayment;
-                            if ($overpayment->amount == 0) {
-                                $overpayment->delete();
-                            } else {
-                                $overpayment->save();
-                            }
+                if ($accounting_invoice->overpayment > 0) {
+                    $overpayment = Overpayment::where('customer_id', $accounting_invoice->customer_id)->first();
+                    if ($overpayment) {
+                        $overpayment->amount -= $accounting_invoice->overpayment;
+                        if ($overpayment->amount == 0) {
+                            $overpayment->delete();
+                            $warnings_ .= 'overpayment deleted-';
+                        } else {
+                            $overpayment->save();
+                            $warnings_ .= 'overpayment updated-';
                         }
                     }
+                    $total_overpayment += $accounting_invoice->overpayment;
+                    $total_amount_paid += $accounting_invoice->amount_paid;
+                }
+                if ($accounting_invoice->invoice_table == 'notas') {
+                    $nota = Nota::find($accounting_invoice->invoice_id);
+                    $nota->amount_due += $accounting_invoice->amount_paid;
+                    $nota->amount_paid -= $accounting_invoice->amount_paid;
+                    $nota->balance_used += $accounting_invoice->balance_used;
+                    $nota->overpayment -= $accounting_invoice->overpayment;
+                    $nota->save();
                 }
 
                 // Hapus AccountingInvoice terkait
                 $accounting_invoice->delete();
+                $warnings_ .= 'accounting_invoice deleted-';
+
+                // UPDATE AccountingInvoice sebelumnya,
+                // kalau exist maka ubah status nya menjadi active
+                $previous_accounting_invoice = AccountingInvoice::where('invoice_table', $accounting_invoice->invoice_table)
+                    ->where('invoice_id', $accounting_invoice->invoice_id)
+                    ->latest('time_key')
+                    ->first();
+                if ($previous_accounting_invoice) {
+                    $previous_accounting_invoice->status = 'active';
+                    $previous_accounting_invoice->updated_by = $user->username;
+                    $previous_accounting_invoice->save();
+                    $warnings_ .= '-previous_accounting_invoice status changed to active-';
+                }
             }
             DB::commit();
         } catch (\Throwable $th) {

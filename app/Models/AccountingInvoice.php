@@ -9,4 +9,11 @@ class AccountingInvoice extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+
+    public function NewAccountingInvoice() {
+        
+    }
+
+    public function UpdatePaymentStatus() {
+    }
 }
