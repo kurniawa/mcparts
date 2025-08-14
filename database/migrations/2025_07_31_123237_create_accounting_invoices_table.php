@@ -30,10 +30,10 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('accounting_time_key')->nullable(); // untuk koneksi ke accounting
             $table->bigInteger('time_key')->nullable()->unique(); // untuk sorting
+            $table->foreignId('accounting_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('invoice_id')->nullable();
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();
-            $table->foreignId('accounting_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('transaction_name_id')->nullable()->constrained('transaction_names')->onDelete('set null');
             $table->string('transaction_name_desc')->nullable(); // e.g., 'Pembayaran Nota', 'Pembayaran Hutang'
             $table->foreignId('customer_id')->nullable()->constrained('pelanggans')->onDelete('set null');

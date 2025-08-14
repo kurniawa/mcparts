@@ -37,7 +37,7 @@ class SeedingAccountingInvoices extends Command
                     $time_key++;
                 }
                 AccountingInvoice::create([
-                    'accounting_time_key' => $nota->created_at->timestamp,
+                    // 'accounting_time_key' => $nota->created_at->timestamp,
                     'time_key' => $time_key,
                     'invoice_id' => $nota->id,
                     'invoice_table' => 'notas',

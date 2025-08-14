@@ -481,7 +481,7 @@ class AccountingController extends Controller
                         }
                         $related_nota->update([
                             'status_bayar' => $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
-                            'discount_percentage' => $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
+                            'discount_percentage' => $related_nota->total_discount + $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
                             'total_discount' => $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                             'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
                             'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
@@ -509,6 +509,7 @@ class AccountingController extends Controller
                         if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
                             if ($related_accounting_invoice) {
                                 $related_accounting_invoice->update([
+                                    'accounting_id' => $new_accounting->id,
                                     'status' => 'inactive',
                                     'updated_by' => $user->username,
                                     'finished_at' => $created_at,
@@ -523,10 +524,10 @@ class AccountingController extends Controller
                             $related_accounting_invoice = AccountingInvoice::create([
                                 'accounting_time_key' => $time_key,
                                 'time_key' => $this_time_key,
+                                'accounting_id' => $new_accounting->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
                                 'invoice_number' => $related_nota->no_nota,
-                                'accounting_id' => $new_accounting->id,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
                                 'customer_id' => $related_nota->pelanggan_id,
@@ -543,10 +544,10 @@ class AccountingController extends Controller
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
                             $related_accounting_invoice->update([
                                 'accounting_time_key' => $time_key,
+                                'accounting_id' => $new_accounting->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
                                 'invoice_number' => $related_nota->no_nota,
-                                'accounting_id' => $new_accounting->id,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
                                 'customer_id' => $related_nota->pelanggan_id,
@@ -1075,13 +1076,11 @@ class AccountingController extends Controller
                     $last_transaction->saldo = $saldo_next;
                     $last_transaction->save();
                 }
-                $warnings_ .= '-jumlah saldo editted-';
+                $warnings_ .= '-jumlah saldo edited-';
 
             }
 
-            $accounting->delete();
-            $warnings_ .= '-transaction deleted-';
-
+            
             /**
              * DELETE AccountingInvoice terkait pada time_key terkait.
              * dan UPDATE Nota terkait.
@@ -1107,12 +1106,15 @@ class AccountingController extends Controller
                     $total_overpayment += $accounting_invoice->overpayment;
                     $total_amount_paid += $accounting_invoice->amount_paid;
                 }
+
                 if ($accounting_invoice->invoice_table == 'notas') {
                     $nota = Nota::find($accounting_invoice->invoice_id);
                     $nota->amount_due += $accounting_invoice->amount_paid;
                     $nota->amount_paid -= $accounting_invoice->amount_paid;
                     $nota->balance_used += $accounting_invoice->balance_used;
                     $nota->overpayment -= $accounting_invoice->overpayment;
+                    // UPDATE status_bayar pada Nota
+                    $nota->status_bayar = $nota->UpdatePaymentStatus();
                     $nota->save();
                 }
 
@@ -1132,7 +1134,12 @@ class AccountingController extends Controller
                     $previous_accounting_invoice->save();
                     $warnings_ .= '-previous_accounting_invoice status changed to active-';
                 }
+
             }
+
+            $accounting->delete();
+            $warnings_ .= '-transaction deleted-';
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
