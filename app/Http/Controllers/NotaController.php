@@ -299,6 +299,7 @@ class NotaController extends Controller
             $request->validate(['error'=>'required'],['error.required'=>'created_at?']);
         }
         if ($post['finished_day'] !== null) {
+            return back()->with('errors_', "Tanggal selesai dapat diubah melalui laman Accounting, yakni pada input transaksi 'PENERIMAAN PIUTANG'");
             if ($post['finished_month'] === null || $post['finished_year'] === null) {
                 $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
             }
