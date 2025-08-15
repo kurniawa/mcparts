@@ -82,6 +82,7 @@ Route::controller(NotaController::class)->group(function(){
     Route::post('/notas/{spk}/{nota}/delete','delete')->name('notas.delete')->middleware('auth');
     Route::post('/notas/{spk}/nota_all','nota_all')->name('notas.nota_all')->middleware('auth');
     Route::post('/notas/{nota}/edit_tanggal','edit_tanggal')->name('notas.edit_tanggal')->middleware('auth');
+    Route::post('/notas/{nota}/delete-finished-at','DeleteFinishedAt')->name('notas.DeleteFinishedAt')->middleware('auth');
     Route::post('/notas/{spk}/{spk_produk_nota}/delete_item','delete_item')->name('notas.delete_item')->middleware('auth');
     Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.edit_alamat')->middleware('auth');
     Route::post('/notas/{spk}/edit_kontak','edit_kontak')->name('notas.edit_kontak')->middleware('auth');

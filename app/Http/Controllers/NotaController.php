@@ -328,6 +328,17 @@ class NotaController extends Controller
         return back()->with('success_', $success_);
     }
 
+    public function DeleteFinishedAt(Nota $nota) {
+        // dump($nota);
+        $user = Auth::user();
+        $nota->finished_at = null;
+        $nota->status_bayar = 'belum_lunas';
+        $nota->updated_by = $user->username;
+        $nota->save();
+        $success_ = '$nota->finished_at deleted-';
+        return back()->with('success_', $success_);
+    }
+
     function delete_item(Spk $spk, SpkProdukNota $spk_produk_nota) {
         // dump($spk);
         // dd($spk_produk_nota);

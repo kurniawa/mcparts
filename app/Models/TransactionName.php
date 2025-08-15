@@ -22,29 +22,29 @@ class TransactionName extends Model
             $customerBalance = $customerBalance->toArray();
         }
 
-        $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
-            ->where('customer_id', $this->pelanggan_id)
-            ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
-            ->where('status', 'active')
-            ->get()
-            ->map(function ($invoice) {
-                $invoice->no_nota = $invoice->invoice_number;
-                $invoice->pelanggan_id = $invoice->customer_id;
-                $invoice->harga_total = $invoice->total_amount;
-                $invoice->status_bayar = $invoice->payment_status;
-                return $invoice;
+        $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where('status_bayar', 'belum_lunas')
+            ->orWhere('status_bayar', 'sebagian')
+            ->get()->map(function ($nota) {
+                $nota->invoice_id = $nota->id;
+                return $nota;
             })
             ->toArray();
-            
-        if (!count($accountingInvoices) ) {
-            $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where('status_bayar', 'belum_lunas')
-                ->orWhere('status_bayar', 'sebagian')
-                ->get()->map(function ($nota) {
-                    $nota->invoice_id = $nota->id;
-                    return $nota;
+        $accountingInvoices = $notas;
+        
+        if (!count($notas) ) {
+            $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
+                ->where('customer_id', $this->pelanggan_id)
+                ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
+                ->where('status', 'active')
+                ->get()
+                ->map(function ($invoice) {
+                    $invoice->no_nota = $invoice->invoice_number;
+                    $invoice->pelanggan_id = $invoice->customer_id;
+                    $invoice->harga_total = $invoice->total_amount;
+                    $invoice->status_bayar = $invoice->payment_status;
+                    return $invoice;
                 })
                 ->toArray();
-            $accountingInvoices = $notas;
         }
         
         return [$accountingInvoices, $customerBalance];
