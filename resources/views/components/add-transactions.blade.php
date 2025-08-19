@@ -201,7 +201,7 @@
                     dataType: 'json',
                     success: function(data) {
                         // console.log(data.message);
-                        console.log(data.notas);
+                        // console.log(data.notas);
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
@@ -622,7 +622,8 @@
                         }
                     }
                 } else {
-                    if (kategoriType == "UANG MASUK") {
+                    // console.log(kategoriType);
+                    if (kategoriType.value == "UANG MASUK") {
                         if (!masukReal || masukReal.value <= 0) {
                             errorMessage += '[UANG MASUK?]';
                             adaError = true;

@@ -333,6 +333,8 @@ class NotaController extends Controller
         $user = Auth::user();
         $nota->finished_at = null;
         $nota->status_bayar = 'belum_lunas';
+        $nota->amount_due = $nota->harga_total;
+        $nota->amount_paid = 0;
         $nota->updated_by = $user->username;
         $nota->save();
         $success_ = '$nota->finished_at deleted-';
