@@ -1114,7 +1114,11 @@ class AccountingController extends Controller
                     $nota->balance_used += $accounting_invoice->balance_used;
                     $nota->overpayment -= $accounting_invoice->overpayment;
                     // UPDATE status_bayar pada Nota
-                    $nota->status_bayar = $nota->UpdatePaymentStatus();
+                    $payment_status = $nota->UpdatePaymentStatus();
+                    $nota->status_bayar = $payment_status;
+                    if ($payment_status != 'lunas') {
+                        $nota->finished_at = null;
+                    }
                     $nota->save();
                 }
 

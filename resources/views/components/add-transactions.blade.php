@@ -503,9 +503,23 @@
             }
         });
 
+        // LOADING SPINNER
+        $spinner = $('#spinner');
+        $spinner.hide(500);
+        const loading_animation = () => {
+            $loading_to_disable = $('#loading_to_disable')
+            $loading_to_disable.prop('disabled', true);
+            $loading_to_hide = $('#loading_to_hide');
+            $loading_to_hide.hide()
+            // console.log('loading_animation');
+            $spinner = $('#spinner');
+            $spinner.show();
+        }
+
         // VALIDASI SECARA FRONTEND
         document.getElementById('form-add-transactions').addEventListener('submit', (event) => {
             event.preventDefault();
+            $spinner.show(500);
             // console.log('submit');
             /*
             Filter array object listOfTrID, apabila ditemukan duplicate dari listOfInvoiceID,

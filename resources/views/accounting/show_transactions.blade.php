@@ -527,18 +527,6 @@
     //     $spinner.hide();
     // }, 1000);
 
-    $spinner = $('#spinner');
-    $spinner.hide(500);
-    const loading_animation = () => {
-        $loading_to_disable = $('#loading_to_disable')
-        $loading_to_disable.prop('disabled', true);
-        $loading_to_hide = $('#loading_to_hide');
-        $loading_to_hide.hide()
-        // console.log('loading_animation');
-        $spinner = $('#spinner');
-        $spinner.show();
-    }
-
     // const get_scroll = () => {
     //     const scrollValue = localStorage.getItem("scrollValue")
     //     if (scrollValue !== null) {
