@@ -163,20 +163,6 @@ class Nota extends Model
          * karena belum ada transaksi pembayaran terkait dengan invoice ini,
          * karena invoice baru saja dibuat.
          */
-        AccountingInvoice::create([
-            'time_key' => strtotime($this->created_at),
-            'invoice_id' => $this->id,
-            'invoice_table' => 'notas',
-            'invoice_number' => $this->no_nota,
-            // 'transaction_name_id' => $related_transaction_name->id,
-            // 'transaction_name_desc' => $related_transaction_name->desc,
-            'customer_id' => $this->pelanggan_id,
-            'customer_name' => $this->pelanggan_nama,
-            'payment_status' => $this->status_bayar,
-            'amount_due' => $this->harga_total,
-            'amount_paid' => 0,
-            'total_amount' => $this->harga_total,
-        ]);
 
         // Update the status_bayar pada nota
         if ($this->amount_paid == 0) {
@@ -193,6 +179,22 @@ class Nota extends Model
         // Save the changes to the nota
         $this->updated_by = Auth::user()->username;
         $this->save();
+
+        
+        AccountingInvoice::create([
+            'time_key' => strtotime($this->created_at),
+            'invoice_id' => $this->id,
+            'invoice_table' => 'notas',
+            'invoice_number' => $this->no_nota,
+            // 'transaction_name_id' => $related_transaction_name->id,
+            // 'transaction_name_desc' => $related_transaction_name->desc,
+            'customer_id' => $this->pelanggan_id,
+            'customer_name' => $this->pelanggan_nama,
+            'payment_status' => $this->status_bayar,
+            'amount_due' => $this->harga_total,
+            'amount_paid' => 0,
+            'total_amount' => $this->harga_total,
+        ]);
     }
     public function updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist($accounting, $accounting_invoice, $transaction_name, $amount_due, $amount_paid, $payment_status) {
         /**

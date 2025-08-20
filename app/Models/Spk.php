@@ -36,7 +36,7 @@ class Spk extends Model
                  * Kalau amount_paid null, maka amount_paid, amount_due dan status_bayar
                  * belum diupdate
                  */
-                $nota->updatePaymentAndAccountingInvoice();
+                $nota->updatePaymentAndAccountingInvoice_NewInvoice();
             }
             $arr_notas[] = $nota->id;
             $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();

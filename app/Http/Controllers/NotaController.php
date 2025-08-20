@@ -277,7 +277,7 @@ class NotaController extends Controller
 
             // Update status pembayaran dan related accounting_invoices
 
-            $nota->updatePaymentAndAccountingInvoice();
+            $nota->updatePaymentAndAccountingInvoice_NewInvoice();
             $success_ .= ' - nota diperbarui -';
 
             DB::commit();
