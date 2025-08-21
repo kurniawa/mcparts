@@ -801,6 +801,28 @@
                         </div>
                     </div>
                     {{-- END - OPSI NOTA --}}
+                    {{-- HISTORI PEMBAYARAN --}}
+                    <div class="mt-2">
+                        <h5 class="font-bold">Histori Pembayaran:</h5>
+                        @if (count($nota->accountingInvoices) === 0)
+                        <div class="text-center italic text-slate-500">kosong</div>
+                        @else
+                        <table class="w-full text-xs">
+                            <tr>
+                                <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Metode</th>
+                            </tr>
+                            @foreach ($nota->accountingInvoices as $accountingInvoice)
+                            <tr>
+                                <td>{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
+                                <td>{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
+                                <td>{{ number_format($accountingInvoice->amount_paid,0,',','.') }}</td>
+                                <td>{{ $accountingInvoice->userInstance->username }}-{{ $accountingInvoice->userInstance->instance_name }}-{{ $accountingInvoice->userInstance->branch }}</td>
+                            </tr>
+                            @endforeach
+                        </table>
+                        @endif
+                    </div>
+                    {{-- END - HISTORI PEMBAYARAN --}}
                     {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}
                     <div class="hidden" id="pilihan_srjalan-{{ $key_nota }}">
                         <div class="mt-1 flex justify-end">

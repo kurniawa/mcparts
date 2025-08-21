@@ -10,10 +10,13 @@ class AccountingInvoice extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
-    public function NewAccountingInvoice() {
-        
+    public function accounting()
+    {
+        return $this->belongsTo(Accounting::class);
     }
 
-    public function UpdatePaymentStatus() {
+    public function userInstance()
+    {
+        return $this->belongsTo(UserInstance::class);
     }
 }

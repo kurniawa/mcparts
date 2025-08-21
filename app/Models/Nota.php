@@ -271,4 +271,10 @@ class Nota extends Model
         }
         return $payment_status;
     }
+
+    public function accountingInvoices() {
+        return $this->hasMany(AccountingInvoice::class, 'invoice_id', 'id')
+            ->where('invoice_table', 'notas')
+            ->orderBy('time_key');
+    }
 }

@@ -40,7 +40,7 @@ class Spk extends Model
             }
             $arr_notas[] = $nota->id;
             $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
-            $notas[] = $nota->toArray();
+            $notas[] = $nota;
             $col_spk_produk_notas->push($spk_produk_notas);
             // END - DATA NOTA
             // CUST KONTAK
