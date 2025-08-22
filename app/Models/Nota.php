@@ -277,4 +277,14 @@ class Nota extends Model
             ->where('invoice_table', 'notas')
             ->orderBy('time_key');
     }
+
+    public function spk()
+    {
+        return $this->belongsToMany(
+            Spk::class,          // Model tujuan
+            'spk_notas',         // Nama tabel pivot
+            'nota_id',           // Foreign key di tabel pivot yang merujuk ke Nota
+            'spk_id'             // Foreign key di tabel pivot yang merujuk ke Spk
+        ); // Mengambil hanya satu Spk yang terkait dengan Nota
+    }
 }

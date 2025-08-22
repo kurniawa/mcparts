@@ -525,6 +525,7 @@ class AccountingController extends Controller
                                 'accounting_time_key' => $time_key,
                                 'time_key' => $this_time_key,
                                 'accounting_id' => $new_accounting->id,
+                                'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
                                 'invoice_number' => $related_nota->no_nota,
@@ -545,6 +546,7 @@ class AccountingController extends Controller
                             $related_accounting_invoice->update([
                                 'accounting_time_key' => $time_key,
                                 'accounting_id' => $new_accounting->id,
+                                'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
                                 'invoice_number' => $related_nota->no_nota,

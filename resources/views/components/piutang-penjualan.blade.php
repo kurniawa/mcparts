@@ -77,7 +77,7 @@
                     <tr><th>No.</th><th>Tanggal</th><th>Pelanggan</th><th>Harga</th><th>Subtotal</th></tr>
                     @foreach ($notaSubtotalAllForPiutang as $nota_subtotal)
                     <tr class="{{ $nota_subtotal['class'] }}">
-                        <td>{{ $nota_subtotal['no_nota'] }}</td><td>{{ date('d-m-Y', strtotime($nota_subtotal['created_at'])) }}</td>
+                        <td><a href="{{ route('spks.show', $nota_subtotal['spk_id']) }}" class="font-bold text-sky-400">{{ $nota_subtotal['no_nota'] }}</a></td><td>{{ date('d-m-Y', strtotime($nota_subtotal['created_at'])) }}</td>
                         <td>{{ $nota_subtotal['pelanggan_nama'] }}</td>
                         <td>
                             <div class="flex justify-between">
@@ -116,7 +116,7 @@
                     <tr><th>Tanggal</th><th>Ref.</th><th>Customer</th><th>Daerah</th><th>Nota Item</th><th>Jml.</th><th>Harga</th><th>Total</th></tr>
                     @foreach ($notaDetailItemsAllForPiutang as $nota_detail_item)
                     <tr class="{{ $nota_detail_item['class'] }}">
-                        <td>{{ date('d-m-Y', strtotime($nota_detail_item['created_at'])) }}</td><td>{{ $nota_detail_item['no_nota'] }}</td>
+                        <td>{{ date('d-m-Y', strtotime($nota_detail_item['created_at'])) }}</td><td><a href="{{ route('spks.show', $nota_detail_item['spk_id']) }}" class="font-bold text-sky-400">{{ $nota_detail_item['no_nota'] }}</a></td>
                         <td>{{ $nota_detail_item['pelanggan_nama'] }}</td><td>{{ $nota_detail_item['cust_short'] }}</td>
                         <td>{{ $nota_detail_item['nama_nota'] }}</td><td>{{ $nota_detail_item['jumlah'] }}</td>
                         <td>

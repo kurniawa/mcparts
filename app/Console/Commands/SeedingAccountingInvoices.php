@@ -48,6 +48,7 @@ class SeedingAccountingInvoices extends Command
                     'amount_due' => $nota->amount_due,
                     'amount_paid' => $nota->amount_paid,
                     'total_amount' => $nota->harga_total,
+                    'created_at' => $nota->created_at,
                 ]);
             }
         }

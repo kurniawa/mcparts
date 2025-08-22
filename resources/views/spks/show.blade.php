@@ -807,16 +807,20 @@
                         @if (count($nota->accountingInvoices) === 0)
                         <div class="text-center italic text-slate-500">kosong</div>
                         @else
-                        <table class="w-full text-xs">
+                        <table id="histori-pembayaran-{{ $key_nota }}" class="w-full text-xs border border-collapse">
                             <tr>
                                 <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Metode</th>
                             </tr>
                             @foreach ($nota->accountingInvoices as $accountingInvoice)
                             <tr>
-                                <td>{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
-                                <td>{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
-                                <td>{{ number_format($accountingInvoice->amount_paid,0,',','.') }}</td>
-                                <td>{{ $accountingInvoice->userInstance->username }}-{{ $accountingInvoice->userInstance->instance_name }}-{{ $accountingInvoice->userInstance->branch }}</td>
+                                <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
+                                <td class="text-center">{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
+                                <td class="text-center">{{ number_format($accountingInvoice->amount_paid,0,',','.') }}</td>
+                                <td class="text-center">
+                                    {{ $accountingInvoice->user_instance_id ? 
+                                    ($accountingInvoice->userInstance->username . '-' . $accountingInvoice->userInstance->instance_name . '-' . $accountingInvoice->userInstance->branch)
+                                    : "-" }}
+                                </td>
                             </tr>
                             @endforeach
                         </table>

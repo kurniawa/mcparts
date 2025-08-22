@@ -31,6 +31,7 @@ return new class extends Migration
             $table->bigInteger('accounting_time_key')->nullable(); // untuk koneksi ke accounting
             $table->bigInteger('time_key')->nullable()->unique(); // untuk sorting
             $table->foreignId('accounting_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('user_instance_id')->nullable()->constrained('user_instances')->nullOnDelete();
             $table->foreignId('invoice_id')->nullable();
             $table->string('invoice_table', 50)->nullable();
             $table->string('invoice_number', 50)->nullable();
@@ -41,6 +42,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
             $table->string('supplier_name', 100)->nullable(); //
             $table->string('payment_status', 50)->default('belum_lunas'); // e.g., paid, unpaid, partial
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->string('payment_method', 50)->nullable(); // e.g., cash, bank transfer, credit card
             $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice
 
@@ -54,7 +56,6 @@ return new class extends Migration
             $table->decimal('remaining_funds', 15, 2)->default(0.00);
             $table->decimal('balance', 15, 2)->default(0.00);
             $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
-            $table->enum('status', ['active', 'inactive'])->default('active');
 
             // $table->decimal('discount_percentage_old', 5, 2)->default(0.00);
             // $table->decimal('total_discount_old', 15, 2)->default(0.00);
