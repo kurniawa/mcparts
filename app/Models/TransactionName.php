@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class TransactionName extends Model
 {
@@ -22,14 +23,18 @@ class TransactionName extends Model
             $customerBalance = $customerBalance->toArray();
         }
 
-        $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where('status_bayar', 'belum_lunas')
-            ->orWhere('status_bayar', 'sebagian')
+        // Log::info($this->pelanggan_id);
+        $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where(function ($query) {
+            $query->where('status_bayar', 'belum_lunas')
+                  ->orWhere('status_bayar', 'sebagian');
+            })
             ->get()->map(function ($nota) {
                 $nota->invoice_id = $nota->id;
                 return $nota;
             })
             ->toArray();
         $accountingInvoices = $notas;
+        Log::info($notas);
         
         if (!count($notas) ) {
             $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')

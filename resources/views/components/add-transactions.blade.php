@@ -520,6 +520,9 @@
         document.getElementById('form-add-transactions').addEventListener('submit', (event) => {
             event.preventDefault();
             $spinner.show(500);
+            setTimeout(() => {
+                $spinner.hide(500);
+            }, 3000); // Sembunyikan spinner setelah 2 detik (2000 ms)
             // console.log('submit');
             /*
             Filter array object listOfTrID, apabila ditemukan duplicate dari listOfInvoiceID,
