@@ -517,9 +517,18 @@ class NotaController extends Controller
             $harga_total += $spk_produk_nota->harga_t;
         }
 
-        $nota->harga_total = $harga_total;
-        $nota->save();
-        $success_ .= '-nota:harga_total updated-';
+        if ($nota->harga_total != $harga_total) {
+            $nota->harga_total = $harga_total;
+            $nota->amount_due = $nota->harga_total - $nota->amount_paid;
+            $nota->status_bayar = $nota->UpdatePaymentStatus();
+            $nota->save();
+            $success_ .= 'nota:harga_total status_bayar & amount_due updated-';
+
+            // UPDATE ACCOUNTING_INVOICE
+            if ($nota->updateLastAccountingInvoice()) {
+                $success_ .= '-accounting_invoice updated-';
+            }
+        }
 
         return back()->with('success_', $success_);
     }

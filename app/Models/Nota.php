@@ -272,6 +272,19 @@ class Nota extends Model
         return $payment_status;
     }
 
+    public function updateLastAccountingInvoice() {
+        $last_accounting_invoice = $this->accountingInvoices()->latest('time_key')->first();
+        if ($last_accounting_invoice) {
+            $last_accounting_invoice->payment_status = $this->status_bayar;
+            $last_accounting_invoice->amount_due = $this->amount_due;
+            $last_accounting_invoice->amount_paid = $this->amount_paid;
+            $last_accounting_invoice->updated_by = Auth::user()->username;
+            $last_accounting_invoice->save();
+            return true;
+        }
+        return false;
+    }
+
     public function accountingInvoices() {
         return $this->hasMany(AccountingInvoice::class, 'invoice_id', 'id')
             ->where('invoice_table', 'notas')
