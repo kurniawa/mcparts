@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\AccountingController2;
+use App\Http\Controllers\AccountingInvoiceController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
@@ -227,6 +228,10 @@ Route::controller(AccountingController::class)->group(function(){
 Route::controller(AccountingController2::class)->group(function(){
     Route::get('/accounting/laba-rugi','laba_rugi')->name('accounting.laba_rugi')->middleware('auth');
     Route::get('/accounting/{transaction_name}/get-related-not-yet-paid-off-invoices','getRelatedNotYetPaidOffInvoices')->name('accounting.get_related_not_yet_paid_off_invoices')->middleware('auth');
+});
+
+Route::controller(AccountingInvoiceController::class)->group(function(){
+    Route::get('/accounting-invoices/{nota}/{accounting_invoice}/delete-last-payment-customer','delete_last_payment_customer')->name('accounting_invoices.delete_last_payment_customer')->middleware('auth');
 });
 
 Route::controller(ArtisanController::class)->group(function(){

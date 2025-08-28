@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccountingInvoice;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\TransactionName;

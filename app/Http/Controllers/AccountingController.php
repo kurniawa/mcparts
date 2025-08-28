@@ -219,7 +219,7 @@ class AccountingController extends Controller
 
         $working_index = count($post['transaction_desc']);
         $warnings_ = '';
-
+        $array_balance_used = [];
         for ($i = 0; $i < $working_index; $i++) {
             $created_at = null;
 
@@ -237,6 +237,19 @@ class AccountingController extends Controller
 
             $keluar = trim($post['keluar'][$i] ?? '');
             $masuk = trim($post['masuk'][$i] ?? '');
+            $balance_used = null;
+            if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
+                $balance_used = 0;
+                foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
+                    if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
+                        ]);
+                    }
+                    $balance_used += (float)$value;
+                }
+            }
+            $array_balance_used[$i] = $balance_used;
 
             $keluar = is_numeric($keluar) ? $keluar : null;
             $masuk = is_numeric($masuk) ? $masuk : null;
@@ -244,7 +257,7 @@ class AccountingController extends Controller
             $desc = $post['transaction_desc'][$i] ?? null;
             $trans_id = $post['transaction_id'][$i] ?? null;
 
-            $is_valid_entry = $created_at !== null && $desc !== null && ($keluar !== null || $masuk !== null);
+            $is_valid_entry = $created_at !== null && $desc !== null && ($keluar !== null || $masuk !== null || $balance_used !== null);
 
             $transaction_name = null; // Definisi transaction_name disini karena akan digunakan nantinya untuk validasi data untuk kategori "PENERIMAAN PIUTANG"
             if ($is_valid_entry) {
@@ -287,7 +300,7 @@ class AccountingController extends Controller
                 }
 
                 if (
-                    ($transaction_name->kategori_type === 'UANG MASUK' && $masuk === null) ||
+                    ($transaction_name->kategori_type === 'UANG MASUK' && $masuk === null && $balance_used === null) ||
                     ($transaction_name->kategori_type === 'UANG KELUAR' && $keluar === null)
                 ) {
                     $request->validate(['error' => 'required'], [
@@ -307,7 +320,7 @@ class AccountingController extends Controller
                             'error.required' => "Deskripsi kosong pada baris ke-$i"
                         ]);
                     }
-                    if ($keluar === null && $masuk === null) {
+                    if ($keluar === null && $masuk === null && $balance_used === null) {
                         $request->validate(['error' => 'required'], [
                             'error.required' => "Jumlah keluar/masuk kosong pada baris ke-$i"
                         ]);
@@ -324,7 +337,7 @@ class AccountingController extends Controller
                 }
             }
 
-            // dump($post);
+            // dd($transaction_name);
             if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
                 Accounting::validasi_data_untuk_penerimaan_piutang($request, $i);
                 // dump('VALID');
@@ -356,9 +369,11 @@ class AccountingController extends Controller
                 $transaction_type = 'pengeluaran';
 
                 if ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $transaction_type = 'pemasukan';
-                    $jumlah = $masuk * 100;
-                    $keluar = null;
+                    if ($masuk !== null) {
+                        $transaction_type = 'pemasukan';
+                        $jumlah = $masuk * 100;
+                        $keluar = null;
+                    }
                 } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
                     $jumlah = $keluar * 100;
                     $masuk = null;
@@ -412,46 +427,57 @@ class AccountingController extends Controller
                 }
 
                 // Simpan transaksi baru
-                $new_accounting = Accounting::create([
-                    'user_id' => $user->id,
-                    'username' => $user->username,
-                    'user_instance_id' => $user_instance->id,
-                    'instance_type' => $user_instance->instance_type,
-                    'instance_name' => $user_instance->instance_name,
-                    'branch' => $user_instance->branch,
-                    'account_number' => $user_instance->account_number,
-                    'kode' => $post['kode'][$i],
-                    'transaction_type' => $transaction_type,
-                    'transaction_desc' => $transaction_name->desc,
-                    'kategori_type' => $transaction_name->kategori_type,
-                    'kategori_level_one' => $transaction_name->kategori_level_one,
-                    'kategori_level_two' => $transaction_name->kategori_level_two,
-                    'related_user_id' => $transaction_name->related_user_id,
-                    'related_username' => $transaction_name->related_username,
-                    'related_desc' => $transaction_name->related_desc,
-                    'related_user_instance_id' => $transaction_name->related_user_instance_id,
-                    'related_user_instance_type' => $transaction_name->related_user_instance_type,
-                    'related_user_instance_name' => $transaction_name->related_user_instance_name,
-                    'related_user_instance_branch' => $transaction_name->related_user_instance_branch,
-                    'pelanggan_id' => $transaction_name->pelanggan_id,
-                    'pelanggan_nama' => $transaction_name->pelanggan_nama,
-                    'supplier_id' => $transaction_name->supplier_id,
-                    'supplier_nama' => $transaction_name->supplier_nama,
-                    'keterangan' => $post['keterangan'][$i],
-                    'jumlah' => $jumlah,
-                    'saldo' => $saldo,
-                    'status' => $status,
-                    'time_key' => $time_key,
-                    'created_at' => $created_at,
-                ]);
+                $new_accounting = null;
+                if ($transaction_name->kategori_type == 'UANG MASUK' && $masuk === null) {
+                    // Skip pembuatan accounting jika kategori UANG MASUK tapi nilai masuk null
+                    if ($array_balance_used[$i] == null) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Kategori UANG MASUK tapi nilai masuk dan saldo yang digunakan null pada baris ke-$i"
+                        ]);
+                    }
+                    
+                } else {
+                    $new_accounting = Accounting::create([
+                        'user_id' => $user->id,
+                        'username' => $user->username,
+                        'user_instance_id' => $user_instance->id,
+                        'instance_type' => $user_instance->instance_type,
+                        'instance_name' => $user_instance->instance_name,
+                        'branch' => $user_instance->branch,
+                        'account_number' => $user_instance->account_number,
+                        'kode' => $post['kode'][$i],
+                        'transaction_type' => $transaction_type,
+                        'transaction_desc' => $transaction_name->desc,
+                        'kategori_type' => $transaction_name->kategori_type,
+                        'kategori_level_one' => $transaction_name->kategori_level_one,
+                        'kategori_level_two' => $transaction_name->kategori_level_two,
+                        'related_user_id' => $transaction_name->related_user_id,
+                        'related_username' => $transaction_name->related_username,
+                        'related_desc' => $transaction_name->related_desc,
+                        'related_user_instance_id' => $transaction_name->related_user_instance_id,
+                        'related_user_instance_type' => $transaction_name->related_user_instance_type,
+                        'related_user_instance_name' => $transaction_name->related_user_instance_name,
+                        'related_user_instance_branch' => $transaction_name->related_user_instance_branch,
+                        'pelanggan_id' => $transaction_name->pelanggan_id,
+                        'pelanggan_nama' => $transaction_name->pelanggan_nama,
+                        'supplier_id' => $transaction_name->supplier_id,
+                        'supplier_nama' => $transaction_name->supplier_nama,
+                        'keterangan' => $post['keterangan'][$i],
+                        'jumlah' => $jumlah,
+                        'saldo' => $saldo,
+                        'status' => $status,
+                        'time_key' => $time_key,
+                        'created_at' => $created_at,
+                    ]);
+                }
 
                 /**
                  * Apabila transaksi/accounting terkait dengan nota/invoice tertentu, maka:
                  * insert relasi antara accountings dengan invoices/notas,
                  * yakni pada tabel 'accounting_invoices'.
                  */
-    
-                if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
+                
+                if ($transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG') {
                     $success_ .= "penerimaan piutang-";
                     $total_balance_used = 0;
                     $saldo_awal = $post['saldo_awal'][$i];
@@ -459,7 +485,8 @@ class AccountingController extends Controller
                     $array_accounting_invoice = []; // Untuk diupdate nanti.
                     $array_related_nota = []; // Untuk diupdate nanti.
                     $nota_id_number = count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
-                    $this_time_key = time(); 
+                    $this_time_key = time();
+                    $accounting_id = null;
                     for ($j=0; $j <$nota_id_number; $j++) {
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         /**
@@ -491,7 +518,7 @@ class AccountingController extends Controller
                         $success_ .= "related_nota updated-";
                         $array_related_nota[] = $related_nota;
                         // $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
-    
+
                         /**
                          * CREATE OR UPDATE AccountingInvoice
                          * ----------------------------------
@@ -505,11 +532,16 @@ class AccountingController extends Controller
                             ->where('invoice_id', $related_nota->id)
                             ->where('status', 'active')
                             ->latest('accounting_time_key')->first();
+                        \Illuminate\Support\Facades\Log::info("related_accounting_invoice = " . $related_accounting_invoice);
+                        
 
+                        if ($new_accounting) {
+                            $accounting_id = $new_accounting->id;
+                        }
                         if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
                             if ($related_accounting_invoice) {
                                 $related_accounting_invoice->update([
-                                    'accounting_id' => $new_accounting->id,
+                                    'accounting_id' => $accounting_id,
                                     'status' => 'inactive',
                                     'updated_by' => $user->username,
                                     'finished_at' => $created_at,
@@ -520,11 +552,18 @@ class AccountingController extends Controller
                             while (AccountingInvoice::where('time_key', $this_time_key)->exists()) {
                                 $this_time_key++;
                             }
+                            // Pastikan bahwa created_at juga unik, untuk memudahkan tracking history
+                            $created_at_check = $created_at;
+                            while (AccountingInvoice::where('created_at', $created_at_check)->exists()) {
+                                $created_at_check = date('Y-m-d H:i:s', strtotime($created_at_check) + 1);
+                            }
+                            $created_at = $created_at_check;
+                            
                             // Buat record baru di tabel accounting_invoices
                             $related_accounting_invoice = AccountingInvoice::create([
                                 'accounting_time_key' => $time_key,
                                 'time_key' => $this_time_key,
-                                'accounting_id' => $new_accounting->id,
+                                'accounting_id' => $accounting_id,
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
@@ -545,7 +584,7 @@ class AccountingController extends Controller
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
                             $related_accounting_invoice->update([
                                 'accounting_time_key' => $time_key,
-                                'accounting_id' => $new_accounting->id,
+                                'accounting_id' => $accounting_id,
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
@@ -564,10 +603,36 @@ class AccountingController extends Controller
                                 'created_at' => $created_at,
                             ]);
                             $success_ .= "AccountingInvoice updated-";
+                        } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null) {
+                            $accounting_id = $related_accounting_invoice->accounting_id;
+                            \Illuminate\Support\Facades\Log::info("elseif ke-3 accounting_id = " . $accounting_id);
+                            // Buat record baru di tabel accounting_invoices
+                            $related_accounting_invoice = AccountingInvoice::create([
+                                'accounting_time_key' => $time_key,
+                                'time_key' => $this_time_key,
+                                'accounting_id' => $accounting_id,
+                                'user_instance_id' => $user_instance->id,
+                                'invoice_id' => $related_nota->id,
+                                'invoice_table' => 'notas',
+                                'invoice_number' => $related_nota->no_nota,
+                                'transaction_name_id' => $transaction_name->id,
+                                'transaction_name_desc' => $transaction_name->desc,
+                                'customer_id' => $related_nota->pelanggan_id,
+                                'customer_name' => $related_nota->pelanggan_nama,
+                                'payment_status' => $related_nota->status_bayar,
+                                'amount_due' => $related_nota->amount_due,
+                                'amount_paid' => $related_nota->amount_paid,
+                                'balance_used' => $related_nota->balance_used,
+                                'total_amount' => $related_nota->harga_total,
+                                'status' => $accounting_invoice_status,
+                                'created_at' => $created_at,
+                            ]);
+                            $success_ .= "AccountingInvoice created-";
                         }
                         $array_accounting_invoice[] = $related_accounting_invoice;
 
                         $total_balance_used += (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
+                        \Illuminate\Support\Facades\Log::info("accounting_id = " . $accounting_id);
                     }
                     /**
                      * CREATE or UPDATE customer_balance / overpayment
@@ -580,7 +645,7 @@ class AccountingController extends Controller
                         if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {
                             $overpayment_old->update([
                                 'time_key' => $this_time_key,
-                                'accounting_id' => $new_accounting->id,
+                                'accounting_id' => $accounting_id,
                                 'customer_id' => $transaction_name->pelanggan_id,
                                 'amount' => $overpayment_new,
                                 'updated_by' => $user->username,
@@ -588,7 +653,7 @@ class AccountingController extends Controller
                         } elseif (!$overpayment_old) {
                             Overpayment::create([
                                 'time_key' => $this_time_key,
-                                'accounting_id' => $new_accounting->id,
+                                'accounting_id' => $accounting_id,
                                 'customer_id' => $transaction_name->pelanggan_id,
                                 'amount' => $overpayment_new
                             ]);

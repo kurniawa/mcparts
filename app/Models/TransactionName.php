@@ -34,7 +34,7 @@ class TransactionName extends Model
             })
             ->toArray();
         $accountingInvoices = $notas;
-        Log::info($notas);
+        // Log::info($notas);
         
         if (!count($notas) ) {
             $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')

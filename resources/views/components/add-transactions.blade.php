@@ -622,10 +622,17 @@
                             }
                         });
     
-                        // Validasi nilai uang masuk tidak boleh kosong pada penerimaan_piutang
-                        if (isNaN(masukReal.value) || masukReal.value <= 0) {
-                            errorMessage2 += '[Input penerimaan_piutang harus ada nilai masuk]';
+                        // Validasi nilai uang masuk
+                        if (isNaN(masukReal.value) || masukReal.value < 0) {
+                            errorMessage2 += '[Input nilai masuk tidak sesuai.]';
                             adaError = true;
+                        }
+
+                        if (masukReal.value == 0) {
+                            if (totalSaldoUsed == 0) {
+                                errorMessage2 += '[Apabila uang masuk 0, maka saldo yang digunakan tidak boleh 0.]';
+                                adaError = true;
+                            }
                         }
     
                         // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
