@@ -1,4 +1,11 @@
 <div>
+    @if ($errors->any())
+        <div class="alert alert-danger text-xs">
+            @foreach ($errors->all() as $message)
+                <div>{{ $message }}</div>
+            @endforeach
+        </div>
+    @endif
     <div class="flex flex-col lg:flex-row lg:gap-2 mt-3">
         <div class="border rounded p-1">
             {{-- LOADING ANIMATION --}}
@@ -478,8 +485,6 @@
                             paymentStatus.value = 'belum_lunas'; 
                         } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
                             paymentStatus.value = 'sebagian';
-                        } else {
-                            paymentStatus.value = 'error';
                         }
                         // console.log(paymentStatus.value);
                     }, 1000);
