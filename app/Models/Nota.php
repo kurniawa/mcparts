@@ -269,6 +269,13 @@ class Nota extends Model
         } else if (($this->amount_paid + $this->balance_used) > 0 && ($this->amount_due < ($this->harga_total - $this->total_discount) && $this->amount_due < $this->harga_total)) {
             $payment_status = 'sebagian';
         }
+        if ($payment_status == 'error') {
+//             dd("amount_paid: $this->amount_paid
+// balance_used: $this->balance_used
+// amount_due: $this->amount_due
+// harga_total: $this->harga_total
+// total_discount: $this->total_discount");
+        }
         return $payment_status;
     }
 
@@ -288,7 +295,7 @@ class Nota extends Model
     public function accountingInvoices() {
         return $this->hasMany(AccountingInvoice::class, 'invoice_id', 'id')
             ->where('invoice_table', 'notas')
-            ->orderBy('time_key');
+            ->orderBy('created_at');
     }
 
     public function spk()

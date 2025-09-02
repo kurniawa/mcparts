@@ -231,7 +231,7 @@ Route::controller(AccountingController2::class)->group(function(){
 });
 
 Route::controller(AccountingInvoiceController::class)->group(function(){
-    Route::get('/accounting-invoices/{nota}/{accounting_invoice}/delete-last-payment-customer','delete_last_payment_customer')->name('accounting_invoices.delete_last_payment_customer')->middleware('auth');
+    Route::post('/accounting-invoices/{nota}/{accounting_invoice}/delete-last-payment-customer','delete_last_payment_customer')->name('accounting_invoices.delete_last_payment_customer')->middleware('auth');
 });
 
 Route::controller(ArtisanController::class)->group(function(){

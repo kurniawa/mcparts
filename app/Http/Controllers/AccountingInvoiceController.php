@@ -17,16 +17,16 @@ class AccountingInvoiceController extends Controller
          * Menghapus accounting invoice adalah seperti menghapus history pembayaran
          * Oleh karena itu, penghapusan harus dilakukan dari accounting invoice yang terakhir
          */
-        $after_this = AccountingInvoice::where('nota_id', $accountingInvoice->nota_id)
+        $after_this = AccountingInvoice::where('invoice_id', $accountingInvoice->invoice_id)
             ->where('created_at', '>', $accountingInvoice->created_at)
             ->exists();
 
         if ($after_this) {
-            return redirect()->back()->with('error', 'Hanya bisa menghapus pembayaran terakhir saja');
+            return redirect()->back()->with('errors_', 'Hanya bisa menghapus pembayaran terakhir saja');
         }
 
         // Apabila ini merupakan satu-satunya history pembayaran, maka tidak boleh dihapus
-        $only_one = AccountingInvoice::where('nota_id', $accountingInvoice->nota_id)->count();
+        $only_one = AccountingInvoice::where('invoice_id', $accountingInvoice->invoice_id)->count();
         if ($only_one <= 1) {
             return redirect()->back()->with('error', 'Tidak bisa menghapus pembayaran terakhir, karena ini merupakan satu-satunya pembayaran.');
         }
@@ -36,24 +36,43 @@ class AccountingInvoiceController extends Controller
             /**
              * UPDATE / DELETE Overpayment kalau ada
              */
-            if ($accountingInvoice->overpayment > 0) {
+            // dd($accountingInvoice);
+            if ($accountingInvoice->balance_used > 0) {
                 $overpayment = Overpayment::where("customer_id", $accountingInvoice->customer_id)->first();
-                $overpayment->amount -= $accountingInvoice->overpayment;
+                $overpayment->amount -= $accountingInvoice->balance_used;
                 if ($overpayment->amount > 0) {
                     $overpayment->save();
-                    $success_ .= "overpayment dikurangi sebesar $accountingInvoice->overpayment. ";
-                } else {
+                    $success_ .= "overpayment dikurangi sebesar $accountingInvoice->balance_used. ";
+                } elseif ($overpayment->amount == 0) {
                     $overpayment->delete();
                     $success_ .= "overpayment dihapus karena menjadi 0. ";
+                } elseif ($overpayment->amount < 0) {
+                    // Ini seharusnya tidak mungkin terjadi, tapi untuk jaga-jaga saja
+                    dd($overpayment->amount);
+                    // return redirect()->back()->with('error', 'Terjadi kesalahan pada data overpayment.');
                 }
             }
 
             // UPDATE Nota
+            $log = "nota->amount_paid -= accountingInvoice->amount_paid | $nota->amount_paid, $accountingInvoice->amount_paid";
+            $log .= "\nnota->balance_used -= accountingInvoice->balance_used | $nota->balance_used, $accountingInvoice->balance_used";
+            $log .= "\nnota->amount_due += (accountingInvoice->amount_paid + accountingInvoice->balance_used) | $nota->amount_due, ($accountingInvoice->amount_paid + $accountingInvoice->balance_used)";
+            $log .= "\nnota->status_bayar | $nota->status_bayar";
+            /**
+             * Data overpayment pada nota, tidak perlu diupdate, itu hanya untuk menandakan,
+             * kapan dan pada nota yang mana pelanggan melakukan pembayaran yang lebih daripada seharusnya
+             */
+
             $nota->amount_paid -= $accountingInvoice->amount_paid;
             $nota->balance_used -= $accountingInvoice->balance_used;
             $nota->amount_due += ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
-            $nota->overpayment -= $accountingInvoice->overpayment;
+            // $nota->overpayment -= $accountingInvoice->balance_used;
             $nota->status_bayar = $nota->UpdatePaymentStatus();
+            $log .= "\n\nnota->amount_paid = $nota->amount_paid";
+            $log .= "\nnota->balance_used = $nota->balance_used";
+            $log .= "\nnota->amount_due = $nota->amount_due";
+            $log .= "\nnota->status_bayar = $nota->status_bayar";
+            // dd($log);
             $nota->save();
             $success_ .= "nota diupdate. ";
 

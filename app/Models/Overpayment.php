@@ -9,4 +9,9 @@ class Overpayment extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+
+    public function accounting()
+    {
+        return $this->belongsTo(Accounting::class);
+    }
 }

@@ -92,7 +92,6 @@ class Accounting extends Model
             // dump($related_nota);
             // dump($amount_due_old, $total_discount_new, $amount_paid, $balance_used);
             $amount_due_new = $amount_due_old - $total_discount_new - $amount_paid - $balance_used;
-            // dd($amount_due_new, $amount_due);
             if ($amount_due_new != $amount_due) {
                 $request->validate(['error' => 'required'], [
                     'error.required' => "amount_due_new != amount_due --> $amount_due_new != $amount_due"
@@ -190,25 +189,27 @@ class Accounting extends Model
                     'error.required' => "input uang masuk[$i][$j] --> " . $post['masuk'][$i]
                 ]);
             }
-        } elseif (!$masuk && $balance_used) {
-            $amount_due_to_validate = $amount_due_old - (float)$balance_used;
-            if ($amount_due_new != $amount_due_to_validate) {
-                $request->validate(['error' => 'required'], [
-                    'error.required' => "amount_due_new != amount_due_to_validate --> $amount_due_new != $amount_due_to_validate"
-                ]);
-            }
-        } elseif ($masuk && $balance_used) {
-            $amount_due_to_validate = $amount_due_old ($amount_paid + (float)$balance_used);
-            if ($amount_due_new != $amount_due_to_validate) {
-                $request->validate(['error' => 'required'], [
-                    'error.required' => "amount_due_new != amount_due_to_validate --> $amount_due_new != $amount_due_to_validate"
-                ]);
-            }
         } elseif (!$masuk && !$balance_used) {
             $request->validate(['error' => 'required'], [
                 'error.required' => "input uang masuk dan saldo yang digunakan tidak sesuai"
             ]);
         }
+        //  elseif (!$masuk && $balance_used) {
+        //     $amount_due_to_validate = $amount_due_old - (float)$balance_used;
+        //     if ($amount_due_new != $amount_due_to_validate) {
+        //         dd($amount_due_new, $amount_due, $amount_due_old, $total_discount_new, $amount_paid, $balance_used);
+        //         $request->validate(['error' => 'required'], [
+        //             'error.required' => "amount_due_new != amount_due_to_validate --> $amount_due_new != $amount_due_to_validate"
+        //         ]);
+        //     }
+        // } elseif ($masuk && $balance_used) {
+        //     $amount_due_to_validate = $amount_due_old ($amount_paid + (float)$balance_used);
+        //     if ($amount_due_new != $amount_due_to_validate) {
+        //         $request->validate(['error' => 'required'], [
+        //             'error.required' => "amount_due_new != amount_due_to_validate --> $amount_due_new != $amount_due_to_validate"
+        //         ]);
+        //     }
+        // }
 
         // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
         // if ($total_saldo_used > saldoAwalRealValue) {
