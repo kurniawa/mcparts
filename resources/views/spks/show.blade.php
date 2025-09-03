@@ -780,7 +780,7 @@
                     <div class="flex justify-between">
                         <div class="font-bold">
                             <p>status: {{ $nota['status_bayar'] }}</p>
-                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'],0,',','.') }}</p>
+                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'] + $nota['balance_used'],0,',','.') }}</p>
                             <p class="text-red-500">sisa bayar: {{ number_format($nota['amount_due'],0,',','.') }}</p>
                         </div>
                         <div class="flex justify-end mt-1 mb-2 items-center gap-1">
@@ -815,7 +815,7 @@
                             <tr>
                                 <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
                                 <td class="text-center">{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
-                                <td class="text-center">{{ number_format($accountingInvoice->amount_paid,0,',','.') }}</td>
+                                <td class="text-center">{{ number_format(($accountingInvoice->amount_paid + $accountingInvoice->balance_used),0,',','.') }}</td>
                                 <td class="text-center">
                                     {{ $accountingInvoice->user_instance_id ? 
                                     ($accountingInvoice->userInstance->username . '-' . $accountingInvoice->userInstance->instance_name . '-' . $accountingInvoice->userInstance->branch)

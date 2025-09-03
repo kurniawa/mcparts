@@ -350,6 +350,7 @@ class AccountingController extends Controller
         // dump($post);
         $index_j = 0;
         $error_loc = '';
+        $chosen_selection = 0;
         DB::beginTransaction();
         try {
             for ($i = 0; $i < $working_index; $i++) {
@@ -549,7 +550,7 @@ class AccountingController extends Controller
                         2 // skala desimal sesuai decimal(15,2)
                         );
                         $remaining_balance_masuk_new = $post['remaining_balance_masuk'][$i];
-                        if (isNan($remaining_balance_masuk_new)) {
+                        if (!is_numeric($remaining_balance_masuk_new)) {
                             $remaining_balance_masuk_new = 0;
                         }
                         $related_nota->update([
@@ -579,33 +580,36 @@ class AccountingController extends Controller
                         $related_accounting_invoice = AccountingInvoice::where('invoice_table', 'notas')
                             ->where('invoice_id', $related_nota->id)
                             ->where('status', 'active')
-                            ->latest('accounting_time_key')->first();
+                            ->latest('created_at')->first();
                         // \Illuminate\Support\Facades\Log::info("related_accounting_invoice = " . $related_accounting_invoice);
 
                         if ($new_accounting) {
                             $accounting_id = $new_accounting->id;
                         }
-                        if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
-                            dump(1);
-                            if ($related_accounting_invoice) {
-                                $related_accounting_invoice->update([
-                                    'accounting_id' => $accounting_id,
-                                    'status' => 'inactive',
-                                    'updated_by' => $user->username,
-                                    'finished_at' => $created_at,
-                                ]);
-                                $success_ .= "related_accounting_invoice->status updated to inactive-";
-                            }
-                            // Pastikan bahwa time_key unik
-                            while (AccountingInvoice::where('time_key', $this_time_key)->exists()) {
-                                $this_time_key++;
-                            }
-                            // Pastikan bahwa created_at juga unik, untuk memudahkan tracking history
-                            $created_at_check = $created_at;
-                            while (AccountingInvoice::where('created_at', $created_at_check)->exists()) {
-                                $created_at_check = date('Y-m-d H:i:s', strtotime($created_at_check) + 1);
-                            }
-                            $created_at = $created_at_check;
+                        // Pastikan bahwa time_key unik
+                        while (AccountingInvoice::where('time_key', $this_time_key)->exists()) {
+                            $this_time_key++;
+                        }
+                        // Pastikan bahwa created_at juga unik, untuk memudahkan tracking history
+                        $created_at_check = $created_at;
+                        while (AccountingInvoice::where('created_at', $created_at_check)->exists()) {
+                            $created_at_check = date('Y-m-d H:i:s', strtotime($created_at_check) + 1);
+                        }
+                        $created_at = $created_at_check;
+
+                        if (!$related_accounting_invoice) {
+                            // $chosen_selection = 1;
+                            // if ($related_accounting_invoice) {
+                            //     $chosen_selection = 1.2;
+                            //     $related_accounting_invoice->update([
+                            //         'accounting_id' => $accounting_id,
+                            //         'status' => 'inactive',
+                            //         'updated_by' => $user->username,
+                            //         'finished_at' => $created_at,
+                            //     ]);
+                            //     $success_ .= "related_accounting_invoice->status updated to inactive-";
+                            // }
+                            
                             
                             // Buat record baru di tabel accounting_invoices
                             $related_accounting_invoice = AccountingInvoice::create([
@@ -633,7 +637,7 @@ class AccountingController extends Controller
                             ]);
                             $success_ .= "AccountingInvoice created-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
-                            dump(2);
+                            $chosen_selection = 2;
                             $related_accounting_invoice->update([
                                 'accounting_time_key' => $time_key,
                                 'accounting_id' => $accounting_id,
@@ -659,8 +663,8 @@ class AccountingController extends Controller
                             ]);
                             $success_ .= "AccountingInvoice updated-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null) {
-                            dump(3);
-                            $accounting_id = $related_accounting_invoice->accounting_id;
+                            $chosen_selection = 3;
+                            // $accounting_id = $related_accounting_invoice->accounting_id;
                             // \Illuminate\Support\Facades\Log::info("elseif ke-3 accounting_id = " . $accounting_id);
                             // Buat record baru di tabel accounting_invoices
                             $related_accounting_invoice = AccountingInvoice::create([
@@ -745,10 +749,12 @@ class AccountingController extends Controller
                 }
             }
 
+            // dd("chosen_selection: $chosen_selection");
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
             dump($post);
+            dump("chosen_selection: $chosen_selection");
 
             $message = "Error: " . $th->getMessage()
                 . "\n\nFile: " . $th->getFile()
@@ -1227,13 +1233,13 @@ class AccountingController extends Controller
              * Tabel yang perlu diperhatikan: Nota, AccountingInvoice, Overpayment
              */
             $funds_in = (float)$accounting->jumlah / 100;
-            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->where('accounting_time_key', $accounting->time_key)->latest('created_at')->get();
-            $total_overpayment = 0;
-            $total_amount_paid = 0;
+            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->latest('created_at')->get();
+            // dd($accounting_invoices);
             foreach ($accounting_invoices as $accounting_invoice) {
-                if ($accounting_invoice->overpayment > 0) {
+                if ($accounting_invoice->overpayment > 0 || $accounting_invoice->balance_used > 0) {
                     $overpayment = Overpayment::where('customer_id', $accounting_invoice->customer_id)->first();
                     if ($overpayment) {
+                        $overpayment->amount += $accounting_invoice->balance_used;
                         $overpayment->amount -= $accounting_invoice->overpayment;
                         if ($overpayment->amount == 0) {
                             $overpayment->delete();
@@ -1243,15 +1249,13 @@ class AccountingController extends Controller
                             $warnings_ .= 'overpayment updated-';
                         }
                     }
-                    $total_overpayment += $accounting_invoice->overpayment;
-                    $total_amount_paid += $accounting_invoice->amount_paid;
                 }
 
                 if ($accounting_invoice->invoice_table == 'notas') {
                     $nota = Nota::find($accounting_invoice->invoice_id);
-                    $nota->amount_due += $accounting_invoice->amount_paid;
+                    $nota->amount_due += ($accounting_invoice->amount_paid + $accounting_invoice->balance_used + $accounting_invoice->total_discount);
                     $nota->amount_paid -= $accounting_invoice->amount_paid;
-                    $nota->balance_used += $accounting_invoice->balance_used;
+                    $nota->balance_used -= $accounting_invoice->balance_used;
                     $nota->overpayment -= $accounting_invoice->overpayment;
                     // UPDATE status_bayar pada Nota
                     $payment_status = $nota->UpdatePaymentStatus();
@@ -1268,22 +1272,23 @@ class AccountingController extends Controller
 
                 // UPDATE AccountingInvoice sebelumnya,
                 // kalau exist maka ubah status nya menjadi active
-                $previous_accounting_invoice = AccountingInvoice::where('invoice_table', $accounting_invoice->invoice_table)
-                    ->where('invoice_id', $accounting_invoice->invoice_id)
-                    ->latest('time_key')
-                    ->first();
-                if ($previous_accounting_invoice) {
-                    $previous_accounting_invoice->status = 'active';
-                    $previous_accounting_invoice->updated_by = $user->username;
-                    $previous_accounting_invoice->save();
-                    $warnings_ .= '-previous_accounting_invoice status changed to active-';
-                }
+                // $previous_accounting_invoice = AccountingInvoice::where('invoice_table', $accounting_invoice->invoice_table)
+                //     ->where('invoice_id', $accounting_invoice->invoice_id)
+                //     ->latest('time_key')
+                //     ->first();
+                // if ($previous_accounting_invoice) {
+                //     $previous_accounting_invoice->status = 'active';
+                //     $previous_accounting_invoice->updated_by = $user->username;
+                //     $previous_accounting_invoice->save();
+                //     $warnings_ .= '-previous_accounting_invoice status changed to active-';
+                // }
 
             }
 
             $accounting->delete();
             $warnings_ .= '-transaction deleted-';
-
+            // $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->where('accounting_time_key', $accounting->time_key)->latest('created_at')->get();
+            // dd($accounting_invoices);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();

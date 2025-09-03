@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('overpayments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('accounting_id')->constrained()->onDelete('cascade');
+            $table->bigInteger('accounting_id')->nullable();
             $table->foreignId('customer_id')->nullable()->constrained('pelanggans')->onDelete('set null');
+            $table->string('customer_name', 100)->nullable();
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('supplier_name', 100)->nullable();
             $table->decimal('amount', 15, 2)->default(0.00);
             $table->timestamps();
         });

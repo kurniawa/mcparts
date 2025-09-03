@@ -44,13 +44,34 @@ class Accounting extends Model
             "related_not_yet_paid_off_invoices.amount_paid.$i" => "required|array",
             "related_not_yet_paid_off_invoices.amount_paid.$i.*" => "numeric",
         ]);
-
-        // Validasi perbandingan nilai-nilai yang di post dengan yang ada di database, apakah sudah sesuai?
+        
         $post = $request->post();
+        
+        // Validasi perbandingan nilai-nilai yang di post dengan yang ada di database, apakah sudah sesuai?
         $total_amount_paid_posted = 0;
         $total_saldo_used = 0;
         $customer_id = null;
         for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
+            // Validasi accountingInvoice, cek tanggalnya, apabila sudah ada tanggal setelahnya,
+            // maka accountingInvoice tidak dapat diinput/disimpan.
+            $created_at_new = \Carbon\Carbon::create(
+                $post['year'][$i],
+                $post['month'][$i],
+                $post['day'][$i],
+                now()->hour,
+                now()->minute,
+                now()->second
+            );
+            $accounting_invoice_after = AccountingInvoice::where('invoice_table', 'notas')
+                ->where('invoice_id', $post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j])
+                ->where('status', 'active')
+                ->where('created_at', '>', $created_at_new)->get();
+            
+            if (count($accounting_invoice_after)) {
+                dump('Terdapat accounting_invoice setelah nya');
+                dd($accounting_invoice_after);
+            }
+
             $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
 
             if (!$related_nota) {

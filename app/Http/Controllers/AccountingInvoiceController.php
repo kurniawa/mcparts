@@ -37,13 +37,16 @@ class AccountingInvoiceController extends Controller
              * UPDATE / DELETE Overpayment kalau ada
              */
             // dd($accountingInvoice);
-            if ($accountingInvoice->balance_used > 0) {
+            if ($accountingInvoice->balance_used > 0 || $accountingInvoice->overpayment > 0) {
                 $overpayment = Overpayment::where("customer_id", $accountingInvoice->customer_id)->first();
-                $overpayment->amount -= $accountingInvoice->balance_used;
+                $overpayment->amount -= $accountingInvoice->overpayment;
+                $overpayment->amount += $accountingInvoice->balance_used;
+                // dd($overpayment->amount);
                 if ($overpayment->amount > 0) {
                     $overpayment->save();
-                    $success_ .= "overpayment dikurangi sebesar $accountingInvoice->balance_used. ";
+                    $success_ .= "overpayment->amount diupdate";
                 } elseif ($overpayment->amount == 0) {
+                    // dd($overpayment);
                     $overpayment->delete();
                     $success_ .= "overpayment dihapus karena menjadi 0. ";
                 } elseif ($overpayment->amount < 0) {
@@ -52,6 +55,7 @@ class AccountingInvoiceController extends Controller
                     // return redirect()->back()->with('error', 'Terjadi kesalahan pada data overpayment.');
                 }
             }
+            // dump(Overpayment::where("customer_id", $accountingInvoice->customer_id)->first());
 
             // UPDATE Nota
             $log = "nota->amount_paid -= accountingInvoice->amount_paid | $nota->amount_paid, $accountingInvoice->amount_paid";
@@ -79,14 +83,19 @@ class AccountingInvoiceController extends Controller
             // UPDATE entry Accounting / Transaksi terkait
             if ($accountingInvoice->accounting_id) {
                 $accounting = $accountingInvoice->accounting;
-                $accounting->jumlah -= $accountingInvoice->amount_paid;
+                $accounting->jumlah -= (($accountingInvoice->amount_paid + $accountingInvoice->overpayment) * 100);
                 $accounting->save();
                 $accounting->updateAccountingAfter();
                 $success_ .= "accounting diupdate. ";
+                if ($accounting->jumlah == 0) {
+                    $accounting->delete();
+                    $success_ .= "accounting deleted. ";
+                }
             }
 
             $accountingInvoice->delete();
             $success_ .= "accounting invoice dihapus. ";
+            // dd(Overpayment::where("customer_id", $accountingInvoice->customer_id)->first());
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
