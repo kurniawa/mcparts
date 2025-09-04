@@ -28,7 +28,7 @@ class AccountingInvoiceController extends Controller
         // Apabila ini merupakan satu-satunya history pembayaran, maka tidak boleh dihapus
         $only_one = AccountingInvoice::where('invoice_id', $accountingInvoice->invoice_id)->count();
         if ($only_one <= 1) {
-            return redirect()->back()->with('error', 'Tidak bisa menghapus pembayaran terakhir, karena ini merupakan satu-satunya pembayaran.');
+            return redirect()->back()->with('errors_', 'Tidak bisa menghapus pembayaran terakhir, karena ini merupakan satu-satunya pembayaran.');
         }
 
         DB::beginTransaction();
@@ -99,7 +99,14 @@ class AccountingInvoiceController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error_', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+
+            $message = "Error: " . $e->getMessage()
+                . "\n\nFile: " . $e->getFile()
+                . "\n\nFile: " . $e->getLine()
+                . "\n\nTrace: " . $e->getTraceAsString();
+            dd($message);
+
+            return redirect()->back()->with('errors_', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
         
         return redirect()->back()->with('success_', $success_);
