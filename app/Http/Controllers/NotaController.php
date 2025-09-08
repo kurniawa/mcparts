@@ -173,6 +173,7 @@ class NotaController extends Controller
         $success_ = '';
 
         // Mulai transaksi untuk menjaga konsistensi
+        $work_with_existing_invoice = false;
         DB::beginTransaction();
 
         try {
@@ -234,6 +235,7 @@ class NotaController extends Controller
                 if (!$nota) {
                     return back()->withErrors(['error' => 'Nota tidak ditemukan.']);
                 }
+                $work_with_existing_invoice = true;
             }
 
             // Proses semua produk dalam SPK
@@ -276,8 +278,15 @@ class NotaController extends Controller
             // dd($nota);
 
             // Update status pembayaran dan related accounting_invoices
-
-            $nota->updatePaymentAndAccountingInvoice_NewInvoice();
+            if ($work_with_existing_invoice) {
+                $accounting_invoice = $nota->lastAccountingInvoice;
+                $accounting_invoice->update([
+                    'total_amount' => $harga_total,
+                    'amount_due' => $harga_total
+                ]);
+            } elseif (!$work_with_existing_invoice) {
+                $nota->updatePaymentAndAccountingInvoice_NewInvoice();
+            }
             $success_ .= ' - nota diperbarui -';
 
             DB::commit();
@@ -286,7 +295,12 @@ class NotaController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Gagal membuat nota: ' . $e->getMessage()]);
+            $message = "Error: " . $e->getMessage()
+                . "\n\nFile: " . $e->getFile()
+                . "\n\nFile: " . $e->getLine()
+                . "\n\nTrace: " . $e->getTraceAsString();
+            dd($message);
+            // return back()->withErrors(['error' => 'Gagal membuat nota: ' . $e->getMessage()]);
         }
     }
 

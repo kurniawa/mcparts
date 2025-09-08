@@ -298,6 +298,12 @@ class Nota extends Model
             ->orderBy('created_at');
     }
 
+    public function lastAccountingInvoice() {
+        return $this->hasOne(AccountingInvoice::class, 'invoice_id', 'id')
+        ->where('invoice_table', 'notas')
+        ->latest('created_at');
+    }
+
     public function spk()
     {
         return $this->belongsToMany(
