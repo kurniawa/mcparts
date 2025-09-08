@@ -354,7 +354,10 @@ class PembelianController extends Controller
         }
 
         $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
-        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
+        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'supplier_id', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
+
+        $labelSupplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $labelBarang = Barang::select('id', 'nama as label', 'nama as value', 'supplier_id', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
 
         // Pembelian Total Supplier
         // dump($pembelians);
@@ -397,6 +400,8 @@ class PembelianController extends Controller
             'kontaks' => $kontaks,
             'label_supplier' => $label_supplier,
             'label_barang' => $label_barang,
+            'labelSupplier' => $labelSupplier,
+            'labelBarang' => $labelBarang,
             'grand_total' => $grand_total,
             'lunas_total' => $lunas_total,
             'from' => $from,
@@ -442,6 +447,12 @@ class PembelianController extends Controller
         $warnings_ = '';
 
         $barangList = Barang::whereIn('id', $post['barang_id'])->get()->keyBy('id');
+        // dd($barangList);
+        foreach ($barangList as $barang) {
+            if($barang->supplier_id != $supplier->id) {
+                $request->validate(['error'=>'required'],['error.required'=>'Barang dan Supplier tidak sesuai']);
+            }
+        }
 
         DB::beginTransaction();
         try {

@@ -129,7 +129,7 @@
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($pembelian->created_at)->format('d M Y') }}</td>
                     <td>{{ $pembelian->tanggal_lunas ? \Carbon\Carbon::parse($pembelian->tanggal_lunas)->format('d M Y') : '-' }}</td>
-                    <td>{{ $pembelian->supplier_nama }}</td>
+                    <td>{{ $barang->supplier_nama }}</td>
                     <td class="font-bold text-sky-500"><a href="{{ route('pembelians.show', $pembelian->id) }}">{{ $pembelian->nomor_nota }}</a></td>
                     <td>{{ $pembelians_barangs[$key]->jumlah_main / 100 }} {{ $pembelians_barangs[$key]->satuan_main }} ; {{ $pembelians_barangs[$key]->jumlah_sub / 100 }} {{ $pembelians_barangs[$key]->satuan_sub }}</td>
                     <td>{{ number_format($pembelians_barangs[$key]->harga_main,0,',','.') }}</td>
