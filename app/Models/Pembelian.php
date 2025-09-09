@@ -160,4 +160,8 @@ class Pembelian extends Model
 
         return $harga_total;
     }
+
+    function pembelianBarangs() {
+        return $this->hasMany(PembelianBarang::class, 'pembelian_id', 'id');
+    }
 }

@@ -1275,7 +1275,6 @@
         </div>
     </div>
   </main>
-</div>
 
 <script>
     function toggle_detail_classes(btn_id, class_name) {

@@ -415,7 +415,20 @@ class PembelianController extends Controller
     }
 
     function show(Pembelian $pembelian) {
-        dd($pembelian);
+        // dump($pembelian);
+        // dump($pembelian->pembelianBarangs);
+        // $pembelian_barangs = $pembelian->pembelianBarangs;
+        // foreach($pembelian_barangs as $pembelian_barang) {
+        //     dump($pembelian_barang);
+        // }
+        // dd('stop');
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'pembelians.show',
+            'profile_menus' => Menu::get_profile_menus(),
+            'pembelian' => $pembelian,
+        ];
+        return view('pembelians.show', $data);
     }
 
     function store(Request $request) {
