@@ -52,6 +52,9 @@ class Accounting extends Model
         $total_saldo_used = 0;
         $customer_id = null;
         for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
+            if ($post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j] == 0 && $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j] == 0) {
+                continue;
+            }
             // Validasi accountingInvoice, cek tanggalnya, apabila sudah ada tanggal setelahnya,
             // maka accountingInvoice tidak dapat diinput/disimpan.
             $created_at_new = \Carbon\Carbon::create(
@@ -62,10 +65,12 @@ class Accounting extends Model
                 now()->minute,
                 now()->second
             );
+            // dump($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
             $accounting_invoice_after = AccountingInvoice::where('invoice_table', 'notas')
                 ->where('invoice_id', $post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j])
                 ->where('status', 'active')
                 ->where('created_at', '>', $created_at_new)->get();
+            // dd($accounting_invoice_after);
             
             if (count($accounting_invoice_after)) {
                 dump('Terdapat accounting_invoice setelah nya');

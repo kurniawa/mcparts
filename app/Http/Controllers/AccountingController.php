@@ -340,6 +340,7 @@ class AccountingController extends Controller
             }
 
             // dd($transaction_name);
+            // dump($post);
             if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
                 Accounting::validasi_data_untuk_penerimaan_piutang($request, $i);
                 // dump('VALID');
@@ -504,6 +505,7 @@ class AccountingController extends Controller
                     $nota_id_number = count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
                     $this_time_key = time();
                     $accounting_id = null;
+                    // dd($post);
                     for ($j=0; $j < $nota_id_number; $j++) {
                         // $index_j = $j;
                         // if ($j == 2) {
