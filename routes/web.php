@@ -181,6 +181,7 @@ Route::controller(PembelianController::class)->group(function(){
     Route::post('/pembelians/{pembelian}/pelunasan','pelunasan')->name('pembelians.pelunasan');
     Route::post('/pembelians/{pembelian}/pembatalan_pelunasan','pembatalan_pelunasan')->name('pembelians.pembatalan_pelunasan');
     Route::post('/pembelians/{pembelian}/{pembelian_barang}/delete_pembelian_barang','delete_pembelian_barang')->name('pembelians.delete_pembelian_barang');
+    Route::post('/pembelians/{pembelian_barang}/change','changePembelianBarang')->name('pembelians.changePembelianBarang');
 });
 
 Route::controller(BarangController::class)->group(function(){

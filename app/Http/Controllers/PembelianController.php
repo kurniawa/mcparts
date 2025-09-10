@@ -422,11 +422,13 @@ class PembelianController extends Controller
         //     dump($pembelian_barang);
         // }
         // dd('stop');
+        $label_barang = Barang::select('id', 'nama as label', 'nama as value')->get();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'pembelians.show',
             'profile_menus' => Menu::get_profile_menus(),
             'pembelian' => $pembelian,
+            'label_barang' => $label_barang,
         ];
         return view('pembelians.show', $data);
     }
@@ -816,5 +818,18 @@ class PembelianController extends Controller
 
         return back()->with('success_', '-item pembelian deleted, pembelian updated-');
 
+    }
+
+    public function changePembelianBarang(PembelianBarang $pembelian_barang, Request $request) {
+        $post = $request->post();
+        // dump($post);
+        // dd($pembelian_barang);
+        $success_ = '';
+        $pembelian_barang->update([
+            'barang_id' => $post['barang_id'],
+            'barang_nama' => $post['barang_nama'],
+        ]);
+        $success_ .= 'pembelian_barang diupdate-';
+        return back()->with('success_', $success_);
     }
 }
