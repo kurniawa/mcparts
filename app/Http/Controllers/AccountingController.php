@@ -507,26 +507,11 @@ class AccountingController extends Controller
                     $accounting_id = null;
                     // dd($post);
                     for ($j=0; $j < $nota_id_number; $j++) {
-                        // $index_j = $j;
-                        // if ($j == 2) {
-                        //     dump([
-                        //         'i' => $i,
-                        //         'j' => $j,
-                        //         'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j] ?? null,
-                        //         'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j] ?? null,
-                        //         'payment_status' => $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j] ?? null,
-                        //         'discount_percentage' => $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j] ?? null,
-                        //         'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j] ?? null,
-                        //         'total_discount' => $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j] ?? null,
-                        //     ]);
-                        // }
-                        // $error_loc = "pencarian related_nota index: $i $j";
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         /**
                          * Create / Update data akan dilakukan apabila memang terjadi pembayaran.
                          * Artinya ada perubahan nilai amount_due atau amount_paid antara yang lama dan yang baru.
                          */
-                        // $error_loc = "amount_due_new dan amount_paid_new index: $i $j";
                         $amount_due_new = $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j];
                         $amount_paid_new = $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j];
                         if ($amount_due_new == $related_nota->amount_due || $amount_paid_new == $related_nota->amount_paid_new) {
@@ -548,7 +533,7 @@ class AccountingController extends Controller
                         );
                         $amount_paid_new = bcadd(
                         (string) $related_nota->amount_paid,
-                        (string) $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                        (string) $amount_paid_new,
                         2 // skala desimal sesuai decimal(15,2)
                         );
                         $remaining_balance_masuk_new = $post['remaining_balance_masuk'][$i];
@@ -556,10 +541,10 @@ class AccountingController extends Controller
                             $remaining_balance_masuk_new = 0;
                         }
                         $related_nota->update([
-                            'status_bayar' => $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
+                            'status_bayar' => $payment_status,
                             'discount_percentage' => $related_nota->total_discount + $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
                             'total_discount' => $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
-                            'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
+                            'amount_due' => $amount_due_new,
                             'amount_paid' => $amount_paid_new,
                             'balance_used' => $balance_used_new,
                             'overpayment' => $remaining_balance_masuk_new,
@@ -600,19 +585,6 @@ class AccountingController extends Controller
                         $created_at = $created_at_check;
 
                         if (!$related_accounting_invoice) {
-                            // $chosen_selection = 1;
-                            // if ($related_accounting_invoice) {
-                            //     $chosen_selection = 1.2;
-                            //     $related_accounting_invoice->update([
-                            //         'accounting_id' => $accounting_id,
-                            //         'status' => 'inactive',
-                            //         'updated_by' => $user->username,
-                            //         'finished_at' => $created_at,
-                            //     ]);
-                            //     $success_ .= "related_accounting_invoice->status updated to inactive-";
-                            // }
-                            
-                            
                             // Buat record baru di tabel accounting_invoices
                             $related_accounting_invoice = AccountingInvoice::create([
                                 'accounting_time_key' => $time_key,
@@ -627,8 +599,8 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
-                                'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                                'amount_due' => $amount_due_new,
+                                'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
                                 'remaining_funds' => $remaining_balance_masuk_new,
@@ -652,8 +624,8 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
-                                'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                                'amount_due' => $amount_due_new,
+                                'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
                                 'remaining_funds' => $remaining_balance_masuk_new,
@@ -682,8 +654,8 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
-                                'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                                'amount_due' => $amount_due_new,
+                                'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
                                 'remaining_funds' => $remaining_balance_masuk_new,
@@ -697,7 +669,10 @@ class AccountingController extends Controller
                         $array_accounting_invoice[] = $related_accounting_invoice;
 
                         $total_balance_used += (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
-                        // \Illuminate\Support\Facades\Log::info("accounting_id = " . $accounting_id);
+                        /**Apabila ada AccountingInvoice setelahnya, akan membuat data amount_due tidak sesuai. */
+                        if($related_accounting_invoice->isExistAccountingInvoiceAfter()) {
+                            $success_ .= "accounting_invoice after exist, history pembayaran diupdate-";
+                        }
                     }
                     // dd($array_accounting_invoice);
                     /**

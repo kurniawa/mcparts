@@ -66,16 +66,16 @@ class Accounting extends Model
                 now()->second
             );
             // dump($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
-            $accounting_invoice_after = AccountingInvoice::where('invoice_table', 'notas')
-                ->where('invoice_id', $post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j])
-                ->where('status', 'active')
-                ->where('created_at', '>', $created_at_new)->get();
-            // dd($accounting_invoice_after);
+            // $accounting_invoice_after = AccountingInvoice::where('invoice_table', 'notas')
+            //     ->where('invoice_id', $post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j])
+            //     ->where('status', 'active')
+            //     ->where('created_at', '>', $created_at_new)->get();
+            // // dd($accounting_invoice_after);
             
-            if (count($accounting_invoice_after)) {
-                dump('Terdapat accounting_invoice setelah nya');
-                dd($accounting_invoice_after);
-            }
+            // if (count($accounting_invoice_after)) {
+            //     dump('Terdapat accounting_invoice setelah nya');
+            //     dd($accounting_invoice_after);
+            // }
 
             $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
 
@@ -115,8 +115,7 @@ class Accounting extends Model
             }
 
             // Validasi Amount Due / Sisa Bayar
-            // dump($related_nota);
-            // dump($amount_due_old, $total_discount_new, $amount_paid, $balance_used);
+            // Yang mempengaruhi amount_due adalah total_discount, amount_paid, balance_used
             $amount_due_new = $amount_due_old - $total_discount_new - $amount_paid - $balance_used;
             if ($amount_due_new != $amount_due) {
                 $request->validate(['error' => 'required'], [
