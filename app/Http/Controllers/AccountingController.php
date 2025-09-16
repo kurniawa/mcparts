@@ -1679,6 +1679,7 @@ class AccountingController extends Controller
         // dd($label_deskripsi_masuk);
         $kategoris = Kategori::all();
         // $label_kategori_level_one = Kategori::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
+        // dd($transaction_names);
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.transactions_relations',
@@ -1811,10 +1812,96 @@ class AccountingController extends Controller
         return back()->with('success_', $success_);
     }
 
-    function delete_transaction_relation(TransactionName $transaction_name) {
+    function delete_transaction_relation(TransactionName $transaction_name, Request $request) {
         // dd($transaction_name);
-        $transaction_name->delete();
-        return back()->with('danger_', '-transaction_relation deleted!-');
+        $post = $request->post();
+        // dump($post);
+        // dump($transaction_name);
+        // VALIDATION
+        $user = Auth::user();
+        // dump($user);
+        if ($post['action'] !== 'edit') {
+            $request->validate([
+                'user_instance_id' => 'required',
+                'type' => 'required|string|in:UANG KELUAR,UANG MASUK',
+                'desc' => 'required|string',
+                'kategori_level_one' => 'required|string',
+                'action' => 'required|string|in:delete, edit',
+            ]);
+            if ($post['related_user_instance_id']) {
+                $request->validate([
+                    'related_desc' => 'required|string',
+                ]);
+            }
+        }
+        $user_instance = UserInstance::find($post['user_instance_id']);
+        // dd($user_instance);
+        if ($user_instance->user_id != $user->id) {
+            $request->validate(['error'=>'required'],['error.required'=>'user not authorized']);
+        }
+
+        // PROCESS
+        if ($post['action'] === 'delete') {
+            $transaction_name->delete();
+            return back()->with('danger_', '-transaction_relation deleted!-');
+        } elseif ($post['action'] === 'edit') {
+            // PELANGGAN
+            $pelanggan_id = null;
+            $pelanggan_nama = null;
+
+            if ($post['pelanggan_nama']) {
+                $pelanggan = Pelanggan::find($post['pelanggan_id']);
+                if (!$pelanggan) {
+                    dd('isset($post["pelanggan_id"]) but pelanggan?');
+                }
+                $pelanggan_id = $pelanggan->id;
+                $pelanggan_nama = $pelanggan->nama;
+            }
+            // SUPPLIER
+            $supplier_id = null;
+            $supplier_nama = null;
+            if ($post['supplier_nama']) {
+                $supplier = Supplier::find($post['supplier_id']);
+                $supplier_id = $supplier->id;
+                $supplier_nama = $supplier->nama;
+            }
+
+            // RELATED USER INSTANCE
+            $related_user_instance_id = $post['related_user_instance_id'] ?? null;
+            $related_user_instance = null;
+            $related_user_instance_type = null;
+            $related_user_instance_name = null;
+            $related_user_instance_branch = null;
+
+            if ($related_user_instance_id) {
+                $related_user_instance = UserInstance::find($related_user_instance_id);
+                if (!$related_user_instance) {
+                    dd('related_user_instance?');
+                }
+                if ($related_user_instance->id === $transaction_name->user_instance_id) {
+                    dd('related_user_instance = user_instance ?');
+                }
+                $related_user_instance_type = $related_user_instance->instance_type;
+                $related_user_instance_name = $related_user_instance->instance_name;
+                $related_user_instance_branch = $related_user_instance->branch;
+            }
+            $transaction_name->update([
+                'desc'=>$post['desc'],
+                'kategori_type'=>$post['type'],
+                'kategori_level_one'=>$post['kategori_level_one'],
+                'kategori_level_two'=>$post['kategori_level_two'],
+                'pelanggan_id'=>$pelanggan_id,
+                'pelanggan_nama'=>$pelanggan_nama,
+                'supplier_id'=>$supplier_id,
+                'supplier_nama'=>$supplier_nama,
+                // 'related_user_id'=>$post['related_user_id'],
+                // 'related_username'=>$post['related_username'],
+                'related_user_instance_type'=>$related_user_instance_type,
+                'related_user_instance_name'=>$related_user_instance_name,
+                'related_user_instance_branch'=>$related_user_instance_branch,
+            ]);
+            return back()->with('success_', '-transaction_relation updated!-');
+        }
     }
 
     function up_down_transaction(UserInstance $user_instance, Accounting $accounting, Request $request) {
