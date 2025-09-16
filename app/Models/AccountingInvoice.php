@@ -37,31 +37,31 @@ class AccountingInvoice extends Model
         $amountDueBuffer = 0;
         foreach ($accounting_invoice_after as $index => $accounting_invoice) {
             // Yang mempengaruhi amount_due adalah total_discount, amount_paid, balance_used
-            dump("index = $index");
+            // dump("index = $index");
             if ($index === 0) {
                 $amount_due_before = $accounting_invoice->amount_due + $accounting_invoice->amount_paid + $accounting_invoice->total_discount + $accounting_invoice->balance_used;
-                dump("amount_due_before = $accounting_invoice->amount_due + $accounting_invoice->amount_paid + $accounting_invoice->total_discount + $accounting_invoice->balance_used = $amount_due_before");
+                // dump("amount_due_before = $accounting_invoice->amount_due + $accounting_invoice->amount_paid + $accounting_invoice->total_discount + $accounting_invoice->balance_used = $amount_due_before");
                 $amount_due_after = $amount_due_before - $this->amount_paid - $this->total_discount - $this->balance_used;
-                dump("amount_due_after = $amount_due_before - $this->amount_paid - $this->total_discount - $this->balance_used = $amount_due_after");
+                // dump("amount_due_after = $amount_due_before - $this->amount_paid - $this->total_discount - $this->balance_used = $amount_due_after");
                 $this->update([
                     'amount_due' => $amount_due_after,
                 ]);
                 $amountDueBuffer = $amount_due_after - $accounting_invoice->amount_paid - $accounting_invoice->total_discount - $accounting_invoice->balance_used;
-                dump("amountDueBuffer = $amount_due_after - $accounting_invoice->amount_paid - $accounting_invoice->total_discount - $accounting_invoice->balance_used = $amountDueBuffer");
+                // dump("amountDueBuffer = $amount_due_after - $accounting_invoice->amount_paid - $accounting_invoice->total_discount - $accounting_invoice->balance_used = $amountDueBuffer");
                 $accounting_invoice->update([
                     'amount_due' => $amountDueBuffer,
                 ]);
             } else {
                 $amount_due_after = $amountDueBuffer - $accounting_invoice->amount_paid - $accounting_invoice->total_discount - $accounting_invoice->balance_used;
-                dump("amount_due_after = $amountDueBuffer - $this->amount_paid - $this->total_discount - $this->balance_used = $amount_due_after");
+                // dump("amount_due_after = $amountDueBuffer - $this->amount_paid - $this->total_discount - $this->balance_used = $amount_due_after");
                 $accounting_invoice->update([
                     'amount_due' => $amount_due_after,
                 ]);
                 $amountDueBuffer = $amount_due_after;
-                dump("amount_due_after = amount_due_after = $amount_due_after");
+                // dump("amount_due_after = amount_due_after = $amount_due_after");
             }
         }
-        dd('stop');
+        // dd('stop');
         return true;
     }
 }
