@@ -236,9 +236,10 @@
                                 }
                                 elementToAppend += `
                                 <tr>${htmlRemainingBalanceMasuk}
-                                    <td>
+                                    <td class="font-bold">
                                         <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
+                                        <div class="text-center">${formatDate(relatedInvoice.created_at)}</div>
                                     </td>
                                     <td>
                                         <input type="text" value="${formatHargaIndo(relatedInvoice.harga_total)}" class="text-xs p-0 border-none text-center" readonly>
@@ -680,6 +681,22 @@
                 event.target.submit();
             }
         })
+
+        function formatDate(params) {
+            let createdAt = new Date(params);
+
+            // Format manual (contoh: 16-09-2025 14:25)
+            let formatted = '<div class="border rounded border-red-400">' + createdAt.getDate().toString().padStart(2, '0') + '/' +
+                            (createdAt.getMonth() + 1).toString().padStart(2, '0') + '<br>' +
+                            createdAt.getFullYear() + '</div>';
+                            // + ' ' +
+                            // createdAt.getHours().toString().padStart(2, '0') + ':' +
+                            // createdAt.getMinutes().toString().padStart(2, '0');
+
+            console.log(formatted);
+
+            return formatted;
+        }
     </script>
 
     <style>
