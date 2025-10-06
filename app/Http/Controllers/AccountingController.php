@@ -540,10 +540,11 @@ class AccountingController extends Controller
                         if (!is_numeric($remaining_balance_masuk_new)) {
                             $remaining_balance_masuk_new = 0;
                         }
+                        // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
                         $related_nota->update([
                             'status_bayar' => $payment_status,
-                            'discount_percentage' => $related_nota->total_discount + $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
-                            'total_discount' => $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            'discount_percentage' => $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
+                            'total_discount' => $related_nota->total_discount + (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                             'amount_due' => $amount_due_new,
                             'amount_paid' => $amount_paid_new,
                             'balance_used' => $balance_used_new,
