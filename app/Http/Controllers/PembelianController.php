@@ -821,7 +821,10 @@ class PembelianController extends Controller
     }
 
     public function changePembelianBarang(PembelianBarang $pembelian_barang, Request $request) {
-        $post = $request->post();
+        $post = $request->validate([
+            'barang_id' => 'required|numeric',
+            'barang_nama' => 'required|string',
+        ]);
         // dump($post);
         // dd($pembelian_barang);
         $success_ = '';
