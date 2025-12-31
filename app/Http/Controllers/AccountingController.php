@@ -17,8 +17,6 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use function PHPUnit\Framework\isNan;
 
 class AccountingController extends Controller
 {
@@ -541,10 +539,22 @@ class AccountingController extends Controller
                             $remaining_balance_masuk_new = 0;
                         }
                         // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
+                        // Data Discount
+                        $discount_percentage = (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j];
+                        $total_discount = bcadd(
+                            (string) $related_nota->total_discount,
+                            (string) $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
+                        $discount_description = null;
+                        if ($post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j] !== null) {
+                            $discount_description = $post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j];
+                        }
                         $related_nota->update([
                             'status_bayar' => $payment_status,
-                            'discount_percentage' => $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
-                            'total_discount' => $related_nota->total_discount + (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            'discount_percentage' => $discount_percentage,
+                            'total_discount' => $total_discount,
+                            'discount_description' => $discount_description,
                             'amount_due' => $amount_due_new,
                             'amount_paid' => $amount_paid_new,
                             'balance_used' => $balance_used_new,
@@ -600,6 +610,9 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
+                                'discount_percentage' => $discount_percentage,
+                                'total_discount' => $total_discount,
+                                'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
                                 'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
@@ -625,6 +638,9 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
+                                'discount_percentage' => $discount_percentage,
+                                'total_discount' => $total_discount,
+                                'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
                                 'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
@@ -655,6 +671,9 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
+                                'discount_percentage' => $discount_percentage,
+                                'total_discount' => $total_discount,
+                                'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
                                 'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
@@ -1237,9 +1256,18 @@ class AccountingController extends Controller
                     $nota->overpayment -= $accounting_invoice->overpayment;
                     // UPDATE status_bayar pada Nota
                     $payment_status = $nota->UpdatePaymentStatus();
-                    $nota->status_bayar = $payment_status;
                     if ($payment_status != 'lunas') {
                         $nota->finished_at = null;
+                    } elseif ($payment_status == 'error') {
+                        $nota->status_bayar = 'belum_lunas';
+                        $nota->discount_percentage = 0.00;
+                        $nota->total_discount = 0;
+                        $nota->discount_description = null;
+                        $nota->amount_due = $nota->harga_total;
+                        $nota->amount_paid = 0;
+                        $nota->balance_used = 0;
+                        $nota->overpayment = 0;
+                        $warnings_ .= 'nota payment_status error -> reset nota value-';
                     }
                     $nota->save();
                 }

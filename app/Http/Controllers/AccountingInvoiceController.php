@@ -22,13 +22,15 @@ class AccountingInvoiceController extends Controller
             ->exists();
 
         if ($after_this) {
-            return redirect()->back()->with('errors_', 'Hanya bisa menghapus pembayaran terakhir saja');
+            return redirect()->back()->with('errors_', 'Penghapusan harus dimulai dari history pembayaran terakhir.');
         }
 
         // Apabila ini merupakan satu-satunya history pembayaran, maka tidak boleh dihapus
         $only_one = AccountingInvoice::where('invoice_id', $accountingInvoice->invoice_id)->count();
+        $reset_nota = false;
         if ($only_one <= 1) {
-            return redirect()->back()->with('errors_', 'Tidak bisa menghapus pembayaran terakhir, karena ini merupakan satu-satunya pembayaran.');
+            // return redirect()->back()->with('errors_', 'Tidak bisa menghapus pembayaran terakhir, karena ini merupakan satu-satunya pembayaran.');
+            $reset_nota = true;
         }
 
         DB::beginTransaction();
@@ -67,15 +69,29 @@ class AccountingInvoiceController extends Controller
              * kapan dan pada nota yang mana pelanggan melakukan pembayaran yang lebih daripada seharusnya
              */
 
-            $nota->amount_paid -= $accountingInvoice->amount_paid;
-            $nota->balance_used -= $accountingInvoice->balance_used;
-            $nota->amount_due += ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
-            // $nota->overpayment -= $accountingInvoice->balance_used;
-            $nota->status_bayar = $nota->UpdatePaymentStatus();
-            $log .= "\n\nnota->amount_paid = $nota->amount_paid";
-            $log .= "\nnota->balance_used = $nota->balance_used";
-            $log .= "\nnota->amount_due = $nota->amount_due";
-            $log .= "\nnota->status_bayar = $nota->status_bayar";
+            if ($reset_nota) {
+                // Reset semua data pembayaran pada nota
+                $nota->amount_paid = 0;
+                $nota->balance_used = 0;
+                $nota->amount_due = $nota->harga_total;
+                $nota->status_bayar = 'belum_lunas';
+                $nota->overpayment = 0;
+                $log .= "\n\nRESET nota karena ini merupakan satu-satunya pembayaran.";
+                $log .= "\nnota->amount_paid = $nota->amount_paid";
+                $log .= "\nnota->balance_used = $nota->balance_used";
+                $log .= "\nnota->amount_due = $nota->amount_due";
+                $log .= "\nnota->status_bayar = $nota->status_bayar";
+            } else {
+                $nota->amount_paid -= $accountingInvoice->amount_paid;
+                $nota->balance_used -= $accountingInvoice->balance_used;
+                $nota->amount_due += ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
+                // $nota->overpayment -= $accountingInvoice->balance_used;
+                $nota->status_bayar = $nota->UpdatePaymentStatus();
+                $log .= "\n\nnota->amount_paid = $nota->amount_paid";
+                $log .= "\nnota->balance_used = $nota->balance_used";
+                $log .= "\nnota->amount_due = $nota->amount_due";
+                $log .= "\nnota->status_bayar = $nota->status_bayar";
+            }
             // dd($log);
             $nota->save();
             $success_ .= "nota diupdate. ";

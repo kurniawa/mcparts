@@ -35,4 +35,9 @@ class Barang extends Model
         }
         return array($pembelians, $pembelian_barangs);
     }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 }

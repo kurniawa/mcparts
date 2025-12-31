@@ -12,59 +12,25 @@ use Illuminate\Support\Facades\Auth;
 class BarangController extends Controller
 {
     function index(Request $request) {
-        $get = $request->query();
-
-        $suppliers = collect();
-        $barangs = collect();
-        
-
-        if (count($get) !== 0) {
-            // dd($get);
-
-            if ($get['barang_id']) {
-                $supplier_barangs = Barang::where('id', $get['barang_id'])->get();
-                $suppliers = Supplier::where('id', $supplier_barangs[0]->supplier_id)->get();
-                $barangs->push($supplier_barangs);
-            } else if ($get['barang_nama']) {
-                $suppliers_temp = Barang::where('nama', 'like', "%$get[barang_nama]%")->select('supplier_id')->groupBy('supplier_id')->orderBy('supplier_nama')->get();
-                // dd($suppliers_temp);
-                foreach ($suppliers_temp as $supplier_id) {
-                    $suppliers->push(Supplier::find($supplier_id['supplier_id']));
-                }
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                    $barangs->push($supplier_barangs);
-                }
-                // $suppliers = Supplier::where('id', $supplier_barangs[0]->supplier_id)->get();
-                // dd($suppliers);
-            } else if ($get['supplier_nama']) {
-                $suppliers = Supplier::where('nama', 'like', "%$get[supplier_nama]%")->get();
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                    $barangs->push($supplier_barangs);
-                }
-                // dd($suppliers);
-            } else if ($get['supplier_id']) {
-                $suppliers = Supplier::where('id', $get['supplier_id'])->get();
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $get['supplier_id'])->get();
-                    $barangs->push($supplier_barangs);
-                }
-            } else {
-                $suppliers = Supplier::orderBy('nama')->get();
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                    $barangs->push($supplier_barangs);
-                }
+        $suppliers = Supplier::with(['barangs' => function ($query) use ($request) {
+            $query->orderBy('nama', 'asc');
+            if ($request->filled('barang_id')) {
+                $query->where('id', $request->barang_id);
             }
 
-        } else {
-            $suppliers = Supplier::orderBy('nama')->get();
-            foreach ($suppliers as $supplier) {
-                $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                $barangs->push($supplier_barangs);
+            if ($request->filled('barang_nama')) {
+                $query->where('nama', 'like', '%' . $request->barang_nama . '%');
             }
-        }
+
+        }])
+        ->when($request->filled('supplier_id'), function ($query) use ($request) {
+            $query->where('id', $request->supplier_id);
+        })
+        ->when($request->filled('supplier_nama'), function ($query) use ($request) {
+            $query->where('nama', 'like', '%' . $request->supplier_nama . '%');
+        })
+        ->orderBy('nama')
+        ->get();
 
 
         $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
@@ -77,96 +43,13 @@ class BarangController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'pembelian_menus' => Menu::get_pembelian_menus(),
             'suppliers' => $suppliers,
-            'barangs' => $barangs,
+            // 'barangs' => $barangs,
             'label_supplier' => $label_supplier,
             'label_barang' => $label_barang,
         ];
         // dd($barangs[0][0]);
         return view('barangs.index', $data);
     }
-
-    // public function index(Request $request)
-    // {
-    //     $get = $request->query();
-
-    //     $suppliers = collect();
-    //     $barangs = collect();
-
-    //     // Awal query builder barang
-    //     $barangQuery = Barang::with('goodsPrices'); // eager load relasi harga
-
-    //     if (count($get) !== 0) {
-    //         // Filter berdasarkan ID barang
-    //         if (!empty($get['barang_id'])) {
-    //             $barang = $barangQuery->where('id', $get['barang_id'])->first();
-    //             if ($barang) {
-    //                 $suppliers = Supplier::where('id', $barang->supplier_id)->get();
-    //                 $barangs = collect([$barang]);
-    //             }
-
-    //         // Filter berdasarkan nama barang
-    //         } elseif (!empty($get['barang_nama'])) {
-    //             $barangs = $barangQuery
-    //                 ->where('nama', 'like', "%{$get['barang_nama']}%")
-    //                 ->get();
-    //             $supplierIds = $barangs->pluck('supplier_id')->unique();
-    //             $suppliers = Supplier::whereIn('id', $supplierIds)->orderBy('nama')->get();
-
-    //         // Filter berdasarkan nama supplier
-    //         } elseif (!empty($get['supplier_nama'])) {
-    //             $suppliers = Supplier::where('nama', 'like', "%{$get['supplier_nama']}%")
-    //                 ->orderBy('nama')
-    //                 ->get();
-    //             $barangs = $barangQuery
-    //                 ->whereIn('supplier_id', $suppliers->pluck('id'))
-    //                 ->get();
-
-    //         // Filter berdasarkan ID supplier
-    //         } elseif (!empty($get['supplier_id'])) {
-    //             $suppliers = Supplier::where('id', $get['supplier_id'])->get();
-    //             $barangs = $barangQuery
-    //                 ->where('supplier_id', $get['supplier_id'])
-    //                 ->get();
-
-    //         } else {
-    //             // Tidak ada filter valid, ambil semua supplier dan barang
-    //             $suppliers = Supplier::orderBy('nama')->get();
-    //             $barangs = $barangQuery->get();
-    //         }
-
-    //     } else {
-    //         // Tidak ada query string, ambil semua supplier dan barang
-    //         $suppliers = Supplier::orderBy('nama')->get();
-    //         $barangs = $barangQuery->get();
-    //     }
-
-    //     // Dropdown label
-    //     $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
-    //     $label_barang = Barang::select(
-    //         'id',
-    //         'nama as label',
-    //         'nama as value',
-    //         'satuan_sub',
-    //         'satuan_main',
-    //         'harga_main',
-    //         'jumlah_main',
-    //         'harga_total_main'
-    //     )->orderBy('nama')->get();
-
-    //     $data = [
-    //         'menus' => Menu::get(),
-    //         'route_now' => 'barangs.index',
-    //         'parent_route' => 'pembelians.index',
-    //         'profile_menus' => Menu::get_profile_menus(),
-    //         'pembelian_menus' => Menu::get_pembelian_menus(),
-    //         'suppliers' => $suppliers,
-    //         'barangs' => $barangs,
-    //         'label_supplier' => $label_supplier,
-    //         'label_barang' => $label_barang,
-    //     ];
-
-    //     return view('barangs.index', $data);
-    // }
 
     function store(Request $request) {
         $post = $request->post();
