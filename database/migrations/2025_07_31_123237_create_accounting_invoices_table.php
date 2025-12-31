@@ -49,7 +49,7 @@ return new class extends Migration
             // Data Pembayaran
             $table->decimal('discount_percentage', 5, 2)->default(0.00);
             $table->decimal('total_discount', 15, 2)->default(0.00);
-            $table->decimal('discount_description', 15, 2)->default(0.00);
+            $table->string('discount_description')->nullable();
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
             $table->decimal('balance_used', 15, 2)->default(0.00);

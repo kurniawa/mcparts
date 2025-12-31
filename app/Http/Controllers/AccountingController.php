@@ -547,7 +547,7 @@ class AccountingController extends Controller
                             2 // skala desimal sesuai decimal(15,2)
                         );
                         $discount_description = null;
-                        if ($post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j] !== null) {
+                        if (isset($post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j]) && $post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j] !== null) {
                             $discount_description = $post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j];
                         }
                         $related_nota->update([
@@ -1256,6 +1256,7 @@ class AccountingController extends Controller
                     $nota->overpayment -= $accounting_invoice->overpayment;
                     // UPDATE status_bayar pada Nota
                     $payment_status = $nota->UpdatePaymentStatus();
+                    $nota->status_bayar = $payment_status;
                     if ($payment_status != 'lunas') {
                         $nota->finished_at = null;
                     } elseif ($payment_status == 'error') {
