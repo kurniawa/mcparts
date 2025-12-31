@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Pembelian;
 use App\Models\PembelianBarang;
 use App\Models\GoodsPrice;
-use App\Models\Barang;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
