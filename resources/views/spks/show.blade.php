@@ -837,6 +837,9 @@
                             @endforeach
                         </table>
                         @endif
+                        <div class="flex justify-end mt-1">
+                            <a href="{{ route('accounting.search_related_accounting', $nota->id) }}" target="_blank" rel="noopener noreferrer" class="bg-sky-400 text-white font-bold rounded-xl px-1 text-xs">rel.accounting</a>
+                        </div>
                     </div>
                     {{-- END - HISTORI PEMBAYARAN --}}
                     {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}

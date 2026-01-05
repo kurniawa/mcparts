@@ -75,4 +75,16 @@ class AccountingController2 extends Controller
             }
         }
     }
+
+    function search_related_accounting(Nota $nota) {
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'accounting.laba_rugi',
+            'parent_route' => 'accounting.index',
+            'profile_menus' => Menu::get_profile_menus(),
+            'accounting_menus' => Menu::get_accounting_menus(),
+            'nota' => $nota,
+        ];
+        return view('spks.search_related_accounting', $data);
+    }
 }

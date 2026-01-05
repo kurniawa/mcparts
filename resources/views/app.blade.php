@@ -26,20 +26,11 @@
         @endforeach
     </div>
       <div class="mx-1 py-1 sm:px-6 lg:px-8 text-xs">
-            {{-- <div class="flex">
-                <button id="btn_filter" class="border rounded border-yellow-300 text-yellow-500 px-3 py-1" onclick="toggle_light(this.id,'filter-content', [], ['bg-yellow-200'], 'inline-block')">Filter</button>
-                <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_spk" onclick="toggle_light(this.id, 'form_new_spk', [], ['bg-emerald-200'], 'block')">+ SPK</button>
-            </div> --}}
         <div class="flex mt-1">
             {{-- SEARCH / FILTER --}}
             <div>
                 <div class="rounded p-2 bg-white shadow drop-shadow inline-block" id="filter-content">
                     <form action="" method="GET">
-                        {{-- <div class="flex items-center">
-                            <div><input type="radio" name="tipe_filter" value="spk" id="radio_spk" checked><label for="radio_spk" class="ml-1">SPK</label></div>
-                            <div class="ml-3"><input type="radio" name="tipe_filter" value="nota" id="radio_nota"><label for="radio_nota" class="ml-1">Nota</label></div>
-                            <div class="ml-3"><input type="radio" name="tipe_filter" value="sj" id="radio_sj"><label for="radio_sj" class="ml-1">SJ</label></div>
-                        </div> --}}
                         <input type="hidden" name="tipe_filter" value="spk">
                         <div class="ml-1 mt-2 flex">
                             <div>
@@ -134,25 +125,6 @@
                                         <td>Tanggal</td><td><div class="mx-2">:</div></td>
                                         <td class="py-1">
                                             <div class="flex">
-                                                {{-- <select name="day" id="day" class="rounded text-xs">
-                                                    <option value="{{ date('d') }}">{{ date('d') }}</option>
-                                                    @for ($i = 1; $i < 32; $i++)
-                                                    <option value="{{ $i }}">{{ $i }}</option>
-                                                    @endfor
-                                                </select>
-                                                <select name="month" id="month" class="rounded text-xs ml-1">
-                                                    <option value="{{ date('m') }}">{{ date('m') }}</option>
-                                                    @for ($i = 1; $i < 13; $i++)
-                                                    <option value="{{ $i }}">{{ $i }}</option>
-                                                    @endfor
-                                                </select>
-                                                <select name="year" id="year" class="rounded text-xs ml-1">
-                                                    <option value="{{ date('Y') }}">{{ date('Y') }}</option>
-                                                    <option value="">-</option>
-                                                    @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
-                                                    <option value="{{ $i }}">{{ $i }}</option>
-                                                    @endfor
-                                                </select> --}}
                                                 <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
                                                 <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
                                                 <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
@@ -185,22 +157,6 @@
                                             </button>
                                         </td>
                                     </tr>
-                                    {{-- <tr>
-                                        <td>
-                                            <div class="flex items-center">
-                                                <button id="toggle_produk_keterangan" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggleButton(this.id,'produk_keterangan',['bg-yellow-300'],null)">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                                    </svg>
-                                                </button>
-                                                <input type="text" name="produk_nama[]" id="produk_nama" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400" placeholder="nama item...">
-                                            </div>
-                                            <div class="mt-1" id="produk_keterangan">
-                                                <textarea name="produk_keterangan[]" id="produk_keterangan" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
-                                            </div>
-                                        </td>
-                                        <td><div class="text-center"><input type="number" name="produk_jumlah[]" id="produk_jumlah" class="border-slate-300 rounded-lg text-xs p-1 w-1/2"></div></td>
-                                    </tr> --}}
                                 </table>
                             </div>
                         </div>
@@ -313,7 +269,7 @@
                             </div>
                         </div>
                         <div class="flex justify-center">
-                            <div class="flex">
+                            <div class="flex items-center">
                                 @if ($nota->finished_at === null)
                                 <div>
                                     <div class="rounded p-1 bg-red-500 text-white font-bold text-center">
@@ -353,7 +309,11 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="text-right">{{ number_format($nota->harga_total,0,',','.') }}</div>
+                        <div>
+                            <div class="text-right">{{ number_format($nota->harga_total,0,',','.') }}</div>
+                            <div class="text-right text-[0.65rem] text-green-400 font-bold">{{ number_format($nota->amount_paid,0,',','.') }}</div>
+                            <div class="text-right text-[0.65rem] text-yellow-400 font-bold">{{ number_format($nota->amount_due,0,',','.') }}</div>
+                        </div>
                     </div>
 
                     {{-- Nota Items --}}
