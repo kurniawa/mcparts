@@ -230,6 +230,7 @@ Route::controller(AccountingController2::class)->group(function(){
     Route::get('/accounting/laba-rugi','laba_rugi')->name('accounting.laba_rugi')->middleware('auth');
     Route::get('/accounting/{transaction_name}/get-related-not-yet-paid-off-invoices','getRelatedNotYetPaidOffInvoices')->name('accounting.get_related_not_yet_paid_off_invoices')->middleware('auth');
     Route::get('/accounting/{nota}/search_related_accounting','search_related_accounting')->name('accounting.search_related_accounting')->middleware('auth');
+    Route::post('/accounting/{nota}/{accounting}/link_nota_accounting','link_nota_accounting')->name('accounting.link_nota_accounting')->middleware('auth');
 });
 
 Route::controller(AccountingInvoiceController::class)->group(function(){

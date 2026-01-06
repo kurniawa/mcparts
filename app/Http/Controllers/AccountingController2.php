@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Accounting;
 use App\Models\AccountingInvoice;
 use App\Models\Menu;
 use App\Models\Nota;
@@ -77,6 +78,8 @@ class AccountingController2 extends Controller
     }
 
     function search_related_accounting(Nota $nota) {
+        $possible_related_accountings = $nota->possible_related_accountings();
+
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.laba_rugi',
@@ -84,7 +87,51 @@ class AccountingController2 extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'accounting_menus' => Menu::get_accounting_menus(),
             'nota' => $nota,
+            'possible_related_accountings' => $possible_related_accountings,
         ];
         return view('spks.search_related_accounting', $data);
+    }
+
+    function link_nota_accounting(Request $request, Nota $nota, Accounting $accounting) {
+        $post = $request->post();
+        $spk_id = $nota->spk->first()->id;
+        $transaction_name = TransactionName::where('user_instance_id', $accounting->user_instance_id)->where('desc', $accounting->transaction_desc)->first();
+        
+        $payment_status = $post['payment_status'];
+        $accounting_invoice_status = 'active';
+        $finished_at = null;
+        if ($payment_status == 'lunas') {
+            $finished_at = $nota->finished_at;
+            $accounting_invoice_status = 'inactive';
+        }
+        AccountingInvoice::create([
+            'accounting_time_key' => $accounting->time_key,
+            'time_key' => time(),
+            'accounting_id' => $accounting->id,
+            'user_instance_id' => $accounting->user_instance_id,
+            'invoice_id' => $nota->id,
+            'invoice_table' => 'notas',
+            'invoice_number' => $nota->no_nota,
+            'transaction_name_id' => $transaction_name->id,
+            'transaction_name_desc' => $transaction_name->desc,
+            'customer_id' => $nota->pelanggan_id,
+            'customer_name' => $nota->pelanggan_nama,
+            'payment_status' => $post['payment_status'],
+            'discount_percentage' => $post['discount_percentage'],
+            'total_discount' => $post['total_discount'],
+            'discount_description' => $post['discount_description'],
+            'amount_due' => $post['amount_due_new'],
+            'amount_paid' => $post['amount_paid_new'],
+            'balance_used' => $post['balance_used'],
+            'total_amount' => $nota->harga_total,
+            'remaining_funds' => $post['remaining_funds'],
+            'balance' => $post['sisa_saldo'],
+            'overpayment' => $post['overpayment'],
+            'status' => $accounting_invoice_status,
+            'created_at' => $accounting->created_at,
+            'finished_at' => $finished_at,
+        ]);
+
+        return redirect()->route('spks.show', ['spk' => $spk_id])->with('success', 'Nota linked to Accounting successfully. AccountingInvoice created.');
     }
 }

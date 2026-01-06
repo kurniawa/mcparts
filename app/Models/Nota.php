@@ -12,6 +12,45 @@ class Nota extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
+    public function spk()
+    {
+        return $this->belongsToMany(
+            Spk::class,          // Model tujuan
+            'spk_notas',         // Nama tabel pivot
+            'nota_id',           // Foreign key di tabel pivot yang merujuk ke Nota
+            'spk_id'             // Foreign key di tabel pivot yang merujuk ke Spk
+        ); // Mengambil hanya satu Spk yang terkait dengan Nota
+    }
+
+    function spk_produk_notas()
+    {
+        return $this->hasMany(SpkProdukNota::class, 'nota_id', 'id');
+    }
+
+    function possible_related_accountings()
+    {
+        // Get all accountings related to this nota's customer and created_at not more than five months after nota created_at
+        // dump($this->pelanggan_id);
+        // dump($this->created_at);
+        // dump($this->harga_total);
+        $accountings = Accounting::where('pelanggan_id', $this->pelanggan_id)
+            ->where('created_at', '>=', $this->created_at)
+            ->where('created_at', '<=', date('Y-m-d H:i:s', strtotime($this->created_at . ' +5 months')))
+            ->get();
+        // dump($accountings);
+        // Filter only accountings which not related with any accounting_invoices
+        $related_accountings = collect();
+        foreach ($accountings as $accounting) {
+            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->get();
+            if (count($accounting_invoices) == 0) {
+                $related_accountings->push($accounting);
+            }
+        }
+        // dump($related_accountings);
+        return $related_accountings;
+        
+    }
+
     public static function create_from_spk_produk($spk, $spk_produk, $jumlah_total) {
         $alamat_id = null;
         $kontak_id = null;
@@ -302,15 +341,5 @@ class Nota extends Model
         return $this->hasOne(AccountingInvoice::class, 'invoice_id', 'id')
         ->where('invoice_table', 'notas')
         ->latest('created_at');
-    }
-
-    public function spk()
-    {
-        return $this->belongsToMany(
-            Spk::class,          // Model tujuan
-            'spk_notas',         // Nama tabel pivot
-            'nota_id',           // Foreign key di tabel pivot yang merujuk ke Nota
-            'spk_id'             // Foreign key di tabel pivot yang merujuk ke Spk
-        ); // Mengambil hanya satu Spk yang terkait dengan Nota
     }
 }
