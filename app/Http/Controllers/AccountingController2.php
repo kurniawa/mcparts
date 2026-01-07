@@ -94,16 +94,19 @@ class AccountingController2 extends Controller
 
     function link_nota_accounting(Request $request, Nota $nota, Accounting $accounting) {
         $post = $request->post();
+        // dd($post);
+        $payment_status = $post['payment_status'];
+        if ($payment_status !== 'lunas') {
+            $request->validate(['error'=>'required'],['error.required'=>'Payment status must be "lunas" when linking nota to accounting.']);
+        }
         $spk_id = $nota->spk->first()->id;
         $transaction_name = TransactionName::where('user_instance_id', $accounting->user_instance_id)->where('desc', $accounting->transaction_desc)->first();
         
-        $payment_status = $post['payment_status'];
         $accounting_invoice_status = 'active';
-        $finished_at = null;
         if ($payment_status == 'lunas') {
-            $finished_at = $nota->finished_at;
             $accounting_invoice_status = 'inactive';
         }
+        // Create AccountingInvoice
         AccountingInvoice::create([
             'accounting_time_key' => $accounting->time_key,
             'time_key' => time(),
@@ -118,20 +121,34 @@ class AccountingController2 extends Controller
             'customer_name' => $nota->pelanggan_nama,
             'payment_status' => $post['payment_status'],
             'discount_percentage' => $post['discount_percentage'],
+            'percent_discount' => $post['percent_discount'],
+            'other_discount' => $post['other_discount'],
             'total_discount' => $post['total_discount'],
             'discount_description' => $post['discount_description'],
             'amount_due' => $post['amount_due_new'],
-            'amount_paid' => $post['amount_paid_new'],
-            'balance_used' => $post['balance_used'],
+            'amount_paid' => $post['amount_paid'],
+            'balance_used' => 0.00,
             'total_amount' => $nota->harga_total,
-            'remaining_funds' => $post['remaining_funds'],
-            'balance' => $post['sisa_saldo'],
-            'overpayment' => $post['overpayment'],
+            'remaining_funds' => $post['remaining_balance'],
+            'balance' => $post['balance_start'],
+            'overpayment' => 0.00,
             'status' => $accounting_invoice_status,
             'created_at' => $accounting->created_at,
-            'finished_at' => $finished_at,
         ]);
+        // Update Nota payment status
+        $nota->status_bayar = $payment_status;
+        $nota->discount_percentage = $post['discount_percentage'];
+        $nota->percent_discount = $post['percent_discount'];
+        $nota->other_discount = $post['other_discount'];
+        $nota->total_discount = $post['total_discount'];
+        $nota->discount_description = $post['discount_description'];
+        $nota->amount_due = $post['amount_due_new'];
+        $nota->amount_paid = $post['amount_paid'];
+        $nota->balance_used = 0.00;
+        $nota->overpayment = 0.00;
+        $nota->finished_at = $accounting->created_at;
+        $nota->save();
 
-        return redirect()->route('spks.show', ['spk' => $spk_id])->with('success', 'Nota linked to Accounting successfully. AccountingInvoice created.');
+        return redirect()->route('spks.show', ['spk' => $spk_id])->with('success_', 'Nota linked to Accounting successfully. AccountingInvoice created. Nota updated.');
     }
 }

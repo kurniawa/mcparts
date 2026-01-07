@@ -254,10 +254,18 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="text-center">
-                                            <input type="number" id="related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[discount_percentage][${trId}][]" value="0" class="text-xs p-1 w-12">%
+                                        <div class="flex w-full">
+                                            <input type="number" id="related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[discount_percentage][${trId}][]" value="0" class="text-xs p-0 pl-1 w-max-30">
+                                            <span>%</span>
+                                            <input type="text" id="related_not_yet_paid_off_invoices[percent_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 w-max-30 bg-slate-200" readonly>
                                         </div>
-                                        <input type="text" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1 text-center">
+                                        <div class="flex w-full">
+                                            <input type="text" id="related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 col-span-2 w-max-30">
+                                            <input type="text" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 col-span-3 bg-slate-200 w-max-30" readonly>
+                                        </div>
+                                        <input type="text" name="related_not_yet_paid_off_invoices[discount_description][${trId}][]" placeholder="keterangan diskon" class="text-xs p-0 pl-1">
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices[percent_discount][${trId}][]" id="related_not_yet_paid_off_invoices[percent_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices[other_discount][${trId}][]" id="related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
                                         <input type="hidden" name="related_not_yet_paid_off_invoices[total_discount][${trId}][]" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
                                     </td>
                                     <td>
@@ -290,7 +298,7 @@
                                 // console.log('trId', trId);
                                 applyFormatNumber(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}`);
                                 applyEvent(`related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}`, trId);
                                 applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId);
                                 applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId);
                             });
@@ -435,14 +443,20 @@
                     let amountDueRealUnchanged = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real-unchanged`);
                     let paymentStatus = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${trId}-${invoice.value}`);
                     let discountPercentage = document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${invoice.value}`);
+                    let percentDiscount = document.getElementById(`related_not_yet_paid_off_invoices[percent_discount]-${trId}-${invoice.value}`);
+                    let percentDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[percent_discount]-${trId}-${invoice.value}-real`);
+                    let otherDiscount = document.getElementById(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${invoice.value}`);
+                    let otherDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${invoice.value}-real`);
                     let totalDiscount = document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${invoice.value}`);
                     let totalDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${invoice.value}-real`);
                     let balanceUsed = document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${invoice.value}`);
                     let balanceUsedReal = document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${invoice.value}-real`);
                     let totalPrice = document.getElementById(`related_not_yet_paid_off_invoices[harga_total]-${trId}-${invoice.value}-real`);
-                    
+                    // console.log(trId, invoice.value);
+                    // console.log(otherDiscountReal);
                     // parseFloat beberapa Value
                     let discountPercentageValue = parseFloat(discountPercentage.value);
+                    let otherDiscountRealValue = parseFloat(otherDiscountReal.value);
                     let balanceUsedRealValue = parseFloat(balanceUsedReal.value);
                     let amountPaidRealValue = parseFloat(amountPaidReal.value);
                     let amountDueRealUnchangedValue = parseFloat(amountDueRealUnchanged.value);
@@ -450,12 +464,13 @@
                     let totalPriceValue = parseFloat(totalPrice.value);
 
                     // Hitung Potongan Harga
-                    let totalDiscountRealValue = parseFloat(totalDiscountReal.value);
-                    if (discountPercentageValue > 0) {
-                        totalDiscountRealValue = (discountPercentageValue / 100) * amountDueRealValue;
-                    }
-                    totalDiscount.value = formatHargaIndo(totalDiscountRealValue);
+                    let percentDiscountRealValue = (discountPercentageValue / 100) * amountDueRealValue;
+                    percentDiscountReal.value = percentDiscountRealValue;
+                    percentDiscount.value = formatHargaIndo(percentDiscountRealValue);
+                    let totalDiscountRealValue = percentDiscountRealValue + otherDiscountRealValue;
+                    otherDiscount.value = formatHargaIndo(otherDiscountRealValue);
                     totalDiscountReal.value = totalDiscountRealValue;
+                    totalDiscount.value = formatHargaIndo(totalDiscountRealValue);
                     // console.log("discountPercentageValue", discountPercentageValue);
                     // console.log("totalDiscountRealValue", totalDiscountRealValue);
 
@@ -482,7 +497,7 @@
                         // console.log(amountDueRealValue);
                         if (amountDueRealValue <= 0) {
                             paymentStatus.value = 'lunas';
-                        } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) && amountDueRealValue == totalPriceValue) {
+                        } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
                             paymentStatus.value = 'belum_lunas'; 
                         } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
                             paymentStatus.value = 'sebagian';
@@ -693,7 +708,7 @@
                             // createdAt.getHours().toString().padStart(2, '0') + ':' +
                             // createdAt.getMinutes().toString().padStart(2, '0');
 
-            console.log(formatted);
+            // console.log(formatted);
 
             return formatted;
         }

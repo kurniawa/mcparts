@@ -144,25 +144,33 @@
                                                 <td>
                                                     <div id="remaining_balance-{{ $key_accounting }}">{{ number_format($accounting->jumlah / 100, 0, ',', '.') }}</div>
                                                     <input type="hidden" id="remaining_balance-{{ $key_accounting }}-real" name="remaining_balance" value="{{ $accounting->jumlah / 100 }}">
-                                                    <input type="hidden" name="balance_available" id="balance_available-{{ $key_accounting }}" value="{{ $accounting->jumlah / 100 }}">
+                                                    <input type="hidden" name="balance_start" id="balance_start-{{ $key_accounting }}" value="{{ $accounting->jumlah / 100 }}">
                                                     <input type="hidden" name="total_price" id="total_price-{{ $key_accounting }}" value="{{ $nota->harga_total }}">
                                                 </td>
                                                 <td>
                                                     <div>
                                                         <span class="text-orange-400">=><input type="text" id="amount_due-{{ $key_accounting }}" value="{{ number_format($nota->amount_due, 0, ',', '.') }}" class="text-xs p-0 border-none" readonly></span>
-                                                        <input type="hidden" name="amount_due" id="amount_due-{{ $key_accounting }}-real" value="{{ $nota->amount_due }}}">
-                                                        <input type="hidden" name="amount_paid" id="amount_paid-{{ $key_accounting }}-real" value="{{ $nota->amount_paid }}}">
-                                                        <input type="hidden" id="amount_due-{{ $key_accounting }}-start" value="{{ $nota->amount_due }}}">
+                                                        <input type="hidden" name="amount_due_new" id="amount_due-{{ $key_accounting }}-real" value="{{ $nota->amount_due }}">
+                                                        <input type="hidden" name="amount_paid" id="amount_paid-{{ $key_accounting }}-real" value="{{ $nota->amount_paid }}">
+                                                        <input type="hidden" id="amount_due-{{ $key_accounting }}-start" value="{{ $nota->amount_due }}">
                                                     </div>
                                                     <div class="text-xs text-center">
                                                         <span class="text-emerald-400">=><input type="text" id="payment_status-{{ $key_accounting }}" name="payment_status" class="text-xs p-0 border-none" value="{{ $nota->status_bayar }}" readonly></span>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div class="text-center">
-                                                        <input type="number" id="discount_percentage-{{ $key_accounting }}" name="discount_percentage" value="0" class="text-xs p-1 w-12">%
+                                                    <div class="flex w-full">
+                                                        <input type="number" id="discount_percentage-{{ $key_accounting }}" name="discount_percentage" value="0" max="100" class="text-xs p-0 pl-1 w-full">
+                                                        <span>%</span>
+                                                        <input type="text" id="percent_discount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 w-full bg-slate-200" readonly>
                                                     </div>
-                                                    <input type="text" id="total_discount-{{ $key_accounting }}" value="0" class="text-xs p-1 text-center">
+                                                    <div class="grid grid-cols-5">
+                                                        <input type="text" id="other_discount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 col-span-2">
+                                                        <input type="text" id="total_discount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 col-span-3 bg-slate-200" readonly>
+                                                    </div>
+                                                    <input type="text" name="discount_description" placeholder="keterangan diskon" class="text-xs p-0 pl-1 w-full">
+                                                    <input type="hidden" name="percent_discount" id="percent_discount-{{ $key_accounting }}-real" value="0">
+                                                    <input type="hidden" name="other_discount" id="other_discount-{{ $key_accounting }}-real" value="0">
                                                     <input type="hidden" name="total_discount" id="total_discount-{{ $key_accounting }}-real" value="0">
                                                 </td>
                                                 <td>
@@ -196,6 +204,8 @@
 <script>
     const possible_related_accountings = @json($possible_related_accountings);
     possible_related_accountings.forEach((element, index) => {
+        applyFormatNumber(`percent_discount-${index}`);
+        applyFormatNumberAndEvent(`other_discount-${index}`, index);
         applyFormatNumber(`total_discount-${index}`);
         applyFormatNumberAndEvent(`balance_used-${index}`, index);
         applyEvent(`discount_percentage-${index}`, index);
@@ -243,14 +253,17 @@
         // Set the initial value: remainingBalance
         let remainingBalance = document.getElementById(`remaining_balance-${trId}`);
         let remainingBalanceReal = document.getElementById(`remaining_balance-${trId}-real`);
-        let balanceAvailable = document.getElementById(`balance_available-${trId}`);
-        let amountPaid = document.getElementById(`amount_paid-${trId}`);
+        let balanceStart = document.getElementById(`balance_start-${trId}`);
         let amountPaidReal = document.getElementById(`amount_paid-${trId}-real`);
         let amountDue = document.getElementById(`amount_due-${trId}`);
         let amountDueReal = document.getElementById(`amount_due-${trId}-real`);
         let amountDueStart = document.getElementById(`amount_due-${trId}-start`);
         let paymentStatus = document.getElementById(`payment_status-${trId}`);
         let discountPercentage = document.getElementById(`discount_percentage-${trId}`);
+        let percentDiscount = document.getElementById(`percent_discount-${trId}`);
+        let percentDiscountReal = document.getElementById(`percent_discount-${trId}-real`);
+        let otherDiscount = document.getElementById(`other_discount-${trId}`);
+        let otherDiscountReal = document.getElementById(`other_discount-${trId}-real`);
         let totalDiscount = document.getElementById(`total_discount-${trId}`);
         let totalDiscountReal = document.getElementById(`total_discount-${trId}-real`);
         let balanceUsed = document.getElementById(`balance_used-${trId}`);
@@ -259,32 +272,37 @@
         
         // parseFloat beberapa Value
         let discountPercentageValue = parseFloat(discountPercentage.value);
+        let otherDiscountRealValue = parseFloat(otherDiscountReal.value);
         let balanceUsedRealValue = parseFloat(balanceUsedReal.value);
-        let remainingBalanceRealValue = parseFloat(remainingBalanceReal.value);
-        let amountPaidRealValue = parseFloat(amountPaidReal.value);
+        let remainingBalanceRealValue = parseFloat(balanceStart.value);
+        let amountPaidRealValue = balanceUsedRealValue;
         let amountDueStartValue = parseFloat(amountDueStart.value);
         let amountDueRealValue = amountDueStartValue;
         let totalPriceValue = parseFloat(totalPrice.value);
 
         // Hitung Potongan Harga
-        let totalDiscountRealValue = parseFloat(totalDiscountReal.value);
-        if (discountPercentageValue > 0) {
-            totalDiscountRealValue = (discountPercentageValue / 100) * amountDueRealValue;
-        }
-        totalDiscount.value = formatHargaIndo(totalDiscountRealValue);
+        let percentDiscountRealValue = (discountPercentageValue / 100) * amountDueRealValue;
+        percentDiscountReal.value = percentDiscountRealValue;
+        percentDiscount.value = formatHargaIndo(percentDiscountRealValue);
+        let totalDiscountRealValue = percentDiscountRealValue + otherDiscountRealValue;
+        otherDiscount.value = formatHargaIndo(otherDiscountRealValue);
         totalDiscountReal.value = totalDiscountRealValue;
+        totalDiscount.value = formatHargaIndo(totalDiscountRealValue);
         // console.log("discountPercentageValue", discountPercentageValue);
         // console.log("totalDiscountRealValue", totalDiscountRealValue);
 
         // Hitung Sisa Bayar
-        amountDueRealValue = amountDueRealValue - totalDiscountRealValue - amountPaidRealValue - balanceUsedRealValue;
+        amountDueRealValue = amountDueRealValue - totalDiscountRealValue - balanceUsedRealValue;
         amountDueReal.value = amountDueRealValue;
         amountDue.value = formatHargaIndo(amountDueRealValue); // Format angka yang ditampilkan
         
         // Hitung Sisa Balance
-        remainingBalanceRealValue = remainingBalanceRealValue - amountPaidRealValue;
+        remainingBalanceRealValue = remainingBalanceRealValue - balanceUsedRealValue;
         remainingBalanceReal.value = remainingBalanceRealValue;
         remainingBalance.innerHTML = formatHargaIndo(remainingBalanceRealValue);
+
+        // Hitung Jumlah Bayar
+        amountPaidReal.value = amountPaidRealValue;
 
         // Menentukan status_bayar
         setTimeout(() => {
@@ -292,7 +310,7 @@
             // console.log(amountDueRealValue);
             if (amountDueRealValue <= 0) {
                 paymentStatus.value = 'lunas';
-            } else if (amountDueRealValue == (amountDueStartValue-totalDiscountRealValue) && amountDueRealValue == totalPriceValue) {
+            } else if (amountDueRealValue == (amountDueStartValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
                 paymentStatus.value = 'belum_lunas'; 
             } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueStartValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
                 paymentStatus.value = 'sebagian';

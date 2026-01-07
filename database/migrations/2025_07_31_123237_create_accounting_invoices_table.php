@@ -48,14 +48,16 @@ return new class extends Migration
 
             // Data Pembayaran
             $table->decimal('discount_percentage', 5, 2)->default(0.00);
+            $table->decimal('percent_discount', 15, 2)->default(0.00);
+            $table->decimal('other_discount', 15, 2)->default(0.00);
             $table->decimal('total_discount', 15, 2)->default(0.00);
             $table->string('discount_description')->nullable();
             $table->decimal('amount_due', 15, 2)->default(0.00); // Amount still due for payment
+            $table->decimal('balance', 15, 2)->default(0.00); // Berapa jumlah uang masuk
             $table->decimal('amount_paid', 15, 2)->default(0.00); // Amount already paid
-            $table->decimal('balance_used', 15, 2)->default(0.00);
-            $table->decimal('remaining_funds', 15, 2)->default(0.00);
-            $table->decimal('balance', 15, 2)->default(0.00);
-            $table->decimal('overpayment', 15, 2)->default(0.00); // Overpayment
+            $table->decimal('balance_used', 15, 2)->default(0.00); // Berapa jumlah (dari saldo yang sebelumnya sudah ada) yang digunakan untuk membayar
+            $table->decimal('remaining_funds', 15, 2)->default(0.00); // Berapa jumlah (dari uang masuk) yang tersisa
+            $table->decimal('overpayment', 15, 2)->default(0.00); // Berapa jumlah lebih bayar
 
             // $table->decimal('discount_percentage_old', 5, 2)->default(0.00);
             // $table->decimal('total_discount_old', 15, 2)->default(0.00);
