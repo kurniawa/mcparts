@@ -541,6 +541,16 @@ class AccountingController extends Controller
                         // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
                         // Data Discount
                         $discount_percentage = (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j];
+                        $other_discount = bcadd(
+                            (string) $related_nota->other_discount,
+                            (string) $post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
+                        $percent_discount = bcadd(
+                            (string) $related_nota->percent_discount,
+                            (string) $post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
                         $total_discount = bcadd(
                             (string) $related_nota->total_discount,
                             (string) $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
@@ -553,6 +563,8 @@ class AccountingController extends Controller
                         $related_nota->update([
                             'status_bayar' => $payment_status,
                             'discount_percentage' => $discount_percentage,
+                            'percent_discount' => $percent_discount,
+                            'other_discount' => $other_discount,
                             'total_discount' => $total_discount,
                             'discount_description' => $discount_description,
                             'amount_due' => $amount_due_new,
@@ -610,8 +622,10 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'discount_percentage' => $discount_percentage,
-                                'total_discount' => $total_discount,
+                                'discount_percentage' => (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
+                                'percent_discount' => (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                                'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                                'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
                                 'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
@@ -638,8 +652,10 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'discount_percentage' => $discount_percentage,
-                                'total_discount' => $total_discount,
+                                'discount_percentage' => (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
+                                'percent_discount' => (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                                'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                                'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
                                 'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
@@ -671,8 +687,10 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'discount_percentage' => $discount_percentage,
-                                'total_discount' => $total_discount,
+                                'discount_percentage' => (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
+                                'percent_discount' => (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                                'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                                'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
                                 'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],

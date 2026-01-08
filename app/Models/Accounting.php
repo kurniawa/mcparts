@@ -98,6 +98,8 @@ class Accounting extends Model
             $amount_paid = (float)$post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j];
             $amount_due = (float)$post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j];
             $discount_percentage = (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j];
+            $percent_discount = (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j];
+            $other_discount = (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j];
             $total_discount = (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j];
             $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
             $balance_used = (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
@@ -105,7 +107,7 @@ class Accounting extends Model
             // Validasi Potongan Harga
             $total_discount_new = $total_discount;
             if ($discount_percentage > 0) {
-                $total_discount_new = ($discount_percentage / 100) * $amount_due_old;
+                $total_discount_new = $percent_discount + $other_discount;
             }
 
             if ($total_discount_new != $total_discount) {
