@@ -32,6 +32,11 @@ class Accounting extends Model
         ];
     }
 
+    // Related AccountingInvoices
+    public function accounting_invoices() {
+        return $this->hasMany(AccountingInvoice::class, 'accounting_id', 'id');
+    }
+
     static function validasi_data_untuk_penerimaan_piutang($request, $i) {
         $request->validate([
             // "remaining_balance_masuk.$i" => "required|numeric",

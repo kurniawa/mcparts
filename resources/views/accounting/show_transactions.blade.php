@@ -171,7 +171,23 @@
                 </tr>
                 @foreach ($accountings as $key_accounting => $accounting)
                 <tr>
-                    <td>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
+                    <td>
+                        <div class="flex gap-1 items-center">
+                            <span>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</span>
+                            <button id="btn-toggle-form_change_date-{{ $key_accounting }}" type="button" class="border rounded" onclick="toggle_light(this.id, 'form_change_date-{{ $key_accounting }}', [], ['bg-gray-200'], 'block')">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form id="form_change_date-{{ $key_accounting }}" action="{{ route('accounting.change_date', $accounting->id) }}" method="POST" onsubmit="return confirm('Ingin ubah tanggal?')" class="hidden">
+                            @csrf
+                            <div class="flex gap-1 items-center">
+                                <input type="date" name="new_date" class="border p-1 text-xs mt-1 w-20" value="{{ date('Y-m-d', strtotime($accounting->created_at)) }}">
+                                <button type="submit" class="rounded bg-blue-200 text-blue-600 px-1">change date</button>
+                            </div>
+                        </form>
+                    </td>
                     <td>{{ $accounting->kode }}</td>
                     @if ($accounting->keterangan !== null)
                     <td>{{ $accounting->transaction_desc }} <span class="font-bold text-blue-300">- {{ $accounting->keterangan }} -</span></td>

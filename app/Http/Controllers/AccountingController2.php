@@ -151,4 +151,123 @@ class AccountingController2 extends Controller
 
         return redirect()->route('spks.show', ['spk' => $spk_id])->with('success_', 'Nota linked to Accounting successfully. AccountingInvoice created. Nota updated.');
     }
+
+    function change_date(Request $request,Accounting $accounting) {
+        $post = $request->post();
+        dump($post);
+        dump($accounting);
+        dd($accounting->accounting_invoices);
+
+        // Validate new date
+        $request->validate([
+            'new_date' => 'required|date',
+        ], [
+            'new_date.required' => 'New date is required.',
+            'new_date.date' => 'New date must be a valid date.',
+        ]);
+
+        // If new date is same as old date, do nothing
+        $old_date = date('Y-m-d', strtotime($accounting->created_at));
+        if ($old_date == $post['new_date']) {
+            return;
+        }
+
+        // Update related AccountingInvoices
+        $new_created_at = date('Y-m-d', strtotime($post['new_date'])) . ' ' . date('H:i:s');
+        foreach ($accounting->accounting_invoices as $accounting_invoice) {
+            $accounting_invoice->created_at = $new_created_at;
+            $accounting_invoice->save();
+            /**
+             * If $accounting->kategori_level_one == 'Penerimaan Piutang' &&
+             * $accounting_invoice->payment_status == 'lunas'
+             * then also update the related Nota's finished_at date
+             */
+            if ($accounting->kategori_level_one == 'Penerimaan Piutang' && $accounting_invoice->payment_status == 'lunas') {
+                $nota = Nota::find($accounting_invoice->invoice_id);
+                if ($nota) {
+                    $nota->finished_at = $new_created_at;
+                    $nota->save();
+                }
+            }
+        }
+
+        /**
+         * Updating Accounting's created_at need to recalculate the balance(saldo) of related user_instance_id
+         * So first we need to get the balance(saldo) before this accounting's old created_at
+         * then recalculate the balance(saldo) from this accounting's new created_at to the latest accounting
+         */
+        $old_created_at = $accounting->created_at;
+        if($old_created_at > $new_created_at) { // tanggal lebih awal
+            // Get balance before new_created_at
+            $accounting_before = Accounting::where('user_instance_id', $accounting->user_instance_id)
+                ->where('created_at', '<', $new_created_at)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            $starting_balance = $accounting_before ? $accounting_before->saldo : 0.00;
+            $last_balance = $starting_balance;
+            
+            // Update $last_balance for this accounting terlebih dahulu
+            // Setelah itu update accountings yang ada diantara new_created_at dan old_created_at
+            if($accounting->transaction_type == 'pemasukan') {
+                $last_balance += $accounting->jumlah;
+            } elseif($accounting->transaction_type == 'pengeluaran') {
+                $last_balance -= $accounting->jumlah;
+            }
+            $accounting->saldo = $last_balance;
+            $accounting->created_at = $new_created_at;
+            $accounting->save();
+
+            $accounting_betweens = Accounting::where('user_instance_id', $accounting->user_instance_id)
+                ->whereBetween('created_at', [$new_created_at, $old_created_at])
+                ->orderBy('created_at', 'asc')
+                ->get();
+            
+            // Recalculate balance from new_created_at to old_created_at
+            foreach ($accounting_betweens as $acc) {
+                if($acc->transaction_type == 'pemasukan') {
+                    $last_balance += $acc->jumlah;
+                } elseif($acc->transaction_type == 'pengeluaran') {
+                    $last_balance -= $acc->jumlah;
+                }
+                $acc->saldo = $last_balance;
+                $acc->save();
+            }
+            
+        } elseif($old_created_at < $new_created_at) { // tanggal lebih akhir
+            // Get balance before old_created_at
+            $accounting_before = Accounting::where('user_instance_id', $accounting->user_instance_id)
+                ->where('created_at', '<', $old_created_at)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            $starting_balance = $accounting_before ? $accounting_before->saldo : 0.00;
+            $last_balance = $starting_balance;
+
+            // Update accountings yang ada diantara old_created_at dan new_created_at terlebih dahulu
+            // Setelah itu update $last_balance for this accounting
+            $accounting_betweens = Accounting::where('user_instance_id', $accounting->user_instance_id)
+                ->whereBetween('created_at', [$old_created_at, $new_created_at])
+                ->orderBy('created_at', 'asc')
+                ->get();
+            
+            foreach ($accounting_betweens as $acc) {
+                if($acc->transaction_type == 'pemasukan') {
+                    $last_balance += $acc->jumlah;
+                } elseif($acc->transaction_type == 'pengeluaran') {
+                    $last_balance -= $acc->jumlah;
+                }
+                $acc->saldo = $last_balance;
+                $acc->save();
+            }
+
+            if($accounting->transaction_type == 'pemasukan') {
+                $last_balance += $accounting->jumlah;
+            } elseif($accounting->transaction_type == 'pengeluaran') {
+                $last_balance -= $accounting->jumlah;
+            }
+            $accounting->saldo = $last_balance;
+            $accounting->created_at = $new_created_at;
+            $accounting->save();
+        }
+
+    }
 }
