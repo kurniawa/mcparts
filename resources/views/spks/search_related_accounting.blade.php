@@ -129,7 +129,7 @@
                                 <td>{{ $accounting->transaction_desc }}</td>
                                 <td>
                                     <div class="text-right">
-                                        {{ number_format($accounting->jumlah / 100,0,',','.') }}
+                                        {{ number_format($accounting->jumlah,0,',','.') }}
                                     </div>
                                 </td>
                                 
@@ -142,9 +142,9 @@
                                             <tr><th>Balance</th><th>Amount Due</th><th>Discount</th><th>Balance Used</th></tr>
                                             <tr>
                                                 <td>
-                                                    <div id="remaining_balance-{{ $key_accounting }}">{{ number_format($accounting->jumlah / 100, 0, ',', '.') }}</div>
-                                                    <input type="hidden" id="remaining_balance-{{ $key_accounting }}-real" name="remaining_balance" value="{{ $accounting->jumlah / 100 }}">
-                                                    <input type="hidden" name="balance_start" id="balance_start-{{ $key_accounting }}" value="{{ $accounting->jumlah / 100 }}">
+                                                    <div id="remaining_balance-{{ $key_accounting }}">{{ number_format($accounting->jumlah, 0, ',', '.') }}</div>
+                                                    <input type="hidden" id="remaining_balance-{{ $key_accounting }}-real" name="remaining_balance" value="{{ $accounting->jumlah }}">
+                                                    <input type="hidden" name="balance_start" id="balance_start-{{ $key_accounting }}" value="{{ $accounting->jumlah }}">
                                                     <input type="hidden" name="total_price" id="total_price-{{ $key_accounting }}" value="{{ $nota->harga_total }}">
                                                 </td>
                                                 <td>
@@ -281,7 +281,7 @@
         let totalPriceValue = parseFloat(totalPrice.value);
 
         // Hitung Potongan Harga
-        let percentDiscountRealValue = (discountPercentageValue / 100) * amountDueRealValue;
+        let percentDiscountRealValue = (discountPercentageValue) * amountDueRealValue;
         percentDiscountReal.value = percentDiscountRealValue;
         percentDiscount.value = formatHargaIndo(percentDiscountRealValue);
         let totalDiscountRealValue = percentDiscountRealValue + otherDiscountRealValue;

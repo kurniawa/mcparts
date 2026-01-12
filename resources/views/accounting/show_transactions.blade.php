@@ -131,13 +131,13 @@
                     <th>
                         <div class="flex justify-between bg-pink-300">
                             <span>Rp</span>
-                            <span>{{ number_format($keluar_total / 100,2,',','.') }}</span>
+                            <span>{{ number_format($keluar_total,2,',','.') }}</span>
                         </div>
                     </th>
                     <th>
                         <div class="flex justify-between bg-emerald-300">
                             <span>Rp</span>
-                            <span>{{ number_format($masuk_total / 100,2,',','.') }}</span>
+                            <span>{{ number_format($masuk_total,2,',','.') }}</span>
                         </div>
                     </th>
                     <th>
@@ -145,7 +145,7 @@
                             <span>Rp</span>
                             @if ($from)
                             @if (count($accountings) !== 0)
-                            <span>{{ number_format($accountings[count($accountings) - 1]->saldo / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accountings[count($accountings) - 1]->saldo,2,',','.') }}</span>
                             @else
                             <span>0</span>
                             @endif
@@ -165,7 +165,7 @@
                     <td>
                         <div class="flex justify-between">
                             <span>Rp.</span>
-                            <span>{{ number_format($saldo_awal / 100,2,',','.') }}</span>
+                            <span>{{ number_format($saldo_awal,2,',','.') }}</span>
                         </div>
                     </td>
                 </tr>
@@ -198,7 +198,7 @@
                         @if ($accounting->transaction_type === 'pengeluaran')
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->jumlah / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accounting->jumlah,2,',','.') }}</span>
                         </div>
                         @endif
                     </td>
@@ -206,14 +206,14 @@
                         @if ($accounting->transaction_type === 'pemasukan')
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->jumlah / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accounting->jumlah,2,',','.') }}</span>
                         </div>
                         @endif
                     </td>
                     <td>
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->saldo / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accounting->saldo,2,',','.') }}</span>
                         </div>
                     </td>
                     @if ((int)$userInstance->user_id === $user->id)
@@ -284,8 +284,8 @@
                                     <div class="ml-1">
                                         <label for="" class="block">keluar:</label>
                                         @if ($accounting->transaction_type === 'pengeluaran')
-                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah / 100,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
-                                        <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted" value="{{ $accounting->jumlah / 100 }}">
+                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
+                                        <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
                                         <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36">
                                         <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted">
@@ -294,8 +294,8 @@
                                     <div class="ml-1">
                                         <label for="" class="block">masuk:</label>
                                         @if ($accounting->transaction_type === 'pemasukan')
-                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah / 100,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
-                                        <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted" value="{{ $accounting->jumlah / 100 }}">
+                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
+                                        <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
                                         <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36">
                                         <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted">
@@ -353,12 +353,12 @@
             <table id="table-transactions">
                 <tr>
                     <th></th><th></th><th></th>
-                    <th>{{ $keluar_total / 100 }}</th>
-                    <th>{{ $masuk_total / 100 }}</th>
+                    <th>{{ $keluar_total }}</th>
+                    <th>{{ $masuk_total }}</th>
                     <th>
                         @if ($from)
                         @if (count($accountings) !== 0)
-                        <span>{{ $accountings[count($accountings) - 1]->saldo / 100 }}</span>
+                        <span>{{ $accountings[count($accountings) - 1]->saldo }}</span>
                         @else
                         <span>0</span>
                         @endif
@@ -387,16 +387,16 @@
                     @endif
                     <td>
                         @if ($accounting->transaction_type === 'pengeluaran')
-                        {{ $accounting->jumlah / 100 }}
+                        {{ $accounting->jumlah }}
                         @endif
                     </td>
                     <td>
                         @if ($accounting->transaction_type === 'pemasukan')
-                        {{ $accounting->jumlah / 100 }}
+                        {{ $accounting->jumlah }}
                         @endif
                     </td>
                     <td>
-                        {{ $accounting->saldo / 100 }}
+                        {{ $accounting->saldo }}
                     </td>
 
                 </tr>

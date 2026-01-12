@@ -99,7 +99,7 @@ class AccountingInvoiceController extends Controller
             // UPDATE entry Accounting / Transaksi terkait
             if ($accountingInvoice->accounting_id) {
                 $accounting = $accountingInvoice->accounting;
-                $accounting->jumlah -= (($accountingInvoice->amount_paid + $accountingInvoice->overpayment) * 100);
+                $accounting->jumlah -= (($accountingInvoice->amount_paid + $accountingInvoice->overpayment));
                 $accounting->save();
                 $accounting->updateAccountingAfter();
                 $success_ .= "accounting diupdate. ";

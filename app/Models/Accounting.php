@@ -9,6 +9,10 @@ class Accounting extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+    protected $casts = [
+        'jumlah' => 'decimal:2',
+        'saldo'  => 'decimal:2',
+    ];
     static function get_instance_types() {
         return [
             'safe',

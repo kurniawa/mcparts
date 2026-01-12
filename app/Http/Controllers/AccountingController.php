@@ -375,11 +375,11 @@ class AccountingController extends Controller
                 if ($transaction_name->kategori_type === 'UANG MASUK') {
                     if ($masuk !== null) {
                         $transaction_type = 'pemasukan';
-                        $jumlah = $masuk * 100;
+                        $jumlah = $masuk;
                         $keluar = null;
                     }
                 } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $jumlah = $keluar * 100;
+                    $jumlah = $keluar;
                     $masuk = null;
                 }
 
@@ -1050,10 +1050,10 @@ class AccountingController extends Controller
 
         if ($transaction_name->kategori_type === 'UANG MASUK') {
             $transaction_type = 'pemasukan';
-            $jumlah = (float)$masuk * 100;
+            $jumlah = (float)$masuk;
             $keluar = null;
         } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
-            $jumlah = (float)$keluar * 100;
+            $jumlah = (float)$keluar;
             $masuk = null;
         }
 
@@ -1247,7 +1247,6 @@ class AccountingController extends Controller
              * dan UPDATE Nota terkait.
              * Tabel yang perlu diperhatikan: Nota, AccountingInvoice, Overpayment
              */
-            $funds_in = (float)$accounting->jumlah / 100;
             $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->latest('created_at')->get();
             // dd($accounting_invoices);
             foreach ($accounting_invoices as $accounting_invoice) {
