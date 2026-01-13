@@ -51,12 +51,12 @@ class PembelianService
                     'barang_id' => $barang->id,
                     'barang_nama' => $barang->nama,
                     'satuan_main' => $barang->satuan_main,
-                    'jumlah_main' => $jumlah_main * 100,
+                    'jumlah_main' => $jumlah_main,
                     'harga_main' => $harga_main,
                     'satuan_sub' => $barang->satuan_sub,
-                    'jumlah_sub' => (int) $data['jumlah_sub'][$i] * 100,
+                    'jumlah_sub' => (float)$data['jumlah_sub'][$i],
                     'harga_sub' => $harga_sub,
-                    'harga_t' => round($harga_t, 2),
+                    'harga_t' => $harga_t,
                     'creator' => $user->username,
                 ]);
 

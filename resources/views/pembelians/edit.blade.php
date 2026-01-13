@@ -71,7 +71,7 @@
                                 <td>
                                     <div class="text-center">
                                         <div class="flex items-center">
-                                            <input type="number" name="jumlah_sub[]" id="jumlah_sub-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->jumlah_sub / 100 }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-1/2" oninput="count_harga_total({{ $key_pembelian_barang }})">
+                                            <input type="number" name="jumlah_sub[]" id="jumlah_sub-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->jumlah_sub }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-1/2" oninput="count_harga_total({{ $key_pembelian_barang }})">
                                             <span id="satuan_sub-{{ $key_pembelian_barang }}" class="ml-1">{{ $pembelian_barang->satuan_sub }}</span>
                                         </div>
                                     </div>
@@ -79,7 +79,7 @@
                                 <td>
                                     <div class="text-center">
                                         <div class="flex items-center">
-                                            <input type="number" name="jumlah_main[]" id="jumlah_main-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->jumlah_main / 100 }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-1/2" oninput="count_harga_total({{ $key_pembelian_barang }})">
+                                            <input type="number" name="jumlah_main[]" id="jumlah_main-{{ $key_pembelian_barang }}" value="{{ $pembelian_barang->jumlah_main }}" min="1" step="1" class="border-slate-300 rounded-lg text-xs p-1 w-1/2" oninput="count_harga_total({{ $key_pembelian_barang }})">
                                             <span class="satuan_main-{{ $key_pembelian_barang }} ml-1">{{ $pembelian_barang->satuan_main }}</span>
                                         </div>
                                     </div>

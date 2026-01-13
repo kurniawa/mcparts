@@ -21,8 +21,8 @@ return new class extends Migration
         DB::statement('
             UPDATE accountings
             SET 
-                jumlah = jumlah,
-                saldo = saldo
+                jumlah = jumlah / 100,
+                saldo = saldo / 100
         ');
     }
 

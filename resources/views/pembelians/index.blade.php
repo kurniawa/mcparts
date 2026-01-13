@@ -361,13 +361,13 @@
                                             <td>
                                                 @if ($pembelian_barang->satuan_sub !== null)
                                                 <div class="min-w-max">
-                                                    {{ $pembelian_barang->jumlah_sub / 100 }} {{ $pembelian_barang->satuan_sub }}
+                                                    {{ $pembelian_barang->jumlah_sub }} {{ $pembelian_barang->satuan_sub }}
                                                 </div>
                                                 @endif
                                             </td>
                                             <td>
                                                 <div class="min-w-max">
-                                                    {{ $pembelian_barang->jumlah_main / 100 }} {{ $pembelian_barang->satuan_main }}
+                                                    {{ $pembelian_barang->jumlah_main }} {{ $pembelian_barang->satuan_main }}
                                                 </div>
                                             </td>
                                             <td>
@@ -403,7 +403,7 @@
                                                     Content:
                                                     @if ($pembelians[$i]->isi !== null)
                                                         @foreach (json_decode($pembelians[$i]->isi,true) as $isi)
-                                                            --> {{ $isi['jumlah'] / 100 }} {{ $isi['satuan'] }}
+                                                            --> {{ $isi['jumlah'] }} {{ $isi['satuan'] }}
                                                         @endforeach
                                                     @endif
                                                 </div>
@@ -552,8 +552,8 @@
                             <td>{{ $pembelians[$i]->nomor_nota }}</td>
                             <td>{{ $pembelian_barang->barang_nama }}</td>
                             <td>{{ $pembelians[$i]->keterangan_bayar }}</td>
-                            <td class="text-center">{{ $pembelian_barang->jumlah_sub / 100 }}</td><td>{{ $pembelian_barang->satuan_sub }}</td>
-                            <td class="text-center">{{ $pembelian_barang->jumlah_main / 100 }}</td><td>{{ $pembelian_barang->satuan_main }}</td>
+                            <td class="text-center">{{ $pembelian_barang->jumlah_sub }}</td><td>{{ $pembelian_barang->satuan_sub }}</td>
+                            <td class="text-center">{{ $pembelian_barang->jumlah_main }}</td><td>{{ $pembelian_barang->satuan_main }}</td>
                             <td>{{ str_replace('.', ',', $pembelian_barang->harga_main) }}</td>
                             <td>{{ str_replace('.', ',', $pembelian_barang->harga_t) }}</td>
                         </tr>

@@ -80,7 +80,7 @@ class BarangController extends Controller
             if ($post['jumlah_sub'] === null || $post['jumlah_sub'] === 0) {
                 $jumlah_sub = 100;
             } else {
-                $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+                $jumlah_sub = (float)($post['jumlah_sub']);
             }
             $harga_sub = $post['harga_sub'];
             $harga_total_sub = $post['harga_total_sub'];
@@ -94,7 +94,7 @@ class BarangController extends Controller
             'satuan_sub' => $satuan_sub,
             'harga_main' => $post['harga_main'],
             'harga_sub' => $harga_sub,
-            'jumlah_main' => (int)($post['jumlah_main'] * 100),
+            'jumlah_main' => (float)($post['jumlah_main']),
             'jumlah_sub' => $jumlah_sub,
             'harga_total_main' => $post['harga_total_main'],
             'harga_total_sub' => $harga_total_sub,
@@ -191,7 +191,7 @@ class BarangController extends Controller
             if ($post['jumlah_sub'] === null || $post['jumlah_sub'] === 0) {
                 $jumlah_sub = 100;
             } else {
-                $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+                $jumlah_sub = (float)($post['jumlah_sub']);
             }
             $harga_sub = $post['harga_sub'];
             $harga_total_sub = $post['harga_total_sub'];
@@ -205,7 +205,7 @@ class BarangController extends Controller
             'satuan_sub' => $satuan_sub,
             'harga_main' => $post['harga_main'],
             'harga_sub' => $harga_sub,
-            'jumlah_main' => (int)($post['jumlah_main'] * 100),
+            'jumlah_main' => (float)($post['jumlah_main']),
             'jumlah_sub' => $jumlah_sub,
             'harga_total_main' => $post['harga_total_main'],
             'harga_total_sub' => $harga_total_sub,

@@ -412,19 +412,19 @@ class ArtisanController extends Controller
                 $satuan_main = $barang->satuan_meter;
                 $satuan_sub = $barang->satuan_rol;
                 $jumlah_sub = 100;
-                $harga_main = (int)$barang->harga_meter;
-                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_main = (float)$barang->harga_meter;
+                $jumlah_main = (float)($barang->jumlah_meter);
                 $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
                 $harga_sub = $harga_total_main;
                 $harga_total_sub = $harga_sub;
             } elseif ($barang->satuan_rol === null && $barang->satuan_meter !== null) {
                 $satuan_main = $barang->satuan_meter;
-                $harga_main = (int)$barang->harga_meter;
-                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_main = (float)$barang->harga_meter;
+                $jumlah_main = (float)($barang->jumlah_meter);
                 $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
             } elseif ($barang->satuan_rol !== null && $barang->satuan_meter === null) {
                 $satuan_main = $barang->satuan_rol;
-                $harga_main = (int)($barang->harga_total / $barang->jumlah_rol);
+                $harga_main = (float)($barang->harga_total / $barang->jumlah_rol);
                 $jumlah_main = 1;
                 $harga_total_main = $harga_main;
             }
@@ -655,19 +655,19 @@ class ArtisanController extends Controller
                     $barang = Barang::where('nama', $pembelian_temp->nama_barang)->first();
                     $jumlah_sub = null;
                     if ($pembelian_temp->jumlah_rol !== null) {
-                        $jumlah_sub = (int)($pembelian_temp->jumlah_rol * 100);
+                        $jumlah_sub = (float)($pembelian_temp->jumlah_rol);
                     }
                     PembelianBarang::create([
                         'pembelian_id' => $pembelian->id,
                         'barang_id' => $barang->id,
                         'barang_nama' => $barang->nama,
                         'satuan_main' => $pembelian_temp->satuan_meter,
-                        'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
-                        'harga_main' => (int)$pembelian_temp->harga_meter,
+                        'jumlah_main' => (float)($pembelian_temp->jumlah_meter),
+                        'harga_main' => (float)$pembelian_temp->harga_meter,
                         'satuan_sub' => $pembelian_temp->satuan_rol,
                         'jumlah_sub' => $jumlah_sub,
                         'harga_sub' => null,
-                        'harga_t' => (int)$pembelian_temp->harga_total,
+                        'harga_t' => (float)$pembelian_temp->harga_total,
                         'status_bayar' => $pembelian_temp->status_pembayaran,
                         'keterangan_bayar' => $pembelian_temp->keterangan_pembayaran,
                         'tanggal_lunas' => $pembelian_temp->tanggal_lunas,
@@ -688,17 +688,17 @@ class ArtisanController extends Controller
                 $tanggal_lunas = null;
 
                 foreach ($pembelian_barangs as $key_pembelian_barang => $pembelian_barang) {
-                    $harga_total += (int)$pembelian_barang->harga_t;
+                    $harga_total += (float)$pembelian_barang->harga_t;
                     $exist_satuan_main = false;
                     $exist_satuan_sub = false;
                     if (count($isi) !== 0) {
                         for ($i=0; $i < count($isi); $i++) {
                             if ($isi[$i]['satuan'] === $pembelian_barang->satuan_main) {
-                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_main);
+                                $isi[$i]['jumlah'] += (float)($pembelian_barang->jumlah_main);
                                 $exist_satuan_main = true;
                             }
                             if ($isi[$i]['satuan'] === $pembelian_barang->satuan_sub) {
-                                $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_sub);
+                                $isi[$i]['jumlah'] += (float)($pembelian_barang->jumlah_sub);
                                 $exist_satuan_sub = true;
                             }
                         }
@@ -706,14 +706,14 @@ class ArtisanController extends Controller
                     if (!$exist_satuan_main) {
                         $isi[] = [
                             'satuan' => $pembelian_barang->satuan_main,
-                            'jumlah' => (int)($pembelian_barang->jumlah_main),
+                            'jumlah' => (float)($pembelian_barang->jumlah_main),
                         ];
                     }
                     if (!$exist_satuan_sub) {
                         if ($pembelian_barang->satuan_sub !== null) {
                             $isi[] = [
                                 'satuan' => $pembelian_barang->satuan_sub,
-                                'jumlah' => (int)($pembelian_barang->jumlah_sub),
+                                'jumlah' => (float)($pembelian_barang->jumlah_sub),
                             ];
                         }
                     }
@@ -1239,19 +1239,19 @@ class ArtisanController extends Controller
                 $satuan_main = $barang->satuan_meter;
                 $satuan_sub = $barang->satuan_rol;
                 $jumlah_sub = 100;
-                $harga_main = (int)$barang->harga_meter;
-                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_main = (float)$barang->harga_meter;
+                $jumlah_main = (float)($barang->jumlah_meter);
                 $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
                 $harga_sub = $harga_total_main;
                 $harga_total_sub = $harga_sub;
             } elseif ($barang->satuan_rol === null && $barang->satuan_meter !== null) {
                 $satuan_main = $barang->satuan_meter;
-                $harga_main = (int)$barang->harga_meter;
-                $jumlah_main = (int)($barang->jumlah_meter * 100);
+                $harga_main = (float)$barang->harga_meter;
+                $jumlah_main = (float)($barang->jumlah_meter);
                 $harga_total_main = $barang->harga_meter * $barang->jumlah_meter;
             } elseif ($barang->satuan_rol !== null && $barang->satuan_meter === null) {
                 $satuan_main = $barang->satuan_rol;
-                $harga_main = (int)($barang->harga_total / $barang->jumlah_rol);
+                $harga_main = (float)($barang->harga_total / $barang->jumlah_rol);
                 $jumlah_main = 1;
                 $harga_total_main = $harga_main;
             }
@@ -1303,11 +1303,11 @@ class ArtisanController extends Controller
         $accountings = Accounting::all();
         foreach ($accountings as $accounting) {
             $accounting->update([
-                'jumlah' => (string)((int)$accounting->jumlah),
-                'saldo' => (string)((int)$accounting->saldo)
+                'jumlah' => (string)((float)$accounting->jumlah),
+                'saldo' => (string)((float)$accounting->saldo)
             ]);
-            // $accounting->jumlah = (int)$accounting->jumlah;
-            // $accounting->saldo = (int)$accounting->saldo;
+            // $accounting->jumlah = (float)$accounting->jumlah;
+            // $accounting->saldo = (float)$accounting->saldo;
             // $accounting->save();
         }
         dump('data rupiah pada accounting diupdate.');

@@ -66,7 +66,7 @@
                             </button>
                         </div>
                     </td>
-                    <td>{{ $pembelian_barang->jumlah_sub / 100 }} {{ $pembelian_barang->satuan_sub }}&#64;{{ $pembelian_barang->jumlah_main /100 }} {{ $pembelian_barang->satuan_main }}</td>
+                    <td>{{ $pembelian_barang->jumlah_sub }} {{ $pembelian_barang->satuan_sub }}&#64;{{ $pembelian_barang->jumlah_main /100 }} {{ $pembelian_barang->satuan_main }}</td>
                     <td>{{ number_format($pembelian_barang->harga_main, 2, ',', '.') }}/{{ $pembelian_barang->satuan_main }}</td>
                     <td>{{ number_format($pembelian_barang->harga_t, 2, ',', '.') }}</td>
                 </tr>

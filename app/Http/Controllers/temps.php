@@ -75,14 +75,14 @@ while ($a < count($pembelians)) {
             $barang = Barang::where('nama', $pembelian_barang->nama_barang)->first();
             $jumlah_sub = null;
             if ($pembelian_barang->jumlah_rol !== null) {
-                $jumlah_sub = (int)($pembelian_barang->jumlah_rol * 100);
+                $jumlah_sub = (int)($pembelian_barang->jumlah_rol);
             }
             $pembelian_barang_new = PembelianBarang::create([
                 'pembelian_id' => $pembelian_new->id,
                 'barang_id' => $barang->id,
                 'barang_nama' => $barang->nama,
                 'satuan_main' => $pembelian_barang->satuan_meter,
-                'jumlah_main' => (int)($pembelian_barang->jumlah_meter * 100),
+                'jumlah_main' => (int)($pembelian_barang->jumlah_meter),
                 'harga_main' => (int)$pembelian_barang->harga_meter,
                 'satuan_sub' => $pembelian_barang->satuan_rol,
                 'jumlah_sub' => $jumlah_sub,
@@ -102,11 +102,11 @@ while ($a < count($pembelians)) {
             if (count($isi) !== 0) {
                 for ($i=0; $i < count($isi); $i++) {
                     if ($isi[$i]['satuan'] === $pembelian_barang->satuan_meter) {
-                        $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_meter * 100);
+                        $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_meter);
                         $exist_satuan_main = true;
                     }
                     if ($isi[$i]['satuan'] === $pembelian_barang->satuan_rol) {
-                        $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_rol * 100);
+                        $isi[$i]['jumlah'] += (int)($pembelian_barang->jumlah_rol);
                         $exist_satuan_sub = true;
                     }
                 }
@@ -114,14 +114,14 @@ while ($a < count($pembelians)) {
             if (!$exist_satuan_main) {
                 $isi[] = [
                     'satuan' => $pembelian_barang->satuan_meter,
-                    'jumlah' => (int)($pembelian_barang->jumlah_meter * 100),
+                    'jumlah' => (int)($pembelian_barang->jumlah_meter),
                 ];
             }
             if (!$exist_satuan_sub) {
                 if ($pembelian_barang->satuan_rol !== null) {
                     $isi[] = [
                         'satuan' => $pembelian_barang->satuan_rol,
-                        'jumlah' => (int)($pembelian_barang->jumlah_rol * 100),
+                        'jumlah' => (int)($pembelian_barang->jumlah_rol),
                     ];
                 }
             }
@@ -198,7 +198,7 @@ PembelianBarang::create([
     'barang_id' => $barang->id,
     'barang_nama' => $barang->nama,
     'satuan_main' => $pembelian_temp->satuan_meter,
-    'jumlah_main' => (int)($pembelian_temp->jumlah_meter * 100),
+    'jumlah_main' => (int)($pembelian_temp->jumlah_meter),
     'harga_main' => (int)$pembelian_temp->harga_meter,
     'satuan_sub' => $pembelian_temp->satuan_rol,
     'jumlah_sub' => $jumlah_sub,

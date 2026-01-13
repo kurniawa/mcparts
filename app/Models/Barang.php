@@ -10,6 +10,15 @@ class Barang extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'harga_main' => 'decimal:2',
+        'harga_sub'  => 'decimal:2',
+        'jumlah_main'  => 'decimal:2',
+        'jumlah_sub'  => 'decimal:2',
+        'harga_total_main'  => 'decimal:2',
+        'harga_total_sub'  => 'decimal:2',
+    ];
+
     public function goodsPrices()
     {
         return $this->hasMany(GoodsPrice::class, 'goods_id');

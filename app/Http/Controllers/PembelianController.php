@@ -498,10 +498,10 @@ class PembelianController extends Controller
                     'barang_id' => $barang->id,
                     'barang_nama' => $barang->nama,
                     'satuan_main' => $barang->satuan_main,
-                    'jumlah_main' => (int)$post['jumlah_main'][$i] * 100,
+                    'jumlah_main' => (float)$post['jumlah_main'][$i],
                     'harga_main' => $harga_main,
                     'satuan_sub' => $barang->satuan_sub,
-                    'jumlah_sub' => (int)$post['jumlah_sub'][$i] * 100,
+                    'jumlah_sub' => (float)$post['jumlah_sub'][$i],
                     'harga_sub' => $harga_sub,
                     'harga_t' => round((float)$post['harga_t'][$i],2),
                     'creator' => $user->username,
@@ -694,20 +694,20 @@ class PembelianController extends Controller
                 // dd($barang);
                 $barang = Barang::find($post['barang_id'][$i]);
 
-                $harga_main = round((float)$post['harga_main'][$i],2);
-                $harga_sub = round($harga_main * (int)$post['jumlah_main'][$i],2);
+                $harga_main = (float)$post['harga_main'][$i];
+                $harga_sub = $harga_main * (int)$post['jumlah_main'][$i];
 
                 $pembelian_barang = PembelianBarang::create([
                     'pembelian_id' => $pembelian->id,
                     'barang_id' => $barang->id,
                     'barang_nama' => $barang->nama,
                     'satuan_main' => $barang->satuan_main,
-                    'jumlah_main' => (int)$post['jumlah_main'][$i] * 100,
+                    'jumlah_main' => (float)$post['jumlah_main'][$i],
                     'harga_main' => $harga_main,
                     'satuan_sub' => $barang->satuan_sub,
-                    'jumlah_sub' => (int)$post['jumlah_sub'][$i] * 100,
+                    'jumlah_sub' => (float)$post['jumlah_sub'][$i],
                     'harga_sub' => $harga_sub,
-                    'harga_t' => round((float)$post['harga_t'][$i],2),
+                    'harga_t' => (float)$post['harga_t'][$i],
                     // 'status_bayar' => null,
                     // 'keterangan_bayar' => null,
                     // 'tanggal_lunas' => null,
@@ -729,10 +729,10 @@ class PembelianController extends Controller
                         'barang_id' => $pembelian_barang->barang_id,
                         'barang_nama' => $pembelian_barang->barang_nama,
                         'satuan_main' => $pembelian_barang->satuan_main,
-                        'jumlah_main' => (int)$post['jumlah_main'][$i] * 100,
+                        'jumlah_main' => (int)$post['jumlah_main'][$i],
                         'harga_main' => $harga_main,
                         'satuan_sub' => $pembelian_barang->satuan_sub,
-                        'jumlah_sub' => (int)$post['jumlah_sub'][$i] * 100,
+                        'jumlah_sub' => (int)$post['jumlah_sub'][$i],
                         'harga_sub' => $harga_sub,
                         'harga_t' => round((float)$post['harga_t'][$i],2),
                         // 'status_bayar' => null,

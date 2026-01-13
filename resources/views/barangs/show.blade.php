@@ -22,8 +22,8 @@
             <div class="text-xs">
                 Supplier: {{ $barang->supplier_nama }}<br>
                 Nama Barang/Item: {{ $barang->nama }}<br>
-                Satuan Utama: {{ $barang->satuan_main }} - Jumlah Utama: {{ $barang->jumlah_main / 100 }} - Harga Utama: {{ number_format($barang->harga_main,0,',','.') }}<br>
-                Satuan Sub: {{ $barang->satuan_sub }} - Jumlah Sub: {{ $barang->jumlah_sub / 100 }} - Harga Sub: {{ number_format($barang->harga_sub,0,',','.') }}<br>
+                Satuan Utama: {{ $barang->satuan_main }} - Jumlah Utama: {{ $barang->jumlah_main }} - Harga Utama: {{ number_format($barang->harga_main,0,',','.') }}<br>
+                Satuan Sub: {{ $barang->satuan_sub }} - Jumlah Sub: {{ $barang->jumlah_sub }} - Harga Sub: {{ number_format($barang->harga_sub,0,',','.') }}<br>
                 Keterangan: <br>
                 <textarea name="" id="" cols="30" rows="3" class="border text-xs p-1">{{ $barang->keterangan }}</textarea>
             </div>
@@ -131,7 +131,7 @@
                     <td>{{ $pembelian->tanggal_lunas ? \Carbon\Carbon::parse($pembelian->tanggal_lunas)->format('d M Y') : '-' }}</td>
                     <td>{{ $barang->supplier_nama }}</td>
                     <td class="font-bold text-sky-500"><a href="{{ route('pembelians.show', $pembelian->id) }}">{{ $pembelian->nomor_nota }}</a></td>
-                    <td>{{ $pembelians_barangs[$key]->jumlah_main / 100 }} {{ $pembelians_barangs[$key]->satuan_main }} ; {{ $pembelians_barangs[$key]->jumlah_sub / 100 }} {{ $pembelians_barangs[$key]->satuan_sub }}</td>
+                    <td>{{ $pembelians_barangs[$key]->jumlah_main }} {{ $pembelians_barangs[$key]->satuan_main }} ; {{ $pembelians_barangs[$key]->jumlah_sub }} {{ $pembelians_barangs[$key]->satuan_sub }}</td>
                     <td>{{ number_format($pembelians_barangs[$key]->harga_main,0,',','.') }}</td>
                     <td>{{ number_format($pembelians_barangs[$key]->harga_t,0,',','.') }}</td>
                 </tr>

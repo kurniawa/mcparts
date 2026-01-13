@@ -32,7 +32,7 @@ class UpdatePriceOfBarangs extends Command
             $latestPrice = $barang->latestPrice();
             if ($latestPrice) {
                 if ($barang->harga_main !== $latestPrice->price) {
-                    $harga_total_main = $latestPrice->price * ($barang->jumlah_main / 100);
+                    $harga_total_main = $latestPrice->price * ($barang->jumlah_main);
                     $harga_total_sub = null;
                     if ($barang->jumlah_sub) {
                         $harga_total_sub = $harga_total_main;
