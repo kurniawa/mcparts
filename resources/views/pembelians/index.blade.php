@@ -665,10 +665,10 @@
     }
     // END - FUNGSI BARANG
 
-    function remove_item(index) {
-        // console.log(index);
-        document.getElementById(`tr_barang-${index}`).remove();
-    }
+    // function remove_item(index) {
+    //     // console.log(index);
+    //     document.getElementById(`tr_barang-${index}`).remove();
+    // }
 </script>
 
 @endsection

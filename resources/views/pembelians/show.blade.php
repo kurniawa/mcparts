@@ -59,18 +59,18 @@
                     <td>
                         <div class="flex items-center gap-2">
                             <span>{{ $pembelian_barang->barang_nama }}</span>
-                            <button type="button" class="button-toggle-change-pembelian-barang text-slate-400" value="{{ $key }}">
+                            {{-- <button type="button" class="button-toggle-change-pembelian-barang text-slate-400" value="{{ $key }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                 </svg>
-                            </button>
+                            </button> --}}
                         </div>
                     </td>
                     <td>{{ $pembelian_barang->jumlah_sub }} {{ $pembelian_barang->satuan_sub }}&#64;{{ $pembelian_barang->jumlah_main /100 }} {{ $pembelian_barang->satuan_main }}</td>
                     <td>{{ number_format($pembelian_barang->harga_main, 2, ',', '.') }}/{{ $pembelian_barang->satuan_main }}</td>
                     <td>{{ number_format($pembelian_barang->harga_t, 2, ',', '.') }}</td>
                 </tr>
-                <tr>
+                {{-- <tr>
                     <td colspan="5" class="hidden" id="tr-change-pembelian-barang-{{ $key }}">
                         <form action="{{ route('pembelians.changePembelianBarang', $pembelian_barang->id) }}" method="post" id="form-change-pembelian-barang">
                             @csrf
@@ -81,13 +81,13 @@
                             </div>
                         </form>
                     </td>
-                </tr>
+                </tr> --}}
                 @endforeach
                 <tr><th></th><th></th><th></th><th>Grand Total</th><th>{{ number_format($pembelian->harga_total, 2, ',', '.') }}</th></tr>
             </tbody>
         </table>
     </div>
-    <div class="text-xs flex justify-center italic mt-2">Fitur sementara: mengganti barang yang sudah tercantum pada pembelian</div>
+    {{-- <div class="text-xs flex justify-center italic mt-2">Fitur sementara: mengganti barang yang sudah tercantum pada pembelian</div> --}}
 </main>      
 
 <script>

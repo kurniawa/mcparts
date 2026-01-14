@@ -450,9 +450,8 @@ class PembelianController extends Controller
             'jumlah_main' => 'required|array',
             'jumlah_sub' => 'nullable|array',
             'harga_main.*' => 'nullable|numeric|min:1',
-            'jumlah_main.*' => 'nullable|integer|min:1',
-            'jumlah_sub.*' => 'nullable|integer|min:1',
-
+            'jumlah_main.*' => 'nullable|numeric|min:1',
+            'jumlah_sub.*' => 'nullable|numeric|min:1',
         ]);
 
         $supplier = Supplier::find($post['supplier_id']);
@@ -636,8 +635,8 @@ class PembelianController extends Controller
     function edit(Pembelian $pembelian) {
         $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->get();
 
-        $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
-        $label_barang = Barang::select('id', 'nama as label', 'nama as value', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
+        $labelSupplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        $labelBarang = Barang::select('id', 'nama as label', 'nama as value', 'supplier_id', 'satuan_sub', 'satuan_main', 'satuan_sub', 'harga_main', 'jumlah_main', 'harga_total_main')->orderBy('nama')->get();
 
         $data = [
             'menus' => Menu::get(),
@@ -647,8 +646,8 @@ class PembelianController extends Controller
             'pembelian_menus' => Menu::get_pembelian_menus(),
             'pembelian' => $pembelian,
             'pembelian_barangs' => $pembelian_barangs,
-            'label_supplier' => $label_supplier,
-            'label_barang' => $label_barang,
+            'labelSupplier' => $labelSupplier,
+            'labelBarang' => $labelBarang,
         ];
         return view('pembelians.edit', $data);
     }
@@ -656,7 +655,7 @@ class PembelianController extends Controller
     function update(Pembelian $pembelian, Request $request) {
         $post = $request->post();
 
-        // dump($post);
+        dd($post);
         // dump($pembelian);
 
         $request->validate([
@@ -665,6 +664,13 @@ class PembelianController extends Controller
             'year' => 'required',
             'supplier_nama' => 'required',
             'supplier_id' => 'required',
+            'barang_id' => 'required|array',
+            'harga_t' => 'required|array',
+            'jumlah_main' => 'required|array',
+            'jumlah_sub' => 'nullable|array',
+            'harga_main.*' => 'nullable|numeric|min:1',
+            'jumlah_main.*' => 'nullable|numeric|min:1',
+            'jumlah_sub.*' => 'nullable|numeric|min:1',
         ]);
 
         $supplier = Supplier::find($post['supplier_id']);
@@ -673,6 +679,14 @@ class PembelianController extends Controller
         $nomor_nota = "N-$pembelian->id";
         if ($post['nomor_nota'] !== null) {
             $nomor_nota = $post['nomor_nota'];
+        }
+
+        $barangList = Barang::whereIn('id', $post['barang_id'])->get()->keyBy('id');
+        // dd($barangList);
+        foreach ($barangList as $barang) {
+            if($barang->supplier_id != $supplier->id) {
+                $request->validate(['error'=>'required'],['error.required'=>'Barang dan Supplier tidak sesuai']);
+            }
         }
 
         $pembelian->update([
@@ -702,12 +716,12 @@ class PembelianController extends Controller
                     'barang_id' => $barang->id,
                     'barang_nama' => $barang->nama,
                     'satuan_main' => $barang->satuan_main,
-                    'jumlah_main' => (float)$post['jumlah_main'][$i],
+                    'jumlah_main' => $post['jumlah_main'][$i],
                     'harga_main' => $harga_main,
                     'satuan_sub' => $barang->satuan_sub,
-                    'jumlah_sub' => (float)$post['jumlah_sub'][$i],
+                    'jumlah_sub' => $post['jumlah_sub'][$i],
                     'harga_sub' => $harga_sub,
-                    'harga_t' => (float)$post['harga_t'][$i],
+                    'harga_t' => $post['harga_t'][$i],
                     // 'status_bayar' => null,
                     // 'keterangan_bayar' => null,
                     // 'tanggal_lunas' => null,
@@ -721,20 +735,20 @@ class PembelianController extends Controller
             } else {
                 $pembelian_barang = PembelianBarang::find($post['pembelian_barang_id'][$i]);
                 // dd($pembelian_barang);
-                $harga_main = round((float)$post['harga_main'][$i],2);
-                $harga_sub = round($harga_main * (int)$post['jumlah_main'][$i],2);
+                $harga_main = (float)$post['harga_main'][$i];
+                $harga_sub = $harga_main * (float)$post['jumlah_main'][$i];
 
                 try {
                     $pembelian_barang->update([
                         'barang_id' => $pembelian_barang->barang_id,
                         'barang_nama' => $pembelian_barang->barang_nama,
                         'satuan_main' => $pembelian_barang->satuan_main,
-                        'jumlah_main' => (int)$post['jumlah_main'][$i],
+                        'jumlah_main' => $post['jumlah_main'][$i],
                         'harga_main' => $harga_main,
                         'satuan_sub' => $pembelian_barang->satuan_sub,
-                        'jumlah_sub' => (int)$post['jumlah_sub'][$i],
+                        'jumlah_sub' => $post['jumlah_sub'][$i],
                         'harga_sub' => $harga_sub,
-                        'harga_t' => round((float)$post['harga_t'][$i],2),
+                        'harga_t' => (float)$post['harga_t'][$i],
                         // 'status_bayar' => null,
                         // 'keterangan_bayar' => null,
                         // 'tanggal_lunas' => null,
@@ -786,7 +800,7 @@ class PembelianController extends Controller
 
         $pembelian->update([
             'isi' => json_encode($isi),
-            'harga_total' => round((float)$post['harga_total'],2),
+            'harga_total' => (float)$post['harga_total'],
             // 'status_bayar' => $status_bayar,
             // 'keterangan_bayar' => $keterangan_bayar,
             // 'tanggal_lunas' => $tanggal_lunas,
