@@ -73,6 +73,7 @@
 
         let supplierID = 0;
         let indexItem = 0;
+        let mode = 'new';
     </script>
 
     <script src="{{ asset('js/pembelianHelper.js') }}"></script>

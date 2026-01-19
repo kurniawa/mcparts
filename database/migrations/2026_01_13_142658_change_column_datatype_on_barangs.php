@@ -26,6 +26,11 @@ return new class extends Migration
                 jumlah_main = jumlah_main / 100,
                 jumlah_sub = jumlah_sub / 100
         ');
+
+        Schema::table('pembelian_barangs', function (Blueprint $table) {
+            $table->decimal('jumlah_main', 12, 2)->nullable()->change();
+            $table->decimal('jumlah_sub', 12, 2)->nullable()->change();
+        });
     }
 
     /**
@@ -46,6 +51,11 @@ return new class extends Migration
             $table->integer('jumlah_sub')->nullable()->change();
             $table->integer('harga_total_main')->nullable()->change();
             $table->bigInteger('harga_total_sub')->nullable()->change();
+        });
+
+        Schema::table('pembelian_barangs', function (Blueprint $table) {
+            $table->integer('jumlah_main')->nullable()->change();
+            $table->integer('jumlah_sub')->nullable()->change();
         });
     }
 };

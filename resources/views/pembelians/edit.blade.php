@@ -145,6 +145,7 @@
 
     let supplierID = {{ $pembelian->supplier_id }};
     let indexItem = {{ count($pembelian_barangs) }};
+    let mode = 'edit';
 </script>
 
 <script src="{{ asset('js/pembelianHelper.js') }}"></script>

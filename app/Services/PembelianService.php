@@ -123,4 +123,46 @@ class PembelianService
             throw $e;
         }
     }
+
+    function updateGoodsPrice($barang, $pembelian_barang, $user, &$success_) {
+        $harga_total_main = $pembelian_barang->harga_main * $pembelian_barang->jumlah_main;
+        $harga_total_sub = $pembelian_barang->harga_sub * $pembelian_barang->jumlah_sub;
+        $last_goods_price = GoodsPrice::where('goods_id', $barang->id)->orderByDesc('created_at')->first();
+                
+        if (!$last_goods_price) {
+            GoodsPrice::create([
+                'goods_id' => $barang->id,
+                'goods_slug' => $barang->nama,
+                'supplier_id' => $barang->supplier_id,
+                'supplier_name' => $barang->supplier_nama,
+                'unit' => $barang->satuan_main,
+                'price' => $pembelian_barang->harga_main,
+                'created_by' => $user->username,
+            ]);
+            $success_ .= "-new goods_price ($barang->nama) created-";
+        } elseif ($last_goods_price->price != $pembelian_barang->harga_main) {
+            GoodsPrice::create([
+                'goods_id' => $barang->id,
+                'goods_slug' => $barang->nama,
+                'supplier_id' => $barang->supplier_id,
+                'supplier_name' => $barang->supplier_nama,
+                'unit' => $barang->satuan_main,
+                'price' => $pembelian_barang->harga_main,
+                'created_by' => $user->username,
+            ]);
+            $success_ .= "-actual goods_price ($barang->nama) created-";
+
+            // Update harga_barang pada tabel barang
+            $barang->jumlah_main = $pembelian_barang->jumlah_main;
+            $barang->harga_main = $pembelian_barang->harga_main;
+            $barang->jumlah_sub = $pembelian_barang->jumlah_sub;
+            $barang->harga_sub = $pembelian_barang->harga_sub;
+            $barang->harga_total_main = $harga_total_main;
+            $barang->harga_total_sub = $harga_total_sub;
+            $barang->save();
+            $success_ .= '-barang updated-';
+        } else {
+            $success_ .= '-no goods_price change-';
+        }
+    }
 }

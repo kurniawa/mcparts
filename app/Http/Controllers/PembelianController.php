@@ -15,9 +15,14 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\PembelianService;
 
 class PembelianController extends Controller
 {
+    public function __construct(
+        protected PembelianService $pembelianService
+    ) {}
+
     function index(Request $request) {
         $get = $request->query();
 
@@ -489,63 +494,27 @@ class PembelianController extends Controller
                 }
     
                 // proses pembelian_barang...
-                $harga_main = round((float)$post['harga_main'][$i],2);
-                $harga_sub = round($harga_main * (int)$post['jumlah_main'][$i],2);
+                $harga_main = (float)$post['harga_main'][$i];
+                $harga_sub = $harga_main * (float)$post['jumlah_main'][$i];
     
                 $pembelian_barang = PembelianBarang::create([
                     'pembelian_id' => $pembelian_new->id,
                     'barang_id' => $barang->id,
                     'barang_nama' => $barang->nama,
                     'satuan_main' => $barang->satuan_main,
-                    'jumlah_main' => (float)$post['jumlah_main'][$i],
+                    'jumlah_main' => $post['jumlah_main'][$i],
                     'harga_main' => $harga_main,
                     'satuan_sub' => $barang->satuan_sub,
-                    'jumlah_sub' => (float)$post['jumlah_sub'][$i],
+                    'jumlah_sub' => $post['jumlah_sub'][$i],
                     'harga_sub' => $harga_sub,
-                    'harga_t' => round((float)$post['harga_t'][$i],2),
+                    'harga_t' => $post['harga_t'][$i],
                     'creator' => $user->username,
                 ]);
     
                 $success_ .= '-pembelian_barang created-';
 
                 // Insert ke tabel goods_prices apabila harga_main tidak sama dengan harga_main terakhir
-                $harga_total_main = $harga_main * $post['jumlah_main'][$i];
-                $harga_total_sub = $harga_sub * $post['jumlah_sub'][$i];
-                $last_goods_price = GoodsPrice::where('goods_id', $barang->id)->orderByDesc('created_at')->first();
-                
-                if (!$last_goods_price) {
-                    GoodsPrice::create([
-                        'goods_id' => $barang->id,
-                        'goods_slug' => $barang->nama,
-                        'supplier_id' => $barang->supplier_id,
-                        'supplier_name' => $barang->supplier_nama,
-                        'unit' => $barang->satuan_main,
-                        'price' => $harga_main,
-                        'created_by' => $user->username,
-                    ]);
-                    $success_ .= '-goods_price created-';
-                } elseif ($last_goods_price->price != $harga_main) {
-                    GoodsPrice::create([
-                        'goods_id' => $barang->id,
-                        'goods_slug' => $barang->nama,
-                        'supplier_id' => $barang->supplier_id,
-                        'supplier_name' => $barang->supplier_nama,
-                        'unit' => $barang->satuan_main,
-                        'price' => $harga_main,
-                        'created_by' => $user->username,
-                    ]);
-                    $success_ .= '-goods_price created-';
-
-                    // Update harga_barang pada tabel barang
-                    $barang->jumlah_main = $pembelian_barang->jumlah_main;
-                    $barang->harga_main = $harga_main;
-                    $barang->jumlah_sub = $pembelian_barang->jumlah_sub;
-                    $barang->harga_sub = $harga_sub;
-                    $barang->harga_total_main = $harga_total_main;
-                    $barang->harga_total_sub = $harga_total_sub;
-                    $barang->save();
-                    $success_ .= '-barang updated-';
-                }
+                $this->pembelianService->updateGoodsPrice($barang, $pembelian_barang, $user, $success_);
     
     
                 // $key_main = ctype_upper($pembelian_barang->satuan_main) ? strtolower($pembelian_barang->satuan_main) : $pembelian_barang->satuan_main;
@@ -582,17 +551,17 @@ class PembelianController extends Controller
             $success_ .= '-pembelian new created-';
 
             DB::commit();
+
+            $feedback = [
+                'success_' => $success_,
+                'warnings_' => $warnings_,
+            ];
+
+            return back()->with($feedback);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors('Gagal menyimpan data: ' . $e->getMessage());
+            return back()->withErrors('Gagal membuat pembelian baru: ' . $e->getMessage());
         }
-
-        $feedback = [
-            'success_' => $success_,
-            'warnings_' => $warnings_,
-        ];
-
-        return back()->with($feedback);
     }
 
     function delete(Pembelian $pembelian) {
@@ -655,7 +624,7 @@ class PembelianController extends Controller
     function update(Pembelian $pembelian, Request $request) {
         $post = $request->post();
 
-        dd($post);
+        // dd($post);
         // dump($pembelian);
 
         $request->validate([
@@ -677,9 +646,12 @@ class PembelianController extends Controller
         $user = Auth::user();
 
         $nomor_nota = "N-$pembelian->id";
-        if ($post['nomor_nota'] !== null) {
+        if (isset($post['nomor_nota']) && $post['nomor_nota'] !== null) {
             $nomor_nota = $post['nomor_nota'];
         }
+        
+        $success_ = '';
+        $warnings_ = '';
 
         $barangList = Barang::whereIn('id', $post['barang_id'])->get()->keyBy('id');
         // dd($barangList);
@@ -689,56 +661,57 @@ class PembelianController extends Controller
             }
         }
 
-        $pembelian->update([
-            'nomor_nota' => $nomor_nota,
-            'supplier_id' => $supplier->id,
-            'supplier_nama' => $supplier->nama,
-            'updater' => $user->username,
-            'created_at' => date('Y-m-d H:i:s', strtotime("$post[year]-$post[month]-$post[day]" . " " . date("H:i:s"))),
-        ]);
+        DB::beginTransaction();
+        try {
+            $pembelian->update([
+                'nomor_nota' => $nomor_nota,
+                'supplier_id' => $supplier->id,
+                'supplier_nama' => $supplier->nama,
+                'updater' => $user->username,
+                'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', "{$post['year']}-{$post['month']}-{$post['day']} " . now()->format('H:i:s')),
+            ]);
 
-        // $isi = collect();
-        $isi = array();
-        $success_ = '';
+            // $isi = collect();
+            $isiMap = [];
 
-        for ($i=0; $i < count($post['pembelian_barang_id']); $i++) {
-            // if ($barang === null) { // kasus dimana barang memang sudah dihapus namun apa yang sudah tercantum pada nota pembelian, tidak terhapus, namun barang_id menjadi null
-            // }
-            if ($post['pembelian_barang_id'][$i] === 'new') {
-                // dd($barang);
-                $barang = Barang::find($post['barang_id'][$i]);
+            for ($i=0; $i < count($post['pembelian_barang_id']); $i++) {
+                // if ($barang === null) { // kasus dimana barang memang sudah dihapus namun apa yang sudah tercantum pada nota pembelian, tidak terhapus, namun barang_id menjadi null
+                // }
+                $pembelian_barang = null;
+                $barang = $barangList[$post['barang_id'][$i]] ?? null;
+                if ($post['pembelian_barang_id'][$i] === 'new') {
+                    // dd($barang);
 
-                $harga_main = (float)$post['harga_main'][$i];
-                $harga_sub = $harga_main * (int)$post['jumlah_main'][$i];
+                    $harga_main = (float)$post['harga_main'][$i];
+                    $harga_sub = $harga_main * (int)$post['jumlah_main'][$i];
 
-                $pembelian_barang = PembelianBarang::create([
-                    'pembelian_id' => $pembelian->id,
-                    'barang_id' => $barang->id,
-                    'barang_nama' => $barang->nama,
-                    'satuan_main' => $barang->satuan_main,
-                    'jumlah_main' => $post['jumlah_main'][$i],
-                    'harga_main' => $harga_main,
-                    'satuan_sub' => $barang->satuan_sub,
-                    'jumlah_sub' => $post['jumlah_sub'][$i],
-                    'harga_sub' => $harga_sub,
-                    'harga_t' => $post['harga_t'][$i],
-                    // 'status_bayar' => null,
-                    // 'keterangan_bayar' => null,
-                    // 'tanggal_lunas' => null,
-                    // 'created_at' => $pembelian_barang->created_at, // sudah otomatis
-                    // 'updated_at' => $pembelian_barang->updated_at,
-                    'creator' => $user->username,
-                    // 'updater' => $user->username,
-                ]);
+                    $pembelian_barang = PembelianBarang::create([
+                        'pembelian_id' => $pembelian->id,
+                        'barang_id' => $barang->id,
+                        'barang_nama' => $barang->nama,
+                        'satuan_main' => $barang->satuan_main,
+                        'jumlah_main' => $post['jumlah_main'][$i],
+                        'harga_main' => $harga_main,
+                        'satuan_sub' => $barang->satuan_sub,
+                        'jumlah_sub' => $post['jumlah_sub'][$i],
+                        'harga_sub' => $harga_sub,
+                        'harga_t' => $post['harga_t'][$i],
+                        // 'status_bayar' => null,
+                        // 'keterangan_bayar' => null,
+                        // 'tanggal_lunas' => null,
+                        // 'created_at' => $pembelian_barang->created_at, // sudah otomatis
+                        // 'updated_at' => $pembelian_barang->updated_at,
+                        'creator' => $user->username,
+                        // 'updater' => $user->username,
+                    ]);
 
-                $success_ .= '-pembelian_barang created-';
-            } else {
-                $pembelian_barang = PembelianBarang::find($post['pembelian_barang_id'][$i]);
-                // dd($pembelian_barang);
-                $harga_main = (float)$post['harga_main'][$i];
-                $harga_sub = $harga_main * (float)$post['jumlah_main'][$i];
+                    $success_ .= '-new pembelian_barang created-';
+                } else {
+                    $pembelian_barang = PembelianBarang::find($post['pembelian_barang_id'][$i]);
+                    // dd($pembelian_barang);
+                    $harga_main = (float)$post['harga_main'][$i];
+                    $harga_sub = $harga_main * (float)$post['jumlah_main'][$i];
 
-                try {
                     $pembelian_barang->update([
                         'barang_id' => $pembelian_barang->barang_id,
                         'barang_nama' => $pembelian_barang->barang_nama,
@@ -748,7 +721,7 @@ class PembelianController extends Controller
                         'satuan_sub' => $pembelian_barang->satuan_sub,
                         'jumlah_sub' => $post['jumlah_sub'][$i],
                         'harga_sub' => $harga_sub,
-                        'harga_t' => (float)$post['harga_t'][$i],
+                        'harga_t' => $post['harga_t'][$i],
                         // 'status_bayar' => null,
                         // 'keterangan_bayar' => null,
                         // 'tanggal_lunas' => null,
@@ -757,62 +730,52 @@ class PembelianController extends Controller
                         // 'creator' => $user->username,
                         'updater' => $user->username,
                     ]);
-                } catch (\Throwable $th) {
-                    //throw $th;
-                    dump($th);
-                    dd($post['pembelian_barang_id'][$i]);
+                    $success_ .= '-pembelian_barang updated-';
+                }
+
+                if ($pembelian_barang) {
+                    $this->pembelianService->updateGoodsPrice($barang, $pembelian_barang, $user, $success_);
+                }
+
+                // $key_main = ctype_upper($pembelian_barang->satuan_main) ? strtolower($pembelian_barang->satuan_main) : $pembelian_barang->satuan_main;
+                $key_main = strtolower($pembelian_barang->satuan_main);
+                $isiMap[$key_main] = ($isiMap[$key_main] ?? 0) + $pembelian_barang->jumlah_main;
+    
+                if ($pembelian_barang->satuan_sub) {
+                    // $key_sub = ctype_upper($pembelian_barang->satuan_sub) ? strtolower($pembelian_barang->satuan_sub) : $pembelian_barang->satuan_sub;
+                    $key_sub = strtolower($pembelian_barang->satuan_sub);
+                    $isiMap[$key_sub] = ($isiMap[$key_sub] ?? 0) + $pembelian_barang->jumlah_sub;
                 }
             }
 
-            $exist_satuan_main = false;
-            $exist_satuan_sub = false;
-            if (count($isi) !== 0) {
-                for ($j=0; $j < count($isi); $j++) {
-                    if ($isi[$j]['satuan'] === $pembelian_barang->satuan_main) {
-                        $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_main);
-                        // dump($isi[$j]['jumlah']);
-                        // dump($pembelian_barang->jumlah_main);
-                        // dump('isi:');
-                        // dump($isi);
-                        $exist_satuan_main = true;
-                    }
-                    if ($isi[$j]['satuan'] === $pembelian_barang->satuan_sub) {
-                        $isi[$j]['jumlah'] = (int)$isi[$j]['jumlah'] + (int)($pembelian_barang->jumlah_sub);
-                        $exist_satuan_sub = true;
-                    }
-                }
+            $isi = [];
+            foreach ($isiMap as $satuan => $jumlah) {
+                $isi[] = ['satuan' => $satuan, 'jumlah' => $jumlah];
             }
-            if (!$exist_satuan_main) {
-                $isi[]=[
-                    'satuan' => $pembelian_barang->satuan_main,
-                    'jumlah' => (int)($pembelian_barang->jumlah_main),
-                ];
-            }
-            if (!$exist_satuan_sub) {
-                if ($pembelian_barang->satuan_sub !== null) {
-                    $isi[]=[
-                        'satuan' => $pembelian_barang->satuan_sub,
-                        'jumlah' => (int)($pembelian_barang->jumlah_sub),
-                    ];
-                }
-            }
+
+            $pembelian->update([
+                'nomor_nota' => $nomor_nota,
+                'isi' => json_encode($isi),
+                'harga_total' => (float)$post['harga_total'],
+                // 'status_bayar' => $status_bayar,
+                // 'keterangan_bayar' => $keterangan_bayar,
+                // 'tanggal_lunas' => $tanggal_lunas,
+                // 'created_at' => $tanggal_lunas,
+            ]);
+            $success_ .= '-pembelian updated-';
+            DB::commit();
+
+            $feedback = [
+                'success_' => $success_,
+            ];
+
+            return back()->with($feedback);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors('Gagal update pembelian: ' . $e->getMessage());
         }
 
-        $pembelian->update([
-            'isi' => json_encode($isi),
-            'harga_total' => (float)$post['harga_total'],
-            // 'status_bayar' => $status_bayar,
-            // 'keterangan_bayar' => $keterangan_bayar,
-            // 'tanggal_lunas' => $tanggal_lunas,
-            // 'created_at' => $tanggal_lunas,
-        ]);
-        $success_ .= '-pembelian updated-';
-
-        $feedback = [
-            'success_' => $success_,
-        ];
-
-        return back()->with($feedback);
+        
     }
 
     function delete_pembelian_barang(Pembelian $pembelian, PembelianBarang $pembelian_barang) {

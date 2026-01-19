@@ -10,6 +10,10 @@ class Pembelian extends Model
     use HasFactory;
     protected $guarded=['id'];
 
+    protected $casts = [
+        'harga_total'  => 'decimal:2',
+    ];
+
     static function lengkapi_data_pembelian($pembelian, $pembelian_temp) {
         $isi = array();
         $harga_total = 0;

@@ -11,6 +11,10 @@ $("#pembelian-new-supplier-nama").autocomplete({
 function addItem(trID, parentID) {
     document.getElementById(trID).remove();
     let parent = document.getElementById(parentID);
+    let html_pembelian_barang_id = "";
+    if (mode === 'edit') {
+        html_pembelian_barang_id = `<input type="hidden" name="pembelian_barang_id[]" value="new" id="pembelian-barang-id-${indexItem}">`;
+    }
     parent.insertAdjacentHTML('beforeend',
     `<tr id="tr-barang-${indexItem}">
         <td>
@@ -22,6 +26,7 @@ function addItem(trID, parentID) {
                 </button>
                 <input type="text" name="barang_nama[]" id="barang-nama-${indexItem}" class="border-slate-300 rounded-lg text-xs p-1 ml-1 placeholder:text-slate-400 w-56" placeholder="nama item...">
                 <input type="hidden" name="barang_id[]" id="barang-id-${indexItem}">
+                ${html_pembelian_barang_id}
             </div>
             <div class="mt-1 hidden" id="barang-keterangan-${indexItem}">
                 <textarea name="barang_keterangan[]" cols="30" rows="3" class="border-slate-300 rounded-lg text-xs p-0 placeholder:text-slate-400" placeholder="keterangan item..."></textarea>
