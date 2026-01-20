@@ -624,7 +624,7 @@ class PembelianController extends Controller
     function update(Pembelian $pembelian, Request $request) {
         $post = $request->post();
 
-        // dd($post);
+        // dump($post);
         // dump($pembelian);
 
         $request->validate([
@@ -671,8 +671,17 @@ class PembelianController extends Controller
                 'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', "{$post['year']}-{$post['month']}-{$post['day']} " . now()->format('H:i:s')),
             ]);
 
-            // $isi = collect();
-            $isiMap = [];
+            // Keterangan isi pembelian akan di lakukan setelah perubahan dilakukan
+            
+            // Pada saat update, perlu cek pembelian_barang_id yang sebelumnya apakah ada yang dihapus
+            $existing_pembelian_barang_ids = PembelianBarang::where('pembelian_id', $pembelian->id)->pluck('id')->toArray();
+            $pembelian_barang_ids_to_delete = array_diff($existing_pembelian_barang_ids, $post['pembelian_barang_id']);
+            // dump($existing_pembelian_barang_ids);
+            // dd($pembelian_barang_ids_to_delete);
+            if (count($pembelian_barang_ids_to_delete) > 0) {
+                PembelianBarang::whereIn('id', $pembelian_barang_ids_to_delete)->delete();
+                $success_ .= '-deleted pembelian_barang ids: ' . implode(',', $pembelian_barang_ids_to_delete) . '-';
+            }
 
             for ($i=0; $i < count($post['pembelian_barang_id']); $i++) {
                 // if ($barang === null) { // kasus dimana barang memang sudah dihapus namun apa yang sudah tercantum pada nota pembelian, tidak terhapus, namun barang_id menjadi null
@@ -736,18 +745,18 @@ class PembelianController extends Controller
                 if ($pembelian_barang) {
                     $this->pembelianService->updateGoodsPrice($barang, $pembelian_barang, $user, $success_);
                 }
+            }
 
-                // $key_main = ctype_upper($pembelian_barang->satuan_main) ? strtolower($pembelian_barang->satuan_main) : $pembelian_barang->satuan_main;
+            $isiMap = [];
+            foreach (PembelianBarang::where('pembelian_id', $pembelian->id)->get() as $pembelian_barang) {
                 $key_main = strtolower($pembelian_barang->satuan_main);
                 $isiMap[$key_main] = ($isiMap[$key_main] ?? 0) + $pembelian_barang->jumlah_main;
-    
+
                 if ($pembelian_barang->satuan_sub) {
-                    // $key_sub = ctype_upper($pembelian_barang->satuan_sub) ? strtolower($pembelian_barang->satuan_sub) : $pembelian_barang->satuan_sub;
                     $key_sub = strtolower($pembelian_barang->satuan_sub);
                     $isiMap[$key_sub] = ($isiMap[$key_sub] ?? 0) + $pembelian_barang->jumlah_sub;
                 }
             }
-
             $isi = [];
             foreach ($isiMap as $satuan => $jumlah) {
                 $isi[] = ['satuan' => $satuan, 'jumlah' => $jumlah];
@@ -756,7 +765,7 @@ class PembelianController extends Controller
             $pembelian->update([
                 'nomor_nota' => $nomor_nota,
                 'isi' => json_encode($isi),
-                'harga_total' => (float)$post['harga_total'],
+                'harga_total' => $post['harga_total'],
                 // 'status_bayar' => $status_bayar,
                 // 'keterangan_bayar' => $keterangan_bayar,
                 // 'tanggal_lunas' => $tanggal_lunas,

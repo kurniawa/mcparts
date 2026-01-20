@@ -52,7 +52,7 @@
                             <tr><th>Nama Item</th><th>Jml. Sub</th><th>Jml. Main</th><th>Hrg.</th><th>Hrg. t</th><th></th></tr>
                             {{-- {{ dump($pembelian_barangs) }} --}}
                             @foreach ($pembelian_barangs as $key_pembelian_barang => $pembelian_barang)
-                            <tr id="tr_barang-{{ $key_pembelian_barang }}">
+                            <tr id="tr-barang-{{ $key_pembelian_barang }}">
                                 <td>
                                     <div class="flex items-center mt-1">
                                         <button id="toggle_barang_keterangan-{{ $key_pembelian_barang }}" type="button" class="border border-yellow-500 rounded text-yellow-500" onclick="toggle_light(this.id,'barang_keterangan-{{ $key_pembelian_barang }}', [], ['bg-yellow-300'], 'block')">
