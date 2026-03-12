@@ -60,6 +60,7 @@ class AccountingController2 extends Controller
 
     public function getRelatedNotYetPaidOffInvoices(TransactionName $transactionName) {
         // Get the related invoice for the transaction name
+        return response()->json(['message' => "Transaction name: $transactionName"], 404);
         if (!isset($transactionName)) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
         } elseif (!$transactionName) {

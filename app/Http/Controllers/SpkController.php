@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alamat;
-use App\Models\Ekspedisi;
-use App\Models\EkspedisiAlamat;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\NotaSrjalan;
@@ -12,16 +10,13 @@ use App\Models\Pelanggan;
 use App\Models\PelangganAlamat;
 use App\Models\PelangganEkspedisi;
 use App\Models\PelangganKontak;
-use App\Models\PelangganProduk;
 use App\Models\Produk;
-use App\Models\ProdukHarga;
 use App\Models\Spk;
 use App\Models\SpkNota;
 use App\Models\SpkProduk;
 use App\Models\SpkProdukNota;
 use App\Models\SpkProdukNotaSrjalan;
 use App\Models\Srjalan;
-use App\Models\TipePacking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -156,111 +151,33 @@ class SpkController extends Controller
     }
 
     public function show(Spk $spk) {
-        // dd($spk);
-        // $test_array = [["tipe_packing"=>"colly","jumlah"=>2406,"jumlah_packing"=>16],];
-        // $encoded_test_array = json_encode($test_array);
-        // $test_array2 = [["tipe_packing"=>"colly","jumlah"=>300,"jumlah_packing"=>2],];
-        // $encoded_test_array2 = json_encode($test_array2);
-        // dump($test_array);
-        // dump($encoded_test_array);
-        // dump($test_array2);
-        // dd($encoded_test_array2);
-        $data_spk_nota_srjalans = Spk::Data_SPK_Nota_Srjalan($spk);
-        // dd($data_spk_nota_srjalans);
-        $label_pelanggans = Pelanggan::label_pelanggans();
-        $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
-        // PILIHAN ALAMAT PELANGGAN
-        $pelanggan_alamats = PelangganAlamat::where('pelanggan_id', $spk->pelanggan_id)->get();
-        $pilihan_alamat = collect();
-        $alamat_id_terpilih = null;
-        $kontak_id_terpilih = null;
-        if (count($data_spk_nota_srjalans['notas']) !== 0) {
-            $alamat_id_terpilih = $data_spk_nota_srjalans['notas'][0]['alamat_id'];
-            $kontak_id_terpilih = $data_spk_nota_srjalans['notas'][0]['kontak_id'];
-        }
-        foreach ($pelanggan_alamats as $pelanggan_alamat) {
-            $alamat = Alamat::find($pelanggan_alamat->alamat_id);
-            $pilihan_alamat->push($alamat);
-        }
-        // END - PILIHAN ALAMAT PELANGGAN
-        // PILIHAN_KONTAK_PELANGGAN
-        $pilihan_kontak = PelangganKontak::where('pelanggan_id', $spk->pelanggan_id)->get();
-        // dd($pilihan_kontak);
-        // END - PILIHAN_KONTAK_PELANGGAN
-        // PILIHAN_EKSPEDISI
-        $pelanggan_ekspedisis = PelangganEkspedisi::where('pelanggan_id', $spk->pelanggan_id)->where('is_transit','no')->get();
-        $pilihan_ekspedisi = collect();
-        foreach ($pelanggan_ekspedisis as $pelanggan_ekspedisi) {
-            $ekspedisi = Ekspedisi::find($pelanggan_ekspedisi->ekspedisi_id);
-            $ekspedisi_alamat = EkspedisiAlamat::where('ekspedisi_id', $ekspedisi->id)->where('tipe','UTAMA')->first();
-            $alamat = Alamat::find($ekspedisi_alamat->alamat_id);
-            $pilihan_ekspedisi->push([
-                'id' => $ekspedisi->id,
-                'nama' => $ekspedisi->nama,
-                'alamat' => $alamat,
-                'tipe' => $pelanggan_ekspedisi->tipe,
-            ]);
-        }
-        $pelanggan_transits = PelangganEkspedisi::where('pelanggan_id', $spk->pelanggan_id)->where('is_transit','yes')->get();
-        $pilihan_transit = collect();
-        foreach ($pelanggan_transits as $pelanggan_transit) {
-            $transit = Ekspedisi::find($pelanggan_transit->ekspedisi_id);
-            $transit_alamat = EkspedisiAlamat::where('ekspedisi_id', $transit->id)->where('tipe','UTAMA')->first();
-            $alamat = Alamat::find($transit_alamat->alamat_id);
-            $pilihan_transit->push([
-                'id' => $transit->id,
-                'nama' => $transit->nama,
-                'alamat' => $alamat,
-                'tipe' => $pelanggan_transit->tipe,
-            ]);
-        }
-
-        // dump($pilihan_ekspedisi);
-        // dd($pilihan_transit);
-        // END - PILIHAN_EKSPEDISI
-
-        // DATA PACKING
-        // $pilihan_srjalan = SpkProdukNotaSrjalan::where('spk_id', $spk->id)->select('srjalan_id as id')->groupBy('srjalan_id')->get();
-        $pilihan_srjalan = collect();
-        $data_packings = collect();
-        $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
-        foreach ($spk_notas as $spk_nota) {
-            $nota_srjalans = NotaSrjalan::where('nota_id', $spk_nota->nota_id)->get();
-            foreach ($nota_srjalans as $nota_srjalan) {
-                $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
-                $data_packings->push(Srjalan::get_data_packing($srjalan->jumlah_packing));
-                $pilihan_srjalan->push(['id'=>$srjalan->id]);
-            }
-        }
-        $pilihan_srjalan = $pilihan_srjalan->unique('id');
-        // dump($spk_notas);
-        // END - DATA PACKING
+        $data_spk = Spk::get_data_SPK($spk);
         $user = Auth::user();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'spks.create',
             'profile_menus' => Menu::get_profile_menus(),
             'spk' => $spk,
-            'nama_pelanggan' => $data_spk_nota_srjalans['nama_pelanggan'],
-            'spk_produks' => $data_spk_nota_srjalans['spk_produks'],
-            'notas' => $data_spk_nota_srjalans['notas'],
-            'cust_kontaks' => $data_spk_nota_srjalans['cust_kontaks'],
-            'col_spk_produk_notas' => $data_spk_nota_srjalans['col_spk_produk_notas'],
-            'col_srjalans' => $data_spk_nota_srjalans['col_srjalans'],
-            'col_ekspedisi_kontaks' => $data_spk_nota_srjalans['col_ekspedisi_kontaks'],
-            'col_col_spk_produk_nota_srjalans' => $data_spk_nota_srjalans['col_col_spk_produk_nota_srjalans'],
-            'data_spk_produks' => $data_spk_nota_srjalans['data_spk_produks'],
-            'data_spk_produk_notas' => $data_spk_nota_srjalans['data_spk_produk_notas'],
-            'label_pelanggans' => $label_pelanggans,
-            'label_produks' => $label_produks,
-            'data_packings' => $data_packings,
-            'alamat_id_terpilih' => $alamat_id_terpilih,
-            'pilihan_alamat' => $pilihan_alamat,
-            'pilihan_kontak' => $pilihan_kontak,
-            'kontak_id_terpilih' => $kontak_id_terpilih,
-            'pilihan_ekspedisi' => $pilihan_ekspedisi,
-            'pilihan_transit' => $pilihan_transit,
-            'pilihan_srjalan' => $pilihan_srjalan,
+            'nama_pelanggan' => $data_spk['data_spk_nota_srjalans']['nama_pelanggan'],
+            'spk_produks' => $data_spk['data_spk_nota_srjalans']['spk_produks'],
+            'notas' => $data_spk['data_spk_nota_srjalans']['notas'],
+            'cust_kontaks' => $data_spk['data_spk_nota_srjalans']['cust_kontaks'],
+            'col_spk_produk_notas' => $data_spk['data_spk_nota_srjalans']['col_spk_produk_notas'],
+            'col_srjalans' => $data_spk['data_spk_nota_srjalans']['col_srjalans'],
+            'col_ekspedisi_kontaks' => $data_spk['data_spk_nota_srjalans']['col_ekspedisi_kontaks'],
+            'col_col_spk_produk_nota_srjalans' => $data_spk['data_spk_nota_srjalans']['col_col_spk_produk_nota_srjalans'],
+            'data_spk_produks' => $data_spk['data_spk_nota_srjalans']['data_spk_produks'],
+            'data_spk_produk_notas' => $data_spk['data_spk_nota_srjalans']['data_spk_produk_notas'],
+            'label_pelanggans' => $data_spk['label_pelanggans'],
+            'label_produks' => $data_spk['label_produks'],
+            'data_packings' => $data_spk['data_packings'],
+            'alamat_id_terpilih' => $data_spk['alamat_id_terpilih'],
+            'pilihan_alamat' => $data_spk['pilihan_alamat'],
+            'pilihan_kontak' => $data_spk['pilihan_kontak'],
+            'kontak_id_terpilih' => $data_spk['kontak_id_terpilih'],
+            'pilihan_ekspedisi' => $data_spk['pilihan_ekspedisi'],
+            'pilihan_transit' => $data_spk['pilihan_transit'],
+            'pilihan_srjalan' => $data_spk['pilihan_srjalan'],
             'user' => $user,
         ];
         // dump($data_spk_nota_srjalans['notas']);

@@ -275,4 +275,91 @@ class Spk extends Model
     function notas() {
         return $this->belongsToMany(Nota::class, 'spk_notas', 'spk_id', 'nota_id');
     }
+
+    static function get_data_SPK ($spk) {
+        $data_spk_nota_srjalans = Spk::Data_SPK_Nota_Srjalan($spk);
+        // dd($data_spk_nota_srjalans);
+        $label_pelanggans = Pelanggan::label_pelanggans();
+        $label_produks = Produk::select('id', 'nama as label', 'nama as value')->get();
+        // PILIHAN ALAMAT PELANGGAN
+        $pelanggan_alamats = PelangganAlamat::where('pelanggan_id', $spk->pelanggan_id)->get();
+        $pilihan_alamat = collect();
+        $alamat_id_terpilih = null;
+        $kontak_id_terpilih = null;
+        if (count($data_spk_nota_srjalans['notas']) !== 0) {
+            $alamat_id_terpilih = $data_spk_nota_srjalans['notas'][0]['alamat_id'];
+            $kontak_id_terpilih = $data_spk_nota_srjalans['notas'][0]['kontak_id'];
+        }
+        foreach ($pelanggan_alamats as $pelanggan_alamat) {
+            $alamat = Alamat::find($pelanggan_alamat->alamat_id);
+            $pilihan_alamat->push($alamat);
+        }
+        // END - PILIHAN ALAMAT PELANGGAN
+        // PILIHAN_KONTAK_PELANGGAN
+        $pilihan_kontak = PelangganKontak::where('pelanggan_id', $spk->pelanggan_id)->get();
+        // dd($pilihan_kontak);
+        // END - PILIHAN_KONTAK_PELANGGAN
+        // PILIHAN_EKSPEDISI
+        $pelanggan_ekspedisis = PelangganEkspedisi::where('pelanggan_id', $spk->pelanggan_id)->where('is_transit','no')->get();
+        $pilihan_ekspedisi = collect();
+        foreach ($pelanggan_ekspedisis as $pelanggan_ekspedisi) {
+            $ekspedisi = Ekspedisi::find($pelanggan_ekspedisi->ekspedisi_id);
+            $ekspedisi_alamat = EkspedisiAlamat::where('ekspedisi_id', $ekspedisi->id)->where('tipe','UTAMA')->first();
+            $alamat = Alamat::find($ekspedisi_alamat->alamat_id);
+            $pilihan_ekspedisi->push([
+                'id' => $ekspedisi->id,
+                'nama' => $ekspedisi->nama,
+                'alamat' => $alamat,
+                'tipe' => $pelanggan_ekspedisi->tipe,
+            ]);
+        }
+        $pelanggan_transits = PelangganEkspedisi::where('pelanggan_id', $spk->pelanggan_id)->where('is_transit','yes')->get();
+        $pilihan_transit = collect();
+        foreach ($pelanggan_transits as $pelanggan_transit) {
+            $transit = Ekspedisi::find($pelanggan_transit->ekspedisi_id);
+            $transit_alamat = EkspedisiAlamat::where('ekspedisi_id', $transit->id)->where('tipe','UTAMA')->first();
+            $alamat = Alamat::find($transit_alamat->alamat_id);
+            $pilihan_transit->push([
+                'id' => $transit->id,
+                'nama' => $transit->nama,
+                'alamat' => $alamat,
+                'tipe' => $pelanggan_transit->tipe,
+            ]);
+        }
+
+        // dump($pilihan_ekspedisi);
+        // dd($pilihan_transit);
+        // END - PILIHAN_EKSPEDISI
+
+        // DATA PACKING
+        // $pilihan_srjalan = SpkProdukNotaSrjalan::where('spk_id', $spk->id)->select('srjalan_id as id')->groupBy('srjalan_id')->get();
+        $pilihan_srjalan = collect();
+        $data_packings = collect();
+        $spk_notas = SpkNota::where('spk_id', $spk->id)->get();
+        foreach ($spk_notas as $spk_nota) {
+            $nota_srjalans = NotaSrjalan::where('nota_id', $spk_nota->nota_id)->get();
+            foreach ($nota_srjalans as $nota_srjalan) {
+                $srjalan = Srjalan::find($nota_srjalan->srjalan_id);
+                $data_packings->push(Srjalan::get_data_packing($srjalan->jumlah_packing));
+                $pilihan_srjalan->push(['id'=>$srjalan->id]);
+            }
+        }
+        $pilihan_srjalan = $pilihan_srjalan->unique('id');
+        // dump($spk_notas);
+        // END - DATA PACKING
+
+        return [
+            'data_spk_nota_srjalans'=>$data_spk_nota_srjalans,
+            'label_pelanggans'=>$label_pelanggans,
+            'label_produks'=>$label_produks,
+            'pilihan_alamat'=>$pilihan_alamat,
+            'alamat_id_terpilih'=>$alamat_id_terpilih,
+            'pilihan_kontak'=>$pilihan_kontak,
+            'kontak_id_terpilih'=>$kontak_id_terpilih,
+            'pilihan_ekspedisi'=>$pilihan_ekspedisi,
+            'pilihan_transit'=>$pilihan_transit,
+            'pilihan_srjalan'=>$pilihan_srjalan,
+            'data_packings'=>$data_packings,
+        ];
+    }
 }

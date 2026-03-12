@@ -23,6 +23,46 @@ use Illuminate\Support\Facades\DB;
 
 class NotaController extends Controller
 {
+    public function show(Nota $nota) {
+        $spk = $nota->spk[0];
+        // dd($spk);
+        $data_spk = Spk::get_data_SPK($spk);
+        $user = Auth::user();
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'spks.create',
+            'profile_menus' => Menu::get_profile_menus(),
+            'spk' => $spk,
+            'nama_pelanggan' => $data_spk['data_spk_nota_srjalans']['nama_pelanggan'],
+            'spk_produks' => $data_spk['data_spk_nota_srjalans']['spk_produks'],
+            'notas' => $data_spk['data_spk_nota_srjalans']['notas'],
+            'cust_kontaks' => $data_spk['data_spk_nota_srjalans']['cust_kontaks'],
+            'col_spk_produk_notas' => $data_spk['data_spk_nota_srjalans']['col_spk_produk_notas'],
+            'col_srjalans' => $data_spk['data_spk_nota_srjalans']['col_srjalans'],
+            'col_ekspedisi_kontaks' => $data_spk['data_spk_nota_srjalans']['col_ekspedisi_kontaks'],
+            'col_col_spk_produk_nota_srjalans' => $data_spk['data_spk_nota_srjalans']['col_col_spk_produk_nota_srjalans'],
+            'data_spk_produks' => $data_spk['data_spk_nota_srjalans']['data_spk_produks'],
+            'data_spk_produk_notas' => $data_spk['data_spk_nota_srjalans']['data_spk_produk_notas'],
+            'label_pelanggans' => $data_spk['label_pelanggans'],
+            'label_produks' => $data_spk['label_produks'],
+            'data_packings' => $data_spk['data_packings'],
+            'alamat_id_terpilih' => $data_spk['alamat_id_terpilih'],
+            'pilihan_alamat' => $data_spk['pilihan_alamat'],
+            'pilihan_kontak' => $data_spk['pilihan_kontak'],
+            'kontak_id_terpilih' => $data_spk['kontak_id_terpilih'],
+            'pilihan_ekspedisi' => $data_spk['pilihan_ekspedisi'],
+            'pilihan_transit' => $data_spk['pilihan_transit'],
+            'pilihan_srjalan' => $data_spk['pilihan_srjalan'],
+            'user' => $user,
+        ];
+        // dump($data_spk_nota_srjalans['notas']);
+        // dd($data_spk_nota_srjalans['col_srjalans']);
+        // dd($data_spk_nota_srjalans['notas'][0]);
+        // dd($data_packings);
+        // dd($data_spk_nota_srjalans['col_srjalans']);
+        return view('spks.show', $data);
+    }
+
     public function create_or_edit_jumlah_spk_produk_nota(Spk $spk, SpkProduk $spk_produk, Request $request) {
         $post = $request->post();
         // dump($post['jumlah']);

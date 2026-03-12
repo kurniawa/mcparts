@@ -126,6 +126,7 @@
     <script>
         const label_deskripsi = {!! json_encode($labelDeskripsi, JSON_HEX_TAG) !!};
         
+        // run function after page loaded
         for (let i = 0; i < 15; i++) {
             autocomplete_deskripsi(i);
         }
@@ -185,7 +186,7 @@
             if (trErrorFeedback) {
                 trErrorFeedback.remove();
             }
-            if (kategori_level_one == "PENERIMAAN PIUTANG") {
+            if (kategori_level_one === "PENERIMAAN PIUTANG" || kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
                 // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
                 //     .then(response => {
                 //         if (!response.ok) {
@@ -237,7 +238,7 @@
                                 elementToAppend += `
                                 <tr>${htmlRemainingBalanceMasuk}
                                     <td class="font-bold">
-                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer">${relatedInvoice.no_nota}</label>
+                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer"><a href="/notas/${relatedInvoice.id}/show" target="_blank">${relatedInvoice.no_nota}</a></label>
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
                                         <div class="text-center">${formatDate(relatedInvoice.created_at)}</div>
                                     </td>

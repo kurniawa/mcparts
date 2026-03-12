@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 
 class TransactionName extends Model
 {
@@ -17,14 +16,12 @@ class TransactionName extends Model
      */
     public function getRelatedNotYetPaidOffInvoices()
     {
-        $customerBalance = Overpayment::where('customer_id', $this->pelanggan_id)->latest()->first();
-
-        if ($customerBalance) {
-            $customerBalance = $customerBalance->toArray();
-        }
-
-        // Log::info($this->pelanggan_id);
-        $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where(function ($query) {
+        $balance = null;
+        $notas = null;
+        if ($this->kategori_level_one === 'PENERIMAAN PIUTANG') {
+            $balance = Overpayment::where('customer_id', $this->pelanggan_id)->latest()->first();
+            
+            $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where(function ($query) {
             $query->where('status_bayar', 'belum_lunas')
                   ->orWhere('status_bayar', 'sebagian');
             })
@@ -33,10 +30,30 @@ class TransactionName extends Model
                 return $nota;
             })
             ->toArray();
+        } elseif ($this->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+            $balance = Overpayment::where('supplier_id', $this->supplier_id)->latest()->first();
+            
+            $notas = Pembelian::where('supplier_id', $this->supplier_id)->where(function ($query) {
+            $query->where('status_bayar', 'BELUM')
+                  ->orWhere('status_bayar', 'SEBAGIAN');
+            })
+            ->get()->map(function ($nota) {
+                $nota->invoice_id = $nota->id;
+                return $nota;
+            })
+            ->toArray();
+        }
+
+        if ($balance) {
+            $balance = $balance->toArray();
+        }
+
+        
         $accountingInvoices = $notas;
         // Log::info($notas);
         
         if (!count($notas) ) {
+            
             $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
                 ->where('customer_id', $this->pelanggan_id)
                 ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
@@ -52,6 +69,6 @@ class TransactionName extends Model
                 ->toArray();
         }
         
-        return [$accountingInvoices, $customerBalance];
+        return [$accountingInvoices, $balance];
     }
 }

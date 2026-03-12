@@ -78,6 +78,7 @@ Route::controller(SpkController::class)->group(function(){
 });
 
 Route::controller(NotaController::class)->group(function(){
+    Route::get('/notas/{nota}/show','show')->name('notas.show')->middleware('auth');
     Route::get('/notas/{nota}/print_out','print_out')->name('notas.print_out');
     Route::post('/notas/{spk}/{spk_produk}/create_or_edit_jumlah_spk_produk_nota','create_or_edit_jumlah_spk_produk_nota')->name('notas.create_or_edit_jumlah_spk_produk_nota')->middleware('auth');
     Route::post('/notas/{spk}/{nota}/delete','delete')->name('notas.delete')->middleware('auth');
