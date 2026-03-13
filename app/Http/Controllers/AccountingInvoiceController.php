@@ -74,7 +74,7 @@ class AccountingInvoiceController extends Controller
                 $nota->amount_paid = 0;
                 $nota->balance_used = 0;
                 $nota->amount_due = $nota->harga_total;
-                $nota->status_bayar = 'belum_lunas';
+                $nota->status_bayar = 'BELUM_LUNAS';
                 $nota->overpayment = 0;
                 $log .= "\n\nRESET nota karena ini merupakan satu-satunya pembayaran.";
                 $log .= "\nnota->amount_paid = $nota->amount_paid";

@@ -261,7 +261,7 @@ class NotaController extends Controller
                     'copy' => $spk->copy,
                 ]);
 
-                $nota->no_nota = "N-$nota->id";
+                $nota->nomor_nota = "N-$nota->id";
                 $nota->save();
 
                 SpkNota::create([
@@ -386,7 +386,7 @@ class NotaController extends Controller
         // dump($nota);
         $user = Auth::user();
         $nota->finished_at = null;
-        $nota->status_bayar = 'belum_lunas';
+        $nota->status_bayar = 'BELUM_LUNAS';
         $nota->amount_due = $nota->harga_total;
         $nota->amount_paid = 0;
         $nota->updated_by = $user->username;

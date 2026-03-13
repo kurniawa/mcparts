@@ -154,11 +154,11 @@ class Accounting extends Model
             // Validasi Payment Status
             $payment_status_new = 'error';
             if ($amount_due_new <= 0) {
-                $payment_status_new = 'lunas';
+                $payment_status_new = 'LUNAS';
             } else if ($amount_due_new == ($amount_due_old - $total_discount_new)) {
-                $payment_status_new = 'belum_lunas'; 
+                $payment_status_new = 'BELUM_LUNAS'; 
             } else if ($amount_due_new > 0 && $amount_due_new < ($amount_due_old - $total_discount_new)) {
-                $payment_status_new = 'sebagian';
+                $payment_status_new = 'SEBAGIAN';
             }
             if ($payment_status_new == 'error') {
                 $request->validate(['error' => 'required'], [

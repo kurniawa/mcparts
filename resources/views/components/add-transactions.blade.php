@@ -238,7 +238,7 @@
                                 elementToAppend += `
                                 <tr>${htmlRemainingBalanceMasuk}
                                     <td class="font-bold">
-                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer"><a href="/notas/${relatedInvoice.id}/show" target="_blank">${relatedInvoice.no_nota}</a></label>
+                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer"><a href="/notas/${relatedInvoice.id}/show" target="_blank">${relatedInvoice.nomor_nota}</a></label>
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
                                         <div class="text-center">${formatDate(relatedInvoice.created_at)}</div>
                                     </td>
@@ -497,11 +497,11 @@
                         // console.log(amountPaidRealValue, amountDueRealValue);
                         // console.log(amountDueRealValue);
                         if (amountDueRealValue <= 0) {
-                            paymentStatus.value = 'lunas';
+                            paymentStatus.value = 'LUNAS';
                         } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
-                            paymentStatus.value = 'belum_lunas'; 
+                            paymentStatus.value = 'BELUM_LUNAS'; 
                         } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
-                            paymentStatus.value = 'sebagian';
+                            paymentStatus.value = 'SEBAGIAN';
                         }
                         // console.log(paymentStatus.value);
                     }, 1000);

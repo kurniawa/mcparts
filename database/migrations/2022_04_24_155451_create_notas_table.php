@@ -16,11 +16,11 @@ return new class extends Migration
     {
         Schema::create('notas', function (Blueprint $table) {
             $table->id();
-            $table->string('no_nota', 20)->nullable();
+            $table->string('nomor_nota', 20)->nullable();
             $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggans')->onDelete('SET NULL');
             $table->foreignId('reseller_id')->nullable()->constrained('pelanggans')->onDelete('SET NULL');
-            $table->string('status_bayar', 50)->default('BELUM');
-            // $table->string('status_sj', 50)->default('BELUM');// Keliatannya sih tidak diperlukan
+            $table->string('status_bayar', 50)->default('BELUM_LUNAS');
+            // $table->string('status_sj', 50)->default('BELUM_LUNAS');// Keliatannya sih tidak diperlukan
             // $table->integer('jumlah_sj')->nullable()->default(0);
             $table->integer('jumlah_total')->nullable();
             $table->integer('harga_total')->nullable();

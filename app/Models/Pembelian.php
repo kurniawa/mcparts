@@ -17,7 +17,7 @@ class Pembelian extends Model
     static function lengkapi_data_pembelian($pembelian, $pembelian_temp) {
         $isi = array();
         $harga_total = 0;
-        $status_bayar = 'BELUM';
+        $status_bayar = 'BELUM_LUNAS';
         $jumlah_lunas = 0;
         $keterangan_bayar = '';
         $tanggal_lunas = null;

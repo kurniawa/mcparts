@@ -111,26 +111,26 @@ class PenjualanController extends Controller
             $total_penjualan_for_piutang = 0;
             foreach ($notas_grouped as $key_nota => $nota) {
                 $class = 'bg-red-200';
-                if ($nota->status_bayar === 'lunas') {
+                if ($nota->status_bayar === 'LUNAS') {
                     $class = 'bg-green-200';
-                } elseif ($nota->status_bayar === 'sebagian') {
+                } elseif ($nota->status_bayar === 'SEBAGIAN') {
                     $class = 'bg-orange-200';
                 }
                 $total_penjualan += $nota->harga_total;
                 if ($key_nota === count($notas_grouped) - 1) {
                     $notaSubtotalAll[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
                         'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'harga_total' => $nota->harga_total,
                         'subtotal' => $total_penjualan,
                         'class' => $class,
                     ];
-                    if ($nota->status_bayar !== 'lunas') {
+                    if ($nota->status_bayar !== 'LUNAS') {
                         $notaSubtotalAllForPiutang[] = [
                             'created_at' => $nota->created_at,
-                            'no_nota' => $nota->no_nota,
+                            'nomor_nota' => $nota->nomor_nota,
                             'spk_id' => $nota->spk_id,
                             'pelanggan_nama' => $nota->pelanggan_nama,
                             'harga_total' => $nota->harga_total,
@@ -142,17 +142,17 @@ class PenjualanController extends Controller
                 } else {
                     $notaSubtotalAll[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
                         'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'harga_total' => $nota->harga_total,
                         'subtotal' => null,
                         'class' => $class,
                     ];
-                    if ($nota->status_bayar !== 'lunas') {
+                    if ($nota->status_bayar !== 'LUNAS') {
                         $notaSubtotalAllForPiutang[] = [
                             'created_at' => $nota->created_at,
-                            'no_nota' => $nota->no_nota,
+                            'nomor_nota' => $nota->nomor_nota,
                             'spk_id' => $nota->spk_id,
                             'pelanggan_nama' => $nota->pelanggan_nama,
                             'harga_total' => $nota->harga_total,
@@ -164,13 +164,13 @@ class PenjualanController extends Controller
                 }
                 $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
                 $spk_produk_notas_for_piutang = [];
-                if ($nota->status_bayar !== 'lunas') {
+                if ($nota->status_bayar !== 'LUNAS') {
                     $spk_produk_notas_for_piutang = SpkProdukNota::where('nota_id', $nota->id)->get();
                 }
                 foreach ($spk_produk_notas as $spk_produk_nota) {
                     $notaDetailItemsAll[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
                         'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'cust_short' => $nota->cust_short,
@@ -190,7 +190,7 @@ class PenjualanController extends Controller
                 foreach ($spk_produk_notas_for_piutang as $spk_produk_nota) {
                     $notaDetailItemsAllForPiutang[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
                         'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'cust_short' => $nota->cust_short,

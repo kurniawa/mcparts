@@ -120,7 +120,7 @@ class Nota extends Model
             'copy'=>$spk->copy,
         ]);
         // UPDATE NO_NOTA
-        $nota->no_nota = "N-$nota->id";
+        $nota->nomor_nota = "N-$nota->id";
         $nota->save();
         // CREATE SPK_NOTA
         $spk_nota = SpkNota::create([
@@ -156,13 +156,13 @@ class Nota extends Model
             $jumlah_sudah_nota_gabungan += $jumlah_sudah_nota;
         }
 
-        $status_nota = 'BELUM';
+        $status_nota = 'BELUM_LUNAS';
         if ($spk->jumlah_total === $jumlah_sudah_nota_gabungan) {
             $status_nota = 'SEMUA';
         } elseif ($jumlah_sudah_nota_gabungan > 0) {
             $status_nota = 'SEBAGIAN';
         } elseif ($jumlah_sudah_nota_gabungan <= 0) {
-            $status_nota = 'BELUM';
+            $status_nota = 'BELUM_LUNAS';
         }
 
         $spk->status_nota = $status_nota;
@@ -205,11 +205,11 @@ class Nota extends Model
 
         // Update the status_bayar pada nota
         if ($this->amount_paid == 0) {
-            $this->status_bayar = 'belum_lunas';
+            $this->status_bayar = 'BELUM_LUNAS';
         } elseif ($this->amount_paid < $this->harga_total) {
-            $this->status_bayar = 'sebagian';
+            $this->status_bayar = 'SEBAGIAN';
         } elseif ($this->amount_paid >= $this->harga_total) {
-            $this->status_bayar = 'lunas';
+            $this->status_bayar = 'LUNAS';
             $this->finished_at = now();
         }
 
@@ -224,7 +224,7 @@ class Nota extends Model
             'time_key' => strtotime($this->created_at),
             'invoice_id' => $this->id,
             'invoice_table' => 'notas',
-            'invoice_number' => $this->no_nota,
+            'invoice_number' => $this->nomor_nota,
             // 'transaction_name_id' => $related_transaction_name->id,
             // 'transaction_name_desc' => $related_transaction_name->desc,
             'customer_id' => $this->pelanggan_id,
@@ -243,11 +243,11 @@ class Nota extends Model
         if ($amount_due_to_compare < 0) {
             $amount_due_to_compare = 0;
         }
-        $payment_status_to_compare = "belum_lunas";
+        $payment_status_to_compare = "BELUM_LUNAS";
         if ($amount_due_to_compare == 0) {
-            $payment_status_to_compare = 'lunas';
+            $payment_status_to_compare = 'LUNAS';
         } elseif ($amount_due_to_compare > 0 && $amount_due_to_compare < $this->harga_total) {
-            $payment_status_to_compare = 'sebagian';
+            $payment_status_to_compare = 'SEBAGIAN';
         }
 
         if ($amount_due_to_compare != $amount_due || $payment_status_to_compare !== $payment_status) {
@@ -278,7 +278,7 @@ class Nota extends Model
                 'time_key' => strtotime($this->created_at),
                 'invoice_id' => $this->id,
                 'invoice_table' => 'notas',
-                'invoice_number' => $this->no_nota,
+                'invoice_number' => $this->nomor_nota,
                 'transaction_name_id' => $transaction_name->id,
                 'transaction_name_desc' => $transaction_name->desc,
                 'customer_id' => $this->pelanggan_id,
@@ -302,11 +302,11 @@ class Nota extends Model
         // Validasi Payment Status
         $payment_status = 'error';
         if ($this->amount_due == 0) {
-            $payment_status = 'lunas';
+            $payment_status = 'LUNAS';
         } else if (($this->amount_paid + $this->balance_used) == 0 && ($this->amount_due == ($this->harga_total - $this->total_discount) || $this->amount_due == $this->harga_total)) {
-            $payment_status = 'belum_lunas'; 
+            $payment_status = 'BELUM_LUNAS'; 
         } else if (($this->amount_paid + $this->balance_used) > 0 && ($this->amount_due < ($this->harga_total - $this->total_discount) && $this->amount_due < $this->harga_total)) {
-            $payment_status = 'sebagian';
+            $payment_status = 'SEBAGIAN';
         }
         if ($payment_status == 'error') {
 //             dd("amount_paid: $this->amount_paid

@@ -404,7 +404,7 @@
                             @foreach ($notas as $key_pilih_nota => $nota)
                             <div class="flex items-center mt-1">
                                 <input type="radio" name="nota_id" id="pilih_nota_id-{{ $key_pilih_nota }}" value="{{ $nota['id'] }}">
-                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
+                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota['nomor_nota'] }}</label>
                             </div>
                             @endforeach
                             <div class="flex items-center mt-1">
@@ -460,7 +460,7 @@
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
                                     <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}" value="{{ $nota['id'] }}">
-                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
+                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota['nomor_nota'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -494,7 +494,7 @@
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
                                     <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}" value="{{ $nota['id'] }}">
-                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
+                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota['nomor_nota'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -508,7 +508,7 @@
                     <div class="grid grid-cols-2">
                         <table class="w-full">
                             <tr>
-                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['no_nota'] }}</div></td>
+                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['nomor_nota'] }}</div></td>
                             </tr>
                             <tr>
                                 <td>Tgl.</td><td>:</td>

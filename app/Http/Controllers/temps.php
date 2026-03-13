@@ -65,7 +65,7 @@ while ($a < count($pembelians)) {
 
         $isi = array();
         $harga_total = 0;
-        $status_bayar = 'BELUM';
+        $status_bayar = 'BELUM_LUNAS';
         $jumlah_lunas = 0;
         $keterangan_bayar = '';
         $tanggal_lunas = null;
@@ -251,11 +251,11 @@ if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'
             }
         } elseif (!$lunas && $belum_lunas && !$sebagian) {
             if ($get['supplier_id']) {
-                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where('status_bayar', 'BELUM_LUNAS')->latest()->limit(500)->get();
             } else {
-                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where('status_bayar', 'BELUM_LUNAS')->latest()->limit(500)->get();
                 if (count($pembelians) === 0) {
-                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where('status_bayar', 'BELUM')->latest()->limit(500)->get();
+                    $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where('status_bayar', 'BELUM_LUNAS')->latest()->limit(500)->get();
                 }
             }
         } elseif (!$lunas && !$belum_lunas && $sebagian) {
@@ -270,15 +270,15 @@ if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'
         } elseif ($lunas && $belum_lunas && !$sebagian) {
             if ($get['supplier_id']) {
                 $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where(function ($query) {
-                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
+                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM_LUNAS');
                 })->latest()->limit(500)->get();
             } else {
                 $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where(function ($query) {
-                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
+                    $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM_LUNAS');
                 })->latest()->limit(500)->get();
                 if (count($pembelians) === 0) {
                     $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where(function ($query) {
-                        $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM');
+                        $query->where('status_bayar', 'LUNAS')->orWhere('status_bayar', 'BELUM_LUNAS');
                     })->latest()->limit(500)->get();
                 }
             }
@@ -300,15 +300,15 @@ if ($get['from_day'] === null || $get['from_month'] === null || $get['from_year'
         } elseif (!$lunas && $belum_lunas && $sebagian) {
             if ($get['supplier_id']) {
                 $pembelians = Pembelian::where('supplier_id', $get['supplier_id'])->where(function ($query) {
-                    $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
+                    $query->where('status_bayar', 'BELUM_LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
                 })->latest()->limit(500)->get();
             } else {
                 $pembelians = Pembelian::where('supplier_nama', $get['supplier_nama'])->where(function ($query) {
-                    $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
+                    $query->where('status_bayar', 'BELUM_LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
                 })->latest()->limit(500)->get();
                 if (count($pembelians) === 0) {
                     $pembelians = Pembelian::where('supplier_nama','like', "%$get[supplier_nama]%")->where(function ($query) {
-                        $query->where('status_bayar', 'BELUM')->orWhere('status_bayar', 'SEBAGIAN');
+                        $query->where('status_bayar', 'BELUM_LUNAS')->orWhere('status_bayar', 'SEBAGIAN');
                     })->latest()->limit(500)->get();
                 }
             }

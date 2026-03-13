@@ -13,7 +13,7 @@
                     <div class="flex">
                         <table class="">
                             <tr>
-                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['no_nota'] }}</div></td>
+                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['nomor_nota'] }}</div></td>
                                 <td class="align-top">Alamat</td><td class="align-top">:</td>
                                 <td class="align-top">
                                     @if ($nota['cust_long']!==null)
@@ -309,11 +309,11 @@
             // console.log(amountPaidRealValue, amountDueRealValue);
             // console.log(amountDueRealValue);
             if (amountDueRealValue <= 0) {
-                paymentStatus.value = 'lunas';
+                paymentStatus.value = 'LUNAS';
             } else if (amountDueRealValue == (amountDueStartValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
-                paymentStatus.value = 'belum_lunas'; 
+                paymentStatus.value = 'BELUM_LUNAS'; 
             } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueStartValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
-                paymentStatus.value = 'sebagian';
+                paymentStatus.value = 'SEBAGIAN';
             }
             // console.log(paymentStatus.value);
         }, 1000);

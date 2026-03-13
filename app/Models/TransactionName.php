@@ -12,18 +12,19 @@ class TransactionName extends Model
     public $timestamps = false;
 
     /**
-     * Get notas, where status_bayar is 'belum_lunas' or 'sebagian'
+     * Get notas, where status_bayar is 'BELUM_LUNAS' or 'SEBAGIAN'
      */
     public function getRelatedNotYetPaidOffInvoices()
     {
         $balance = null;
-        $notas = null;
+        $notas = [];
+        $invoice_table = 'notas';
         if ($this->kategori_level_one === 'PENERIMAAN PIUTANG') {
             $balance = Overpayment::where('customer_id', $this->pelanggan_id)->latest()->first();
             
             $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where(function ($query) {
-            $query->where('status_bayar', 'belum_lunas')
-                  ->orWhere('status_bayar', 'sebagian');
+            $query->where('status_bayar', 'BELUM_LUNAS')
+                  ->orWhere('status_bayar', 'SEBAGIAN');
             })
             ->get()->map(function ($nota) {
                 $nota->invoice_id = $nota->id;
@@ -31,10 +32,11 @@ class TransactionName extends Model
             })
             ->toArray();
         } elseif ($this->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+            $invoice_table = 'pembelians';
             $balance = Overpayment::where('supplier_id', $this->supplier_id)->latest()->first();
             
             $notas = Pembelian::where('supplier_id', $this->supplier_id)->where(function ($query) {
-            $query->where('status_bayar', 'BELUM')
+            $query->where('status_bayar', 'BELUM_LUNAS')
                   ->orWhere('status_bayar', 'SEBAGIAN');
             })
             ->get()->map(function ($nota) {
@@ -53,15 +55,15 @@ class TransactionName extends Model
         // Log::info($notas);
         
         if (!count($notas) ) {
-            
-            $accountingInvoices = AccountingInvoice::where('invoice_table', 'notas')
-                ->where('customer_id', $this->pelanggan_id)
-                ->whereIn('payment_status', ['belum_lunas', 'sebagian'])
+            $accountingInvoices = AccountingInvoice::where('invoice_table', $invoice_table)
+                ->where($invoice_table === 'notas' ? 'customer_id' : 'supplier_id', $this->pelanggan_id ?? $this->supplier_id)
+                ->whereIn('payment_status', ['BELUM_LUNAS', 'SEBAGIAN'])
                 ->where('status', 'active')
                 ->get()
                 ->map(function ($invoice) {
-                    $invoice->no_nota = $invoice->invoice_number;
+                    $invoice->nomor_nota = $invoice->invoice_number;
                     $invoice->pelanggan_id = $invoice->customer_id;
+                    $invoice->supplier_id = $invoice->supplier_id;
                     $invoice->harga_total = $invoice->total_amount;
                     $invoice->status_bayar = $invoice->payment_status;
                     return $invoice;

@@ -27,11 +27,11 @@ class SeedingAccountingInvoices extends Command
     public function handle()
     {
         /**
-         * Hanya seeding data untuk invoices/notas dengan status_bayar = belum_lunas
+         * Hanya seeding data untuk invoices/notas dengan status_bayar = BELUM_LUNAS
          */
-        $notas = \App\Models\Nota::where('status_bayar', 'belum_lunas')->get();
+        $notas = \App\Models\Nota::where('status_bayar', 'BELUM_LUNAS')->get();
         foreach ($notas as $nota) {
-            if ($nota->status_bayar === 'belum_lunas' || $nota->status_bayar === 'sebagian') {
+            if ($nota->status_bayar === 'BELUM_LUNAS' || $nota->status_bayar === 'SEBAGIAN') {
                 $time_key = $nota->created_at->timestamp;
                 while (AccountingInvoice::where('time_key', $time_key)->exists()) {
                     $time_key++;
@@ -41,7 +41,7 @@ class SeedingAccountingInvoices extends Command
                     'time_key' => $time_key,
                     'invoice_id' => $nota->id,
                     'invoice_table' => 'notas',
-                    'invoice_number' => $nota->no_nota,
+                    'invoice_number' => $nota->nomor_nota,
                     'customer_id' => $nota->pelanggan_id,
                     'customer_name' => $nota->pelanggan_nama,
                     'payment_status' => $nota->status_bayar,

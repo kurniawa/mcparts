@@ -520,7 +520,7 @@ class AccountingController extends Controller
                         $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
                         $finished_at = null;
                         $accounting_invoice_status = 'active';
-                        if ($payment_status == 'lunas') {
+                        if ($payment_status == 'LUNAS') {
                             $finished_at = $created_at;
                             $accounting_invoice_status = 'inactive';
                         }
@@ -616,7 +616,7 @@ class AccountingController extends Controller
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
-                                'invoice_number' => $related_nota->no_nota,
+                                'invoice_number' => $related_nota->nomor_nota,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
                                 'customer_id' => $related_nota->pelanggan_id,
@@ -646,7 +646,7 @@ class AccountingController extends Controller
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
-                                'invoice_number' => $related_nota->no_nota,
+                                'invoice_number' => $related_nota->nomor_nota,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
                                 'customer_id' => $related_nota->pelanggan_id,
@@ -681,7 +681,7 @@ class AccountingController extends Controller
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
                                 'invoice_table' => 'notas',
-                                'invoice_number' => $related_nota->no_nota,
+                                'invoice_number' => $related_nota->nomor_nota,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
                                 'customer_id' => $related_nota->pelanggan_id,
@@ -1274,10 +1274,10 @@ class AccountingController extends Controller
                     // UPDATE status_bayar pada Nota
                     $payment_status = $nota->UpdatePaymentStatus();
                     $nota->status_bayar = $payment_status;
-                    if ($payment_status != 'lunas') {
+                    if ($payment_status != 'LUNAS') {
                         $nota->finished_at = null;
                     } elseif ($payment_status == 'error') {
-                        $nota->status_bayar = 'belum_lunas';
+                        $nota->status_bayar = 'BELUM_LUNAS';
                         $nota->discount_percentage = 0.00;
                         $nota->total_discount = 0;
                         $nota->discount_description = null;

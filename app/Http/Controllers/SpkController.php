@@ -216,7 +216,7 @@ class SpkController extends Controller
             }
         }
         // END - VALIDASI
-        $status = 'BELUM';
+        $status = 'BELUM_LUNAS';
         if ($jumlah === $spk_produk->jumlah_total) {
             $status = 'SELESAI';
         } elseif ($jumlah <= $spk_produk->jumlah_total && $jumlah > 0) {

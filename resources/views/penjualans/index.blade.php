@@ -55,7 +55,7 @@
         <tr><th>No.</th><th>Tanggal</th><th>Pelanggan</th><th>Harga</th><th>Subtotal</th></tr>
         @foreach ($notaSubtotalAll as $nota_subtotal)
         <tr>
-            <td>{{ $nota_subtotal['no_nota'] }}</td><td>{{ date('d-m-Y', strtotime($nota_subtotal['created_at'])) }}</td>
+            <td>{{ $nota_subtotal['nomor_nota'] }}</td><td>{{ date('d-m-Y', strtotime($nota_subtotal['created_at'])) }}</td>
             <td>{{ $nota_subtotal['pelanggan_nama'] }}</td>
             <td>{{ $nota_subtotal['harga_total'] }}</td>
             @if ($nota_subtotal['subtotal'])
@@ -71,7 +71,7 @@
         <tr><th>Tanggal</th><th>Ref.</th><th>Customer</th><th>Daerah</th><th>Nota Item</th><th>Jml.</th><th>Harga</th><th>Total</th></tr>
         @foreach ($notaDetailItemsAll as $nota_detail_item)
         <tr>
-            <td>{{ date('d-m-Y', strtotime($nota_detail_item['created_at'])) }}</td><td>{{ $nota_detail_item['no_nota'] }}</td>
+            <td>{{ date('d-m-Y', strtotime($nota_detail_item['created_at'])) }}</td><td>{{ $nota_detail_item['nomor_nota'] }}</td>
             <td>{{ $nota_detail_item['pelanggan_nama'] }}</td><td>{{ $nota_detail_item['cust_short'] }}</td>
             <td>{{ $nota_detail_item['nama_nota'] }}</td><td>{{ $nota_detail_item['jumlah'] }}</td>
             <td>{{ $nota_detail_item['harga'] }}</td>

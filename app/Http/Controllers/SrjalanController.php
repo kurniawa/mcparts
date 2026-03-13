@@ -60,7 +60,7 @@ class SrjalanController extends Controller
                     // Strateginya adalah, apabila jumlah lebih dari 0 baru dia akan input ke surat jalan terkait
                     $srjalan = Srjalan::find($post['srjalan_id'][$i]);
                     $spk_produk_nota_srjalan = SpkProdukNotaSrjalan::where('spk_produk_nota_id',$spk_produk_nota->id)->where('srjalan_id',$post['srjalan_id'][$i])->first();
-                    // KALAU NULL BERARTI EMANG BELUM ADA YANG DIINPUT KE NOTA TERKAIT
+                    // KALAU NULL BERARTI EMANG BELUM_LUNAS ADA YANG DIINPUT KE NOTA TERKAIT
                     // BERARTI BIKIN SPK_PRODUK_NOTA_SRJALAN BARU
                     if ($spk_produk_nota_srjalan === null) {
                         // dump($post['jumlah'][$i]);

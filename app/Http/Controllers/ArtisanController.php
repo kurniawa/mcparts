@@ -268,7 +268,7 @@ class ArtisanController extends Controller
             $table->decimal('jumlah_meter', 10, 2);
             $table->decimal('harga_meter', 21, 2);
             $table->decimal('harga_total', 21, 2);
-            $table->enum('status_pembayaran', ['BELUM', 'SEBAGIAN', 'LUNAS'])->nullable();
+            $table->enum('status_pembayaran', ['BELUM_LUNAS', 'SEBAGIAN', 'LUNAS'])->nullable();
             $table->string('keterangan_pembayaran')->nullable();
             $table->timestamp('tanggal_lunas')->nullable();
             $table->timestamps();
@@ -479,7 +479,7 @@ class ArtisanController extends Controller
             $table->string('keterangan')->nullable();
             $table->string('isi')->nullable();
             $table->bigInteger('harga_total')->nullable();
-            $table->string('status_bayar', 20)->default('BELUM'); // ['BELUM', 'SEBAGIAN', 'LUNAS']
+            $table->string('status_bayar', 20)->default('BELUM_LUNAS'); // ['BELUM_LUNAS', 'SEBAGIAN', 'LUNAS']
             $table->string('keterangan_bayar')->nullable();
             $table->timestamp('tanggal_lunas')->nullable();
             $table->timestamps();
@@ -508,7 +508,7 @@ class ArtisanController extends Controller
             $table->bigInteger('harga_sub')->nullable();
             $table->bigInteger('harga_t');
             $table->string('keterangan')->nullable();
-            $table->string('status_bayar', 20)->default('BELUM'); // ['BELUM', 'SEBAGIAN', 'LUNAS']
+            $table->string('status_bayar', 20)->default('BELUM_LUNAS'); // ['BELUM_LUNAS', 'SEBAGIAN', 'LUNAS']
             $table->string('keterangan_bayar')->nullable();
             $table->timestamp('tanggal_lunas')->nullable();
             $table->timestamps();
@@ -682,7 +682,7 @@ class ArtisanController extends Controller
 
                 $isi = array();
                 $harga_total = 0;
-                $status_bayar = 'BELUM';
+                $status_bayar = 'BELUM_LUNAS';
                 $jumlah_lunas = 0;
                 $keterangan_bayar = '';
                 $tanggal_lunas = null;
@@ -738,7 +738,7 @@ class ArtisanController extends Controller
                     $status_bayar = 'SEBAGIAN';
                 }
 
-                // if ($status_bayar === 'BELUM') {
+                // if ($status_bayar === 'BELUM_LUNAS') {
                 //     $tanggal_lunas = null;
                 // }
 

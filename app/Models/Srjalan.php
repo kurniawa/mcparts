@@ -234,13 +234,13 @@ class Srjalan extends Model
             $jumlah_sudah_srjalan_gabungan += $jumlah_sudah_srjalan;
         }
 
-        $status_srjalan = 'BELUM';
+        $status_srjalan = 'BELUM_LUNAS';
         if ($spk->jumlah_total === $jumlah_sudah_srjalan_gabungan) {
             $status_srjalan = 'SEMUA';
         } elseif ($jumlah_sudah_srjalan_gabungan > 0) {
             $status_srjalan = 'SEBAGIAN';
         } elseif ($jumlah_sudah_srjalan_gabungan <= 0) {
-            $status_srjalan = 'BELUM';
+            $status_srjalan = 'BELUM_LUNAS';
         }
 
         $spk->jumlah_sudah_srjalan = $jumlah_sudah_srjalan_gabungan;

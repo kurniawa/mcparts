@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('customer_name', 100)->nullable(); // e.g., 'Jhon Motor'
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
             $table->string('supplier_name', 100)->nullable(); //
-            $table->string('payment_status', 50)->default('belum_lunas'); // e.g., paid, unpaid, partial
+            $table->string('payment_status', 50)->default('BELUM_LUNAS'); // e.g., paid, unpaid, partial
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->string('payment_method', 50)->nullable(); // e.g., cash, bank transfer, credit card
             $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice

@@ -513,7 +513,7 @@
                                         <div class="flex justify-between text-rose-500">
                                             <span>Rp</span>
                                             {{-- {{ dump($pembelian_total_supplier[$i]->harga_total) }} --}}
-                                            {{ number_format($pembelian_total_suppliers[$i]['pembelian_belum_lunas'],2,',','.') }}
+                                            {{ number_format($pembelian_total_suppliers[$i]['pembelian_BELUM_LUNAS'],2,',','.') }}
                                         </div>
                                     </td>
                                 </tr>

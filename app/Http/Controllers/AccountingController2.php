@@ -60,13 +60,13 @@ class AccountingController2 extends Controller
 
     public function getRelatedNotYetPaidOffInvoices(TransactionName $transactionName) {
         // Get the related invoice for the transaction name
-        return response()->json(['message' => "Transaction name: $transactionName"], 404);
+        // return response()->json(['message' => "Transaction name: $transactionName"], 404);
         if (!isset($transactionName)) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
         } elseif (!$transactionName) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
         } else {
-            if ($transactionName->pelanggan_id) {
+            if ($transactionName->pelanggan_id || $transactionName->supplier_id) {
                 [$notYetPaidOffInvoices, $customerBalance] = $transactionName->getRelatedNotYetPaidOffInvoices();
                 if (!$notYetPaidOffInvoices) {
                     return response()->json(['message' => 'Data not found'], 404);
@@ -74,7 +74,7 @@ class AccountingController2 extends Controller
         
                 return response()->json(['message' => 'Data found', 'notas' => $notYetPaidOffInvoices, 'customerBalance' => $customerBalance], 200);
             } else {
-                return response()->json(['message' => 'Transaction name does not have a related customer'], 400);
+                return response()->json(['message' => 'Transaction name does not have a related customer or supplier'], 400);
             }
         }
     }
@@ -98,14 +98,14 @@ class AccountingController2 extends Controller
         $post = $request->post();
         // dd($post);
         $payment_status = $post['payment_status'];
-        if ($payment_status !== 'lunas') {
+        if ($payment_status !== 'LUNAS') {
             $request->validate(['error'=>'required'],['error.required'=>'Payment status must be "lunas" when linking nota to accounting.']);
         }
         $spk_id = $nota->spk->first()->id;
         $transaction_name = TransactionName::where('user_instance_id', $accounting->user_instance_id)->where('desc', $accounting->transaction_desc)->first();
         
         $accounting_invoice_status = 'active';
-        if ($payment_status == 'lunas') {
+        if ($payment_status == 'LUNAS') {
             $accounting_invoice_status = 'inactive';
         }
         // Create AccountingInvoice
@@ -116,7 +116,7 @@ class AccountingController2 extends Controller
             'user_instance_id' => $accounting->user_instance_id,
             'invoice_id' => $nota->id,
             'invoice_table' => 'notas',
-            'invoice_number' => $nota->no_nota,
+            'invoice_number' => $nota->nomor_nota,
             'transaction_name_id' => $transaction_name->id,
             'transaction_name_desc' => $transaction_name->desc,
             'customer_id' => $nota->pelanggan_id,
@@ -185,15 +185,15 @@ class AccountingController2 extends Controller
                 $success_ .= "AccountingInvoice $accounting_invoice->customer_name - $accounting_invoice->invoice_number date updated.";
                 /**
                  * If $accounting->kategori_level_one == 'Penerimaan Piutang' &&
-                 * $accounting_invoice->payment_status == 'lunas'
+                 * $accounting_invoice->payment_status == 'LUNAS'
                  * then also update the related Nota's finished_at date
                  */
-                if ($accounting->kategori_level_one == 'Penerimaan Piutang' && $accounting_invoice->payment_status == 'lunas') {
+                if ($accounting->kategori_level_one == 'Penerimaan Piutang' && $accounting_invoice->payment_status == 'LUNAS') {
                     $nota = Nota::find($accounting_invoice->invoice_id);
                     if ($nota) {
                         $nota->finished_at = $new_created_at;
                         $nota->save();
-                        $success_ .= " Nota $nota->no_nota finished_at date updated.";
+                        $success_ .= " Nota $nota->nomor_nota finished_at date updated.";
                     }
                 }
             }
