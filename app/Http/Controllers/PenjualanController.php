@@ -33,7 +33,7 @@ class PenjualanController extends Controller
 
             if ($get['pelanggan_nama'] && $date_start && $date_end) {
                 $notas = Nota::with('spk')->whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->orderBy('created_at')->get()->map(function ($nota) {
-                    $nota->spk_id = optional($nota->spk)->id;
+                    $nota->spk_id = optional($nota->spk->first())->id;
                     return $nota;
                 });
                 $pelanggan = Pelanggan::where('nama', 'like', "%$get[pelanggan_nama]%")->first();
