@@ -47,8 +47,8 @@
 
     <x-validation-feedback></x-validation-feedback>
 
-    <div class="flex justify-center">
-        <table class="table-nice">
+    <div class="grid grid-cols-2 gap-2">
+        <table class="table-nice text-xs">
             <thead>
                 <tr><th>No.</th><th>Nama Barang</th><th>Jumlah</th><th>Harga/Satuan</th><th>Harga Total</th></tr>
             </thead>
@@ -86,6 +86,7 @@
                 <tr><th></th><th></th><th></th><th>Grand Total</th><th>{{ number_format($pembelian->harga_total, 2, ',', '.') }}</th></tr>
             </tbody>
         </table>
+        <x-history-pembayaran :nota="$pembelian" :key_nota="$pembelian->id"></x-history-pembayaran>
     </div>
     {{-- <div class="text-xs flex justify-center italic mt-2">Fitur sementara: mengganti barang yang sudah tercantum pada pembelian</div> --}}
 </main>      

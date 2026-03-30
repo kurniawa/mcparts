@@ -168,4 +168,10 @@ class Pembelian extends Model
     function pembelianBarangs() {
         return $this->hasMany(PembelianBarang::class, 'pembelian_id', 'id');
     }
+
+    public function accountingInvoices() {
+        return $this->hasMany(AccountingInvoice::class, 'invoice_id', 'id')
+            ->where('invoice_table', 'pembelians')
+            ->orderBy('created_at');
+    }
 }
