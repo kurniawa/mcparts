@@ -235,10 +235,11 @@
                                 } else {
                                     htmlRemainingBalanceMasuk = "";
                                 }
+                                let linkUrl = relatedInvoice.table === 'notas' ? `/notas/${relatedInvoice.id}/show` : `/pembelians/${relatedInvoice.id}/show`;
                                 elementToAppend += `
                                 <tr>${htmlRemainingBalanceMasuk}
                                     <td class="font-bold">
-                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer"><a href="/notas/${relatedInvoice.id}/show" target="_blank">${relatedInvoice.nomor_nota}</a></label>
+                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer"><a href="${linkUrl}" target="_blank">${relatedInvoice.nomor_nota}</a></label>
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
                                         <div class="text-center">${formatDate(relatedInvoice.created_at)}</div>
                                     </td>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class TransactionName extends Model
 {
@@ -27,6 +28,7 @@ class TransactionName extends Model
                   ->orWhere('status_bayar', 'SEBAGIAN');
             })
             ->get()->map(function ($nota) {
+                $nota->invoice_table = 'notas';
                 $nota->invoice_id = $nota->id;
                 return $nota;
             })
@@ -40,6 +42,7 @@ class TransactionName extends Model
                   ->orWhere('status_bayar', 'SEBAGIAN');
             })
             ->get()->map(function ($nota) {
+                $nota->invoice_table = 'pembelians';
                 $nota->invoice_id = $nota->id;
                 return $nota;
             })
@@ -60,15 +63,17 @@ class TransactionName extends Model
                 ->whereIn('payment_status', ['BELUM_LUNAS', 'SEBAGIAN'])
                 ->where('status', 'active')
                 ->get()
-                ->map(function ($invoice) {
+                ->map(function ($invoice) use ($invoice_table) {
                     $invoice->nomor_nota = $invoice->invoice_number;
                     $invoice->pelanggan_id = $invoice->customer_id;
                     $invoice->supplier_id = $invoice->supplier_id;
                     $invoice->harga_total = $invoice->total_amount;
                     $invoice->status_bayar = $invoice->payment_status;
+                    $invoice->invoice_table = $invoice_table;
                     return $invoice;
                 })
                 ->toArray();
+            // Log::info($accountingInvoices);
         }
         
         return [$accountingInvoices, $balance];

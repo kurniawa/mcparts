@@ -14,17 +14,15 @@ return new class extends Migration
         Schema::create('pembelian_barangs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pembelian_id')->constrained()->onDelete('cascade');
-            // $table->foreignId('supplier_id')->nullable(); // tidak butuh data ini, karena sudah ada pada table pembelians
-            // $table->string('supplier_nama');
             $table->foreignId('barang_id')->nullable()->constrained()->onDelete('set null');
             $table->string('barang_nama');
             $table->string('satuan_main');
-            $table->integer('jumlah_main');
-            $table->bigInteger('harga_main');
+            $table->decimal('jumlah_main', 12, 2);
+            $table->decimal('harga_main', 20, 2);
             $table->string('satuan_sub')->nullable();
-            $table->integer('jumlah_sub')->nullable();
-            $table->bigInteger('harga_sub')->nullable();
-            $table->bigInteger('harga_t');
+            $table->decimal('jumlah_sub', 12, 2)->nullable();
+            $table->decimal('harga_sub', 20, 2)->nullable();
+            $table->decimal('harga_t', 20, 2);
             $table->string('keterangan')->nullable();
             $table->string('status_bayar', 20)->default('BELUM_LUNAS'); // ['BELUM_LUNAS', 'SEBAGIAN', 'LUNAS']
             $table->string('keterangan_bayar')->nullable();
