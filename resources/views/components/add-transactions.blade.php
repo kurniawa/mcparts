@@ -257,16 +257,16 @@
                                     </td>
                                     <td>
                                         <div class="flex w-full">
-                                            <input type="number" id="related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[discount_percentage][${trId}][]" value="0" class="text-xs p-0 pl-1 w-max-30">
+                                            <input type="number" id="related_not_yet_paid_off_invoices[discount_percent]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[discount_percent][${trId}][]" value="0" class="text-xs p-0 pl-1 w-max-30">
                                             <span>%</span>
-                                            <input type="text" id="related_not_yet_paid_off_invoices[percent_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 w-max-30 bg-slate-200" readonly>
+                                            <input type="text" id="related_not_yet_paid_off_invoices[discount_amount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 w-max-30 bg-slate-200" readonly>
                                         </div>
                                         <div class="flex w-full">
                                             <input type="text" id="related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 col-span-2 w-max-30">
                                             <input type="text" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-0 pl-1 col-span-3 bg-slate-200 w-max-30" readonly>
                                         </div>
                                         <input type="text" name="related_not_yet_paid_off_invoices[discount_description][${trId}][]" placeholder="keterangan diskon" class="text-xs p-0 pl-1">
-                                        <input type="hidden" name="related_not_yet_paid_off_invoices[percent_discount][${trId}][]" id="related_not_yet_paid_off_invoices[percent_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
+                                        <input type="hidden" name="related_not_yet_paid_off_invoices[discount_amount][${trId}][]" id="related_not_yet_paid_off_invoices[discount_amount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
                                         <input type="hidden" name="related_not_yet_paid_off_invoices[other_discount][${trId}][]" id="related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
                                         <input type="hidden" name="related_not_yet_paid_off_invoices[total_discount][${trId}][]" id="related_not_yet_paid_off_invoices[total_discount]-${trId}-${relatedInvoice.invoice_id}-real" value="0">
                                     </td>
@@ -299,7 +299,7 @@
                             data.notas.forEach(relatedInvoice => {
                                 // console.log('trId', trId);
                                 applyFormatNumber(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}`);
-                                applyEvent(`related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                                applyEvent(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${relatedInvoice.invoice_id}`, trId);
                                 applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}`, trId);
                                 applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId);
                                 applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId);
@@ -444,9 +444,9 @@
                     let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real`);
                     let amountDueRealUnchanged = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real-unchanged`);
                     let paymentStatus = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${trId}-${invoice.value}`);
-                    let discountPercentage = document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${trId}-${invoice.value}`);
-                    let percentDiscount = document.getElementById(`related_not_yet_paid_off_invoices[percent_discount]-${trId}-${invoice.value}`);
-                    let percentDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[percent_discount]-${trId}-${invoice.value}-real`);
+                    let discountPercentage = document.getElementById(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${invoice.value}`);
+                    let percentDiscount = document.getElementById(`related_not_yet_paid_off_invoices[discount_amount]-${trId}-${invoice.value}`);
+                    let percentDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[discount_amount]-${trId}-${invoice.value}-real`);
                     let otherDiscount = document.getElementById(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${invoice.value}`);
                     let otherDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${invoice.value}-real`);
                     let totalDiscount = document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${trId}-${invoice.value}`);
@@ -618,7 +618,7 @@
                             let amountDueRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real`).value);
                             let amountDueRealUnchangedValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${i}-${notaID.value}-real-unchanged`).value);
                             let paymentStatusValue = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${i}-${notaID.value}`).value;
-                            let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percentage]-${i}-${notaID.value}`).value);
+                            let discountPercentageValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[discount_percent]-${i}-${notaID.value}`).value);
                             let totalDiscountRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[total_discount]-${i}-${notaID.value}-real`).value);
                             let balanceUsedRealValue = parseFloat(document.getElementById(`related_not_yet_paid_off_invoices[balance_used]-${i}-${notaID.value}-real`).value);
                             totalSaldoUsed += balanceUsedRealValue;

@@ -47,8 +47,8 @@ return new class extends Migration
             $table->decimal('total_amount', 15, 2)->default(0.00); // Total amount of the invoice
 
             // Data Pembayaran
-            $table->decimal('discount_percentage', 5, 2)->default(0.00);
-            $table->decimal('percent_discount', 15, 2)->default(0.00);
+            $table->decimal('discount_percent', 5, 2)->default(0.00);
+            $table->decimal('discount_amount', 15, 2)->default(0.00);
             $table->decimal('other_discount', 15, 2)->default(0.00);
             $table->decimal('total_discount', 15, 2)->default(0.00);
             $table->string('discount_description')->nullable();
@@ -59,7 +59,7 @@ return new class extends Migration
             $table->decimal('remaining_funds', 15, 2)->default(0.00); // Berapa jumlah (dari uang masuk) yang tersisa
             $table->decimal('overpayment', 15, 2)->default(0.00); // Berapa jumlah lebih bayar
 
-            // $table->decimal('discount_percentage_old', 5, 2)->default(0.00);
+            // $table->decimal('discount_percent_old', 5, 2)->default(0.00);
             // $table->decimal('total_discount_old', 15, 2)->default(0.00);
             // $table->decimal('discount_description_old', 15, 2)->default(0.00);
             // $table->decimal('amount_due_old', 15, 2)->default(0.00);

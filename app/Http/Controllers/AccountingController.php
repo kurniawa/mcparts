@@ -540,15 +540,15 @@ class AccountingController extends Controller
                         }
                         // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
                         // Data Discount
-                        $discount_percentage = (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j];
+                        $discount_percent = (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j];
                         $other_discount = bcadd(
                             (string) $related_nota->other_discount,
                             (string) $post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
                             2 // skala desimal sesuai decimal(15,2)
                         );
-                        $percent_discount = bcadd(
-                            (string) $related_nota->percent_discount,
-                            (string) $post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                        $discount_amount = bcadd(
+                            (string) $related_nota->discount_amount,
+                            (string) $post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
                             2 // skala desimal sesuai decimal(15,2)
                         );
                         $total_discount = bcadd(
@@ -562,8 +562,8 @@ class AccountingController extends Controller
                         }
                         $related_nota->update([
                             'status_bayar' => $payment_status,
-                            'discount_percentage' => $discount_percentage,
-                            'percent_discount' => $percent_discount,
+                            'discount_percent' => $discount_percent,
+                            'discount_amount' => $discount_amount,
                             'other_discount' => $other_discount,
                             'total_discount' => $total_discount,
                             'discount_description' => $discount_description,
@@ -622,8 +622,8 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'discount_percentage' => (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
-                                'percent_discount' => (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                                'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
+                                'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
                                 'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
                                 'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
@@ -652,8 +652,8 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'discount_percentage' => (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
-                                'percent_discount' => (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                                'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
+                                'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
                                 'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
                                 'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
@@ -687,8 +687,8 @@ class AccountingController extends Controller
                                 'customer_id' => $related_nota->pelanggan_id,
                                 'customer_name' => $related_nota->pelanggan_nama,
                                 'payment_status' => $related_nota->status_bayar,
-                                'discount_percentage' => (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
-                                'percent_discount' => (float)$post['related_not_yet_paid_off_invoices']['percent_discount'][$i][$j],
+                                'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
+                                'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
                                 'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
                                 'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
@@ -1278,7 +1278,7 @@ class AccountingController extends Controller
                         $nota->finished_at = null;
                     } elseif ($payment_status == 'error') {
                         $nota->status_bayar = 'BELUM_LUNAS';
-                        $nota->discount_percentage = 0.00;
+                        $nota->discount_percent = 0.00;
                         $nota->total_discount = 0;
                         $nota->discount_description = null;
                         $nota->amount_due = $nota->harga_total;

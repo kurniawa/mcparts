@@ -160,16 +160,16 @@
                                                 </td>
                                                 <td>
                                                     <div class="flex w-full">
-                                                        <input type="number" id="discount_percentage-{{ $key_accounting }}" name="discount_percentage" value="0" max="100" class="text-xs p-0 pl-1 w-full">
+                                                        <input type="number" id="discount_percent-{{ $key_accounting }}" name="discount_percent" value="0" max="100" class="text-xs p-0 pl-1 w-full">
                                                         <span>%</span>
-                                                        <input type="text" id="percent_discount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 w-full bg-slate-200" readonly>
+                                                        <input type="text" id="discount_amount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 w-full bg-slate-200" readonly>
                                                     </div>
                                                     <div class="grid grid-cols-5">
                                                         <input type="text" id="other_discount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 col-span-2">
                                                         <input type="text" id="total_discount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 col-span-3 bg-slate-200" readonly>
                                                     </div>
                                                     <input type="text" name="discount_description" placeholder="keterangan diskon" class="text-xs p-0 pl-1 w-full">
-                                                    <input type="hidden" name="percent_discount" id="percent_discount-{{ $key_accounting }}-real" value="0">
+                                                    <input type="hidden" name="discount_amount" id="discount_amount-{{ $key_accounting }}-real" value="0">
                                                     <input type="hidden" name="other_discount" id="other_discount-{{ $key_accounting }}-real" value="0">
                                                     <input type="hidden" name="total_discount" id="total_discount-{{ $key_accounting }}-real" value="0">
                                                 </td>
@@ -204,11 +204,11 @@
 <script>
     const possible_related_accountings = @json($possible_related_accountings);
     possible_related_accountings.forEach((element, index) => {
-        applyFormatNumber(`percent_discount-${index}`);
+        applyFormatNumber(`discount_amount-${index}`);
         applyFormatNumberAndEvent(`other_discount-${index}`, index);
         applyFormatNumber(`total_discount-${index}`);
         applyFormatNumberAndEvent(`balance_used-${index}`, index);
-        applyEvent(`discount_percentage-${index}`, index);
+        applyEvent(`discount_percent-${index}`, index);
     });
 
     function applyFormatNumber(elementId) {
@@ -259,9 +259,9 @@
         let amountDueReal = document.getElementById(`amount_due-${trId}-real`);
         let amountDueStart = document.getElementById(`amount_due-${trId}-start`);
         let paymentStatus = document.getElementById(`payment_status-${trId}`);
-        let discountPercentage = document.getElementById(`discount_percentage-${trId}`);
-        let percentDiscount = document.getElementById(`percent_discount-${trId}`);
-        let percentDiscountReal = document.getElementById(`percent_discount-${trId}-real`);
+        let discountPercentage = document.getElementById(`discount_percent-${trId}`);
+        let percentDiscount = document.getElementById(`discount_amount-${trId}`);
+        let percentDiscountReal = document.getElementById(`discount_amount-${trId}-real`);
         let otherDiscount = document.getElementById(`other_discount-${trId}`);
         let otherDiscountReal = document.getElementById(`other_discount-${trId}-real`);
         let totalDiscount = document.getElementById(`total_discount-${trId}`);

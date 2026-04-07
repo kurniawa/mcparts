@@ -122,8 +122,8 @@ class AccountingController2 extends Controller
             'customer_id' => $nota->pelanggan_id,
             'customer_name' => $nota->pelanggan_nama,
             'payment_status' => $post['payment_status'],
-            'discount_percentage' => $post['discount_percentage'],
-            'percent_discount' => $post['percent_discount'],
+            'discount_percent' => $post['discount_percent'],
+            'discount_amount' => $post['discount_amount'],
             'other_discount' => $post['other_discount'],
             'total_discount' => $post['total_discount'],
             'discount_description' => $post['discount_description'],
@@ -139,8 +139,8 @@ class AccountingController2 extends Controller
         ]);
         // Update Nota payment status
         $nota->status_bayar = $payment_status;
-        $nota->discount_percentage = $post['discount_percentage'];
-        $nota->percent_discount = $post['percent_discount'];
+        $nota->discount_percent = $post['discount_percent'];
+        $nota->discount_amount = $post['discount_amount'];
         $nota->other_discount = $post['other_discount'];
         $nota->total_discount = $post['total_discount'];
         $nota->discount_description = $post['discount_description'];

@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('notas', function (Blueprint $table) {
-            $table->decimal('discount_percentage', 5, 2)->after('status_bayar')->default(0.00);
-            $table->decimal('percent_discount', 15, 2)->after('discount_percentage')->default(0.00);
-            $table->decimal('other_discount', 15, 2)->after('percent_discount')->default(0.00);
+            $table->decimal('discount_percent', 5, 2)->after('status_bayar')->default(0.00);
+            $table->decimal('discount_amount', 15, 2)->after('discount_percent')->default(0.00);
+            $table->decimal('other_discount', 15, 2)->after('discount_amount')->default(0.00);
             $table->decimal('total_discount', 15, 2)->after('other_discount')->default(0.00);
             $table->string('discount_description')->after('total_discount')->nullable();
             $table->decimal('amount_due', 15, 2)->after('discount_description')->default(0.00);
@@ -30,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('notas', function (Blueprint $table) {
-            $table->dropColumn('discount_percentage');
+            $table->dropColumn('discount_percent');
             $table->dropColumn('total_discount');
             $table->dropColumn('discount_description');
             $table->dropColumn('amount_due');
