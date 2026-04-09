@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('discount_description')->nullable()->after('total_discount');
             $table->decimal('amount_due', 15, 2)->default(0.00)->after('discount_description');
             $table->decimal('amount_paid', 15, 2)->default(0.00)->after('amount_due');
-            $table->decimal('balanced_used', 15, 2)->default(0.00)->after('amount_paid');
+            $table->decimal('balance_used', 15, 2)->default(0.00)->after('amount_paid');
             $table->decimal('overpayment', 15, 2)->default(0.00)->after('balanced_used');
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pembelians', function (Blueprint $table) {
-            $table->dropColumn(['discount_percent', 'discount_amount', 'other_discount', 'total_discount', 'discount_description', 'amount_due', 'amount_paid', 'balanced_used', 'overpayment']);
+            $table->dropColumn(['discount_percent', 'discount_amount', 'other_discount', 'total_discount', 'discount_description', 'amount_due', 'amount_paid', 'balance_used', 'overpayment']);
         });
     }
 };

@@ -48,6 +48,7 @@
                             </td>
                             <td>
                                 <input type="hidden" name="trId[]" value="{{ $i }}">
+                                <input type="hidden" name="kategori_level_one[]" id="kategori_level_one-{{ $i }}" value="">
                             </td>
                         </tr>
 
@@ -141,7 +142,11 @@
                     document.getElementById(`transaction_id-${index}`).value = ui.item.id;
                     // autofill_transaction(index, ui.item.value);
                     // console.log("autocomplete_deskripsi: " + ui.item.id);
-                    accountingGetRelatedInvoice(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
+                    if (ui.item.kategori_level_one === 'PENERIMAAN PIUTANG') {
+                        accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
+                    } else if (ui.item.kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+                        accountingGetRelatedInvoiceRawMaterials(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
+                    }
                 }
             });
 
@@ -173,7 +178,7 @@
             }
         });
         
-        function accountingGetRelatedInvoice(transactionNameId, trId, kategori_level_one, kategori_type) {
+        function accountingGetRelatedInvoiceReceivables(transactionNameId, trId, kategori_level_one, kategori_type) {
             let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
             let elementToAppend = "";
             // Reset tr penerimaan piutang jika sudah ada
@@ -186,7 +191,7 @@
             if (trErrorFeedback) {
                 trErrorFeedback.remove();
             }
-            if (kategori_level_one === "PENERIMAAN PIUTANG" || kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+            if (kategori_level_one === "PENERIMAAN PIUTANG") {
                 // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
                 //     .then(response => {
                 //         if (!response.ok) {
@@ -209,7 +214,7 @@
                     dataType: 'json',
                     success: function(data) {
                         // console.log(data.message);
-                        console.log(data.notas);
+                        // console.log(data.notas);
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
@@ -405,8 +410,11 @@
 
         function recalculateBalanceMasuk_TotalDue_TotalPaid(trId) {
             // Set the initial value: remainingBalance
+            let kategoriLevelOne = document.getElementById(`input-kategori-level-one-${trId}`).value;
+            // PIUTANG MASUK
             let remainingBalanceMasuk = document.getElementById(`remaining_balance_masuk-${trId}`);
             let remainingBalanceMasukReal = document.getElementById(`remaining_balance_masuk-${trId}-real`);
+
             let masukReal = document.getElementById(`masuk-${trId}-real`);
             let masukRealValue = 0;
             if (masukReal) {
@@ -415,6 +423,16 @@
             remainingBalanceMasuk.innerHTML = formatHargaIndo(masukRealValue);
             remainingBalanceMasukReal.value = masukRealValue;
             let remainingBalanceMasukRealValue = parseFloat(remainingBalanceMasukReal.value);
+
+            // PEMBAYARAN HUTANG BAHAN BAKU
+            let remainingBalanceKeluar = document.getElementById(`remaining_balance_keluar-${trId}`);
+            let remainingBalanceKeluarReal = document.getElementById(`remaining_balance_keluar-${trId}-real`);
+
+            let keluarReal = document.getElementById(`keluar-${trId}-real`);
+            let keluarRealValue = 0;
+            if (keluarReal) {
+                keluarRealValue = keluarReal.value;
+            }
 
             let sisaSaldo = document.getElementById(`sisa-saldo-${trId}`);
             let sisaSaldoReal = document.getElementById(`sisa-saldo-${trId}-real`);
