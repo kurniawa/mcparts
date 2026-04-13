@@ -66,13 +66,20 @@ class AccountingController2 extends Controller
         } elseif (!$transactionName) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
         } else {
-            if ($transactionName->pelanggan_id || $transactionName->supplier_id) {
+            if ($transactionName->pelanggan_id) {
                 [$notYetPaidOffInvoices, $customerBalance] = $transactionName->getRelatedNotYetPaidOffInvoices();
                 if (!$notYetPaidOffInvoices) {
                     return response()->json(['message' => 'Data not found'], 404);
                 }
         
                 return response()->json(['message' => 'Data found', 'notas' => $notYetPaidOffInvoices, 'customerBalance' => $customerBalance], 200);
+            } elseif ($transactionName->supplier_id) {
+                [$notYetPaidOffInvoices, $supplierBalance] = $transactionName->getRelatedNotYetPaidOffInvoices();
+                if (!$notYetPaidOffInvoices) {
+                    return response()->json(['message' => 'Data not found'], 404);
+                }
+        
+                return response()->json(['message' => 'Data found', 'notas' => $notYetPaidOffInvoices, 'supplierBalance' => $supplierBalance], 200);
             } else {
                 return response()->json(['message' => 'Transaction name does not have a related customer or supplier'], 400);
             }

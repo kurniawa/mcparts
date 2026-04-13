@@ -311,7 +311,7 @@
                             });
     
                             // console.log('trId-masuk', trId);
-                            applyEvent(`masuk-${trId}`, trId);
+                            applyEvent(`masuk-${trId}`, trId, "PEMASUKAN");
                             /*
                             Cek apakah array object listOfTrID memiliki trId yang sama.
                             Kalau sama, maka lakukan overwrite invoiceIDs pada object dengan index terkait.
@@ -352,7 +352,6 @@
                 });
                 // console.log(listOfTrID);
             } else {
-                
                 elementToAppend = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=6>
                     <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
                     <input id="input-kategori-type-${trId}" type="hidden" name="kategori_type[]" value="${kategori_type}">
@@ -388,11 +387,15 @@
             }
         }
 
-        function applyEvent(elementId, trId) {
+        function applyEvent(elementId, trId, type) {
             let element = document.getElementById(`${elementId}`);
             try {
                 element.addEventListener('change', function() {
-                    recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
+                    if (type === "PEMASUKAN") {
+                        recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
+                    } else if (type === "PENGELUARAN") {
+                        recalculateBalanceMasuk_TotalDue_TotalPaid_ForBayarBahanBaku(trId);
+                    }
                 });
             } catch (error) {
                 console.log(error);
@@ -401,7 +404,7 @@
         }
 
         function theChangeOfMasukChangeThePayment(trId) {
-            console.log('theChangeOfMasukChangeThePayment', trId);
+            // console.log('theChangeOfMasukChangeThePayment', trId);
             let masuk = document.getElementById(`masuk-${trId}`);
             masuk.addEventListener('change', function() {
                 recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
@@ -740,4 +743,6 @@
             border-collapse: collapse;
         }
     </style>
+
+    <x-add-transactions-bahan-baku></x-add-transactions-bahan-baku>
 </div>
