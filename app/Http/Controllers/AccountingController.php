@@ -339,8 +339,8 @@ class AccountingController extends Controller
 
             // dd($transaction_name);
             // dump($post);
-            if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
-                Accounting::validasi_data_untuk_penerimaan_piutang($request, $i);
+            if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG" || $transaction_name->kategori_level_one === "BAYAR HUTANG BAHAN BAKU") {
+                Accounting::validasi_data_untuk_pemasukan_pengeluaran($request, $i, $transaction_name->kategori_level_one);
                 // dump('VALID');
                 // dd($post);
             }

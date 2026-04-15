@@ -41,7 +41,7 @@ class Accounting extends Model
         return $this->hasMany(AccountingInvoice::class, 'accounting_id', 'id');
     }
 
-    static function validasi_data_untuk_penerimaan_piutang($request, $i) {
+    static function validasi_data_untuk_pemasukan_pengeluaran($request, $i, $kategori_level_one) {
         $request->validate([
             // "remaining_balance_masuk.$i" => "required|numeric",
             "related_not_yet_paid_off_invoices.nota_id.$i" => "required|array",
@@ -198,38 +198,75 @@ class Accounting extends Model
             ]);
         }
 
-        // Validasi Remaining Balance Masuk - Uang Masuk tidak boleh kosong atau kurang dari 0
-        $masuk = $post['masuk'][$i] ?? null;
-        $balance_used = null;
-        if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
-            $balance_used = 0;
-            foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
-                if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
-                    $request->validate(['error' => 'required'], [
-                        'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
-                    ]);
+        if ($kategori_level_one === 'PENERIMAAN PIUTANG') {
+            // Validasi Remaining Balance Masuk - Uang Masuk tidak boleh kosong atau kurang dari 0
+            $masuk = $post['masuk'][$i] ?? null;
+            $balance_used = null;
+            if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
+                $balance_used = 0;
+                foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
+                    if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
+                        ]);
+                    }
+                    $balance_used += (float)$value;
                 }
-                $balance_used += (float)$value;
             }
-        }
-        if ($masuk && !$balance_used) {
-            if ((float)$masuk > 0) {
-                $remaining_balance_new = (float)$masuk - $total_amount_paid_posted;
-                if ($remaining_balance_new != $post['remaining_balance_masuk'][$i]) {
+            if ($masuk && !$balance_used) {
+                if ((float)$masuk > 0) {
+                    $remaining_balance_new = (float)$masuk - $total_amount_paid_posted;
+                    if ($remaining_balance_new != $post['remaining_balance_masuk'][$i]) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != " . $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j]
+                        ]);
+                    }
+                } elseif ((float)$masuk <= 0) {
                     $request->validate(['error' => 'required'], [
-                        'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != " . $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j]
+                        'error.required' => "input uang masuk[$i][$j] --> " . $post['masuk'][$i]
                     ]);
                 }
-            } elseif ((float)$masuk <= 0) {
+            } elseif (!$masuk && !$balance_used) {
                 $request->validate(['error' => 'required'], [
-                    'error.required' => "input uang masuk[$i][$j] --> " . $post['masuk'][$i]
+                    'error.required' => "input uang masuk dan saldo yang digunakan tidak sesuai"
                 ]);
             }
-        } elseif (!$masuk && !$balance_used) {
-            $request->validate(['error' => 'required'], [
-                'error.required' => "input uang masuk dan saldo yang digunakan tidak sesuai"
-            ]);
+        } elseif ($kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+            // Validasi Remaining Balance Keluar - Uang Keluar tidak boleh kosong atau kurang dari 0
+            $keluar = $post['keluar'][$i] ?? null;
+            $balance_used = null;
+            if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
+                $balance_used = 0;
+                foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
+                    if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
+                        ]);
+                    }
+                    $balance_used += (float)$value;
+                }
+            }
+            if ($keluar && !$balance_used) {
+                if ((float)$keluar > 0) {
+                    $remaining_balance_new = (float)$keluar - $total_amount_paid_posted;
+                    if ($remaining_balance_new != $post['remaining_balance_keluar'][$i]) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != " . $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j]
+                        ]);
+                    }
+                } elseif ((float)$keluar <= 0) {
+                    $request->validate(['error' => 'required'], [
+                        'error.required' => "input uang keluar[$i][$j] --> " . $post['keluar'][$i]
+                    ]);
+                }
+            } elseif (!$keluar && !$balance_used) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "input uang keluar dan saldo yang digunakan tidak sesuai"
+                ]);
+            }
         }
+        
+        
         //  elseif (!$masuk && $balance_used) {
         //     $amount_due_to_validate = $amount_due_old - (float)$balance_used;
         //     if ($amount_due_new != $amount_due_to_validate) {

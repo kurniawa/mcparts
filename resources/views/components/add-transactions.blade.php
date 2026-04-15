@@ -304,14 +304,14 @@
                             data.notas.forEach(relatedInvoice => {
                                 // console.log('trId', trId);
                                 applyFormatNumber(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}`);
-                                applyEvent(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId);
+                                applyEvent(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${relatedInvoice.invoice_id}`, trId, 'PEMASUKAN');
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}`, trId, 'PEMASUKAN');
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId, 'PEMASUKAN');
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId, 'PEMASUKAN');
                             });
     
                             // console.log('trId-masuk', trId);
-                            applyEvent(`masuk-${trId}`, trId, "PEMASUKAN");
+                            applyEvent(`masuk-${trId}`, trId, 'PEMASUKAN');
                             /*
                             Cek apakah array object listOfTrID memiliki trId yang sama.
                             Kalau sama, maka lakukan overwrite invoiceIDs pada object dengan index terkait.
@@ -374,12 +374,16 @@
             }
         }
 
-        function applyFormatNumberAndEvent(elementId, trId) {
+        function applyFormatNumberAndEvent(elementId, trId, type) {
             let element = document.getElementById(`${elementId}`);
             try {
                 element.addEventListener('change', function() {
                     formatNumber(element, `${elementId}-real`);
-                    recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
+                    if (type === "PEMASUKAN") {
+                        recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
+                    } else if (type === "PENGELUARAN") {
+                        recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId);
+                    }
                 });
             } catch (error) {
                 console.log(error);
@@ -394,7 +398,7 @@
                     if (type === "PEMASUKAN") {
                         recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
                     } else if (type === "PENGELUARAN") {
-                        recalculateBalanceMasuk_TotalDue_TotalPaid_ForBayarBahanBaku(trId);
+                        recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId);
                     }
                 });
             } catch (error) {
@@ -744,5 +748,4 @@
         }
     </style>
 
-    <x-add-transactions-bahan-baku></x-add-transactions-bahan-baku>
 </div>
