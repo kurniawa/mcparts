@@ -200,7 +200,7 @@ class AccountingController extends Controller
 
     public function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        // dd($post);
+        dd($post);
         // dump($user_instance);
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
@@ -493,8 +493,9 @@ class AccountingController extends Controller
                  * yakni pada tabel 'accounting_invoices'.
                  */
                 $last_index = 0;
-                if ($transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG') {
-                    $success_ .= "penerimaan piutang-";
+                if ($transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG' || $transaction_name->kategori_level_one == 'BAYAR HUTANG BAHAN BAKU') {
+                    $success_ .= "$transaction_name->kategori_level_one-";
+                    $invoice_table = $transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG' ? 'notas' : 'pembelians';
                     $total_balance_used = 0;
                     $saldo_awal = $post['saldo_awal'][$i];
                     $sisa_saldo = $post['sisa_saldo'][$i];
@@ -615,7 +616,7 @@ class AccountingController extends Controller
                                 'accounting_id' => $accounting_id,
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
-                                'invoice_table' => 'notas',
+                                'invoice_table' => $invoice_table,
                                 'invoice_number' => $related_nota->nomor_nota,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
@@ -628,7 +629,7 @@ class AccountingController extends Controller
                                 'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
-                                'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                                'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
                                 'remaining_funds' => $remaining_balance_masuk_new,
@@ -645,7 +646,7 @@ class AccountingController extends Controller
                                 'accounting_id' => $accounting_id,
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
-                                'invoice_table' => 'notas',
+                                'invoice_table' => $invoice_table,
                                 'invoice_number' => $related_nota->nomor_nota,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
@@ -658,7 +659,7 @@ class AccountingController extends Controller
                                 'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
-                                'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                                'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
                                 'remaining_funds' => $remaining_balance_masuk_new,
@@ -680,7 +681,7 @@ class AccountingController extends Controller
                                 'accounting_id' => $accounting_id,
                                 'user_instance_id' => $user_instance->id,
                                 'invoice_id' => $related_nota->id,
-                                'invoice_table' => 'notas',
+                                'invoice_table' => $invoice_table,
                                 'invoice_number' => $related_nota->nomor_nota,
                                 'transaction_name_id' => $transaction_name->id,
                                 'transaction_name_desc' => $transaction_name->desc,
@@ -693,7 +694,7 @@ class AccountingController extends Controller
                                 'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                                 'discount_description' => $discount_description,
                                 'amount_due' => $amount_due_new,
-                                'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                                'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
                                 'remaining_funds' => $remaining_balance_masuk_new,

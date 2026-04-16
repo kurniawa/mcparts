@@ -407,7 +407,6 @@
 
         {{-- STORE NEW TRANSACTIONS --}}
         @if ((int)$userInstance->user_id === $user->id)
-        <x-add-transactions-bahan-baku></x-add-transactions-bahan-baku>
         <x-add-transactions :userInstance="$userInstance" :labelDeskripsi="$labelDeskripsi"></x-add-transactions>
         @endif
         {{-- END - STORE NEW TRANSACTIONS --}}
