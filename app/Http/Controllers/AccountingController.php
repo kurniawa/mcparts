@@ -1760,6 +1760,18 @@ class AccountingController extends Controller
             'kategori_level_one' => 'required',
         ]);
 
+        if ($post['kategori_level_one'] === 'PENERIMAAN PIUTANG') {
+            $request->validate([
+                'pelanggan_id' => 'required',
+                'pelanggan_nama' => 'required',
+            ]);
+        } elseif ($post['kategori_level_one'] === 'BAYAR HUTANG BAHAN BAKU') {
+            $request->validate([
+                'supplier_id' => 'required',
+                'supplier_nama' => 'required',
+            ]);
+        }
+
         $success_ = '';
         $user_instance = UserInstance::find($post['user_instance_id']);
         $user = Auth::user();

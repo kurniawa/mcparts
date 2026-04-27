@@ -27,7 +27,7 @@ class TransactionName extends Model
             $query->where('status_bayar', 'BELUM_LUNAS')
                   ->orWhere('status_bayar', 'SEBAGIAN');
             })
-            ->get()->map(function ($nota) {
+            ->limit(10)->get()->map(function ($nota) {
                 $nota->invoice_table = 'notas';
                 $nota->invoice_id = $nota->id;
                 return $nota;
@@ -41,7 +41,7 @@ class TransactionName extends Model
             $query->where('status_bayar', 'BELUM_LUNAS')
                   ->orWhere('status_bayar', 'SEBAGIAN');
             })
-            ->get()->map(function ($nota) {
+            ->limit(10)->get()->map(function ($nota) {
                 $nota->invoice_table = 'pembelians';
                 $nota->invoice_id = $nota->id;
                 return $nota;

@@ -9,6 +9,7 @@ use App\Models\Nota;
 use App\Models\TransactionName;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AccountingController2 extends Controller
 {
@@ -61,6 +62,7 @@ class AccountingController2 extends Controller
     public function getRelatedNotYetPaidOffInvoices(TransactionName $transactionName) {
         // Get the related invoice for the transaction name
         // return response()->json(['message' => "Transaction name: $transactionName"], 404);
+        // Log::info("Transaction name: $transactionName");
         if (!isset($transactionName)) {
             return response()->json(['message' => "Transaction name not define: $transactionName"], 404);
         } elseif (!$transactionName) {
@@ -74,6 +76,7 @@ class AccountingController2 extends Controller
         
                 return response()->json(['message' => 'Data found', 'notas' => $notYetPaidOffInvoices, 'customerBalance' => $customerBalance], 200);
             } elseif ($transactionName->supplier_id) {
+                // Log::info("Transaction name has supplier_id: $transactionName->supplier_id");
                 [$notYetPaidOffInvoices, $supplierBalance] = $transactionName->getRelatedNotYetPaidOffInvoices();
                 if (!$notYetPaidOffInvoices) {
                     return response()->json(['message' => 'Data not found'], 404);

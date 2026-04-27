@@ -1,5 +1,5 @@
-function getHtmlRemainingBalance(kategori_level_one, jumlah_nota, index_nota, trId) {
-    let htmlRemainingBalanceMasuk = `<td rowspan="${jumlah_nota}" style="vertical-align: top;">
+function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
+    let htmlRemainingBalanceMasuk = `<td rowspan="${data.notas.length}" style="vertical-align: top;">
         <div class="font-bold">Balance.M</div>
         <div id="remaining_balance_masuk-${trId}" class="text-xs p-1">0</div>
         <input type="hidden" id="remaining_balance_masuk-${trId}-real" name="remaining_balance_masuk[${trId}]" value="0">
@@ -14,7 +14,7 @@ function getHtmlRemainingBalance(kategori_level_one, jumlah_nota, index_nota, tr
     </td>
     `;
 
-    let htmlRemainingBalanceKeluar = `<td rowspan="${jumlah_nota}" style="vertical-align: top;">
+    let htmlRemainingBalanceKeluar = `<td rowspan="${data.notas.length}" style="vertical-align: top;">
         <div class="font-bold">Balance.K</div>
         <div id="remaining_balance_keluar-${trId}" class="text-xs p-1">0</div>
         <input type="hidden" id="remaining_balance_keluar-${trId}-real" name="remaining_balance_keluar[${trId}]" value="0">

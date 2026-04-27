@@ -228,7 +228,7 @@
                             elementToAppend += `<tr id="tr-penerimaan-piutang-atau-bayar-bahan-${trId}"><td colspan="6"><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
                             let indexNota = 0;
                             data.notas.forEach(relatedInvoice => {
-                                let htmlRemainingBalance = getHtmlRemainingBalance(kategori_level_one, data.notas.length, indexNota, trId);
+                                let htmlRemainingBalance = getHtmlRemainingBalance(kategori_level_one, data, indexNota, trId);
                                 
                                 let linkUrl = relatedInvoice.table === 'notas' ? `/notas/${relatedInvoice.id}/show` : `/pembelians/${relatedInvoice.id}/show`;
                                 elementToAppend += `
