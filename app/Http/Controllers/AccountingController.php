@@ -570,6 +570,12 @@ class AccountingController extends Controller
                         if (!is_numeric($remaining_balance_new)) {
                             $remaining_balance_new = 0;
                         }
+
+                        $remaining_balance_total = bcadd(
+                            (string) $remaining_balance_total,
+                            (string) $remaining_balance_new,
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
                         // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
                         // Data Discount
                         $discount_percent = (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j];
