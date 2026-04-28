@@ -7,6 +7,7 @@ use App\Models\AccountingInvoice;
 use App\Models\Kategori;
 use App\Models\Menu;
 use App\Models\Nota;
+use App\Models\Pembelian;
 use App\Models\Overpayment;
 use App\Models\Pelanggan;
 use App\Models\Supplier;
@@ -200,7 +201,7 @@ class AccountingController extends Controller
 
     public function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        dd($post);
+        dump($post);
         // dump($user_instance);
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
@@ -350,6 +351,7 @@ class AccountingController extends Controller
         $index_j = 0;
         $error_loc = '';
         $chosen_selection = 0;
+        dump('ready to store');
         DB::beginTransaction();
         try {
             for ($i = 0; $i < $working_index; $i++) {
@@ -452,6 +454,25 @@ class AccountingController extends Controller
                         ]);
                     }
                     
+                } elseif ($transaction_name->kategori_type == 'UANG KELUAR' && $keluar === null) {
+                    // Skip pembuatan accounting jika kategori UANG KELUAR tapi nilai keluar null
+                    if ($array_balance_used[$i] == null) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Kategori UANG KELUAR tapi nilai keluar dan saldo yang digunakan null pada baris ke-$i"
+                        ]);
+                    }
+                    // Cari data salah satu nota yang di post
+                    $get_nota = Pembelian::find($post['invoiceID'][0][0]);
+                    // dd($get_nota);
+                    // Cari Overpayment yang terkait dengan pelanggan ini, lalu dari situ dapat dicari accounting yang terkait
+                    $overpayment = Overpayment::where('supplier_id', $get_nota->supplier_id)->first();
+                    if ($overpayment) {
+                        $new_accounting = $overpayment->accounting;
+                    } else {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Tidak ditemukan Overpayment yang terkait dengan supplier pada baris ke-$i"
+                        ]);
+                    }
                 } else {
                     $new_accounting = Accounting::create([
                         'user_id' => $user->id,
@@ -505,8 +526,12 @@ class AccountingController extends Controller
                     $this_time_key = time();
                     $accounting_id = null;
                     // dd($post);
+                    $remaining_balance_total = 0;
                     for ($j=0; $j < $nota_id_number; $j++) {
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                        if ($transaction_name->kategori_level_one == 'BAYAR HUTANG BAHAN BAKU') {
+                            $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                        }
                         /**
                          * Create / Update data akan dilakukan apabila memang terjadi pembayaran.
                          * Artinya ada perubahan nilai amount_due atau amount_paid antara yang lama dan yang baru.
@@ -535,9 +560,15 @@ class AccountingController extends Controller
                         (string) $amount_paid_new,
                         2 // skala desimal sesuai decimal(15,2)
                         );
-                        $remaining_balance_masuk_new = $post['remaining_balance_masuk'][$i];
-                        if (!is_numeric($remaining_balance_masuk_new)) {
-                            $remaining_balance_masuk_new = 0;
+
+                        if ($transaction_name->kategori_level_one === 'PENERIMAAN PIUTANG') {
+                            $remaining_balance_new = $post['remaining_balance_masuk'][$i];
+                        } elseif ($transaction_name->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+                            $remaining_balance_new = $post['remaining_balance_keluar'][$i];
+                        }
+
+                        if (!is_numeric($remaining_balance_new)) {
+                            $remaining_balance_new = 0;
                         }
                         // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
                         // Data Discount
@@ -571,7 +602,7 @@ class AccountingController extends Controller
                             'amount_due' => $amount_due_new,
                             'amount_paid' => $amount_paid_new,
                             'balance_used' => $balance_used_new,
-                            'overpayment' => $remaining_balance_masuk_new,
+                            'overpayment' => $remaining_balance_new,
                             'finished_at' => $finished_at,
                         ]);
                         $success_ .= "related_nota updated-";
@@ -588,7 +619,7 @@ class AccountingController extends Controller
                          * Maka perlu untuk membuat record baru di tabel accounting_invoices.
                          */
 
-                        $related_accounting_invoice = AccountingInvoice::where('invoice_table', 'notas')
+                        $related_accounting_invoice = AccountingInvoice::where('invoice_table', $invoice_table)
                             ->where('invoice_id', $related_nota->id)
                             ->where('status', 'active')
                             ->latest('created_at')->first();
@@ -610,6 +641,7 @@ class AccountingController extends Controller
 
                         if (!$related_accounting_invoice) {
                             // Buat record baru di tabel accounting_invoices
+                            $chosen_selection = 1;
                             $related_accounting_invoice = AccountingInvoice::create([
                                 'accounting_time_key' => $time_key,
                                 'time_key' => $this_time_key,
@@ -632,9 +664,9 @@ class AccountingController extends Controller
                                 'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
-                                'remaining_funds' => $remaining_balance_masuk_new,
+                                'remaining_funds' => $remaining_balance_new,
                                 'balance' => $post['sisa_saldo'][$i],
-                                'overpayment' => $remaining_balance_masuk_new,
+                                'overpayment' => $remaining_balance_new,
                                 'status' => $accounting_invoice_status,
                                 'created_at' => $created_at,
                             ]);
@@ -662,9 +694,9 @@ class AccountingController extends Controller
                                 'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
-                                'remaining_funds' => $remaining_balance_masuk_new,
+                                'remaining_funds' => $remaining_balance_new,
                                 'balance' => $post['sisa_saldo'][$i],
-                                'overpayment' => $remaining_balance_masuk_new,
+                                'overpayment' => $remaining_balance_new,
                                 'status' => $accounting_invoice_status,
                                 'updated_by' => $user->username,
                                 'created_at' => $created_at,
@@ -697,9 +729,9 @@ class AccountingController extends Controller
                                 'amount_paid' => $amount_paid_new,
                                 'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                                 'total_amount' => $related_nota->harga_total,
-                                'remaining_funds' => $remaining_balance_masuk_new,
+                                'remaining_funds' => $remaining_balance_new,
                                 'balance' => $post['sisa_saldo'][$i],
-                                'overpayment' => $remaining_balance_masuk_new,
+                                'overpayment' => $remaining_balance_new,
                                 'status' => $accounting_invoice_status,
                                 'created_at' => $created_at,
                             ]);
@@ -717,8 +749,7 @@ class AccountingController extends Controller
                     /**
                      * CREATE or UPDATE customer_balance / overpayment
                      */
-                    $remaining_balance_masuk = (float)$remaining_balance_masuk_new;
-                    $overpayment_new = $remaining_balance_masuk + $sisa_saldo;
+                    $overpayment_new = (float)$remaining_balance_total + $sisa_saldo;
                     $overpayment_old = Overpayment::where('customer_id', $new_accounting->pelanggan_id)->first();
                     if ($overpayment_new > 0) {
                         if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {

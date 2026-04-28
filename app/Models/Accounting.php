@@ -85,8 +85,12 @@ class Accounting extends Model
             //     dump('Terdapat accounting_invoice setelah nya');
             //     dd($accounting_invoice_after);
             // }
-
-            $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            $related_nota = null;
+            if ($kategori_level_one === 'PENERIMAAN PIUTANG') {
+                $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            } elseif ($kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+                $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            }
 
             if (!$related_nota) {
                 $request->validate(['error' => 'required'], [
@@ -94,7 +98,7 @@ class Accounting extends Model
                 ]);
             }
 
-            $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $post['transaction_desc'][$i])->first();
+            $related_transaction_name = TransactionName::where('kategori_level_one', $kategori_level_one)->where('desc', $post['transaction_desc'][$i])->first();
 
             if (!$related_transaction_name) {
                 $request->validate(['error' => 'required'], [
@@ -129,8 +133,14 @@ class Accounting extends Model
             // Yang mempengaruhi amount_due adalah total_discount, amount_paid, balance_used
             $amount_due_new = $amount_due_old - $total_discount_new - $amount_paid - $balance_used;
             if ($amount_due_new != $amount_due) {
-                $request->validate(['error' => 'required'], [
-                    'error.required' => "amount_due_new != amount_due --> $amount_due_new != $amount_due"
+                // $request->validate(['error' => 'required'], [
+                //     'error.required' => "amount_due_new != amount_due --> $amount_due_new != $amount_due"
+                // ]);
+                dd("amount_due_new != amount_due --> $amount_due_new != $amount_due", [
+                    'amount_due_old' => $amount_due_old,
+                    'total_discount_new' => $total_discount_new,
+                    'amount_paid' => $amount_paid,
+                    'balance_used' => $balance_used,
                 ]);
             }
 

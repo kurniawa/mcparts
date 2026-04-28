@@ -13,6 +13,7 @@ function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
         </div>
     </td>
     `;
+    let labelBalanceMasuk = 'Dari Balance.M';
 
     let htmlRemainingBalanceKeluar = `<td rowspan="${data.notas.length}" style="vertical-align: top;">
         <div class="font-bold">Balance.K</div>
@@ -28,6 +29,7 @@ function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
         </div>
     </td>
     `;
+    let labelBalanceKeluar = 'Dari Balance.K';
 
     // let htmlRemainingBalance = '';
     // if (kategori_level_one === 'PENERIMAAN PIUTANG') {
@@ -37,12 +39,13 @@ function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
     // }
 
     let htmlRemainingBalance = kategori_level_one === 'PENERIMAAN PIUTANG' ? htmlRemainingBalanceMasuk : kategori_level_one === 'BAYAR HUTANG BAHAN BAKU' ? htmlRemainingBalanceKeluar : '';
-    
+    let labelBalance = kategori_level_one === 'PENERIMAAN PIUTANG' ? labelBalanceMasuk : kategori_level_one === 'BAYAR HUTANG BAHAN BAKU' ? labelBalanceKeluar : '';
+
     if (index_nota !== 0) {
         htmlRemainingBalance = '';
     }
 
-    return htmlRemainingBalance;
+    return [htmlRemainingBalance, labelBalance];
 }
 
 function recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId) {

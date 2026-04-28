@@ -228,7 +228,7 @@
                             elementToAppend += `<tr id="tr-penerimaan-piutang-atau-bayar-bahan-${trId}"><td colspan="6"><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
                             let indexNota = 0;
                             data.notas.forEach(relatedInvoice => {
-                                let htmlRemainingBalance = getHtmlRemainingBalance(kategori_level_one, data, indexNota, trId);
+                                const [htmlRemainingBalance, labelBalance] = getHtmlRemainingBalance(kategori_level_one, data, indexNota, trId);
                                 
                                 let linkUrl = relatedInvoice.table === 'notas' ? `/notas/${relatedInvoice.id}/show` : `/pembelians/${relatedInvoice.id}/show`;
                                 elementToAppend += `
@@ -272,7 +272,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="font-bold text-xs">Dari Balance.M</div>
+                                        <div class="font-bold text-xs">${labelBalance}</div>
                                         <input type="text" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}" value="0" class="text-xs p-1">
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}-real" name="related_not_yet_paid_off_invoices[amount_paid][${trId}][]" value="0">
                                         <div class="font-bold text-xs">Dari Saldo</div>
