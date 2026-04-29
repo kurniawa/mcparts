@@ -267,6 +267,7 @@
                                     </td>
                                     <td>
                                         <div class="text-xs p-1 text-center">${relatedInvoice.status_bayar}</div>
+                                        <input type="hidden" id="related_not_yet_paid_off_invoices[payment_status_before]-${trId}-${relatedInvoice.invoice_id}" value="${relatedInvoice.status_bayar}" readonly>
                                         <div class="text-xs text-center">
                                             <span class="text-emerald-400">=><input type="text" id="related_not_yet_paid_off_invoices[payment_status]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[payment_status][${trId}][]" class="text-xs p-0 border-none" value="${relatedInvoice.status_bayar}" readonly></span>
                                         </div>
@@ -465,6 +466,7 @@
                     let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real`);
                     let amountDueRealUnchanged = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real-unchanged`);
                     let paymentStatus = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${trId}-${invoice.value}`);
+                    let paymentStatusBefore = document.getElementById(`related_not_yet_paid_off_invoices[payment_status_before]-${trId}-${invoice.value}`);
                     let discountPercentage = document.getElementById(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${invoice.value}`);
                     let percentDiscount = document.getElementById(`related_not_yet_paid_off_invoices[discount_amount]-${trId}-${invoice.value}`);
                     let percentDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[discount_amount]-${trId}-${invoice.value}-real`);
@@ -521,7 +523,11 @@
                         if (amountDueRealValue <= 0) {
                             paymentStatus.value = 'LUNAS';
                         } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
-                            paymentStatus.value = 'BELUM_LUNAS'; 
+                            console.log(paymentStatusBefore.value);
+                            paymentStatus.value = 'BELUM_LUNAS';
+                            if (paymentStatusBefore.value == 'SEBAGIAN') {
+                                paymentStatus.value = 'SEBAGIAN';
+                            }
                         } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
                             paymentStatus.value = 'SEBAGIAN';
                         }
@@ -661,6 +667,10 @@
                                 errorMessage2 += '[Nilai tidak sesuai pada sisa bayar.]';
                                 adaError = true;
                             }
+                            // if (amountPaidRealValue <= 0 && balanceUsedRealValue <= 0) {
+                            //     errorMessage2 += '[tidak ada pembayaran yang dilakukan, baik dari uang masuk maupun dari saldo yang digunakan.]';
+                            //     adaError = true;
+                            // }
     
                             // Validasi payment_status tidak error
                             if (paymentStatusValue == "error") {

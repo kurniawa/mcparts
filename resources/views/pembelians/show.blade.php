@@ -86,7 +86,7 @@
                 <tr><th></th><th></th><th></th><th>Grand Total</th><th>{{ number_format($pembelian->harga_total, 2, ',', '.') }}</th></tr>
             </tbody>
         </table>
-        <x-history-pembayaran :nota="$pembelian" :key_nota="$pembelian->id"></x-history-pembayaran>
+        <x-history-pembayaran :nota="$pembelian" :keyNota="$pembelian->id"></x-history-pembayaran>
     </div>
     {{-- <div class="text-xs flex justify-center italic mt-2">Fitur sementara: mengganti barang yang sudah tercantum pada pembelian</div> --}}
 </main>      

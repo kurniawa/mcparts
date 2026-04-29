@@ -201,7 +201,7 @@ class AccountingController extends Controller
 
     public function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        dump($post);
+        // dump($post);
         // dump($user_instance);
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
@@ -351,7 +351,8 @@ class AccountingController extends Controller
         $index_j = 0;
         $error_loc = '';
         $chosen_selection = 0;
-        dump('ready to store');
+        // dump($post);
+        // dd('ready to store');
         DB::beginTransaction();
         try {
             for ($i = 0; $i < $working_index; $i++) {
@@ -369,7 +370,7 @@ class AccountingController extends Controller
                 } else {
                     $transaction_name = TransactionName::find($post['transaction_id'][$i]);
                 }
-
+                // dd($transaction_name);
                 // Default
                 $jumlah = null;
                 $transaction_type = 'pengeluaran';
@@ -526,7 +527,7 @@ class AccountingController extends Controller
                     $this_time_key = time();
                     $accounting_id = null;
                     // dd($post);
-                    $remaining_balance_total = 0;
+                    $remaining_balance_new = 0;
                     for ($j=0; $j < $nota_id_number; $j++) {
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         if ($transaction_name->kategori_level_one == 'BAYAR HUTANG BAHAN BAKU') {
@@ -538,9 +539,9 @@ class AccountingController extends Controller
                          */
                         $amount_due_new = $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j];
                         $amount_paid_new = $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j];
-                        if ($amount_due_new == $related_nota->amount_due || $amount_paid_new == $related_nota->amount_paid_new) {
-                            continue;
-                        }
+                        // if ($amount_due_new == $related_nota->amount_due || $amount_paid_new == $related_nota->amount_paid_new) {
+                        //     continue;
+                        // }
                         // Update data nota terkait
                         // $error_loc = "payment_status index: $i $j";
                         $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
@@ -561,21 +562,17 @@ class AccountingController extends Controller
                         2 // skala desimal sesuai decimal(15,2)
                         );
 
-                        if ($transaction_name->kategori_level_one === 'PENERIMAAN PIUTANG') {
-                            $remaining_balance_new = $post['remaining_balance_masuk'][$i];
-                        } elseif ($transaction_name->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
-                            $remaining_balance_new = $post['remaining_balance_keluar'][$i];
+                        if ($j == 0) {
+                            if ($transaction_name->kategori_level_one === 'PENERIMAAN PIUTANG') {
+                                $remaining_balance_new = $post['remaining_balance_masuk'][$i];
+                            } elseif ($transaction_name->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+                                $remaining_balance_new = $post['remaining_balance_keluar'][$i];
+                            }
+    
+                            if (!is_numeric($remaining_balance_new)) {
+                                $remaining_balance_new = 0;
+                            }
                         }
-
-                        if (!is_numeric($remaining_balance_new)) {
-                            $remaining_balance_new = 0;
-                        }
-
-                        $remaining_balance_total = bcadd(
-                            (string) $remaining_balance_total,
-                            (string) $remaining_balance_new,
-                            2 // skala desimal sesuai decimal(15,2)
-                        );
                         // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
                         // Data Discount
                         $discount_percent = (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j];
@@ -750,59 +747,80 @@ class AccountingController extends Controller
                         if($related_accounting_invoice->isExistAccountingInvoiceAfter()) {
                             $success_ .= "accounting_invoice after exist, history pembayaran diupdate-";
                         }
+
+                        // Perhitungan Overpayment hanya pada index pertama saja
+                        $overpayment_check = null;
+                        if ($j == 0) {
+                            /**
+                             * CREATE or UPDATE customer_balance / overpayment
+                             */
+                            $overpayment_new = (float)$remaining_balance_new + $sisa_saldo;
+                            $overpayment_old = Overpayment::where('customer_id', $new_accounting->pelanggan_id)->first();
+                            if ($overpayment_new > 0) {
+                                if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {
+                                    $overpayment_old->update([
+                                        'time_key' => $this_time_key,
+                                        'accounting_id' => $accounting_id,
+                                        'customer_id' => $transaction_name->pelanggan_id,
+                                        'customer_name' => $transaction_name->pelanggan_nama,
+                                        'supplier_id' => $transaction_name->supplier_id,
+                                        'supplier_name' => $transaction_name->supplier_nama,
+                                        'amount' => $overpayment_new,
+                                        'updated_by' => $user->username,
+                                    ]);
+                                    $overpayment_check = $overpayment_old;
+                                } elseif (!$overpayment_old) {
+                                    $overpayment_check = Overpayment::create([
+                                        'time_key' => $this_time_key,
+                                        'accounting_id' => $accounting_id,
+                                        'customer_id' => $transaction_name->pelanggan_id,
+                                        'customer_name' => $transaction_name->pelanggan_nama,
+                                        'supplier_id' => $transaction_name->supplier_id,
+                                        'supplier_name' => $transaction_name->supplier_nama,
+                                        'amount' => $overpayment_new,
+                                        'created_by' => $user->username,
+                                    ]);
+                                    $success_ .= 'overpayment created-';
+                                }
+                                
+                                /**
+                                 * UPDATE $related_nota dan $related_accounting_invoice,
+                                 * apabila terdapat overpayment yang baru.
+                                 * UPDATE hanya dilakukan pada nota terakhir yang di proses pada iterasi ini.
+                                 */
+                                // dd($array_related_nota);
+                                // $array_related_nota[$last_index]->update([
+                                //     'overpayment' => $overpayment_new,
+                                // ]);
+                                // $array_accounting_invoice[$last_index]->update([
+                                //     'remaining_funds' => $remaining_balance_masuk,
+                                //     'balance' => $sisa_saldo,
+                                //     'overpayment' => $overpayment_new,
+                                //     'updated_by' => $user->username,
+                                // ]);
+                            } elseif ($overpayment_new == 0) {
+                                if ($overpayment_old) {
+                                    $overpayment_old->delete();
+                                }
+                                $success_ .= 'overpayment deleted-';
+                            }
+                        }
+                        // dump($post);
+                        // dump("chosen_selection: $chosen_selection");
+                        // dump("transaction_name:");
+                        // dump($transaction_name);
+                        // dump("related_accounting_invoice:");
+                        // dump($related_accounting_invoice);
+                        // dump("related_nota:");
+                        // dump($related_nota);
+                        // dump("overpayment_check:");
+                        // dd($overpayment_check);
                     }
                     // dd($array_accounting_invoice);
-                    /**
-                     * CREATE or UPDATE customer_balance / overpayment
-                     */
-                    $overpayment_new = (float)$remaining_balance_total + $sisa_saldo;
-                    $overpayment_old = Overpayment::where('customer_id', $new_accounting->pelanggan_id)->first();
-                    if ($overpayment_new > 0) {
-                        if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {
-                            $overpayment_old->update([
-                                'time_key' => $this_time_key,
-                                'accounting_id' => $accounting_id,
-                                'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $overpayment_new,
-                                'updated_by' => $user->username,
-                            ]);
-                        } elseif (!$overpayment_old) {
-                            Overpayment::create([
-                                'time_key' => $this_time_key,
-                                'accounting_id' => $accounting_id,
-                                'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $overpayment_new
-                            ]);
-                            $success_ .= 'overpayment created-';
-                        }
-                        
-                        /**
-                         * UPDATE $related_nota dan $related_accounting_invoice,
-                         * apabila terdapat overpayment yang baru.
-                         * UPDATE hanya dilakukan pada nota terakhir yang di proses pada iterasi ini.
-                         */
-                        // dd($array_related_nota);
-                        // $array_related_nota[$last_index]->update([
-                        //     'overpayment' => $overpayment_new,
-                        // ]);
-                        // $array_accounting_invoice[$last_index]->update([
-                        //     'remaining_funds' => $remaining_balance_masuk,
-                        //     'balance' => $sisa_saldo,
-                        //     'overpayment' => $overpayment_new,
-                        //     'updated_by' => $user->username,
-                        // ]);
-                    } elseif ($overpayment_new == 0) {
-                        if ($overpayment_old) {
-                            $overpayment_old->delete();
-                        }
-                        $success_ .= 'overpayment deleted-';
-                    }
-                    
                     
                 }
             }
 
-            // dd("chosen_selection: $chosen_selection");
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();

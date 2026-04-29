@@ -811,7 +811,7 @@
                             <tr>
                                 <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Metode</th>
                             </tr>
-                            @foreach ($nota->accountingInvoices->sortByDesc('created_at') as $key_acc_inv => $accountingInvoice)
+                            @foreach ($nota->accountingInvoices as $key_acc_inv => $accountingInvoice)
                             <tr>
                                 {{-- {{ dump($key_acc_inv) }} --}}
                                 <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>

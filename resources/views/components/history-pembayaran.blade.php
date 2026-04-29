@@ -9,11 +9,11 @@
     @if (count($nota->accountingInvoices) === 0)
     <div class="text-center italic text-slate-500">kosong</div>
     @else
-    <table id="histori-pembayaran-{{ $key_nota }}" class="w-full text-xs border border-collapse">
+    <table id="histori-pembayaran-{{ $keyNota }}" class="w-full text-xs border border-collapse">
         <tr>
             <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Metode</th>
         </tr>
-        @foreach ($nota->accountingInvoices->sortByDesc('created_at') as $key_acc_inv => $accountingInvoice)
+        @foreach ($nota->accountingInvoices as $key_acc_inv => $accountingInvoice)
         <tr>
             {{-- {{ dump($key_acc_inv) }} --}}
             <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>

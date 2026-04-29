@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
             $table->string('supplier_name', 100)->nullable();
             $table->decimal('amount', 15, 2)->default(0.00);
+            $table->string('created_by', 50)->nullable();
+            $table->string('updated_by', 50)->nullable();
             $table->timestamps();
         });
     }

@@ -93,6 +93,7 @@ function recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId) {
             let amountDueReal = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real`);
             let amountDueRealUnchanged = document.getElementById(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${invoice.value}-real-unchanged`);
             let paymentStatus = document.getElementById(`related_not_yet_paid_off_invoices[payment_status]-${trId}-${invoice.value}`);
+            let paymentStatusBefore = document.getElementById(`related_not_yet_paid_off_invoices[payment_status_before]-${trId}-${invoice.value}`);
             let discountPercentage = document.getElementById(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${invoice.value}`);
             let percentDiscount = document.getElementById(`related_not_yet_paid_off_invoices[discount_amount]-${trId}-${invoice.value}`);
             let percentDiscountReal = document.getElementById(`related_not_yet_paid_off_invoices[discount_amount]-${trId}-${invoice.value}-real`);
@@ -149,7 +150,10 @@ function recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId) {
                 if (amountDueRealValue <= 0) {
                     paymentStatus.value = 'LUNAS';
                 } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
-                    paymentStatus.value = 'BELUM_LUNAS'; 
+                    paymentStatus.value = 'BELUM_LUNAS';
+                    if (paymentStatusBefore.value == 'SEBAGIAN') {
+                        paymentStatus.value = 'SEBAGIAN';
+                    }
                 } else if (amountDueRealValue > 0 && (amountDueRealValue < (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue < totalPriceValue)) {
                     paymentStatus.value = 'SEBAGIAN';
                 }
