@@ -391,6 +391,11 @@ class PembelianController extends Controller
         }
         // dd($pembelian_total_suppliers);
         // END - Pembelian Total Supplier
+        // if (count($pembelians)) {
+        //     dump($pembelians->firstWhere('id', 226));
+        //     dump($pembelians->firstWhere('id', 226)->accountingInvoices);
+        //     dd($pembelians->firstWhere('id', 226)->latestAccountingInvoice);
+        // }
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'pembelians.index',

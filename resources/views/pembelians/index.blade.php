@@ -255,37 +255,12 @@
                         @for ($i = 0; $i < count($pembelians); $i++)
                             <tr class="border-b">
                                 <td>
-                                    <div class="flex">
-                                        <div class="flex">
-                                            @if ($pembelians[$i]->tanggal_lunas === null)
-                                            <div>
-                                                <div class="rounded p-1 bg-pink-200 text-pink-500 font-bold text-center">
-                                                    <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->created_at)) }}</div>
-                                                    <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->created_at)) }}</div>
-                                                </div>
-                                            </div>
-                                            @else
-                                            <div>
-                                                <div class="rounded p-1 bg-sky-200 text-sky-500 font-bold text-center">
-                                                    <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->created_at)) }}</div>
-                                                    <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->created_at)) }}</div>
-                                                </div>
-                                            </div>
-                                            @endif
-                                        </div>
-                                        <div class="flex ml-1 items-center">
-                                            @if ($pembelians[$i]->tanggal_lunas !== null)
-                                            <div>
-                                                <div class="rounded p-1 bg-emerald-200 text-emerald-500 font-bold text-center">
-                                                    <div class="min-w-max">{{ date('d',strtotime($pembelians[$i]->tanggal_lunas)) }}</div>
-                                                    <div class="min-w-max">{{ date('m-y',strtotime($pembelians[$i]->tanggal_lunas)) }}</div>
-                                                </div>
-                                            </div>
-                                            @else
-                                            <span class="font-bold">--</span>
-                                            @endif
-                                        </div>
-                                    </div>
+                                    <x-design-date
+                                        :createdAt="$pembelians[$i]->created_at"
+                                        :invoice="$pembelians[$i]"
+                                        :paidOffAt="$pembelians[$i]->tanggal_lunas"
+                                        :paymentStatus="$pembelians[$i]->status_bayar"
+                                    />
                                 </td>
                                 <td>
                                     <a href="{{ route('pembelians.show', $pembelians[$i]->id) }}" class="text-sky-500">
@@ -454,21 +429,30 @@
                                         @csrf
                                         <table>
                                             <tr>
-                                                <td>Tanggal Lunas</td><td>:</td>
                                                 <td>
+                                                    <label for="">Tanggal Pembayaran:</label>
                                                     <div class="flex">
                                                         @if ($pembelians[$i]->status_bayar === 'LUNAS')
-                                                        <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d', strtotime($pembelians[$i]->tanggal_lunas)) }}">
-                                                        <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m', strtotime($pembelians[$i]->tanggal_lunas)) }}">
-                                                        <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y', strtotime($pembelians[$i]->tanggal_lunas)) }}">
+                                                            <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d', strtotime($pembelians[$i]->tanggal_lunas)) }}">
+                                                            <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m', strtotime($pembelians[$i]->tanggal_lunas)) }}">
+                                                            <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y', strtotime($pembelians[$i]->tanggal_lunas)) }}">
                                                         @else
-                                                        <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
-                                                        <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
-                                                        <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
+                                                            <input type="text" name="day" id="day" class="border rounded text-xs p-1 w-8" placeholder="dd" value="{{ date('d') }}">
+                                                            <input type="text" name="month" id="month" class="border rounded text-xs p-1 w-8 ml-1" placeholder="mm" value="{{ date('m') }}">
+                                                            <input type="text" name="year" id="year" class="border rounded text-xs p-1 w-11 ml-1" placeholder="yyyy" value="{{ date('Y') }}">
                                                         @endif
                                                     </div>
                                                 </td>
+                                                <td>
+                                                    <label for="">Harga Total:</label>
+                                                    <div class="text-xs">{{ number_format($pembelians[$i]->harga_total, 2, ',', '.') }}</div>
+                                                </td>
+                                                <td>
+                                                    <label for="">Sisa Bayar:</label>
+                                                    <div class="text-xs">{{ number_format($pembelians[$i]->amount_due, 2, ',', '.') }}</div>
+                                                </td>
                                             </tr>
+                                            
                                             <tr>
                                                 <td>Keterangan</td><td>:</td>
                                                 <td><textarea name="keterangan_bayar" id="" cols="30" rows="3" class="text-xs p-1">{{ $pembelians[$i]->keterangan_bayar }}</textarea></td>

@@ -174,4 +174,10 @@ class Pembelian extends Model
             ->where('invoice_table', 'pembelians')
             ->orderBy('created_at');
     }
+
+    public function latestAccountingInvoice() {
+        return $this->hasOne(AccountingInvoice::class, 'invoice_id', 'id')
+            ->where('invoice_table', 'pembelians')
+            ->latestOfMany('time_key');
+    }
 }
