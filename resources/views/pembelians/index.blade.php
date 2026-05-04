@@ -425,9 +425,19 @@
                             {{-- FORM PELUNASAN --}}
                             <tr class="hidden" id="form_pelunasan-{{ $i }}">
                                 <td colspan="7">
-                                    <form action="{{ route('pembelians.pelunasan', $pembelians[$i]->id) }}" method="POST" class="flex justify-end">
+                                    <form action="{{ route('pembelians.pelunasan', $pembelians[$i]->id) }}" method="POST">
                                         @csrf
                                         <table>
+                                            <tr>
+                                                <td>
+                                                    <label for="">Harga Total:</label>
+                                                    <div class="text-xs">{{ number_format($pembelians[$i]->harga_total, 2, ',', '.') }}</div>
+                                                </td>
+                                                <td>
+                                                    <label for="">Sisa Bayar:</label>
+                                                    <div class="text-xs">{{ number_format($pembelians[$i]->amount_due, 2, ',', '.') }}</div>
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <td>
                                                     <label for="">Tanggal Pembayaran:</label>
@@ -444,18 +454,20 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <label for="">Harga Total:</label>
-                                                    <div class="text-xs">{{ number_format($pembelians[$i]->harga_total, 2, ',', '.') }}</div>
-                                                </td>
-                                                <td>
-                                                    <label for="">Sisa Bayar:</label>
-                                                    <div class="text-xs">{{ number_format($pembelians[$i]->amount_due, 2, ',', '.') }}</div>
+                                                    <label for="">Jumlah Bayar:</label>
+                                                    <div>
+                                                        <input type="text" id="jumlah_bayar-{{ $i }}" class="border rounded text-xs p-1" value="" onchange="formatNumber(this, 'jumlah_bayar_real-{{ $i }}')">
+                                                        <input type="hidden" name="jumlah_bayar" id="jumlah_bayar_real-{{ $i }}" value="" >
+                                                    </div>
                                                 </td>
                                             </tr>
-                                            
                                             <tr>
-                                                <td>Keterangan</td><td>:</td>
-                                                <td><textarea name="keterangan_bayar" id="" cols="30" rows="3" class="text-xs p-1">{{ $pembelians[$i]->keterangan_bayar }}</textarea></td>
+                                                <td>
+                                                    <label>Keterangan:</label>
+                                                    <div>
+                                                        <textarea name="keterangan_bayar" id="" cols="30" rows="3" class="text-xs p-1">{{ $pembelians[$i]->keterangan_bayar }}</textarea>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td colspan="3">

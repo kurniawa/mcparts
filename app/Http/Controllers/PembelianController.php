@@ -588,15 +588,34 @@ class PembelianController extends Controller
             'year' => 'required',
         ]);
 
-        $pembelian->tanggal_lunas = date('Y-m-d', strtotime("$post[year]-$post[month]-$post[day]")) . " " . date('H:i:s');
-        $pembelian->status_bayar = 'LUNAS';
-        $pembelian->keterangan_bayar = $post['keterangan_bayar'];
-        $pembelian->save();
+        DB::beginTransaction();
+        try {
+            $jumlah_bayar_total = (float)$post['jumlah_bayar'] + (float)$pembelian->amount_paid;
+            $new_amount_due = (float)$pembelian->harga_total - $jumlah_bayar_total;
+            $keterangan_bayar = $pembelian->keterangan_bayar ?? null;
+            $keterangan_bayar = $post['keterangan_bayar'] ?? $keterangan_bayar;
+            $tanggal_lunas = date('Y-m-d', strtotime("$post[year]-$post[month]-$post[day]")) . " " . date('H:i:s');
+            $status_bayar = Pembelian::new_status_bayar($pembelian, $jumlah_bayar_total);
+            $tanggal_lunas = $status_bayar === 'BELUM_LUNAS' ? null : $tanggal_lunas;
 
-        return back()->with('success_', '-data_pelunasan updated-');
+            $pembelian->tanggal_lunas = $tanggal_lunas;
+            $pembelian->amount_due = $new_amount_due;
+            $pembelian->amount_paid = $jumlah_bayar_total;
+            $pembelian->status_bayar = $status_bayar;
+            $pembelian->keterangan_bayar = $keterangan_bayar;
+            $pembelian->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors('Gagal memperbarui data pembayaran/pelunasan: ' . $e->getMessage());
+        }
+
+        return back()->with('success_', '-data_pembayaran/pelunasan updated-');
     }
 
     function pembatalan_pelunasan(Pembelian $pembelian) {
+        dd("Fitur ini sudah tidak digunakan");
         $pembelian->tanggal_lunas = null;
         $pembelian->status_bayar = 'BELUM_LUNAS';
         $pembelian->keterangan_bayar = null;

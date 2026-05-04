@@ -180,4 +180,18 @@ class Pembelian extends Model
             ->where('invoice_table', 'pembelians')
             ->latestOfMany('time_key');
     }
+
+    /**
+     * @param int|float $jumlah_bayar_total
+     */
+    public static function new_status_bayar(Pembelian $pembelian, $jumlah_bayar_total) {
+        $status_bayar = 'BELUM_LUNAS';
+        if ($jumlah_bayar_total >= $pembelian->harga_total) {
+            $status_bayar = 'LUNAS';
+        } elseif ($jumlah_bayar_total > 0 && $jumlah_bayar_total < $pembelian->harga_total) {
+            $status_bayar = 'SEBAGIAN';
+        }
+
+        return $status_bayar;
+    }
 }
