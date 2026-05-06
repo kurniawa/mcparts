@@ -289,6 +289,8 @@
                                         {{-- {{ dump($pembelians[$i]->harga_total) }} --}}
                                         {{ number_format($pembelians[$i]->harga_total,2,',','.') }}
                                     </div>
+                                    <div class="text-right font-bold text-[0.6rem] text-orange-400">{{ number_format($pembelians[$i]->amount_due,2,',','.') }}</div>
+                                    <div class="text-right font-bold text-[0.6rem] text-emerald-400">{{ $pembelians[$i]->amount_paid > 0.00 ? number_format($pembelians[$i]->amount_paid,2,',','.') : '' }}</div>
                                 </td>
                                 <td>
                                     <button id="btn_detail_pembelian-{{ $i }}" class="border rounded" onclick="showDropdown(this.id, 'detail_pembelian-{{ $i }}')">
