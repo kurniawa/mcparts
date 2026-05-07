@@ -221,7 +221,7 @@
                     dataType: 'json',
                     success: function(data) {
                         // console.log(data.message);
-                        console.log(data.notas);
+                        // console.log(data.notas);
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
