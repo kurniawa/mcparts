@@ -221,7 +221,7 @@
                     dataType: 'json',
                     success: function(data) {
                         // console.log(data.message);
-                        // console.log(data.notas);
+                        console.log(data.notas);
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
@@ -230,7 +230,7 @@
                             data.notas.forEach(relatedInvoice => {
                                 const [htmlRemainingBalance, labelBalance] = getHtmlRemainingBalance(kategori_level_one, data, indexNota, trId);
                                 
-                                let linkUrl = relatedInvoice.table === 'notas' ? `/notas/${relatedInvoice.id}/show` : `/pembelians/${relatedInvoice.id}/show`;
+                                let linkUrl = relatedInvoice.invoice_table === 'notas' ? `/notas/${relatedInvoice.id}/show` : `/pembelians/${relatedInvoice.id}/show`;
                                 elementToAppend += `
                                 <tr>${htmlRemainingBalance}
                                     <td class="font-bold">
