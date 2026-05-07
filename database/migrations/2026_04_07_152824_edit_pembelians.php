@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('amount_due', 15, 2)->default(0.00)->after('discount_description');
             $table->decimal('amount_paid', 15, 2)->default(0.00)->after('amount_due');
             $table->decimal('balance_used', 15, 2)->default(0.00)->after('amount_paid');
-            $table->decimal('overpayment', 15, 2)->default(0.00)->after('balanced_used');
+            $table->decimal('overpayment', 15, 2)->default(0.00)->after('balance_used');
         });
     }
 
