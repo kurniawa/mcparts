@@ -33,7 +33,7 @@ class TransactionName extends Model
                 return $nota;
             })
             ->toArray();
-        } elseif ($this->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+        } elseif ($this->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU' || $this->kategori_level_one === 'BIAYA BAHAN PENDUKUNG') {
             $invoice_table = 'pembelians';
             $balance = Overpayment::where('supplier_id', $this->supplier_id)->latest()->first();
             

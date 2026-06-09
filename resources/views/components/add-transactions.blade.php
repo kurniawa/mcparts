@@ -54,19 +54,7 @@
 
                         
                         @endfor
-                        {{-- <tr id="tr_add_transaction">
-                            <td>
-                                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr> --}}
                     </table>
-                    {{-- <div class="mt-3 text-xs border rounded p-1 inline-block border-yellow-500">
-                        <p>*) Keterangan Tambahan akan tertulis dalam tanda kurung pada ringkasan/laporan.</p>
-                    </div> --}}
                     <div class="mt-3 text-center text-xs">
                         <input id="loading_to_disable" type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2 hover:cursor-pointer" value="confirm" />
                     </div>
@@ -74,54 +62,7 @@
                 </form>
             </div>
         </div>
-        {{-- NOTIFIKASI --}}
-        {{-- @if (Auth::user()->id === (int)$userInstance->user_id)
-        <div class="">
-            <div class="border rounded p-1">
-                <h3 class="font-bold text-slate-500">Notifikasi</h3>
-                <div class="w-52 h-52 overflow-auto">
-                    @foreach ($notifications as $notification)
-                    <div class="flex">
-                        @if ($notification->status === 'not read yet')
-                        <textarea readonly class="w-full text-xs p-1 border-red-300 border-2 text-red-500" rows="3">{{ $notification->username }} - {{ date('d-m-Y', strtotime($notification->created_at)) }} - input entry:"{{ $notification->transaction_desc }}"</textarea>
-                        <div>
-                            <form action="{{ route('accounting.mark_as_read_or_unread', [$userInstance->id, $notification->id]) }}" method="POST" onsubmit="return confirm('Mark as read?')">
-                                @csrf
-                                <button class="text-slate-400" type="submit" name="read" value="yes">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                                    </svg>
-                                </button>
-                            </form>
-                            <form action="{{ route('accounting.apply_entry', [$userInstance->id, $notification->id]) }}" method="POST" onsubmit="return confirm('Apply entry to your instance?')">
-                                @csrf
-                                <button class="text-slate-400" type="submit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 10.203 4.167 9.75 5 9.75h1.053c.472 0 .745.556.5.96a8.958 8.958 0 00-1.302 4.665c0 1.194.232 2.333.654 3.375z" />
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-                        @else
-                        <textarea readonly class="w-full text-xs p-1" rows="3">{{ $notification->username }} - {{ date('d-m-Y', strtotime($notification->created_at)) }} - input entry:"{{ $notification->transaction_desc }}"</textarea>
-                        <div>
-                            <form action="{{ route('accounting.mark_as_read_or_unread', [$userInstance->id, $notification->id]) }}" method="POST" onsubmit="return confirm('Mark as unread?')">
-                                @csrf
-                                <button class="text-emerald-500" type="submit" name="read" value="no">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        @endif --}}
-        {{-- END - NOTIFIKASI --}}
+        
     </div>
 
     <script>
@@ -136,18 +77,9 @@
             $(`#transaction_desc-${index}`).autocomplete({
                 source: label_deskripsi,
                 select: function (event, ui) {
-                    // console.log(ui.item);
-                    // document.getElementById(`transaction_desc-${index}`).value = ui.item.id;
                     document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
                     document.getElementById(`transaction_id-${index}`).value = ui.item.id;
-                    // autofill_transaction(index, ui.item.value);
-                    // console.log("autocomplete_deskripsi: " + ui.item.id);
-                    accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
-                    // if (ui.item.kategori_level_one === 'PENERIMAAN PIUTANG') {
-                    //     accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
-                    // } else if (ui.item.kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
-                    //     accountingGetRelatedInvoiceRawMaterials(ui.item.id, index, ui.item.kategori_level_one, ui.item.kategori_type);
-                    // }
+                    accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_type, ui.item.pelanggan_id, ui.item.supplier_id);
                 }
             });
 
@@ -157,7 +89,7 @@
             */
             document.getElementById(`transaction_desc-${index}`).addEventListener('change', function() {
                 let transactionDescValue = this.value.trim();
-                let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-atau-bayar-bahan-${index}`);
+                let trPenerimaanPiutang = document.getElementById(`tr-pemasukan-pengeluaran-dengan-nota-${index}`);
                 let trErrorFeedback = document.getElementById(`tr-error-feedback-${index}`);
                 if (transactionDescValue === "" && trPenerimaanPiutang) {
                     trPenerimaanPiutang.remove();
@@ -179,42 +111,20 @@
             }
         });
         
-        function accountingGetRelatedInvoiceReceivables(transactionNameId, trId, kategori_level_one, kategori_type) {
+        function accountingGetRelatedInvoiceReceivables(transactionNameId, trId, kategori_type, pelanggan_id, supplier_id) {
             let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
             let elementToAppend = "";
             // Reset tr penerimaan piutang jika sudah ada
-            let resetElement = document.getElementById(`tr-penerimaan-piutang-atau-bayar-bahan-${trId}`);
+            let resetElement = document.getElementById(`tr-pemasukan-pengeluaran-dengan-nota-${trId}`);
             if (resetElement) {
                 resetElement.remove();
             }
-            // Reset tr penerimaan piutang jika kategori_level_one bukan PENERIMAAN PIUTANG
+
             let trErrorFeedback = document.getElementById(`tr-error-feedback-${trId}`);
             if (trErrorFeedback) {
                 trErrorFeedback.remove();
             }
-            if (kategori_level_one === "PENERIMAAN PIUTANG" || kategori_level_one === "BAYAR HUTANG BAHAN BAKU") {
-                // fetch(`/accounting/${transactionNameId}/get-related-invoice`)
-                //     .then(response => {
-                //         if (!response.ok) {
-                //             throw new Error('Data not found');
-                //         }
-                //         return response.json();
-                //     })
-                //     .then(data => {
-                //         console.log(data);
-                //         // You can handle the data as needed, e.g., display it in a modal or alert
-                //     })
-                //     .catch(error => {
-                //         console.error('Error:', error);
-                //         alert(error.message);
-                //     });
-
-                // let type = 'PEMASUKAN';
-                // if (kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
-                //     type = 'PENGELUARAN';
-                // }
-
-                let type = kategori_level_one === 'PENERIMAAN PIUTANG' ? 'PEMASUKAN' : 'PENGELUARAN';
+            if (pelanggan_id || supplier_id) {
                 $.ajax({
                     url: `/accounting/${transactionNameId}/get-related-not-yet-paid-off-invoices`,
                     type: 'GET',
@@ -225,16 +135,22 @@
                         // console.log(data.customerBalance);
                         if (data.notas.length > 0) {
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
-                            elementToAppend += `<tr id="tr-penerimaan-piutang-atau-bayar-bahan-${trId}"><td colspan="6"><input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}"><div class="flex justify-center my-1"><div><table class="table-penerimaan-piutang"><tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
+                            elementToAppend += `<tr id="tr-pemasukan-pengeluaran-dengan-nota-${trId}"><td colspan="6">
+                                <input id="input-kategori-type-${trId}" type="hidden" name="kategori_type[]" value="${kategori_type}">
+                                <input id="input-pelanggan-id-${trId}" type="hidden" name="pelanggan_id[]" value="${pelanggan_id}">
+                                <input id="input-supplier-id-${trId}" type="hidden" name="supplier_id[]" value="${supplier_id}">
+                                <div class="flex justify-center my-1"><div>
+                                <table class="table-penerimaan-piutang">
+                                    <tr><th></th><th>Nota</th><th>Harga Total</th><th>Sisa Bayar</th><th>Potongan Harga</th><th>Status Bayar</th><th>Total Bayar</th></tr>`;
                             let indexNota = 0;
                             data.notas.forEach(relatedInvoice => {
-                                const [htmlRemainingBalance, labelBalance] = getHtmlRemainingBalance(kategori_level_one, data, indexNota, trId);
+                                const [htmlRemainingBalance, labelBalance] = getHtmlRemainingBalance(kategori_type, data, indexNota, trId);
                                 
                                 let linkUrl = relatedInvoice.invoice_table === 'notas' ? `/notas/${relatedInvoice.id}/show` : `/pembelians/${relatedInvoice.id}/show`;
                                 elementToAppend += `
                                 <tr>${htmlRemainingBalance}
                                     <td class="font-bold">
-                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 hover:cursor-pointer"><a href="${linkUrl}" target="_blank">${relatedInvoice.nomor_nota}</a></label>
+                                        <label for="related_not_yet_paid_off_invoices[nota_id]" class="ml-1 text-sky-500 hover:cursor-pointer"><a href="${linkUrl}" target="_blank">${relatedInvoice.nomor_nota}</a></label>
                                         <input type="hidden" id="related_not_yet_paid_off_invoices[nota_id]-${trId}-${relatedInvoice.invoice_id}" name="related_not_yet_paid_off_invoices[nota_id][${trId}][]" value="${relatedInvoice.invoice_id}">
                                         <div class="text-center">${formatDate(relatedInvoice.created_at)}</div>
                                     </td>
@@ -303,40 +219,22 @@
     
                             // console.log('trId-masuk', trId);
 
-                            if (type === "PEMASUKAN") {
-                                applyEvent(`masuk-${trId}`, trId, type);
-                            } else if (type === "PENGELUARAN") {
-                                applyEvent(`keluar-${trId}`, trId, type);
+                            if (kategori_type === "UANG MASUK") {
+                                applyEvent(`masuk-${trId}`, trId, 'PEMASUKAN');
+                            } else if (kategori_type === "UANG KELUAR") {
+                                applyEvent(`keluar-${trId}`, trId, 'PENGELUARAN');
                             }
-
-                            /*
-                            Cek apakah array object listOfTrID memiliki trId yang sama.
-                            Kalau sama, maka lakukan overwrite invoiceIDs pada object dengan index terkait.
-                            Kalau tidak maka lakukan:
-                            listOfTrID.push({trId:trId, invoiceIDs:listOfInvoiceID})
-                            */
-                            // Cek apakah sudah ada trId yang sama
-                            // let indexTrId = listOfTrID.findIndex(item => item.trId === trId);
-    
-                            // if (indexTrId !== -1) {
-                            //     // Kalau ada, overwrite invoiceIDs
-                            //     listOfTrID[indexTrId].invoiceIDs = listOfInvoiceID;
-                            // } else {
-                            //     // Kalau tidak ada, tambahkan data baru
-                            //     listOfTrID.push({ trId: trId, invoiceIDs: listOfInvoiceID });
-                            // }
                         }
                     },
                     error: function(err) {
                         console.error('Error:', err);
                         console.error('message:', err.responseJSON?.message);
                         // Reset tr penerimaan piutang jika terjadi error
-                        let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-atau-bayar-bahan-${trId}`);
+                        let trPenerimaanPiutang = document.getElementById(`tr-pemasukan-pengeluaran-dengan-nota-${trId}`);
                         if (trPenerimaanPiutang) {
                             trPenerimaanPiutang.remove();
                         }
-                        elementToAppend += `<tr id="tr-penerimaan-piutang-atau-bayar-bahan-${trId}" class="hidden"><td colspan="6">
-                            <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
+                        elementToAppend += `<tr id="tr-pemasukan-pengeluaran-dengan-nota-${trId}" class="hidden"><td colspan="6">
                             <input id="is-data-found-${trId}" type="hidden" value="no">
                             <div class="flex justify-center my-1"><div>`;
                         // Tambahkan elemen error feedback
@@ -350,7 +248,6 @@
                 // console.log(listOfTrID);
             } else {
                 elementToAppend = `<tr id="tr-error-feedback-${trId}" class="hidden"><td colspan=6>
-                    <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
                     <input id="input-kategori-type-${trId}" type="hidden" name="kategori_type[]" value="${kategori_type}">
                     <div class="text-center max-w-4xl"><p id="p-error-feedback-${trId}" class="text-red-500 font-bold"></p></div>
                 </td></tr>`;
@@ -599,6 +496,8 @@
                 let errorMessage = '';
                 let kategoriLevelOne = document.getElementById(`input-kategori-level-one-${i}`);
                 let kategoriType = document.getElementById(`input-kategori-type-${i}`);
+                let pelangganId = document.getElementById(`input-pelanggan-id-${i}`);
+                let supplierId = document.getElementById(`input-supplier-id-${i}`);
                 let masuk = document.getElementById(`masuk-${i}`);
                 let keluar = document.getElementById(`keluar-${i}`);
                 let masukReal = document.getElementById(`masuk-${i}-real`);
@@ -618,16 +517,12 @@
                     pErrorFeedback.textContent = "";
                 }
 
-                if (kategoriLevelOne && (kategoriLevelOne.value == "PENERIMAAN PIUTANG" || kategoriLevelOne.value == "BAYAR HUTANG BAHAN BAKU")) {
+                if (pelangganId.value || supplierId.value) {
                     // remove class hidden pada tr penerimaan piutang
-                    let trPenerimaanPiutang = document.getElementById(`tr-penerimaan-piutang-atau-bayar-bahan-${i}`);
-                    let trBayarBahanBaku = document.getElementById(`tr-bayar-bahan-baku-${i}`);
+                    let trPenerimaanPiutang = document.getElementById(`tr-pemasukan-pengeluaran-dengan-nota-${i}`);
                     if (trPenerimaanPiutang && trPenerimaanPiutang.classList.contains('hidden')) {
                         trPenerimaanPiutang.classList.remove('hidden');
-                    } else if (trBayarBahanBaku && trBayarBahanBaku.classList.contains('hidden')) {
-                        trBayarBahanBaku.classList.remove('hidden');
                     }
-                    // apabila tidak ditemukan data nota, meskiput pun kategori_level_one adalah PENERIMAAN PIUTANG
                     let isDataFound = document.getElementById(`is-data-found-${i}`);
                     if (isDataFound && isDataFound.value == "no") {
                         adaError = true;
@@ -679,7 +574,7 @@
                             }
                         });
     
-                        if (kategoriLevelOne.value === 'PENERIMAAN PIUTANG') {
+                        if (kategoriType === 'UANG MASUK') {
                             // Validasi nilai uang masuk
                             if (isNaN(masukReal.value) || masukReal.value < 0) {
                                 errorMessage2 += '[Input nilai masuk tidak sesuai.]';
@@ -692,7 +587,7 @@
                                     adaError = true;
                                 }
                             }
-                        } else if (kategoriLevelOne.value === 'BAYAR HUTANG BAHAN BAKU') {
+                        } else if (kategoriType === 'UANG KELUAR') {
                             // Validasi nilai uang keluar
                             if (isNaN(keluarReal.value) || keluarReal.value < 0) {
                                 errorMessage2 += '[Input nilai keluar tidak sesuai.]';

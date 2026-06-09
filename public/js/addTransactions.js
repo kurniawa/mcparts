@@ -1,4 +1,4 @@
-function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
+function getHtmlRemainingBalance(kategori_type, data, index_nota, trId) {
     let htmlRemainingBalanceMasuk = `<td rowspan="${data.notas.length}" style="vertical-align: top;">
         <div class="font-bold">Balance.M</div>
         <div id="remaining_balance_masuk-${trId}" class="text-xs p-1">0</div>
@@ -38,8 +38,8 @@ function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
     //     htmlRemainingBalance = htmlRemainingBalanceKeluar;
     // }
 
-    let htmlRemainingBalance = kategori_level_one === 'PENERIMAAN PIUTANG' ? htmlRemainingBalanceMasuk : kategori_level_one === 'BAYAR HUTANG BAHAN BAKU' ? htmlRemainingBalanceKeluar : '';
-    let labelBalance = kategori_level_one === 'PENERIMAAN PIUTANG' ? labelBalanceMasuk : kategori_level_one === 'BAYAR HUTANG BAHAN BAKU' ? labelBalanceKeluar : '';
+    let htmlRemainingBalance = kategori_type === 'UANG MASUK' ? htmlRemainingBalanceMasuk : kategori_type === 'UANG KELUAR' ? htmlRemainingBalanceKeluar : '';
+    let labelBalance = kategori_type === 'UANG MASUK' ? labelBalanceMasuk : kategori_type === 'UANG KELUAR' ? labelBalanceKeluar : '';
 
     if (index_nota !== 0) {
         htmlRemainingBalance = '';
@@ -49,8 +49,6 @@ function getHtmlRemainingBalance(kategori_level_one, data, index_nota, trId) {
 }
 
 function recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId) {
-    // Set the initial value: remainingBalance
-    let kategoriLevelOne = document.getElementById(`input-kategori-level-one-${trId}`).value;
     // JUMLAH BAYAR
     let remainingBalanceKeluar = document.getElementById(`remaining_balance_keluar-${trId}`);
     let remainingBalanceKeluarReal = document.getElementById(`remaining_balance_keluar-${trId}-real`);
