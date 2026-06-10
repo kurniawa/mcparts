@@ -543,10 +543,12 @@ class PembelianController extends Controller
                 $nomor_nota = $post['nomor_nota'];
             }
 
+            $harga_total = round((float)$post['harga_total'],2);
             $pembelian_new->update([
                 'nomor_nota' => $nomor_nota,
                 'isi' => json_encode($isi),
-                'harga_total' => round((float)$post['harga_total'],2),
+                'harga_total' => $harga_total,
+                'amount_due' => $harga_total,
                 // 'status_bayar' => $status_bayar,
                 // 'keterangan_bayar' => $keterangan_bayar,
                 // 'tanggal_lunas' => $tanggal_lunas,

@@ -20,7 +20,7 @@ class TransactionName extends Model
         $balance = null;
         $notas = [];
         $invoice_table = 'notas';
-        if ($this->kategori_level_one === 'PENERIMAAN PIUTANG') {
+        if ($this->kategori_type === 'UANG MASUK') {
             $balance = Overpayment::where('customer_id', $this->pelanggan_id)->latest()->first();
             
             $notas = Nota::where('pelanggan_id', $this->pelanggan_id)->where(function ($query) {
@@ -33,7 +33,7 @@ class TransactionName extends Model
                 return $nota;
             })
             ->toArray();
-        } elseif ($this->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU' || $this->kategori_level_one === 'BIAYA BAHAN PENDUKUNG') {
+        } elseif ($this->kategori_type === 'UANG KELUAR') {
             $invoice_table = 'pembelians';
             $balance = Overpayment::where('supplier_id', $this->supplier_id)->latest()->first();
             
@@ -47,6 +47,8 @@ class TransactionName extends Model
                 return $nota;
             })
             ->toArray();
+            // dump('supplier_id: ' . $this->supplier_id);
+            // dd($notas);
         }
 
         if ($balance) {
@@ -78,4 +80,17 @@ class TransactionName extends Model
         
         return [$accountingInvoices, $balance];
     }
+
+    // ambil data relasi dengan pelanggan
+    public function pelanggan()
+    {
+        return $this->belongsTo(Pelanggan::class, 'pelanggan_id', 'id');
+    }
+
+    // ambil data relasi dengan supplier
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
+    }
+
 }

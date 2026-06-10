@@ -80,6 +80,7 @@
                     document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
                     document.getElementById(`transaction_id-${index}`).value = ui.item.id;
                     accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_type, ui.item.pelanggan_id, ui.item.supplier_id);
+                    // console.log(ui.item.id);
                 }
             });
 
@@ -211,18 +212,17 @@
                             data.notas.forEach(relatedInvoice => {
                                 // console.log('trId', trId);
                                 applyFormatNumber(`related_not_yet_paid_off_invoices[amount_due]-${trId}-${relatedInvoice.invoice_id}`);
-                                applyEvent(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${relatedInvoice.invoice_id}`, trId, type);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}`, trId, type);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId, type);
-                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId, type);
+                                applyEvent(`related_not_yet_paid_off_invoices[discount_percent]-${trId}-${relatedInvoice.invoice_id}`, trId, kategori_type);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[other_discount]-${trId}-${relatedInvoice.invoice_id}`, trId, kategori_type);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[amount_paid]-${trId}-${relatedInvoice.invoice_id}`, trId, kategori_type);
+                                applyFormatNumberAndEvent(`related_not_yet_paid_off_invoices[balance_used]-${trId}-${relatedInvoice.invoice_id}`, trId, kategori_type);
                             });
     
                             // console.log('trId-masuk', trId);
-
                             if (kategori_type === "UANG MASUK") {
-                                applyEvent(`masuk-${trId}`, trId, 'PEMASUKAN');
+                                applyEvent(`masuk-${trId}`, trId, kategori_type);
                             } else if (kategori_type === "UANG KELUAR") {
-                                applyEvent(`keluar-${trId}`, trId, 'PENGELUARAN');
+                                applyEvent(`keluar-${trId}`, trId, kategori_type);
                             }
                         }
                     },
@@ -273,9 +273,9 @@
             try {
                 element.addEventListener('change', function() {
                     formatNumber(element, `${elementId}-real`);
-                    if (type === "PEMASUKAN") {
+                    if (type === "UANG MASUK") {
                         recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
-                    } else if (type === "PENGELUARAN") {
+                    } else if (type === "UANG KELUAR") {
                         recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId);
                     }
                 });
@@ -289,9 +289,10 @@
             let element = document.getElementById(`${elementId}`);
             try {
                 element.addEventListener('change', function() {
-                    if (type === "PEMASUKAN") {
+                    if (type === "UANG MASUK") {
                         recalculateBalanceMasuk_TotalDue_TotalPaid(trId);
-                    } else if (type === "PENGELUARAN") {
+                    } else if (type === "UANG KELUAR") {
+                        // console.log('applyEvent UANG KELUAR');
                         recalculateBalanceKeluar_TotalDue_TotalPaid_ForBayarBahanBaku(trId);
                     }
                 });

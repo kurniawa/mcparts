@@ -77,6 +77,7 @@ class AccountingController2 extends Controller
                 return response()->json(['message' => 'Data found', 'notas' => $notYetPaidOffInvoices, 'customerBalance' => $customerBalance], 200);
             } elseif ($transactionName->supplier_id) {
                 // Log::info("Transaction name has supplier_id: $transactionName->supplier_id");
+                // dump('supplier');
                 [$notYetPaidOffInvoices, $supplierBalance] = $transactionName->getRelatedNotYetPaidOffInvoices();
                 if (!$notYetPaidOffInvoices) {
                     return response()->json(['message' => 'Data not found'], 404);

@@ -41,7 +41,7 @@ class Accounting extends Model
         return $this->hasMany(AccountingInvoice::class, 'accounting_id', 'id');
     }
 
-    static function validasi_data_untuk_pemasukan_pengeluaran($request, $i, $kategori_level_one) {
+    static function validasi_data_untuk_pemasukan_pengeluaran($request, $i, $kategori_type) {
         $request->validate([
             // "remaining_balance_masuk.$i" => "required|numeric",
             "related_not_yet_paid_off_invoices.nota_id.$i" => "required|array",
@@ -86,9 +86,9 @@ class Accounting extends Model
             //     dd($accounting_invoice_after);
             // }
             $related_nota = null;
-            if ($kategori_level_one === 'PENERIMAAN PIUTANG') {
+            if ($kategori_type === 'UANG MASUK') {
                 $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
-            } elseif ($kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+            } elseif ($kategori_type === 'UANG KELUAR') {
                 $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
             }
 
@@ -98,7 +98,7 @@ class Accounting extends Model
                 ]);
             }
 
-            $related_transaction_name = TransactionName::where('kategori_level_one', $kategori_level_one)->where('desc', $post['transaction_desc'][$i])->first();
+            $related_transaction_name = TransactionName::where('kategori_type', $kategori_type)->where('desc', $post['transaction_desc'][$i])->first();
 
             if (!$related_transaction_name) {
                 $request->validate(['error' => 'required'], [
@@ -208,7 +208,7 @@ class Accounting extends Model
             ]);
         }
 
-        if ($kategori_level_one === 'PENERIMAAN PIUTANG') {
+        if ($kategori_type === 'UANG MASUK') {
             // Validasi Remaining Balance Masuk - Uang Masuk tidak boleh kosong atau kurang dari 0
             $masuk = $post['masuk'][$i] ?? null;
             $balance_used = null;
@@ -241,7 +241,7 @@ class Accounting extends Model
                     'error.required' => "input uang masuk dan saldo yang digunakan tidak sesuai"
                 ]);
             }
-        } elseif ($kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+        } elseif ($kategori_type === 'UANG KELUAR') {
             // Validasi Remaining Balance Keluar - Uang Keluar tidak boleh kosong atau kurang dari 0
             $keluar = $post['keluar'][$i] ?? null;
             $balance_used = null;

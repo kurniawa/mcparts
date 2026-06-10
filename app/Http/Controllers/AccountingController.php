@@ -340,8 +340,8 @@ class AccountingController extends Controller
 
             // dd($transaction_name);
             // dump($post);
-            if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG" || $transaction_name->kategori_level_one === "BAYAR HUTANG BAHAN BAKU") {
-                Accounting::validasi_data_untuk_pemasukan_pengeluaran($request, $i, $transaction_name->kategori_level_one);
+            if ($transaction_name->pelanggan_id || $transaction_name->supplier_id) {
+                Accounting::validasi_data_untuk_pemasukan_pengeluaran($request, $i, $transaction_name->kategori_type);
                 // dump('VALID');
                 // dd($post);
             }
@@ -515,9 +515,9 @@ class AccountingController extends Controller
                  * yakni pada tabel 'accounting_invoices'.
                  */
                 $last_index = 0;
-                if ($transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG' || $transaction_name->kategori_level_one == 'BAYAR HUTANG BAHAN BAKU') {
+                if ($transaction_name->pelanggan_id || $transaction_name->supplier_id) {
                     $success_ .= "$transaction_name->kategori_level_one-";
-                    $invoice_table = $transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG' ? 'notas' : 'pembelians';
+                    $invoice_table = $transaction_name->kategori_type == 'UANG MASUK' ? 'notas' : 'pembelians';
                     $total_balance_used = 0;
                     $saldo_awal = $post['saldo_awal'][$i];
                     $sisa_saldo = $post['sisa_saldo'][$i];
@@ -530,7 +530,7 @@ class AccountingController extends Controller
                     $remaining_balance_new = 0;
                     for ($j=0; $j < $nota_id_number; $j++) {
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
-                        if ($transaction_name->kategori_level_one == 'BAYAR HUTANG BAHAN BAKU') {
+                        if ($transaction_name->kategori_type == 'UANG KELUAR') {
                             $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         }
                         /**
@@ -563,9 +563,9 @@ class AccountingController extends Controller
                         );
 
                         if ($j == 0) {
-                            if ($transaction_name->kategori_level_one === 'PENERIMAAN PIUTANG') {
+                            if ($transaction_name->kategori_type === 'UANG MASUK') {
                                 $remaining_balance_new = $post['remaining_balance_masuk'][$i];
-                            } elseif ($transaction_name->kategori_level_one === 'BAYAR HUTANG BAHAN BAKU') {
+                            } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
                                 $remaining_balance_new = $post['remaining_balance_keluar'][$i];
                             }
     
