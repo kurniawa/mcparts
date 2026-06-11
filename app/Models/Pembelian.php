@@ -194,4 +194,18 @@ class Pembelian extends Model
 
         return $status_bayar;
     }
+
+    public function UpdatePaymentStatus() {
+        $payment_status = 'error';
+        if ($this->amount_due == 0) {
+            $payment_status = 'LUNAS';
+        } else if (($this->amount_paid + $this->balance_used) == 0 && ($this->amount_due == ($this->harga_total - $this->total_discount) || $this->amount_due == $this->harga_total)) {
+            $payment_status = 'BELUM_LUNAS'; 
+        } else if (($this->amount_paid + $this->balance_used) > 0 && ($this->amount_due < ($this->harga_total - $this->total_discount) && $this->amount_due < $this->harga_total)) {
+            $payment_status = 'SEBAGIAN';
+        }
+        if ($payment_status == 'error') {
+        }
+        return $payment_status;
+    }
 }

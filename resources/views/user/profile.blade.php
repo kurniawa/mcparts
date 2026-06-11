@@ -122,10 +122,10 @@
                     @error('new_password')
                     <div class="w-full px-2 py-1 rounded text-pink-600">{{ $message }}</div>
                     @enderror
-                    <label for="confirm_new_password" class="text-slate-600 block mt-2">Confirm New Password :</label>
-                    <input type="password" name="confirm_new_password" id="confirm_new_password" placeholder="Confirm New Password..."
+                    <label for="new_password_confirmation" class="text-slate-600 block mt-2">Confirm New Password :</label>
+                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" placeholder="Confirm New Password..."
                     class="border border-slate-400 text-slate-700 shadow rounded w-full px-3 py-2 block placeholder:text-slate-400 focus:outline-none focus:border-none focus:ring-1 focus:ring-blue-500 invalid:text-pink-700 invalid:focus:ring-pink-700;">
-                    @error('confirm_new_password')
+                    @error('new_password_confirmation')
                     <div class="w-full px-2 py-1 rounded text-pink-600">{{ $message }}</div>
                     @enderror
 

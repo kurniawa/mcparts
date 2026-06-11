@@ -533,6 +533,18 @@ class AccountingController extends Controller
                         if ($transaction_name->kategori_type == 'UANG KELUAR') {
                             $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         }
+                        $customer_id = null;
+                        $customer_name = null;
+                        $supplier_id = null;
+                        $supplier_name = null;
+                        if ($invoice_table == 'notas') {
+                            $customer_id = $related_nota->pelanggan_id;
+                            $customer_name = $related_nota->pelanggan_nama;
+                        }
+                        if ($invoice_table == 'pembelians') {
+                            $supplier_id = $related_nota->supplier_id;
+                            $supplier_name = $related_nota->supplier_nama;
+                        }
                         /**
                          * Create / Update data akan dilakukan apabila memang terjadi pembayaran.
                          * Artinya ada perubahan nilai amount_due atau amount_paid antara yang lama dan yang baru.
@@ -546,10 +558,13 @@ class AccountingController extends Controller
                         // $error_loc = "payment_status index: $i $j";
                         $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
                         $finished_at = null;
+                        $tanggal_lunas = null;
+
                         $accounting_invoice_status = 'active';
                         if ($payment_status == 'LUNAS') {
                             $finished_at = $created_at;
                             $accounting_invoice_status = 'inactive';
+                            $tanggal_lunas = $invoice_table == 'pembelians' ? $finished_at : null;
                         }
                         $balance_used_new = bcadd(
                         (string) $related_nota->balance_used,
@@ -608,6 +623,9 @@ class AccountingController extends Controller
                             'overpayment' => $remaining_balance_new,
                             'finished_at' => $finished_at,
                         ]);
+                        if ($invoice_table == 'pembelians' && $tanggal_lunas) {
+                            $related_nota->update(['tanggal_lunas' => $tanggal_lunas]);
+                        }
                         $success_ .= "related_nota updated-";
                         $array_related_nota[] = $related_nota;
                         $last_index = count($array_related_nota) - 1;
@@ -641,103 +659,56 @@ class AccountingController extends Controller
                             $created_at_check = date('Y-m-d H:i:s', strtotime($created_at_check) + 1);
                         }
                         $created_at = $created_at_check;
-
+                        $invoice_data = [
+                            'accounting_time_key' => $time_key,
+                            'accounting_id' => $accounting_id,
+                            'user_instance_id' => $user_instance->id,
+                            'invoice_id' => $related_nota->id,
+                            'invoice_table' => $invoice_table,
+                            'invoice_number' => $related_nota->nomor_nota,
+                            'transaction_name_id' => $transaction_name->id,
+                            'transaction_name_desc' => $transaction_name->desc,
+                            'customer_id' => $customer_id,
+                            'customer_name' => $customer_name,
+                            'supplier_id' => $supplier_id,
+                            'supplier_name' => $supplier_name,
+                            'payment_status' => $related_nota->status_bayar,
+                            'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
+                            'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
+                            'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                            'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            'discount_description' => $discount_description,
+                            'amount_due' => $amount_due_new,
+                            'amount_paid' => $amount_paid_new,
+                            'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
+                            'total_amount' => $related_nota->harga_total,
+                            'remaining_funds' => $remaining_balance_new,
+                            'balance' => $post['sisa_saldo'][$i],
+                            'overpayment' => $remaining_balance_new,
+                            'status' => $accounting_invoice_status,
+                            'created_at' => $created_at,
+                        ];
                         if (!$related_accounting_invoice) {
                             // Buat record baru di tabel accounting_invoices
-                            $chosen_selection = 1;
-                            $related_accounting_invoice = AccountingInvoice::create([
-                                'accounting_time_key' => $time_key,
-                                'time_key' => $this_time_key,
-                                'accounting_id' => $accounting_id,
-                                'user_instance_id' => $user_instance->id,
-                                'invoice_id' => $related_nota->id,
-                                'invoice_table' => $invoice_table,
-                                'invoice_number' => $related_nota->nomor_nota,
-                                'transaction_name_id' => $transaction_name->id,
-                                'transaction_name_desc' => $transaction_name->desc,
-                                'customer_id' => $related_nota->pelanggan_id,
-                                'customer_name' => $related_nota->pelanggan_nama,
-                                'payment_status' => $related_nota->status_bayar,
-                                'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
-                                'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
-                                'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
-                                'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
-                                'discount_description' => $discount_description,
-                                'amount_due' => $amount_due_new,
-                                'amount_paid' => $amount_paid_new,
-                                'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
-                                'total_amount' => $related_nota->harga_total,
-                                'remaining_funds' => $remaining_balance_new,
-                                'balance' => $post['sisa_saldo'][$i],
-                                'overpayment' => $remaining_balance_new,
-                                'status' => $accounting_invoice_status,
-                                'created_at' => $created_at,
-                            ]);
-                            $success_ .= "AccountingInvoice created-";
+                            // $chosen_selection = 1;
+                            // $invoice_data['time_key'] = $this_time_key;
+                            // $invoice_data['created_at'] = $created_at;
+                            // $related_accounting_invoice = AccountingInvoice::create($invoice_data);
+                            // $success_ .= "AccountingInvoice created-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
                             $chosen_selection = 2;
-                            $related_accounting_invoice->update([
-                                'accounting_time_key' => $time_key,
-                                'accounting_id' => $accounting_id,
-                                'user_instance_id' => $user_instance->id,
-                                'invoice_id' => $related_nota->id,
-                                'invoice_table' => $invoice_table,
-                                'invoice_number' => $related_nota->nomor_nota,
-                                'transaction_name_id' => $transaction_name->id,
-                                'transaction_name_desc' => $transaction_name->desc,
-                                'customer_id' => $related_nota->pelanggan_id,
-                                'customer_name' => $related_nota->pelanggan_nama,
-                                'payment_status' => $related_nota->status_bayar,
-                                'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
-                                'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
-                                'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
-                                'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
-                                'discount_description' => $discount_description,
-                                'amount_due' => $amount_due_new,
-                                'amount_paid' => $amount_paid_new,
-                                'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
-                                'total_amount' => $related_nota->harga_total,
-                                'remaining_funds' => $remaining_balance_new,
-                                'balance' => $post['sisa_saldo'][$i],
-                                'overpayment' => $remaining_balance_new,
-                                'status' => $accounting_invoice_status,
-                                'updated_by' => $user->username,
-                                'created_at' => $created_at,
-                            ]);
+                            $invoice_data['updated_by'] = $user->username;
+                            $invoice_data['updated_at'] = $created_at;
+                            $related_accounting_invoice->update($invoice_data);
                             $success_ .= "AccountingInvoice updated-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null) {
                             $chosen_selection = 3;
                             // $accounting_id = $related_accounting_invoice->accounting_id;
                             // \Illuminate\Support\Facades\Log::info("elseif ke-3 accounting_id = " . $accounting_id);
                             // Buat record baru di tabel accounting_invoices
-                            $related_accounting_invoice = AccountingInvoice::create([
-                                'accounting_time_key' => $time_key,
-                                'time_key' => $this_time_key,
-                                'accounting_id' => $accounting_id,
-                                'user_instance_id' => $user_instance->id,
-                                'invoice_id' => $related_nota->id,
-                                'invoice_table' => $invoice_table,
-                                'invoice_number' => $related_nota->nomor_nota,
-                                'transaction_name_id' => $transaction_name->id,
-                                'transaction_name_desc' => $transaction_name->desc,
-                                'customer_id' => $related_nota->pelanggan_id,
-                                'customer_name' => $related_nota->pelanggan_nama,
-                                'payment_status' => $related_nota->status_bayar,
-                                'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
-                                'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
-                                'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
-                                'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
-                                'discount_description' => $discount_description,
-                                'amount_due' => $amount_due_new,
-                                'amount_paid' => $amount_paid_new,
-                                'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
-                                'total_amount' => $related_nota->harga_total,
-                                'remaining_funds' => $remaining_balance_new,
-                                'balance' => $post['sisa_saldo'][$i],
-                                'overpayment' => $remaining_balance_new,
-                                'status' => $accounting_invoice_status,
-                                'created_at' => $created_at,
-                            ]);
+                            $invoice_data['time_key'] = $this_time_key;
+                            $invoice_data['created_at'] = $created_at;
+                            $related_accounting_invoice = AccountingInvoice::create($invoice_data);
                             $success_ .= "AccountingInvoice created-";
                         }
                         $array_accounting_invoice[] = $related_accounting_invoice;
@@ -1307,7 +1278,7 @@ class AccountingController extends Controller
             // dd($accounting_invoices);
             foreach ($accounting_invoices as $accounting_invoice) {
                 if ($accounting_invoice->overpayment > 0 || $accounting_invoice->balance_used > 0) {
-                    $overpayment = Overpayment::where('customer_id', $accounting_invoice->customer_id)->first();
+                    $overpayment = $invoice_table == 'notas' ? Overpayment::where('customer_id', $accounting_invoice->customer_id)->first() : Overpayment::where('supplier_id', $accounting_invoice->supplier_id)->first();
                     if ($overpayment) {
                         $overpayment->amount += $accounting_invoice->balance_used;
                         $overpayment->amount -= $accounting_invoice->overpayment;
@@ -1320,9 +1291,10 @@ class AccountingController extends Controller
                         }
                     }
                 }
-
-                if ($accounting_invoice->invoice_table == 'notas') {
-                    $nota = Nota::find($accounting_invoice->invoice_id);
+                $invoice_table = $accounting_invoice->invoice_table;
+                if ($invoice_table == 'notas' || $invoice_table == 'pembelians') {
+                    $nota = $invoice_table == 'notas' ? Nota::find($accounting_invoice->invoice_id) : Pembelian::find($accounting_invoice->invoice_id);
+                    // dd($nota);
                     $nota->amount_due += ($accounting_invoice->amount_paid + $accounting_invoice->balance_used + $accounting_invoice->total_discount);
                     $nota->amount_paid -= $accounting_invoice->amount_paid;
                     $nota->balance_used -= $accounting_invoice->balance_used;
@@ -1331,7 +1303,8 @@ class AccountingController extends Controller
                     $payment_status = $nota->UpdatePaymentStatus();
                     $nota->status_bayar = $payment_status;
                     if ($payment_status != 'LUNAS') {
-                        $nota->finished_at = null;
+                        if ($invoice_table == 'notas') {$nota->finished_at = null;}
+                        elseif ($invoice_table == 'pembelians') {$nota->tanggal_lunas = null;}
                     } elseif ($payment_status == 'error') {
                         $nota->status_bayar = 'BELUM_LUNAS';
                         $nota->discount_percent = 0.00;
@@ -1341,7 +1314,7 @@ class AccountingController extends Controller
                         $nota->amount_paid = 0;
                         $nota->balance_used = 0;
                         $nota->overpayment = 0;
-                        $warnings_ .= 'nota payment_status error -> reset nota value-';
+                        $warnings_ .= "$invoice_table payment_status error -> reset $invoice_table value-";
                     }
                     $nota->save();
                 }
