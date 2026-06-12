@@ -20,8 +20,8 @@ class AccountingInvoice extends Model
         return $this->belongsTo(UserInstance::class);
     }
 
-    public function isExistAccountingInvoiceAfter() {
-        $accounting_invoice_after = AccountingInvoice::where('invoice_table', 'notas')
+    public function isExistAccountingInvoiceAfter(string $invoice_table) {
+        $accounting_invoice_after = AccountingInvoice::where('invoice_table', $invoice_table)
             ->where('invoice_id', $this->invoice_id)
             ->where('created_at', '>', $this->created_at)
             ->orderBy('created_at')->get();

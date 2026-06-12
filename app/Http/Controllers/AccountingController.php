@@ -690,7 +690,7 @@ class AccountingController extends Controller
                         ];
                         if (!$related_accounting_invoice) {
                             // Buat record baru di tabel accounting_invoices
-                            // $chosen_selection = 1;
+                            $chosen_selection = 1;
                             // $invoice_data['time_key'] = $this_time_key;
                             // $invoice_data['created_at'] = $created_at;
                             // $related_accounting_invoice = AccountingInvoice::create($invoice_data);
@@ -715,7 +715,7 @@ class AccountingController extends Controller
 
                         $total_balance_used += (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
                         /**Apabila ada AccountingInvoice setelahnya, akan membuat data amount_due tidak sesuai. */
-                        if($related_accounting_invoice->isExistAccountingInvoiceAfter()) {
+                        if($related_accounting_invoice &&$related_accounting_invoice->isExistAccountingInvoiceAfter($invoice_table)) {
                             $success_ .= "accounting_invoice after exist, history pembayaran diupdate-";
                         }
 

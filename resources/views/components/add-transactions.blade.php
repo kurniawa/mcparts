@@ -79,7 +79,7 @@
                 select: function (event, ui) {
                     document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
                     document.getElementById(`transaction_id-${index}`).value = ui.item.id;
-                    accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_type, ui.item.pelanggan_id, ui.item.supplier_id);
+                    accountingGetRelatedInvoiceReceivables(ui.item.id, index, ui.item.kategori_type, ui.item.kategori_level_one, ui.item.pelanggan_id, ui.item.supplier_id);
                     // console.log(ui.item.id);
                 }
             });
@@ -112,7 +112,7 @@
             }
         });
         
-        function accountingGetRelatedInvoiceReceivables(transactionNameId, trId, kategori_type, pelanggan_id, supplier_id) {
+        function accountingGetRelatedInvoiceReceivables(transactionNameId, trId, kategori_type, kategori_level_one, pelanggan_id, supplier_id) {
             let trAddTransaction = document.getElementById(`tr_add_transaction-${trId}`);
             let elementToAppend = "";
             // Reset tr penerimaan piutang jika sudah ada
@@ -138,6 +138,7 @@
                             // let listOfInvoiceID = []; // untuk digunakan nanti pada saat validasi submit
                             elementToAppend += `<tr id="tr-pemasukan-pengeluaran-dengan-nota-${trId}"><td colspan="6">
                                 <input id="input-kategori-type-${trId}" type="hidden" name="kategori_type[]" value="${kategori_type}">
+                                <input id="input-kategori-level-one-${trId}" type="hidden" name="kategori_level_one[]" value="${kategori_level_one}">
                                 <input id="input-pelanggan-id-${trId}" type="hidden" name="pelanggan_id[]" value="${pelanggan_id}">
                                 <input id="input-supplier-id-${trId}" type="hidden" name="supplier_id[]" value="${supplier_id}">
                                 <div class="flex justify-center my-1"><div>
@@ -421,7 +422,7 @@
                         if (amountDueRealValue <= 0) {
                             paymentStatus.value = 'LUNAS';
                         } else if (amountDueRealValue == (amountDueRealUnchangedValue-totalDiscountRealValue) || amountDueRealValue == totalPriceValue) {
-                            console.log(paymentStatusBefore.value);
+                            // console.log(paymentStatusBefore.value);
                             paymentStatus.value = 'BELUM_LUNAS';
                             if (paymentStatusBefore.value == 'SEBAGIAN') {
                                 paymentStatus.value = 'SEBAGIAN';
