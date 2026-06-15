@@ -691,10 +691,10 @@ class AccountingController extends Controller
                         if (!$related_accounting_invoice) {
                             // Buat record baru di tabel accounting_invoices
                             $chosen_selection = 1;
-                            // $invoice_data['time_key'] = $this_time_key;
-                            // $invoice_data['created_at'] = $created_at;
-                            // $related_accounting_invoice = AccountingInvoice::create($invoice_data);
-                            // $success_ .= "AccountingInvoice created-";
+                            $invoice_data['time_key'] = $this_time_key;
+                            $invoice_data['created_at'] = $created_at;
+                            $related_accounting_invoice = AccountingInvoice::create($invoice_data);
+                            $success_ .= "AccountingInvoice created-";
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
                             $chosen_selection = 2;
                             $invoice_data['updated_by'] = $user->username;

@@ -571,7 +571,11 @@ class PembelianController extends Controller
     }
 
     function delete(Pembelian $pembelian) {
-        // dd($pembelian);
+        // dump($pembelian->accountingInvoices()->get());
+        // dd($pembelian->latestAccountingInvoice()->first());
+        if ($pembelian->status_bayar === 'LUNAS' || $pembelian->status_bayar === 'SEBAGIAN') {
+            return back()->withErrors('Tidak dapat menghapus pembelian yang sudah terjadi pembayaran. Accounting terkait pembelian ini harus dihapus terlebih dahulu.');
+        }
         $pembelian->delete();
         $feedback = [
             'danger_' => '-pembelian deleted!-'
@@ -627,6 +631,9 @@ class PembelianController extends Controller
     }
 
     function edit(Pembelian $pembelian) {
+        if ($pembelian->status_bayar == 'LUNAS' || $pembelian->status_bayar == 'SEBAGIAN') {
+            return back()->withErrors('Tidak dapat mengedit pembelian yang sudah terjadi pembayaran. Accounting terkait pembelian ini harus dihapus terlebih dahulu.');
+        }
         $pembelian_barangs = PembelianBarang::where('pembelian_id', $pembelian->id)->get();
 
         $labelSupplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
@@ -815,6 +822,9 @@ class PembelianController extends Controller
     function delete_pembelian_barang(Pembelian $pembelian, PembelianBarang $pembelian_barang) {
         // dump($pembelian);
         // dd($pembelian_barang);
+        if ($pembelian->status_bayar == 'LUNAS' || $pembelian->status_bayar == 'SEBAGIAN') {
+            dd('Tidak dapat mengedit pembelian yang sudah terjadi pembayaran. Accounting terkait pembelian ini harus dihapus terlebih dahulu.');
+        }
 
         $pembelian_barang->delete();
         $isi = Pembelian::get_isi($pembelian->id);
