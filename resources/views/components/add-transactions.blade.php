@@ -519,7 +519,7 @@
                     pErrorFeedback.textContent = "";
                 }
 
-                if (pelangganId.value || supplierId.value) {
+                if ((pelangganId || supplierId) && (pelangganId.value || supplierId.value)) {
                     // remove class hidden pada tr penerimaan piutang
                     let trPenerimaanPiutang = document.getElementById(`tr-pemasukan-pengeluaran-dengan-nota-${i}`);
                     if (trPenerimaanPiutang && trPenerimaanPiutang.classList.contains('hidden')) {
