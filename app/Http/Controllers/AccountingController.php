@@ -201,7 +201,7 @@ class AccountingController extends Controller
 
     public function store_transactions(UserInstance $user_instance, Request $request) {
         $post = $request->post();
-        // dump($post);
+        // dd($post);
         // dump($user_instance);
         // if ($post['transaction_id'][0] !== null) {
         //     dump(TransactionName::find($post['transaction_id'][0]));
@@ -691,10 +691,15 @@ class AccountingController extends Controller
                         if (!$related_accounting_invoice) {
                             // Buat record baru di tabel accounting_invoices
                             $chosen_selection = 1;
-                            $invoice_data['time_key'] = $this_time_key;
-                            $invoice_data['created_at'] = $created_at;
-                            $related_accounting_invoice = AccountingInvoice::create($invoice_data);
-                            $success_ .= "AccountingInvoice created-";
+                            if ( (float) $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j] > 0.00) {
+                                $invoice_data['time_key'] = $this_time_key;
+                                $invoice_data['created_at'] = $created_at;
+                                $related_accounting_invoice = AccountingInvoice::create($invoice_data);
+                                $success_ .= "AccountingInvoice created-";
+                            } else {
+                                $chosen_selection = 0;
+                                $success_ .= "chosen_selection = 0, AccountingInvoice tidak dibuat-";
+                            }
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
                             $chosen_selection = 2;
                             $invoice_data['updated_by'] = $user->username;
