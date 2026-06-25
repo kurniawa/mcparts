@@ -133,7 +133,7 @@ class AccountingController2 extends Controller
             'customer_id' => $nota->pelanggan_id,
             'customer_name' => $nota->pelanggan_nama,
             'payment_status' => $post['payment_status'],
-            'discount_percent' => $post['discount_percent'],
+            'discount_percentage' => $post['discount_percent'],
             'discount_amount' => $post['discount_amount'],
             'other_discount' => $post['other_discount'],
             'total_discount' => $post['total_discount'],

@@ -160,7 +160,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="flex w-full">
-                                                        <input type="number" id="discount_percent-{{ $key_accounting }}" name="discount_percent" value="0" max="100" class="text-xs p-0 pl-1 w-full">
+                                                        <input type="number" id="discount_percentage-{{ $key_accounting }}" name="discount_percentage" value="0" max="100" class="text-xs p-0 pl-1 w-full">
                                                         <span>%</span>
                                                         <input type="text" id="discount_amount-{{ $key_accounting }}" value="0" class="text-xs p-0 pl-1 w-full bg-slate-200" readonly>
                                                     </div>
@@ -208,7 +208,7 @@
         applyFormatNumberAndEvent(`other_discount-${index}`, index);
         applyFormatNumber(`total_discount-${index}`);
         applyFormatNumberAndEvent(`balance_used-${index}`, index);
-        applyEvent(`discount_percent-${index}`, index);
+        applyEvent(`discount_percentage-${index}`, index);
     });
 
     function applyFormatNumber(elementId) {
@@ -259,7 +259,7 @@
         let amountDueReal = document.getElementById(`amount_due-${trId}-real`);
         let amountDueStart = document.getElementById(`amount_due-${trId}-start`);
         let paymentStatus = document.getElementById(`payment_status-${trId}`);
-        let discountPercentage = document.getElementById(`discount_percent-${trId}`);
+        let discountPercentage = document.getElementById(`discount_percentage-${trId}`);
         let percentDiscount = document.getElementById(`discount_amount-${trId}`);
         let percentDiscountReal = document.getElementById(`discount_amount-${trId}-real`);
         let otherDiscount = document.getElementById(`other_discount-${trId}`);

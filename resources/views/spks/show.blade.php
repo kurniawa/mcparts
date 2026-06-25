@@ -778,10 +778,33 @@
                     {{-- END - Nota Items --}}
                     {{-- OPSI NOTA --}}
                     <div class="flex justify-between">
-                        <div class="font-bold">
-                            <p>status: {{ $nota['status_bayar'] }}</p>
-                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'] + $nota['balance_used'],0,',','.') }}</p>
-                            <p class="text-red-500">sisa bayar: {{ number_format($nota['amount_due'],0,',','.') }}</p>
+                        <div>
+                            <p class="font-bold">status: {{ $nota['status_bayar'] }}</p>
+                            <p class="font-bold text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'] + $nota['balance_used'],0,',','.') }}</p>
+                            <p class="font-bold text-red-500">sisa bayar: {{ number_format($nota['amount_due'],0,',','.') }}</p>
+                            <button type="button" class="border border-slate-200 text-slate-500 rounded font-bold text-md px-1 mt-2" id="btn_ubah_status_bayar_nota-{{ $key_nota }}" onclick="toggle_light(this.id,'form_ubah_status_bayar_nota-{{ $key_nota }}',[],['bg-slate-200'], 'block')">Edit Status Bayar</button>
+                            <form id="form_ubah_status_bayar_nota-{{ $key_nota }}" action="{{ route('notas.update_status_bayar_nota', $nota['id']) }}" method="POST" class="hidden border rounded p-1 mt-1">
+                                @csrf
+                                @method('PATCH')
+                                <div class="grid grid-cols-2 gap-1 items-center">
+                                    <label for="status_bayar-{{ $key_nota }}">Ubah status:</label>
+                                    <select name="status_bayar" id="status_bayar-{{ $key_nota }}" class="rounded text-xs">
+                                        <option value="">-</option>
+                                        <option value="BELUM_LUNAS">BELUM_LUNAS</option>
+                                        <option value="LUNAS">LUNAS</option>
+                                        <option value="SEBAGIAN">SEBAGIAN</option>
+                                    </select>
+
+                                    <label for="amount_paid-{{ $key_nota }}">Jumlah pembayaran:</label>
+                                    <input type="number" name="amount_paid" id="amount_paid-{{ $key_nota }}" class="rounded text-xs">
+
+                                    <label for="amount_due-{{ $key_nota }}">Jumlah sisa bayar:</label>
+                                    <input type="number" name="amount_due" id="amount_due-{{ $key_nota }}" class="rounded text-xs">
+                                </div>
+                                <div class="text-center mt-2">
+                                    <button type="submit" class="bg-orange-200 text-orange-500 rounded px-2 py-1 text-sm">Konfirmasi</button>
+                                </div>
+                            </form>
                         </div>
                         <div class="flex justify-end mt-1 mb-2 items-center gap-1">
                             <a href="{{ route('notas.print_out', $nota['id']) }}" class="rounded text-slate-500">

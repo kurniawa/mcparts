@@ -8,6 +8,7 @@ use App\Models\Menu;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
@@ -197,45 +198,64 @@ class BarangController extends Controller
             $harga_total_sub = $post['harga_total_sub'];
         }
         $harga_main_old = $barang->harga_main;
-        $barang->update([
-            'supplier_id' => $post['supplier_id'],
-            'supplier_nama' => $post['supplier_nama'],
-            'nama' => $post['barang_nama'],
-            'satuan_main' => $post['satuan_main'],
-            'satuan_sub' => $satuan_sub,
-            'harga_main' => $post['harga_main'],
-            'harga_sub' => $harga_sub,
-            'jumlah_main' => (float)($post['jumlah_main']),
-            'jumlah_sub' => $jumlah_sub,
-            'harga_total_main' => $post['harga_total_main'],
-            'harga_total_sub' => $harga_total_sub,
-            'keterangan' => $post['keterangan'],
-        ]);
-
-        // Update harga barang di tabel good_prices juga
-        $goods_price = GoodsPrice::where('goods_id', $barang->id)->where('unit', $barang->satuan_main)->where('price', $harga_main_old)->first();
-        if ($goods_price) {
-            $goods_price->harga_main = $post['harga_main'];
-            $goods_price->save();
-            $success_ .= '-GoodsPrice updated-';
-        } else {
-            GoodsPrice::create([
-                'goods_id' => $barang->id,
-                'goods_slug' => $barang->nama,
-                'supplier_id' => $barang->supplier_id,
-                'supplier_name' => $barang->supplier_nama,
-                'unit' => $barang->satuan_main,
-                'price' => $post['harga_main'],
-                'created_by' => $user->username,
+        DB::beginTransaction();
+        try {
+            $barang->update([
+                'supplier_id' => $post['supplier_id'],
+                'supplier_nama' => $post['supplier_nama'],
+                'nama' => $post['barang_nama'],
+                'satuan_main' => $post['satuan_main'],
+                'satuan_sub' => $satuan_sub,
+                'harga_main' => $post['harga_main'],
+                'harga_sub' => $harga_sub,
+                'jumlah_main' => (float)($post['jumlah_main']),
+                'jumlah_sub' => $jumlah_sub,
+                'harga_total_main' => $post['harga_total_main'],
+                'harga_total_sub' => $harga_total_sub,
+                'keterangan' => $post['keterangan'],
             ]);
-            $success_ .= '-new GoodsPrice created-';
-        }
 
-        $success_ .= '-barang updated-';
+            // Update harga barang di tabel good_prices juga
+            $goods_price = GoodsPrice::where('goods_id', $barang->id)->where('unit', $barang->satuan_main)->where('price', $harga_main_old)->first();
+            if ($goods_price) {
+                $goods_price->price = $post['harga_main'];
+                $goods_price->save();
+                $success_ .= '-GoodsPrice updated-';
+            } else {
+                GoodsPrice::create([
+                    'goods_id' => $barang->id,
+                    'goods_slug' => $barang->nama,
+                    'supplier_id' => $barang->supplier_id,
+                    'supplier_name' => $barang->supplier_nama,
+                    'unit' => $barang->satuan_main,
+                    'price' => $post['harga_main'],
+                    'created_by' => $user->username,
+                ]);
+                $success_ .= '-new GoodsPrice created-';
+            }
+
+            $success_ .= '-barang updated-';
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dump($post);
+
+            $message = "Error: " . $th->getMessage()
+                . "\n\nFile: " . $th->getFile()
+                . "\n\nFile: " . $th->getLine()
+                . "\n\nTrace: " . $th->getTraceAsString();
+            dd($message);
+
+            return back()->withErrors([
+                'error Gagal menyimpan transaksi: ' . $th->getMessage(),
+            ]);
+        }
 
         $feedback = [
             'success_' => $success_,
         ];
+        
         return back()->with($feedback);
 
     }

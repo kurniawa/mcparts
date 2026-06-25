@@ -56,7 +56,6 @@ class SpkController extends Controller
         }
         // END - VALIDASI DATA
         $success_ = "";
-        $user = Auth::user();
         // SPK - CREATE dulu, supaya dapet ID nya
         $pelanggan = Pelanggan::find($post['pelanggan_id']);
         // Data Pelanggan - Alamat
@@ -93,8 +92,8 @@ class SpkController extends Controller
             'pelanggan_id'=>$post['pelanggan_id'],
             'reseller_id'=>$post['reseller_id'],
             'keterangan'=>$post['keterangan'],
-            'created_by'=>$user['username'],
-            'updated_by'=>$user['username'],
+            'created_by'=>Auth::user()->username,
+            'updated_by'=>Auth::user()->username,
             'created_at'=>$created_at,
             'pelanggan_nama'=>$pelanggan->nama,
             // 'cust_long'=>$cust_long,

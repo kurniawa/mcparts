@@ -567,8 +567,8 @@ class NotaController extends Controller
         $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
 
         $harga_total = 0;
-        foreach ($spk_produk_notas as $spk_produk_nota) {
-            $harga_total += $spk_produk_nota->harga_t;
+        foreach ($spk_produk_notas as $spn) {
+            $harga_total += $spn->harga_t;
         }
 
         if ($nota->harga_total != $harga_total) {
@@ -587,5 +587,28 @@ class NotaController extends Controller
         return back()->with('success_', $success_);
     }
 
-    
+    function update_status_bayar_nota(Nota $nota, Request $request) {
+        // dump($request->post());
+        // dd($nota);
+
+        $validatedData = $request->validate([
+            'status_bayar' => 'required|in:LUNAS,BELUM_LUNAS,SEBAGIAN',
+            'amount_paid' => 'required|numeric|min:0',
+            'amount_due' => 'required|numeric|min:0',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $nota->status_bayar = $validatedData['status_bayar'];
+            $nota->amount_paid = $validatedData['amount_paid'];
+            $nota->amount_due = $validatedData['amount_due'];
+            $nota->save();
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+        }
+
+        return back()->with('success_', 'Status pembayaran nota berhasil diperbarui.');
+    }
 }
