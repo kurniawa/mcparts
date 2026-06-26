@@ -621,11 +621,21 @@ class PembelianController extends Controller
     }
 
     function pembatalan_pelunasan(Pembelian $pembelian) {
-        dd("Fitur ini sudah tidak digunakan");
-        $pembelian->tanggal_lunas = null;
-        $pembelian->status_bayar = 'BELUM_LUNAS';
-        $pembelian->keterangan_bayar = null;
-        $pembelian->save();
+        // dd("Fitur ini sudah tidak digunakan");
+        DB::beginTransaction();
+        try {
+            $pembelian->amount_due = $pembelian->harga_total;
+            $pembelian->amount_paid = 0;
+            $pembelian->tanggal_lunas = null;
+            $pembelian->status_bayar = 'BELUM_LUNAS';
+            $pembelian->keterangan_bayar = null;
+            $pembelian->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors('Gagal membatalkan pelunasan: ' . $e->getMessage());
+        }
 
         return back()->with('warnings_', '-pelunasan dibatalkan-');
     }
