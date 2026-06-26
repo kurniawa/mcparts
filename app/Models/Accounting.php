@@ -60,6 +60,7 @@ class Accounting extends Model
         $total_amount_paid_posted = 0;
         $total_saldo_used = 0;
         $customer_id = null;
+        $supplier_id = null;
         for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
             if ($post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j] == 0 && $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j] == 0) {
                 continue;
@@ -183,12 +184,23 @@ class Accounting extends Model
             $total_amount_paid_posted += $amount_paid; // Akumulasi total_amount_paid_posted
             $total_saldo_used += $balance_used; // Akumulasi total_saldo_used/total_balance_used
 
-            if ($customer_id === null) {
-                $customer_id = $related_nota->pelanggan_id;
+            if ($kategori_type === 'UANG MASUK') {
+                if ($customer_id === null) {
+                    $customer_id = $related_nota->pelanggan_id;
+                }
+            } elseif ($kategori_type === 'UANG KELUAR') {
+                if ($supplier_id === null) {
+                    $supplier_id = $related_nota->supplier_id;
+                }
             }
         }
         // Validasi Saldo dan Sisa Saldo
-        $overpayment = Overpayment::where('customer_id', $customer_id)->latest()->first();
+        $overpayment = null;
+        if ($kategori_type === 'UANG MASUK') {
+            $overpayment = Overpayment::where('customer_id', $customer_id)->latest()->first();
+        } elseif ($kategori_type === 'UANG KELUAR') {
+            $overpayment = Overpayment::where('supplier_id', $supplier_id)->latest()->first();
+        }
         $saldo_awal_old = 0;
         if ($overpayment) {
             $saldo_awal_old = $overpayment->amount;
