@@ -1053,9 +1053,12 @@ class AccountingController extends Controller
         if ($transaction_name === null) {
             dump("transaction_name?");
             dd($post);
-        } elseif ($transaction_name && $transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG') {
-            $request->validate(['error'=>'required'],['error.required'=>'Belum mendukung edit entri dengan kategori PENERIMAAN PIUTANG']);
         }
+        
+        // elseif ($transaction_name && $transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG') {
+        //     $request->validate(['error'=>'required'],['error.required'=>'Belum mendukung edit entri dengan kategori PENERIMAAN PIUTANG']);
+        // }
+        
         $jumlah = null;
         $transaction_type = 'pengeluaran';
 
