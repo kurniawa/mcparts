@@ -63,9 +63,9 @@
                                 status_bayar:
                                 <div class="flex">
                                     <div><input type="checkbox" name="status_bayar[]" class="rounded" value="all" id="all"><label for="all" class="ml-1">all</label></div>
-                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="lunas" id="lunas"><label for="lunas" class="ml-1">lunas</label></div>
-                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="belum" id="belum"><label for="belum" class="ml-1">belum</label></div>
-                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="sebagian" id="sebagian"><label for="sebagian" class="ml-1">sebagian</label></div>
+                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="LUNAS" id="LUNAS"><label for="LUNAS" class="ml-1">LUNAS</label></div>
+                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="BELUM_LUNAS" id="BELUM_LUNAS"><label for="BELUM_LUNAS" class="ml-1">BELUM_LUNAS</label></div>
+                                    <div class="ml-3"><input type="checkbox" name="status_bayar[]" class="rounded" value="SEBAGIAN" id="SEBAGIAN"><label for="SEBAGIAN" class="ml-1">SEBAGIAN</label></div>
                                 </div>
                             </div>
                             <div class="flex mt-2">
