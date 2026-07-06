@@ -14,7 +14,7 @@
             {{-- <form action="{{ route('pelanggans.create') }}" method="GET" class="flex ml-2">
                 <button type="submit" class="rounded bg-emerald-500 text-white font-semibold px-3 py-1">+ Pelanggan</button>
             </form> --}}
-            <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_pelanggan" onclick="toggle_light(this.id, 'form_new_pelanggan', [], ['bg-emerald-200'], 'block')">+ Pelanggan</button>
+            <button type="submit" class="border rounded border-emerald-300 text-emerald-500 font-semibold px-3 py-1 ml-1" id="btn_new_employee" onclick="toggle_light(this.id, 'form_new_employee', [], ['bg-emerald-200'], 'block')">+ Employee</button>
         </div>
         {{-- SEARCH / FILTER --}}
         <div class="hidden" id="filter-content">
@@ -22,7 +22,7 @@
                 <form action="" method="GET">
                     <div class="ml-1 mt-2 flex items-center">
                         <div class="flex mt-1">
-                            <input type="text" class="input" name="nama_pelanggan" placeholder="Nama Customer..." id="nama_pelanggan">
+                            <input type="text" class="input" name="employee_name" placeholder="Nama Employee..." id="employee_name">
                             {{-- <input type="hidden" name="pelanggan_id" id="pelanggan_id"> --}}
                         </div>
                         <div>
@@ -38,11 +38,11 @@
             </div>
         </div>
         {{-- END - SEARCH / FILTER --}}
-        {{-- FORM_NEW_PELANGGAN --}}
-        <div class="text-xs mt-1 hidden" id="form_new_pelanggan">
+        {{-- FORM_NEW_EMPLOYEE --}}
+        <div class="text-xs mt-1 hidden" id="form_new_employee">
             <div class="flex justify-center">
                 <div class="lg:w-1/2 md:w-3/4 border border-emerald-300 rounded p-1 bg-white shadow drop-shadow-sm">
-                    <form class="rounded" action="{{ route('pelanggans.store') }}" method="POST">
+                    <form class="rounded" action="{{ route('employees.store') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-2">
                             <table>
@@ -173,7 +173,7 @@
                 </div>
             </div>
         </div>
-        {{-- END - FORM_NEW_PELANGGAN --}}
+        {{-- END - FORM_NEW_EMPLOYEE --}}
     </div>
     <div class="flex justify-center">
         <div class='pb-1 text-xs lg:w-1/2 md:w-3/4'>

@@ -7,6 +7,7 @@ use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\EkspedisiController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
@@ -240,6 +241,15 @@ Route::controller(AccountingController2::class)->group(function(){
 Route::controller(AccountingInvoiceController::class)->group(function(){
     Route::post('/accounting-invoices/{nota}/{accounting_invoice}/delete-last-payment-customer','delete_last_payment_customer')->name('accounting_invoices.delete_last_payment_customer')->middleware('auth');
 });
+
+Route::controller(EmployeeController::class)->middleware('auth')->group(function () {
+    Route::get('employees/export', 'export')->name('employees.export');
+    Route::post('employees/import', 'import')->name('employees.import');
+    Route::patch('employees/{employee}/activate', 'activate')->name('employees.activate');
+    Route::patch('employees/{employee}/deactivate', 'deactivate')->name('employees.deactivate');
+});
+
+Route::resource('employees', EmployeeController::class)->middleware('auth');
 
 Route::controller(ArtisanController::class)->group(function(){
     Route::get('/artisan-command','index')->name('artisan.index')->middleware('auth');

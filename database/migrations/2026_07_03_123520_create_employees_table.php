@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->unique()->constrained()->nullOnDelete();
             $table->uuid('uuid')->unique()->index();
 
-            $table->string('employee_code', 20)->unique();
+            $table->string('employee_code', 20)->nullable()->unique();
+            $table->string('employee_type', 20)->default('fulltime')->comment('fulltime, parttime, contract, intern, freelancer');
+            $table->foreignId('employee_type_id')->nullable()->constrained('employee_types')->nullOnDelete();
 
             $table->string('full_name');
             $table->string('given_name')->nullable();

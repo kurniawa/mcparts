@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +14,13 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        //
+        $employees = Employee::all();
+        $data = [
+            'menus' => Menu::get(),
+            'profile_menus' => Menu::get_profile_menus(),
+            'employees' => $employees,
+        ];
+        return view('employees.index', $data);
     }
 
     /**
