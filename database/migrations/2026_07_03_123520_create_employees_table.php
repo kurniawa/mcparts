@@ -17,13 +17,15 @@ return new class extends Migration
             $table->uuid('uuid')->unique()->index();
 
             $table->string('employee_code', 20)->nullable()->unique();
-            $table->string('employee_type', 20)->default('fulltime')->comment('fulltime, parttime, contract, intern, freelancer');
+            $table->string('employee_type', 20)->default('fulltime')->comment('permanent, fulltime, parttime, contract, daily, weekly, intern, freelancer');
             $table->foreignId('employee_type_id')->nullable()->constrained('employee_types')->nullOnDelete();
 
+            $table->string('id_type', 20)->nullable()->comment('KTP, SIM, Passport, etc.');
+            $table->string('id_number', 50)->nullable();
             $table->string('full_name');
             $table->string('given_name')->nullable();
-            $table->string('family_name')->nullable();
-            $table->string('preferred_name')->nullable();
+            $table->string('family_name', 100)->nullable();
+            $table->string('preferred_name', 50)->nullable();
 
             $table->date('birthday');
 
@@ -32,8 +34,8 @@ return new class extends Migration
                 'female',
             ]);
 
-            $table->string('origin');
-            $table->string('domicile');
+            $table->string('origin', 50)->nullable();
+            $table->string('domicile', 50)->nullable();
 
             $table->string('email')->nullable();
             $table->string('phone')->nullable();

@@ -21,8 +21,10 @@ class EmployeeSeeder extends Seeder
             ['code' => 'CONTRACT', 'name' => 'Kontrak', 'description' => 'Contract Employee', 'sort_order' => 2, 'created_by' => 2],
             ['code' => 'DAILY', 'name' => 'Harian', 'description' => 'Daily Employee', 'sort_order' => 3, 'created_by' => 2],
             ['code' => 'WEEKLY', 'name' => 'Mingguan', 'description' => 'Weekly Employee', 'sort_order' => 4, 'created_by' => 2],
-            ['code' => 'INTERN', 'name' => 'Magang', 'description' => 'Intern Employee', 'sort_order' => 5, 'created_by' => 2],
-            ['code' => 'FREELANCER', 'name' => 'Freelancer', 'description' => 'Freelancer Employee', 'sort_order' => 6, 'created_by' => 2],
+            ['code' => 'FULLTIME', 'name' => 'Penuh Waktu', 'description' => 'Full-time Employee', 'sort_order' => 5, 'created_by' => 2],
+            ['code' => 'PARTTIME', 'name' => 'Paruh Waktu', 'description' => 'Part-time Employee', 'sort_order' => 6, 'created_by' => 2],
+            ['code' => 'INTERN', 'name' => 'Magang', 'description' => 'Intern Employee', 'sort_order' => 7, 'created_by' => 2],
+            ['code' => 'FREELANCER', 'name' => 'Freelancer', 'description' => 'Freelancer Employee', 'sort_order' => 8, 'created_by' => 2],
         ];
 
         $employees = [

@@ -15,6 +15,9 @@ return new class extends Migration
     {
         Schema::create('alamats', function (Blueprint $table) {
             $table->id();
+            $table->string('table_name', 50)->nullable();
+            $table->unsignedBigInteger('table_id')->nullable();
+            $table->enum('address_type',['ACTUAL', 'CURRENT', 'LATEST', 'MAIN', 'OLD', 'SUBSIDIARY'])->default('SUBSIDIARY')->nullable();
             $table->string("jalan",100)->nullable(); // yang di Jakarta/Tangerang ada yang tidak pakai keterangan alamat. Ini bisa diisi dengan nama perumahan atau nama ruko, dll.
             $table->string("komplek", 100)->nullable(); // yang di Jakarta/Tangerang ada yang tidak pakai keterangan alamat. Ini bisa diisi dengan nama perumahan atau nama ruko, dll.
             $table->string("rt", 5)->nullable();

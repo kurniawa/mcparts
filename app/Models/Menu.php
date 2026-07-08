@@ -19,6 +19,7 @@ class Menu extends Model
                 ['name'=>'Penjualan','route'=>'penjualans.index'],
                 ['name'=>'Pembelian','route'=>'pembelians.index'],
                 ['name'=>'Accounting','route'=>'accounting.index'],
+                ['name'=>'Employee','route'=>'employees.index'],
             ]);
         } else {
             $menus = collect([
