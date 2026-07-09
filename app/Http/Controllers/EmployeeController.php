@@ -19,6 +19,7 @@ class EmployeeController extends Controller
     {
         $employees = Employee::orderBy('full_name', 'asc')->get();
         $employeeTypes = EmployeeType::all();
+        $idTypes = ['KTP', 'SIM', 'Passport', 'Other'];
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'employees.index',
@@ -26,6 +27,7 @@ class EmployeeController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'employees' => $employees,
             'employeeTypes' => $employeeTypes,
+            'idTypes' => $idTypes,
         ];
         // dd($data);
         return view('employees.index', $data);
@@ -61,6 +63,7 @@ class EmployeeController extends Controller
         // VALIDASI
         // VALIDASI DATA EMPLOYEE
         $request->validate([
+            'nationality' => 'nullable|max:50',
             'employee_type' => 'required|in:FULLTIME,PARTTIME,DAILY,WEEKLY,CONTRACT,INTERN,FREELANCER',
             'full_name' => 'required|max:255',
             'given_name' => 'nullable|max:255',
@@ -72,9 +75,6 @@ class EmployeeController extends Controller
             'origin' => 'nullable|max:50',
             'domicile' => 'nullable|max:50',
         ]);
-        if ($post['initial'] !== null) {
-            $request->validate(['initial'=>'max:5']);
-        }
         // VALIDASI KONTAK
         if ($post['tipe'] !== null) {
             $request->validate(['nomor'=>'required']);

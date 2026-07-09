@@ -3,6 +3,7 @@
         @csrf
         <div class="grid grid-cols-2 gap-1">
             <table>
+                <tr><td>Nationality</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="nationality" value="{{ old('nationality') ? old('nationality') : 'Indonesia' }}"></td></tr>
                 <tr>
                     <td>Type</td><td>:</td>
                     <td>
@@ -13,6 +14,17 @@
                         </select>
                     </td>
                 </tr>
+                <tr>
+                    <td>ID Type</td><td>:</td>
+                    <td>
+                        <select name="id_type" id="id_type" class="rounded py-0">
+                            @foreach ($idTypes as $idType)
+                            <option value="{{ $idType }}">{{ $idType }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                </tr>
+                <tr><td>ID Number</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="id_number" value="{{ old('id_number') ? old('id_number') : '' }}"></td></tr>
                 <tr><td>Full Name</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="full_name" value="{{ old('full_name') ? old('full_name') : '' }}"></td></tr>
                 <tr><td>Given Name</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="given_name" value="{{ old('given_name') ? old('given_name') : '' }}"></td></tr>
                 <tr><td>Family Name</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="family_name" value="{{ old('family_name') ? old('family_name') : '' }}"></td></tr>
@@ -23,17 +35,26 @@
                         <input type="date" name="birthday" id="birthday" class="rounded p-1 text-xs">
                     </td>
                 </tr>
+                <tr>
+                    <td>Start Date</td><td>:</td>
+                    <td>
+                        <input type="date" name="start_date" id="start_date" class="rounded p-1 text-xs">
+                    </td>
+                </tr>
             </table>
             <div>
-                <div>
-                    <label for="gender"> Gender:</label>
-                    <div>
-                        <input type="radio" name="gender" id="male" value="male" class="ml-2">
-                        <label for="male" class="ml-1">Male</label>
-                        <input type="radio" name="gender" id="female" value="female" class="ml-5">
-                        <label for="female" class="ml-1">Female</label>
-                    </div>
-                </div>
+                <table>
+                    <tr>
+                        <td>Gender</td><td>:</td>
+                        <td class="pb-1">
+                            <input type="radio" name="gender" id="male" value="male" class="ml-2" {{ old('gender') == 'male' ? 'checked' : '' }}><label for="male" class="ml-1">Male</label>
+                            <input type="radio" name="gender" id="female" value="female" class="ml-5" {{ old('gender') == 'female' ? 'checked' : '' }}><label for="female" class="ml-1">Female</label>
+                        </td>
+                    </tr>
+                    <tr><td>Origin</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="origin" value="{{ old('origin') ? old('origin') : '' }}" placeholder="Asal"></td></tr>
+                    <tr><td>Domicile</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="domicile" value="{{ old('domicile') ? old('domicile') : '' }}" placeholder="Domisili"></td></tr>
+                    <tr><td>Phone</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="phone" value="{{ old('phone') ? old('phone') : '' }}" placeholder="+62812XXX"></td></tr>
+                </table>
                 <div class="mt-2">
                     <label for="description">Description (opt.):</label>
                     <div class="mt-1">
@@ -43,22 +64,7 @@
             </div>
         </div>
 
-        {{-- KONTAK --}}
-        <div>
-            <div class="flex justify-center mt-5">
-                <div class="flex items-center bg-white rounded p-1 shadow drop-shadow">
-                    <h5 class="font-semibold ml-2">Phone:</h5>
-                </div>
-            </div>
-            <div class="mt-2">
-                <div class="text-center"><label for="phone">Nomor (format +62812XXX):</label></div>
-                <div class="text-center">
-                    <input type="text" name="phone" class="p-1 text-xs rounded" placeholder="format +62812XXX" id="phone">
-                </div>
-            </div>
-        </div>
-        {{-- END - KONTAK --}}
-        <div class="flex justify-center mt-5">
+        {{-- <div class="flex justify-center mt-5">
             <div class="flex items-center bg-white rounded p-1 shadow drop-shadow">
                 <h5 class="font-semibold ml-2">Alamat:</h5>
             </div>
@@ -91,7 +97,7 @@
                 <td>(*)short(daerah)</td><td>:</td><td><input type="text" name="short" class="text-xs p-1 rounded"></td>
                 <td>(*)long</td><td>:</td><td><textarea name="long" id="" cols="30" rows="4" class="border border-slate-400 rounded p-1 text-xs"></textarea></td>
             </tr>
-        </table>
+        </table> --}}
 
         <div class="text-center mt-2">
             <button type="submit" class="bg-emerald-500 rounded text-white py-2 px-5 font-bold">+ CREATE NEW EMPLOYEE</button>

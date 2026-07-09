@@ -98,7 +98,7 @@
             </table>
         </div>
         {{-- FORM_NEW_EMPLOYEE --}}
-        <x-create-employee :employeeTypes="$employeeTypes"></x-create-employee>
+        <x-create-employee :employeeTypes="$employeeTypes" :idTypes="$idTypes"></x-create-employee>
         {{-- END - FORM_NEW_EMPLOYEE --}}
     </div>
 </main>
