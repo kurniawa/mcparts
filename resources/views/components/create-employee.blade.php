@@ -54,6 +54,7 @@
                     <tr><td>Origin</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="origin" value="{{ old('origin') ? old('origin') : '' }}" placeholder="Asal"></td></tr>
                     <tr><td>Domicile</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="domicile" value="{{ old('domicile') ? old('domicile') : '' }}" placeholder="Domisili"></td></tr>
                     <tr><td>Phone</td><td>:</td><td><input type="text" class="rounded p-1 text-xs" name="phone" value="{{ old('phone') ? old('phone') : '' }}" placeholder="+62812XXX"></td></tr>
+                    <tr><td>Email</td><td>:</td><td><input type="email" class="rounded p-1 text-xs" name="email" value="{{ old('email') ? old('email') : '' }}" placeholder="email@example.com"></td></tr>
                 </table>
                 <div class="mt-2">
                     <label for="description">Description (opt.):</label>

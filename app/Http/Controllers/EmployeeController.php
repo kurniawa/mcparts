@@ -62,9 +62,11 @@ class EmployeeController extends Controller
         dd($post);
         // VALIDASI
         // VALIDASI DATA EMPLOYEE
-        $request->validate([
+        $validated = $request->validate([
             'nationality' => 'nullable|max:50',
             'employee_type' => 'required|in:FULLTIME,PARTTIME,DAILY,WEEKLY,CONTRACT,INTERN,FREELANCER',
+            'id_type' => 'required|in:KTP,SIM,Passport,Other',
+            'id_number' => 'required|unique:employees,id_number',
             'full_name' => 'required|max:255',
             'given_name' => 'nullable|max:255',
             'family_name' => 'nullable|max:100',
@@ -74,86 +76,30 @@ class EmployeeController extends Controller
             'gender' => 'required|in:male,female',
             'origin' => 'nullable|max:50',
             'domicile' => 'nullable|max:50',
+            'phone' => 'nullable|max:20',
+            'email' => 'nullable|email|max:255',
+            'description' => 'nullable',
         ]);
-        // VALIDASI KONTAK
-        if ($post['tipe'] !== null) {
-            $request->validate(['nomor'=>'required']);
-        }elseif ($post['nomor'] !== null) {
-            $request->validate(['tipe'=>'required']);
-        }
-
-        // VALIDASI ALAMAT
-        if ($post['short'] !== null) {
-            $request->validate(['long'=>'required']);
-        } elseif ($post['long'] !== null) {
-            $request->validate(['short'=>'required']);
-        }
-        // END - VALIDASI
+        
+        DB::beginTransaction();
         $success_ = '';
-        // STORE DATA_EMPLOYEE
-        $tanggal_lahir = null;
-        if ($post['day'] !== null && $post['month'] !== null && $post['year'] !== null) {
-            $tanggal_lahir = date('Y-m-d', strtotime("$post[year]-$post[month]-$post[day]"));
-        }
-        $employee = Employee::create([
-            'bentuk' => $post['bentuk'],
-            'nama' => $post['nama'],
-            'gender' => $post['gender'],
-            'nik' => $post['nik'],
-            'sapaan' => $post['sapaan'],
-            'gelar' => $post['gelar'],
-            'initial' => $post['initial'],
-            'tanggal_lahir' => $tanggal_lahir,
-            'keterangan' => $post['keterangan'],
-            'creator' => Auth::user()->username,
-            'updater' => Auth::user()->username,
-        ]);
-        $success_ .= '-employee created-';
-        // END - STORE DATA_EMPLOYEE
-        // STORE KONTAK
-        if ($post['tipe'] !== null && $post['nomor'] !== null) {
-            EmployeeContact::create([
-                'employee_id' => $employee->id,
-                'tipe' => $post['tipe'],
-                'kodearea' => $post['kodearea'],
-                'nomor' => $post['nomor'],
-                'is_aktual' => 'yes',
-            ]);
-        }
-        // END - STORE KONTAK
-        // STORE ALAMAT
-        if ($post['short'] !== null && $post['long'] !== null) {
-            $post['long'] = json_encode(preg_split("/\r\n|\n|\r/", $post['long']));
-            $alamat = Alamat::create([
-                'jalan' => $post['jalan'],
-                'komplek' => $post['komplek'],
-                'rt' => $post['rt'],
-                'rw' => $post['rw'],
-                'desa' => $post['desa'],
-                'kelurahan' => $post['kelurahan'],
-                'kecamatan' => $post['kecamatan'],
-                'kota' => $post['kota'],
-                'kodepos' => $post['kodepos'],
-                'kabupaten' => $post['kabupaten'],
-                'provinsi' => $post['provinsi'],
-                'pulau' => $post['pulau'],
-                'negara' => $post['negara'],
-                'short' => $post['short'],
-                'long' => $post['long'],
-            ]);
+        try {
+            $employee_type = EmployeeType::where('code', $validated['employee_type'])->first();
+            $validated['employee_type_id'] = $employee_type->id;
+            $validated['created_by'] = Auth::user()->id;
+            Employee::create($validated);
 
-            Alamat::create([
-                'table_name' => 'employees',
-                'employee_id' => $employee->id,
-                'alamat_id' => $alamat->id,
-                'tipe' => 'UTAMA',
-            ]);
-            $success_ .= '-alamat, employee_alamat created-';
+            $success_ .= '-employee created-';
+            
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
         }
-        // END - STORE ALAMAT
+        
         $feedback = [
             'success_' => $success_
         ];
+
         return back()->with($feedback);
     }
 

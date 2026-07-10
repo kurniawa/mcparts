@@ -39,7 +39,7 @@ return new class extends Migration
             $table->string('domicile', 50)->nullable();
 
             $table->string('email')->nullable();
-            $table->string('phone')->nullable();
+            $table->string('phone', 20)->nullable();
 
             $table->string('photo')->nullable();
             $table->string('photo_id')->nullable();
@@ -56,7 +56,7 @@ return new class extends Migration
                 'resigned',
                 'probation',
                 'leave',
-            ])->default('probation');
+            ])->default('active');
 
             $table->text('notes')->nullable();
 
