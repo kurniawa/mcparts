@@ -13,15 +13,15 @@
             </div>
             @endif
             <div class="flex items-center ml-2">
-                <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')"><label for="now" class="ml-1">now</label></div>
-                <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
-                <div class="ml-3"><input type="radio" name="timerange" value="triwulan" id="triwulan" onclick="set_time_range('triwulan')"><label for="triwulan" class="ml-1">triwulan</label></div>
-                <div class="ml-3"><input type="radio" name="timerange" value="triwulan_lalu" id="triwulan_lalu" onclick="set_time_range('triwulan_lalu')"><label for="triwulan_lalu" class="ml-1">triwulan lalu</label></div>
+                <div><input type="radio" name="timerange" value="today" id="now" onclick="set_time_range('now')" {{ isset($timerange) && $timerange == 'now' ? 'checked' : '' }}><label for="now" class="ml-1">now</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')" {{ isset($timerange) && $timerange == '7d' ? 'checked' : '' }}><label for="7d" class="ml-1">7d</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="triwulan" id="triwulan" onclick="set_time_range('triwulan')" {{ isset($timerange) && $timerange == 'triwulan' ? 'checked' : '' }}><label for="triwulan" class="ml-1">triwulan</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="triwulan_lalu" id="triwulan_lalu" onclick="set_time_range('triwulan_lalu')" {{ isset($timerange) && $timerange == 'triwulan_lalu' ? 'checked' : '' }}><label for="triwulan_lalu" class="ml-1">triwulan lalu</label></div>
                 {{-- <div class="ml-3"><input type="radio" name="timerange" value="30d" id="30d" onclick="set_time_range('30d')"><label for="30d" class="ml-1">30d</label></div> --}}
-                <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')"><label for="bulan_ini" class="ml-1">bulan ini</label></div>
-                <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')"><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
-                <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')"><label for="tahun_ini" class="ml-1">tahun ini</label></div>
-                <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')"><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="bulan_ini" id="bulan_ini" onclick="set_time_range('bulan_ini')" {{ isset($timerange) && $timerange == 'bulan_ini' ? 'checked' : '' }}><label for="bulan_ini" class="ml-1">bulan ini</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="bulan_lalu" id="bulan_lalu" onclick="set_time_range('bulan_lalu')" {{ isset($timerange) && $timerange == 'bulan_lalu' ? 'checked' : '' }}><label for="bulan_lalu" class="ml-1">bulan lalu</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="this_year" id="tahun_ini" onclick="set_time_range('tahun_ini')" {{ isset($timerange) && $timerange == 'this_year' ? 'checked' : '' }}><label for="tahun_ini" class="ml-1">tahun ini</label></div>
+                <div class="ml-3"><input type="radio" name="timerange" value="last_year" id="tahun_lalu" onclick="set_time_range('tahun_lalu')" {{ isset($timerange) && $timerange == 'last_year' ? 'checked' : '' }}><label for="tahun_lalu" class="ml-1">tahun lalu</label></div>
             </div>
         </div>
         <div class="flex mt-2">
@@ -32,20 +32,20 @@
                         <select name="from_day" id="from_day" class="rounded text-xs py-1">
                             <option value="">-</option>
                             @for ($i = 1; $i < 32; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ isset($fromDay) && $fromDay == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                         <select name="from_month" id="from_month" class="rounded text-xs py-1 ml-1">
                             <option value="">-</option>
                             @for ($i = 1; $i < 13; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ isset($fromMonth) && $fromMonth == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                         <select name="from_year" id="from_year" class="rounded text-xs py-1 ml-1">
                             <option value="{{ date('Y') }}">{{ date('Y') }}</option>
                             <option value="">-</option>
                             @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ isset($fromYear) && $fromYear == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                     </div>
@@ -56,20 +56,20 @@
                         <select name="to_day" id="to_day" class="rounded text-xs py-1">
                             <option value="">-</option>
                             @for ($i = 1; $i < 32; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ isset($toDay) && $toDay == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                         <select name="to_month" id="to_month" class="rounded text-xs py-1 ml-1">
                             <option value="">-</option>
                             @for ($i = 1; $i < 13; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ isset($toMonth) && $toMonth == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                         <select name="to_year" id="to_year" class="rounded text-xs py-1 ml-1">
                             <option value="{{ date('Y') }}">{{ date('Y') }}</option>
                             <option value="">-</option>
                             @for ($i = ((int)date("Y") - 30); $i < ((int)date("Y") + 30); $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                            <option value="{{ $i }}" {{ isset($toYear) && $toYear == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>
                         <button type="submit" class="ml-2 flex items-center bg-orange-500 text-white py-1 px-3 rounded hover:bg-orange-700">

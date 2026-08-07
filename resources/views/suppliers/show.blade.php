@@ -8,10 +8,35 @@
 <main class="mb-9">
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
-    <div class="flex justify-center text-xs">
-        <div class="lg:w-1/2 md:w-3/4 border rounded p-1 bg-white shadow drop-shadow-sm">
+    <div class="grid md:flex justify-center text-xs gap-2">
+        <div class="w-full lg:w-1/3 md:w-1/2 border rounded p-2 bg-white shadow drop-shadow-sm">
+            {{-- KATEGORI --}}
+            <div class="flex gap-2 items-center">
+                <span class="font-semibold">Kategori:</span>
+                <div class="border rounded p-1 bg-white shadow drop-shadow font-bold text-slate-600">{{ $supplier->kategori_nama ?? 'Belum ada keterangan kategori' }}</div>
+                <button type="button" class="border rounded border-slate-300 text-slate-500" id="btn_edit_kategori" onclick="toggle_light(this.id, 'form_edit_kategori', [], ['bg-slate-200'], 'block')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                </button>
+            </div>
+            <form id="form_edit_kategori" action="{{ route('suppliers.update_kategori', $supplier->id) }}" method="post" class="hidden" onsubmit="return confirm('Ini akan turut mengupdate semua kategori produk dari supplier ini!')">
+                @csrf
+                @method('PATCH')
+                <div class="flex gap-2 items-center mt-2">
+                    {{-- <input type="text" id="kategori_nama" name="kategori_nama" value="{{ $supplier->kategori_nama ?? 'BAYAR HUTANG BAHAN BAKU' }}" class="border rounded p-1">
+                    <input type="hidden" id="kategori_id" name="kategori_id" value="{{ $supplier->kategori_id ?? '' }}"> --}}
+                    <select name="kategori_nama" id="kategori_nama" class="border rounded p-1">
+                        @foreach ($label_kategori as $kategori)
+                        <option value="{{ $kategori }}" @if($supplier->kategori_nama === $kategori) selected @endif>{{ $kategori }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="rounded bg-sky-500 text-white font-bold p-2">Submit</button>
+                </div>
+            </form>
+            
             {{-- ALAMAT --}}
-            <div class="flex items-center">
+            <div class="flex items-center mt-3">
                 <div class="flex items-center bg-white rounded shadow drop-shadow p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -19,13 +44,14 @@
                     </svg>
                     <h5 class="font-semibold ml-2">Daftar Alamat:</h5>
                 </div>
-                <button type="submit" class="border rounded border-emerald-300 text-emerald-500 ml-1" id="btn_alamat_add" onclick="toggle_light(this.id, 'form_alamat_add', [], ['bg-emerald-200'], 'block')">
+                <button type="button" class="border rounded border-emerald-300 text-emerald-500 ml-1" id="btn_alamat_add" onclick="toggle_light(this.id, 'form_alamat_add', [], ['bg-emerald-200'], 'block')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                 </button>
             </div>
             <div class="flex mt-1">
+                {{-- ALAMAT TERSEDIA --}}
                 @foreach ($alamats as $key_alamat => $alamat)
                 @if ($supplier_alamats[$key_alamat]->tipe === 'UTAMA')
                 <div class="p-1 border-2 rounded relative border-emerald-300 @if($key_alamat !== 0) ml-3 @endif">
@@ -210,8 +236,33 @@
             </div>
             {{-- END - KONTAK TERSEDIA --}}
             {{-- END -KONTAK --}}
-
-
+        </div>
+        {{-- DAFTAR PRODUK --}}
+        <div class="border rounded p-2 bg-white shadow drop-shadow-sm w-full md:w-fit">
+            <div class="flex items-center gap-1 bg-white rounded shadow drop-shadow p-1 w-fit">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25-2.25M12 13.875V3.375m9 4.125h-18" />
+                </svg>
+                <h5 class="font-semibold">Daftar Produk:</h5>
+            </div>
+            <table class="border rounded mt-2">
+                <thead>
+                    <tr class="bg-slate-200">
+                        <th class="border p-1">Nama</th>
+                        <th class="border p-1">Kategori</th>
+                        <th class="border p-1">Satuan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($supplier->barangs as $barang)
+                    <tr>
+                        <td class="border p-1">{{ $barang->nama }}</td>
+                        <td class="border p-1">{{ $barang->kategori_nama }}</td>
+                        <td class="border p-1">{{ $barang->satuan }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
     <form action="{{ route('suppliers.delete', $supplier->id) }}" method="POST" class="flex justify-center mt-2 text-xs" onsubmit="return confirm('Yakin hapus supplier?')">
@@ -226,7 +277,15 @@
 </main>
 
 <script>
-
+    // const label_kategori = {!! json_encode($label_kategori, JSON_HEX_TAG) !!}
+    // $('#kategori_nama').autocomplete({
+    //     source: label_kategori,
+    //     select: function (event, ui) {
+    //         console.log(ui.item);
+    //         document.getElementById('kategori_id').value = ui.item.id;
+    //         document.getElementById('kategori_nama').value = ui.item.label;
+    //     }
+    // });
 </script>
 
 @endsection

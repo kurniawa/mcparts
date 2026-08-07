@@ -217,7 +217,7 @@
                         @endfor
                         @endfor --}}
                         @foreach ($suppliers as $i => $supplier)
-                            <tr><td><div class="font-bold text-slate-500">{{ $supplier->nama }}</div></td></tr>
+                            <tr><td><a href="{{ route('suppliers.show', $supplier->id) }}" class="font-bold text-slate-500">{{ $supplier->nama }}</a></td></tr>
                             @foreach ($supplier->barangs as $j => $barang)
                             <tr class="border-b">
                                 <td>

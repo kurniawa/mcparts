@@ -9,6 +9,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NeracaController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
@@ -209,6 +210,7 @@ Route::controller(SupplierController::class)->group(function(){
     Route::post('/suppliers/{supplier_kontak}/kontak_edit','kontak_edit')->name('suppliers.kontak_edit')->middleware('auth');
     Route::post('/suppliers/{supplier_kontak}/kontak_delete','kontak_delete')->name('suppliers.kontak_delete')->middleware('auth');
     Route::post('/suppliers/{supplier}/{supplier_kontak}/kontak_utama','kontak_utama')->name('suppliers.kontak_utama')->middleware('auth');
+    Route::patch('/suppliers/{supplier}/update_kategori','update_kategori')->name('suppliers.update_kategori')->middleware('auth');
 });
 
 Route::controller(AccountingController::class)->group(function(){
@@ -236,6 +238,10 @@ Route::controller(AccountingController2::class)->group(function(){
     Route::post('/accounting/{nota}/{accounting}/link_nota_accounting','link_nota_accounting')->name('accounting.link_nota_accounting')->middleware('auth');
     Route::post('/accounting/{accounting}/change_date','change_date')->name('accounting.change_date')->middleware('auth');
     Route::post('/accounting/{accounting}/change_sum','change_sum')->name('accounting.change_sum')->middleware('auth');
+});
+
+Route::controller(NeracaController::class)->group(function(){
+    Route::get('/neraca/index','index')->name('neraca.index')->middleware('auth');
 });
 
 Route::controller(AccountingInvoiceController::class)->group(function(){

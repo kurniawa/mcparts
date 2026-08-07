@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kategori_id')->after('id')->nullable()->constrained()->onDelete('set null');
+            $table->string('kategori_nama', 100)->after('kategori_id')->nullable();
             $table->string("bentuk", 10)->nullable(); // PT, CV, Yayasan, Sekolah, dll.
             $table->string("nama", 100);
             $table->string("nama_pemilik", 100)->nullable();

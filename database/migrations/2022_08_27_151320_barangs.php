@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('barangs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kategori_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('kategori_nama', 100)->nullable();
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
             $table->string('supplier_nama');
             $table->string('nama');

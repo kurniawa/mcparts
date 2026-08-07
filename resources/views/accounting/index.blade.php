@@ -138,6 +138,11 @@
                             <button class="bg-violet-400 text-white font-semibold p-1 rounded">Laporan Laba-Rugi >></button>
                         </a>
                     </div>
+                    <div class="mt-2">
+                        <a href="{{ route('neraca.index') }}" target="">
+                            <button class="bg-violet-400 text-white font-semibold p-1 rounded">Estimasi Neraca >></button>
+                        </a>
+                    </div>
                 </div>
 
             </div>
