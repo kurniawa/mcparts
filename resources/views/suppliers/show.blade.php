@@ -250,15 +250,28 @@
                     <tr class="bg-slate-200">
                         <th class="border p-1">Nama</th>
                         <th class="border p-1">Kategori</th>
-                        <th class="border p-1">Satuan</th>
+                        <th class="border p-1">Harga</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($supplier->barangs as $barang)
+                    @foreach ($supplier->barangs as $key_barang => $barang)
                     <tr>
                         <td class="border p-1">{{ $barang->nama }}</td>
-                        <td class="border p-1">{{ $barang->kategori_nama }}</td>
-                        <td class="border p-1">{{ $barang->satuan }}</td>
+                        <td class="border p-1">
+                            <button type="button" id="btn-edit_kategori_barang_{{ $key_barang }}" class="btn-toggle-light w-full">{{ $barang->kategori_nama ?? '-' }}</button>
+                            <form action="{{ route('barangs.update_kategori', [$barang->id]) }}" method="POST" class="hidden" id="form-edit_kategori_barang_{{ $key_barang }}">
+                                @csrf
+                                @method('PATCH')
+                                <select name="kategori_nama" class="border rounded p-1 text-xs max-w-44">
+                                    <option value="">-</option>
+                                    @foreach ($label_kategori as $kategori)
+                                    <option value="{{ $kategori }}" @if($kategori === $barang->kategori_nama) selected @endif>{{ $kategori }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="bg-sky-500 text-white rounded p-1">Konfirmasi</button>
+                            </form>
+                        </td>
+                        <td class="border p-1">{{ number_format($barang->harga_main, 0, ',', '.') }}/{{ $barang->satuan_main }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -277,15 +290,18 @@
 </main>
 
 <script>
-    // const label_kategori = {!! json_encode($label_kategori, JSON_HEX_TAG) !!}
-    // $('#kategori_nama').autocomplete({
-    //     source: label_kategori,
-    //     select: function (event, ui) {
-    //         console.log(ui.item);
-    //         document.getElementById('kategori_id').value = ui.item.id;
-    //         document.getElementById('kategori_nama').value = ui.item.label;
-    //     }
-    // });
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButtons = document.querySelectorAll('.btn-toggle-light');
+        toggleButtons.forEach(button => {
+            button.classList.add('border', 'rounded', 'border-sky-300', 'text-sky-500', 'p-1');
+            const formId = button.id.replace('btn-', 'form-');
+            const form = document.getElementById(formId);
+
+            button.addEventListener('click', function() {
+                toggle_light(button.id, formId, [], ['bg-sky-200'], 'block');
+            });
+        });
+    });
 </script>
 
 @endsection

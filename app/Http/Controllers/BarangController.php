@@ -248,7 +248,7 @@ class BarangController extends Controller
             dd($message);
 
             return back()->withErrors([
-                'error Gagal menyimpan transaksi: ' . $th->getMessage(),
+                'Error Gagal menyimpan transaksi: ' . $th->getMessage(),
             ]);
         }
 
@@ -258,5 +258,39 @@ class BarangController extends Controller
         
         return back()->with($feedback);
 
+    }
+
+    function update_kategori(Barang $barang, Request $request) {
+        $validated = $request->validate([
+            'kategori_nama' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $barang->update([
+                'kategori_nama' => $validated['kategori_nama'],
+            ]);
+            $new_kategoris = Barang::where('supplier_id', $barang->supplier_id)
+                ->whereNotNull('kategori_nama')
+                ->groupBy('kategori_nama')
+                ->pluck('kategori_nama')
+                ->toArray();
+                
+            sort($new_kategoris);
+            // update $supplier->kategori_nama menjadi kombinasi nama-nama kategori yang ada di barang-barang, dipisahkan oleh "---" dan disorting sesuai abjad
+            $supplier = $barang->supplier;
+            $supplier->update([
+                'kategori_nama' => implode('---', $new_kategoris),
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withErrors([
+                'Error Gagal mengupdate kategori barang: ' . $th->getMessage(),
+            ]);
+        }
+
+        return back()->with('success_', 'Kategori barang berhasil diupdate.');
     }
 }

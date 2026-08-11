@@ -195,6 +195,7 @@ Route::controller(BarangController::class)->group(function(){
     Route::post('/barangs/{barang}/update','update')->name('barangs.update');
     Route::post('/barangs','store')->name('barangs.store');
     Route::post('/barangs/{barang}/delete','delete')->name('barangs.delete');
+    Route::patch('/barangs/{barang}/update_kategori','update_kategori')->name('barangs.update_kategori');
 });
 
 Route::controller(SupplierController::class)->group(function(){
