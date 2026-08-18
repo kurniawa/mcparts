@@ -6,6 +6,7 @@ use App\Http\Controllers\AccountingInvoiceController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BilyetGiroController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HomeController;
@@ -257,6 +258,10 @@ Route::controller(EmployeeController::class)->middleware('auth')->group(function
 });
 
 Route::resource('employees', EmployeeController::class)->middleware('auth');
+
+Route::controller(BilyetGiroController::class)->middleware('auth')->group(function () {
+});
+Route::resource('bilyet-giros', BilyetGiroController::class)->middleware('auth');
 
 Route::controller(ArtisanController::class)->group(function(){
     Route::get('/artisan-command','index')->name('artisan.index')->middleware('auth');
