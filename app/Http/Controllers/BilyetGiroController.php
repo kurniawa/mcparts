@@ -18,7 +18,7 @@ class BilyetGiroController extends Controller
         $bilyetGiros = BilyetGiro::orderBy('created_at', 'desc')->get();
         // $label_issuer = BilyetGiro::select('issuer_name', 'issuer_account_number', 'issuer_bank', 'beneficiary_name', 'beneficiary_account_number', 'beneficiary_bank')->groupBy('issuer_account_number')->get();
         // dd($label_issuer);
-        $label_customer = Pelanggan::select('id as value', 'nama as label')->get();
+        $label_customer = Pelanggan::select('id', 'nama as value', 'nama as label')->get();
         $label_issuer = DB::table('bilyet_giros')
             ->select(
                 DB::raw('MAX(customer_name) as customer_name'),
@@ -72,7 +72,7 @@ class BilyetGiroController extends Controller
     public function store(Request $request)
     {
         $post = $request->post();
-        dd($post);
+        // dd($post);
         // VALIDASI
         // VALIDASI DATA EMPLOYEE
         $validated = $request->validate([
@@ -89,10 +89,6 @@ class BilyetGiroController extends Controller
         $success_ = '';
         try {
             $bilyetGiro = BilyetGiro::create($validated);
-
-            $bilyetGiro->update([
-                'bilyet_giro_code' => 'BG' . str_pad($bilyetGiro->id, 6, '0', STR_PAD_LEFT),
-            ]);
 
             $success_ .= '-bilyet giro created-';
 
