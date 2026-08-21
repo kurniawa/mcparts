@@ -8,8 +8,25 @@
 <main class="text-xs">
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
+    <div class="flex justify-center text-base">
+        @foreach ($spk_menus as $key_spk_menu => $spk_menu)
+        @if ($route_now === $spk_menu['route'])
+        @if ($key_spk_menu !== 0)
+        <div class="border rounded-t-lg bg-white px-1 border-b-4 font-bold ml-2">{{ $spk_menu['name'] }}</div>
+        @else
+        <div class="border rounded-t-lg bg-white px-1 border-b-4 font-bold">{{ $spk_menu['name'] }}</div>
+        @endif
+        @else
+        @if ($key_spk_menu !== 0)
+        <a href="{{ route($spk_menu['route']) }}" class="border rounded-t-lg bg-white px-1 hover:bg-slate-100 ml-2">{{ $spk_menu['name'] }}</a>
+        @else
+        <a href="{{ route($spk_menu['route']) }}" class="border rounded-t-lg bg-white px-1 hover:bg-slate-100">{{ $spk_menu['name'] }}</a>
+        @endif
+        @endif
+        @endforeach
+    </div>
     {{-- Form New Bilyet Giro --}}
-    <div class="flex justify-center">
+    <div class="flex justify-center mt-3">
         <div class="bg-white p-2 rounded shadow drop-shadow">
             <h1 class="text-lg font-bold mb-2">Tambah Bilyet Giro</h1>
             <form action="{{ route('bilyet-giros.store') }}" method="POST" class="flex flex-col gap-2">
@@ -33,7 +50,7 @@
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="amount">Nominal</label>
-                        <input type="number" name="amount" id="amount" value="{{ old('amount') }}" class="text-xs border border-slate-300 rounded p-1">
+                        <input type="text" name="amount" id="amount" value="{{ old('amount') }}" class="text-xs border border-slate-300 rounded p-1">
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="issuer_name">Dari</label>
@@ -155,7 +172,7 @@
     $('#issuer_name').autocomplete({
         source: function(request, response) {
             // Ambil nilai input lainnya
-            const issuerBank   = $('#issuer_name').val().toLowerCase().trim();
+            const issuerBank   = $('#issuer_bank').val().toLowerCase().trim();
             const customerName = $('#customer_name').val().toLowerCase().trim();
 
             let issuerOptions = [];
@@ -242,6 +259,7 @@
             $('#customer_id').val(ui.item.id);
         }
     });
+
 </script>
 
 @endsection

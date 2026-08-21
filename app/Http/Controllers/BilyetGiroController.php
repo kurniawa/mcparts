@@ -38,6 +38,7 @@ class BilyetGiroController extends Controller
             'route_now' => 'bilyet-giros.index',
             'parent_route' => 'bilyet-giros.index',
             'profile_menus' => Menu::get_profile_menus(),
+            'spk_menus' => Menu::get_spk_menus(),
             'bilyetGiros' => $bilyetGiros,
             'label_issuer' => $label_issuer,
             'label_customer' => $label_customer,
