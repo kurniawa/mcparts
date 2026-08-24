@@ -75,7 +75,6 @@ class BilyetGiroController extends Controller
         $post = $request->post();
         // dd($post);
         // VALIDASI
-        // VALIDASI DATA EMPLOYEE
         $validated = $request->validate([
             'received_date' => 'required|date',
             'issuer_bank' => 'required|string|max:100',
@@ -84,6 +83,9 @@ class BilyetGiroController extends Controller
             'amount' => 'required|numeric',
             'issuer_name' => 'required|string|max:255',
             'issuer_account_number' => 'required|string|max:50',
+            'beneficiary_name' => 'required|string|max:255',
+            'beneficiary_bank' => 'required|string|max:100',
+            'beneficiary_account_number' => 'required|string|max:50',
         ]);
         
         DB::beginTransaction();
@@ -96,6 +98,8 @@ class BilyetGiroController extends Controller
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
+            dump($post);
+            dd($th);
         }
         
         $feedback = [

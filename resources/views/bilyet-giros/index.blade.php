@@ -29,12 +29,12 @@
     <div class="flex justify-center mt-3">
         <div class="bg-white p-2 rounded shadow drop-shadow">
             <h1 class="text-lg font-bold mb-2">Tambah Bilyet Giro</h1>
-            <form action="{{ route('bilyet-giros.store') }}" method="POST" class="flex flex-col gap-2">
+            <form action="{{ route('bilyet-giros.store') }}" method="POST" class="flex flex-col gap-2 parsed-indonesian-number">
                 @csrf
                 <div class="grid grid-cols-2 md:flex gap-2">
                     <div class="flex flex-col gap-1">
-                        <label for="receive_date">Tgl. Terima</label>
-                        <input type="date" name="receive_date" id="receive_date" value="{{ old('receive_date') }}" class="text-xs border border-slate-300 rounded p-1">
+                        <label for="received_date">Tgl. Terima</label>
+                        <input type="date" name="received_date" id="received_date" value="{{ old('received_date') }}" class="text-xs border border-slate-300 rounded p-1">
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="issuer_bank">Nama Bank</label>
@@ -50,7 +50,7 @@
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="amount">Nominal</label>
-                        <input type="text" name="amount" id="amount" value="{{ old('amount') }}" class="text-xs border border-slate-300 rounded p-1">
+                        <input type="text" name="amount" id="amount" value="{{ old('amount') }}" class="text-xs border border-slate-300 rounded p-1 format-indonesian-number">
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="issuer_name">Dari</label>
@@ -64,6 +64,20 @@
                         <label for="customer_name">Connect to Customer</label>
                         <input type="text" name="customer_name" id="customer_name" value="{{ old('customer_name') }}" class="text-xs border border-slate-300 rounded p-1">
                         <input type="hidden" name="customer_id" id="customer_id">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:flex gap-2 border border-sky-300 rounded p-1 md:p-2 max-w-fit">
+                    <div class="flex flex-col gap-1">
+                        <label for="beneficiary_name">Kepada</label>
+                        <input type="text" name="beneficiary_name" id="beneficiary_name" value="{{ old('beneficiary_name') }}" class="text-xs border border-slate-300 rounded p-1">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label for="beneficiary_bank">Bank Tujuan</label>
+                        <input type="text" name="beneficiary_bank" id="beneficiary_bank" value="{{ old('beneficiary_bank') }}" class="text-xs border border-slate-300 rounded p-1">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label for="beneficiary_account_number">No. Rek Tujuan</label>
+                        <input type="text" name="beneficiary_account_number" id="beneficiary_account_number" value="{{ old('beneficiary_account_number') }}" class="text-xs border border-slate-300 rounded p-1">
                     </div>
                 </div>
                 <div class="flex justify-center md:justify-end">
@@ -246,6 +260,143 @@
                     .map(item => ({
                         label: item.issuer_account_number,
                         value: item.issuer_account_number
+                    }));
+            }
+
+            response(accountOptions);
+        }
+    });
+
+    $('#beneficiary_bank').autocomplete({
+        source: function(request, response) {
+            // Ambil nilai input lainnya
+            const beneficiaryName   = $('#beneficiary_name').val().toLowerCase().trim();
+            const customerName = $('#customer_name').val().toLowerCase().trim();
+            const beneficiaryAccountNumber = $('#beneficiary_account_number').val().toLowerCase().trim();
+            // const customerId   = $('#customer_id').val().trim();
+
+            let bankOptions = [];
+            const searchTerm = request.term.toLowerCase().trim();
+            if (!beneficiaryName && !customerName) {
+                // bankOptions = label_issuer.map(function(item) {
+                //     return {
+                //         label: item.bank,
+                //         value: item.bank
+                //     };
+                // });
+                bankOptions = [...new Set(label_issuer.map(item => item.beneficiary_bank).filter(bank => bank.toLowerCase().includes(searchTerm))
+                )].map(bank => ({
+                    label: bank,
+                    value: bank
+                }));
+
+                // console.log('searchTerm:', searchTerm);
+                // console.log('bankOptions:', bankOptions);
+            } else if (beneficiaryName && !customerName) {
+                bankOptions = label_issuer
+                    .filter(item => item.beneficiary_name.toLowerCase().includes(beneficiaryName))
+                    .map(item => ({
+                        label: item.beneficiary_bank,
+                        value: item.beneficiary_bank
+                    }));
+            } else if (!beneficiaryName && customerName) {
+                bankOptions = label_issuer
+                    .filter(item => item.customer_name && item.customer_name.toLowerCase().includes(customerName))
+                    .map(item => ({
+                        label: item.beneficiary_bank,
+                        value: item.beneficiary_bank
+                    }));
+            } else if (beneficiaryName && customerName) {
+                bankOptions = label_issuer
+                    .filter(item => item.beneficiary_name.toLowerCase().includes(beneficiaryName))
+                    .filter(item => item.customer_name && item.customer_name.toLowerCase().includes(customerName))
+                    .map(item => ({
+                        label: item.beneficiary_bank,
+                        value: item.beneficiary_bank
+                    }));
+            }
+
+            response(bankOptions);
+        }
+    });
+
+    $('#beneficiary_name').autocomplete({
+        source: function(request, response) {
+            // Ambil nilai input lainnya
+            const beneficiaryBank   = $('#beneficiary_bank').val().toLowerCase().trim();
+            const customerName = $('#customer_name').val().toLowerCase().trim();
+
+            let beneficiaryOptions = [];
+            const searchTerm = request.term.toLowerCase().trim();
+            if (!beneficiaryBank && !customerName) {
+                beneficiaryOptions = [...new Set(label_issuer.map(item => item.beneficiary_name).filter(beneficiaryName => beneficiaryName.toLowerCase().includes(searchTerm))
+                )].map(beneficiaryName => ({
+                    label: beneficiaryName,
+                    value: beneficiaryName
+                }));
+            } else if (beneficiaryBank && !customerName) {
+                beneficiaryOptions = label_issuer
+                    .filter(item => item.beneficiary_bank.toLowerCase().includes(beneficiaryBank))
+                    .map(item => ({
+                        label: item.beneficiary_name,
+                        value: item.beneficiary_name
+                    }));
+            } else if (!beneficiaryBank && customerName) {
+                beneficiaryOptions = label_issuer
+                    .filter(item => item.customer_name && item.customer_name.toLowerCase().includes(customerName))
+                    .map(item => ({
+                        label: item.beneficiary_name,
+                        value: item.beneficiary_name
+                    }));
+            } else if (beneficiaryBank && customerName) {
+                beneficiaryOptions = label_issuer
+                    .filter(item => item.beneficiary_name.toLowerCase().includes(beneficiaryBank))
+                    .filter(item => item.customer_name && item.customer_name.toLowerCase().includes(customerName))
+                    .map(item => ({
+                        label: item.beneficiary_name,
+                        value: item.beneficiary_name
+                    }));
+            }
+
+            response(beneficiaryOptions);
+        }
+    });
+
+    $('#beneficiary_account_number').autocomplete({
+        source: function(request, response) {
+            // Ambil nilai input lainnya
+            const beneficiaryBank   = $('#beneficiary_bank').val().toLowerCase().trim();
+            const customerName = $('#customer_name').val().toLowerCase().trim();
+
+            let accountOptions = [];
+            const searchTerm = request.term.toLowerCase().trim();
+            if (!beneficiaryBank && !customerName) {
+                accountOptions = [...new Set(label_issuer.map(item => item.beneficiary_account_number).filter(accountNumber => accountNumber.toLowerCase().includes(searchTerm))
+                )].map(accountNumber => ({
+                    label: accountNumber,
+                    value: accountNumber
+                }));
+            } else if (beneficiaryBank && !customerName) {
+                accountOptions = label_issuer
+                    .filter(item => item.beneficiary_bank.toLowerCase().includes(beneficiaryBank))
+                    .map(item => ({
+                        label: item.beneficiary_account_number,
+                        value: item.beneficiary_account_number
+                    }));
+            } else if (!beneficiaryBank && customerName) {
+                accountOptions = label_issuer
+                    .filter(item => item.customer_name && item.customer_name.toLowerCase().includes(customerName))
+                    .map(item => ({
+                        label: item.beneficiary_account_number,
+                        value: item.beneficiary_account_number
+                    }));
+            } else if (beneficiaryBank && customerName) {
+                accountOptions = label_issuer
+                    .filter(item => item.beneficiary_bank.toLowerCase().includes(beneficiaryBank))
+                    .filter(item => item.customer_name && item.customer_name.toLowerCase().includes(customerName))
+                    .map(item => ({
+                        label: item.beneficiary_account_number,
+                        value: item.beneficiary_account_number
                     }));
             }
 
