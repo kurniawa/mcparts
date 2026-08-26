@@ -116,7 +116,35 @@
                             <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_name }}</td>
                             <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_account_number }}</td>
                             <td class="border border-slate-300 px-4 py-2">{{ $bg->clearing_date ? \Carbon\Carbon::parse($bg->clearing_date)->format('d/m/Y') : '' }}</td>
+                            <td>
+                                <button type="button" class="border rounded border-sky-400 text-sky-400" onclick="toggleForm(this, {{ $key_bg }})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                    </svg>
+                                </button>
+                            </td>
                         </tr>
+                        {{-- Form for editing --}}
+                        <form action="{{ route('bilyet-giros.update', $bg->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <tr class="hidden update-form-{{ $key_bg }} bg-orange-200">
+                                <td class="pt-2"></td>
+                                <td class="pt-2"><input type="date" name="received_date" id="received_date-{{ $key_bg }}" value="{{ old('received_date', \Carbon\Carbon::parse($bg->received_date)->format('Y-m-d')) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                                <td class="pt-2"><input type="text" name="issuer_bank" id="issuer_bank-{{ $key_bg }}" value="{{ old('issuer_bank', $bg->issuer_bank) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                                <td class="pt-2"><input type="text" name="bilyet_number" id="bilyet_number-{{ $key_bg }}" value="{{ old('bilyet_number', $bg->bilyet_number) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                                <td class="pt-2"><input type="date" name="due_date" id="due_date-{{ $key_bg }}" value="{{ old('due_date', \Carbon\Carbon::parse($bg->due_date)->format('Y-m-d')) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                                <td class="pt-2"><input type="text" name="amount" id="amount-{{ $key_bg }}" value="{{ old('amount', number_format($bg->amount, 0, ',', '.')) }}" class="text-xs border border-slate-300 rounded p-1 format-indonesian-number"></td>
+                                <td class="pt-2"><input type="text" name="issuer_name" id="issuer_name-{{ $key_bg }}" value="{{ old('issuer_name', $bg->issuer_name) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                                <td class="pt-2"><input type="text" name="issuer_account_number" id="issuer_account_number-{{ $key_bg }}" value="{{ old('issuer_account_number', $bg->issuer_account_number) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                                <td class="pt-2"><input type="date" name="clearing_date" id="clearing_date-{{ $key_bg }}" value="{{ old('clearing_date', \Carbon\Carbon::parse($bg->clearing_date)->format('Y-m-d')) }}" class="text-xs border border-slate-300 rounded p-1"></td>
+                            </tr>
+                            <tr class="hidden update-form-{{ $key_bg }} bg-orange-200">
+                                <td colspan="9" class="text-center py-2">
+                                    <button type="submit" class="bg-emerald-400 text-white font-bold px-3 py-1 rounded hover:bg-green-400">Update</button>
+                                </td>
+                            </tr>
+                        </form>
                     @endforeach
                 </tbody>
             </table>
@@ -411,6 +439,13 @@
         }
     });
 
+    function toggleForm(button, key) {
+        // add some classes to button, if the classes not exist, remove the classes if the classes exist, with delay 300ms
+        setTimeout(function() {
+            $(button).toggleClass('bg-sky-200');
+        }, 300);
+        $('.update-form-' + key).toggle(300);
+    }
 </script>
 
 @endsection
