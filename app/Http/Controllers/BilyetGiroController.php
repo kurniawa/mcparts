@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BilyetGiroRequest;
 use App\Models\BilyetGiro;
 use App\Models\Menu;
 use App\Models\Pelanggan;
@@ -70,23 +71,12 @@ class BilyetGiroController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(BilyetGiroRequest $request)
     {
         $post = $request->post();
         // dd($post);
         // VALIDASI
-        $validated = $request->validate([
-            'received_date' => 'required|date',
-            'issuer_bank' => 'required|string|max:100',
-            'bilyet_number' => 'required|string|max:20',
-            'due_date' => 'required|date',
-            'amount' => 'required|numeric',
-            'issuer_name' => 'required|string|max:255',
-            'issuer_account_number' => 'required|string|max:50',
-            'beneficiary_name' => 'required|string|max:255',
-            'beneficiary_bank' => 'required|string|max:100',
-            'beneficiary_account_number' => 'required|string|max:50',
-        ]);
+        $validated = $request->validated();
         
         DB::beginTransaction();
         $success_ = '';
@@ -128,10 +118,30 @@ class BilyetGiroController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BilyetGiro $bilyetGiro)
+    public function update(BilyetGiroRequest $request, BilyetGiro $bilyetGiro)
     {
-        dump($bilyetGiro);
-        dd($request->post());
+        // dump($bilyetGiro);
+        // dd($request->post());
+
+        $validated = $request->validated();
+        // dd($validated);
+
+        DB::beginTransaction();
+        $success_ = '';
+        try {
+            $bilyetGiro->update($validated);
+            $success_ .= '-bilyet giro updated-';
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+        }
+        
+        $feedback = [
+            'success_' => $success_
+        ];
+
+        return back()->with($feedback);
     }
 
     /**

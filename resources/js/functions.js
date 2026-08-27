@@ -1,10 +1,6 @@
 $('.format-indonesian-number').on('input', function(event) {
     handleFormattedInput(event, 2);
 });
-
-$('.parsed-indonesian-number').on('submit', function(event) {
-    $('.format-indonesian-number').val(parseIndonesiaNumber($('.format-indonesian-number').val()));
-});
 // =========================
 // FORMATTER
 // =========================
