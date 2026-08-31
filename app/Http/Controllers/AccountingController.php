@@ -163,6 +163,7 @@ class AccountingController extends Controller
         $related_users = User::where('id', '!=', $user->id)->get();
 
         $labelDeskripsi = TransactionName::select('id', 'desc as label', 'desc as value', 'kategori_level_one', 'kategori_type', 'pelanggan_id', 'supplier_id')->where('user_instance_id', $userInstance->id)->orderBy('desc')->get();
+        // dd($labelDeskripsi->where('value', 'KLIRING BG'));
         // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
         // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();

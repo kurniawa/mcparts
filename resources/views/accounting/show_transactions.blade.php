@@ -12,18 +12,18 @@
     </div>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 relative">
         <h1 class="text-xl font-bold">Data Transaksi - <span class="text-slate-500">{{ $user->username }}</span></h1>
-        <div class="flex">
+        <div class="grid gap-1 md:flex">
             <div id="filter-content">
-                <div class="rounded p-2 bg-white shadow drop-shadow">
-                    <form action="" method="GET" class="text-xs">
-                        <div class="flex items-end">
+                <div class="rounded p-2 bg-white shadow drop-shadow overflow-x-auto w-full">
+                    <form action="" method="GET" class="text-xs w-max min-w-full">
+                        <div class="grid md:flex md:items-end">
                             <div>
                                 <label>Desc:</label>
-                                <div class="flex mt-1">
+                                <div class="mt-1">
                                     <input type="text" class="border rounded text-xs p-1" name="desc" placeholder="Deskripsi/Keterangan" id="filter-desc">
                                 </div>
                             </div>
-                            <div class="flex items-center ml-2 gap-2">
+                            <div class="grid grid-cols-2 gap-1 md:flex items-center md:ml-2 md:gap-2">
                                 <div><input type="radio" name="timerange" value="triwulan" id="triwulan" onclick="set_time_range('triwulan')"><label for="triwulan" class="ml-1">triwulan</label></div>
                                 <div><input type="radio" name="timerange" value="triwulan_lalu" id="triwulan_lalu" onclick="set_time_range('triwulan_lalu')"><label for="triwulan_lalu" class="ml-1">triwulan lalu</label></div>
                                 <div><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>

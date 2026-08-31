@@ -231,8 +231,8 @@ Route::controller(AccountingController::class)->group(function(){
     Route::post('/accounting/store_transactions_relations','store_transactions_relations')->name('accounting.store_transactions_relations')->middleware('auth');
     Route::post('/accounting/{transaction_name}/delete_transaction_relation','delete_transaction_relation')->name('accounting.delete_transaction_relation')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/up_down_transaction','up_down_transaction')->name('accounting.up_down_transaction')->middleware('auth');
-});
-
+    });
+    
 Route::controller(AccountingController2::class)->group(function(){
     Route::get('/accounting/laba-rugi','laba_rugi')->name('accounting.laba_rugi')->middleware('auth');
     Route::get('/accounting/{transaction_name}/get-related-not-yet-paid-off-invoices','getRelatedNotYetPaidOffInvoices')->name('accounting.get_related_not_yet_paid_off_invoices')->middleware('auth');
@@ -240,6 +240,8 @@ Route::controller(AccountingController2::class)->group(function(){
     Route::post('/accounting/{nota}/{accounting}/link_nota_accounting','link_nota_accounting')->name('accounting.link_nota_accounting')->middleware('auth');
     Route::post('/accounting/{accounting}/change_date','change_date')->name('accounting.change_date')->middleware('auth');
     Route::post('/accounting/{accounting}/change_sum','change_sum')->name('accounting.change_sum')->middleware('auth');
+    Route::get('/accounting/{user_instance}/kliring_bg','kliring_bg')->name('accounting.kliring_bg')->middleware('auth');
+    Route::post('/accounting/{user_instance}/store_kliring_bg','store_kliring_bg')->name('accounting.store_kliring_bg')->middleware('auth');
 });
 
 Route::controller(NeracaController::class)->group(function(){

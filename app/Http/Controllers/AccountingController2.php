@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Accounting;
 use App\Models\AccountingInvoice;
+use App\Models\BilyetGiro;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\Pembelian;
@@ -386,5 +387,25 @@ class AccountingController2 extends Controller
             DB::rollBack();
             throw $e;
         }
+    }
+
+    function kliring_bg(UserInstance $user_instance) {
+        $bilyetGiros = BilyetGiro::orderBy('created_at', 'desc')->get();
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'accounting.kliring_bg',
+            'parent_route' => 'accounting.index',
+            'profile_menus' => Menu::get_profile_menus(),
+            'accounting_menus' => Menu::get_accounting_menus(),
+            'user_instance' => $user_instance,
+            'bilyetGiros' => $bilyetGiros,
+        ];
+        // dd($data);
+        return view('accounting.kliring_bg', $data);
+    }
+
+    function store_kliring_bg(UserInstance $user_instance, Request $request) {
+        dump($user_instance);
+        dd($request->post());
     }
 }

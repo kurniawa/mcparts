@@ -1,4 +1,4 @@
-<div>
+<div class="text-xs">
     @if ($errors->any())
         <div class="alert alert-danger text-xs">
             @foreach ($errors->all() as $message)
@@ -14,52 +14,57 @@
             </div>
             {{-- END - LOADING ANIMATION --}}
             <div id="loading_to_hide">
-                <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
-                <form id="form-add-transactions" action="{{ route('accounting.store_transactions', $userInstance->id) }}" method="POST" class="mt-1 inline-block min-w-max">
-                    @csrf
-                    <table class="text-xs min-w-max" id="table_add_transactions">
-                        <tr class="text-slate-600">
-                            <th>tanggal</th><th>kode</th><th>deskripsi/keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th>
-                            {{-- <th>saldo</th> --}}
-                        </tr>
-                        @for ($i = 0; $i < 15; $i++)
-                        <tr id="tr_add_transaction-{{ $i }}">
-                            <td>
-                                {{-- <input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"> --}}
-                                <div class="flex items-center">
-                                    <input type="text" name="day[]" id="day-{{ $i }}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
-                                    <span>-</span>
-                                    <input type="text" name="month[]" id="month-{{ $i }}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
-                                    <span>-</span>
-                                    <input type="text" name="year[]" id="year-{{ $i }}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
-                                </div>
-                            </td>
-                            <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ old('kode.' . $i) ? old('kode.' . $i) : $userInstance->kode }}"></td>
-                            <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
-                            <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
-                            <td>
-                                <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-real')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
-                                <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-real" value="{{ old('keluar.' . $i) }}">
-                            </td>
-                            <td>
-                                <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
-                                <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-real" value="{{ old('masuk.' . $i) }}">
-                                <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
-                            </td>
-                            <td>
-                                <input type="hidden" name="trId[]" value="{{ $i }}">
-                                <input type="hidden" name="kategori_level_one[]" id="kategori_level_one-{{ $i }}" value="">
-                            </td>
-                        </tr>
-
-                        
-                        @endfor
-                    </table>
-                    <div class="mt-3 text-center text-xs">
-                        <input id="loading_to_disable" type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2 hover:cursor-pointer" value="confirm" />
-                    </div>
-                    <div class="max-w-4xl"></div>
-                </form>
+                <div class="flex gap-1 items-center">
+                    <h2 class="font-bold text-slate-500">Tambah Transaksi :</h2>
+                    <a href="{{ route('accounting.kliring_bg', $userInstance->id) }}" class="rounded-xl px-2 py-1 bg-blue-300">Kliring BG</a>
+                </div>
+                <div class="mt-1 overflow-x-auto">
+                    <form id="form-add-transactions" action="{{ route('accounting.store_transactions', $userInstance->id) }}" method="POST">
+                        @csrf
+                        <table class="text-xs table-auto" id="table_add_transactions">
+                            <tr class="text-slate-600">
+                                <th>tanggal</th><th>kode</th><th>deskripsi/keterangan</th><th>keterangan tambahan</th><th>keluar</th><th>masuk</th>
+                                {{-- <th>saldo</th> --}}
+                            </tr>
+                            @for ($i = 0; $i < 15; $i++)
+                            <tr id="tr_add_transaction-{{ $i }}">
+                                <td>
+                                    {{-- <input type="text" name="created_at[]" id="created_at-{{ $i }}" class="border p-1 text-xs w-28" placeholder="dd-mm-yyyy" value="{{ old('created_at.' . $i) }}"> --}}
+                                    <div class="flex items-center">
+                                        <input type="text" name="day[]" id="day-{{ $i }}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
+                                        <span>-</span>
+                                        <input type="text" name="month[]" id="month-{{ $i }}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
+                                        <span>-</span>
+                                        <input type="text" name="year[]" id="year-{{ $i }}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
+                                    </div>
+                                </td>
+                                <td><input type="text" name="kode[]" id="kode-{{ $i }}" class="border p-1 text-xs w-20" value="{{ old('kode.' . $i) ? old('kode.' . $i) : $userInstance->kode }}"></td>
+                                <td><input type="text" name="transaction_desc[]" id="transaction_desc-{{ $i }}" class="border p-1 text-xs w-60" value="{{ old('transaction_desc.' . $i) }}"></td>
+                                <td><input type="text" name="keterangan[]" id="keterangan-{{ $i }}" class="border p-1 text-xs w-full" value="{{ old('keterangan.' . $i) }}"></td>
+                                <td>
+                                    <input type="text" id="keluar-{{ $i }}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-{{ $i }}-real')" value="{{ old('keluar.' . $i) ? number_format((int)old('keluar.' . $i),0,',','.') : "" }}">
+                                    <input type="hidden" name="keluar[]" id="keluar-{{ $i }}-real" value="{{ old('keluar.' . $i) }}">
+                                </td>
+                                <td>
+                                    <input type="text" id="masuk-{{ $i }}" class="border p-1 text-xs w-36" value="{{ old('masuk.' . $i) ? number_format((int)old('masuk.' . $i),0,',','.') : "" }}">
+                                    <input type="hidden" name="masuk[]" id="masuk-{{ $i }}-real" value="{{ old('masuk.' . $i) }}">
+                                    <input type="hidden" name="transaction_id[]" id="transaction_id-{{ $i }}" value="{{ old('transaction_id.' . $i) }}">
+                                </td>
+                                <td>
+                                    <input type="hidden" name="trId[]" value="{{ $i }}">
+                                    <input type="hidden" name="kategori_level_one[]" id="kategori_level_one-{{ $i }}" value="">
+                                </td>
+                            </tr>
+    
+                            
+                            @endfor
+                        </table>
+                        <div class="mt-3 text-center text-xs">
+                            <input id="loading_to_disable" type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2 hover:cursor-pointer" value="confirm" />
+                        </div>
+                        <div class="max-w-4xl"></div>
+                    </form>
+                </div>
             </div>
         </div>
         
@@ -671,4 +676,5 @@
     </style>
 
     <script src="{{ asset('js/addTransactions.js') }}"></script>
+    <script src="{{ asset('js/addTransaction-kliringBG.js') }}?v={{ filemtime(public_path('js/addTransaction-kliringBG.js')) }}"></script>
 </div>
