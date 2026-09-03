@@ -11,6 +11,7 @@ use App\Models\Pembelian;
 use App\Models\TransactionName;
 use App\Models\UserInstance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -407,5 +408,18 @@ class AccountingController2 extends Controller
     function store_kliring_bg(UserInstance $user_instance, Request $request) {
         dump($user_instance);
         dd($request->post());
+        // VALIDASI
+        $validated = $request->validate([
+            'bilyet_giro_id' => 'required|exists:bilyet_giros,id',
+            'clearing_date' => 'required|date',
+        ], [
+            'bilyet_giro_id.required' => 'Bilyet Giro is required.',
+            'bilyet_giro_id.exists' => 'Selected Bilyet Giro does not exist.',
+            'clearing_date.required' => 'Clearing date is required.',
+            'clearing_date.date' => 'Clearing date must be a valid date.',
+        ]);
+        if ((int)$user_instance->user_id !== Auth::user()->id) {
+            $request->validate(['error'=>'required'],['error.required'=>'different user???']);
+        }
     }
 }

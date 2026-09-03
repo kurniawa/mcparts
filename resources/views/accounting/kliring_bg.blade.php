@@ -68,7 +68,7 @@
                     </table>
                 </div>
                 <div class="text-center mt-3">
-                    <button type="submit" class="bg-emerald-300 p-2 rounded font-bold text-white">Submit</button>
+                    <button type="submit" class="bg-emerald-400 hover:bg-emerald-300 p-2 rounded font-bold text-white">Submit</button>
                 </div>
             </div>
         </div>
