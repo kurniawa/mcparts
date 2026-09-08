@@ -414,12 +414,39 @@ class AccountingController2 extends Controller
             'clearing_date' => 'required|date',
         ], [
             'bilyet_giro_id.required' => 'Bilyet Giro is required.',
-            'bilyet_giro_id.exists' => 'Selected Bilyet Giro does not exist.',
+            'bilyet_giro_id.exists' => 'Selected Bilyet Giro does not exist. (1)',
             'clearing_date.required' => 'Clearing date is required.',
             'clearing_date.date' => 'Clearing date must be a valid date.',
         ]);
         if ((int)$user_instance->user_id !== Auth::user()->id) {
             $request->validate(['error'=>'required'],['error.required'=>'different user???']);
+        }
+        DB::beginTransaction();
+        try {
+            $bilyetGiro = BilyetGiro::find($validated['bilyet_giro_id']);
+            if (!$bilyetGiro) {
+                return back()->withErrors(['bilyet_giro_id' => 'Selected Bilyet Giro does not exist. (2)']);
+            }
+            $bilyetGiro->clearing_date = $validated['clearing_date'];
+            $bilyetGiro->status = 'CLEARED';
+            $bilyetGiro->save();
+            /**
+             * Setelah bilyet giro di-clearing, kita perlu membuat entry accounting baru untuk mencatat penerimaan dana dari bilyet giro tersebut.
+             * Kita akan membuat entry accounting baru dengan kategori "Penerimaan Piutang".
+             */
+            // Get TransactionName for this user_instance and bilyet giro
+            $transactionName = TransactionName::where('user_instance_id', $user_instance->id)
+                ->where('desc', 'KLIRING BG')
+                ->first();
+            if (!$transactionName) {
+                return back()->withErrors(['error' => 'Transaction name for KLIRING BG not found for this user instance.']);
+            }
+            DB::commit();
+            return back()->with('success_', 'Bilyet Giro cleared successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error clearing Bilyet Giro: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'An error occurred while clearing the Bilyet Giro. Please try again.']);
         }
     }
 }
