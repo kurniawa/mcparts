@@ -49,15 +49,15 @@
                                             <div class="flex max-w-fit rounded border border-sky-300 p-2">
                                                 <div class="flex flex-col gap-1">
                                                     <label for="beneficiary_name">Kepada</label>
-                                                    <input type="text" name="beneficiary_name[{{ $key_bg }}]" id="beneficiary_name-{{ $key_bg }}" value="{{ old('beneficiary_name', $bg->beneficiary_name) }}" class="text-xs border border-slate-300 rounded p-1">
+                                                    <input type="text" name="beneficiary_name[{{ $key_bg }}]" id="beneficiary_name-{{ $key_bg }}" value="{{ old('beneficiary_name.' . $key_bg, $bg->beneficiary_name) }}" class="text-xs border border-slate-300 rounded p-1">
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <label for="beneficiary_bank">Bank Tujuan</label>
-                                                    <input type="text" name="beneficiary_bank[{{ $key_bg }}]" id="beneficiary_bank-{{ $key_bg }}" value="{{ old('beneficiary_bank', $bg->beneficiary_bank) }}" class="text-xs border border-slate-300 rounded p-1">
+                                                    <input type="text" name="beneficiary_bank[{{ $key_bg }}]" id="beneficiary_bank-{{ $key_bg }}" value="{{ old('beneficiary_bank.' . $key_bg, $bg->beneficiary_bank) }}" class="text-xs border border-slate-300 rounded p-1">
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <label for="beneficiary_account_number">No. Rek Tujuan</label>
-                                                    <input type="text" name="beneficiary_account_number[{{ $key_bg }}]" id="beneficiary_account_number-{{ $key_bg }}" value="{{ old('beneficiary_account_number', $bg->beneficiary_account_number) }}" class="text-xs border border-slate-300 rounded p-1">
+                                                    <input type="text" name="beneficiary_account_number[{{ $key_bg }}]" id="beneficiary_account_number-{{ $key_bg }}" value="{{ old('beneficiary_account_number.' . $key_bg, $bg->beneficiary_account_number) }}" class="text-xs border border-slate-300 rounded p-1">
                                                 </div>
                                             </div>
                                         </div>

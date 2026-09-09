@@ -190,7 +190,7 @@
                     </td>
                     <td>{{ $accounting->kode }}</td>
                     @if ($accounting->keterangan !== null)
-                    <td>{{ $accounting->transaction_desc }} <span class="font-bold text-blue-300">- {{ $accounting->keterangan }} -</span></td>
+                    <td>{{ $accounting->transaction_desc }} <span class="font-bold text-blue-300">- {{ str_contains($accounting->keterangan, 'bilyet_giro_id:') ? 'BG' : $accounting->keterangan }} -</span></td>
                     @else
                     <td>{{ $accounting->transaction_desc }}</td>
                     @endif
@@ -279,7 +279,7 @@
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">keterangan tambahan:</label>
-                                        <input type="text" name="keterangan" id="edit-{{ $key_accounting }}-keterangan" class="border p-1 text-xs mt-1 w-60" value="{{ $accounting->keterangan }}">
+                                        <input type="text" name="keterangan" id="edit-{{ $key_accounting }}-keterangan" class="border p-1 text-xs mt-1 w-60" value="{{ str_contains($accounting->keterangan, 'bilyet_giro_id:') ? 'BG' : $accounting->keterangan }}">
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">keluar:</label>
@@ -333,12 +333,21 @@
                                     <button type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2">confirm edit</button>
                                 </div>
                             </form>
+                            @if ($accounting->transaction_desc === 'KLIRING BG' && preg_match('/bilyet_giro_id:(\d+)/', $accounting->keterangan, $matches))
+                            <form action="{{ route('accounting.destroy_accounting_bg', [$accounting->id, $userInstance->id, $matches[1]]) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus transaksi ini?')" class="mt-1">
+                                @csrf
+                                <div class="flex justify-center">
+                                    <button type="submit" class="border-2 font-semibold rounded text-pink-500 border-pink-300 bg-pink-200 px-2">hapus transaksi</button>
+                                </div>
+                            </form>
+                            @else
                             <form action="{{ route('accounting.delete_entry', [$userInstance->id, $accounting->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus transaksi ini?')" class="mt-1">
                                 @csrf
                                 <div class="flex justify-center">
                                     <button type="submit" class="border-2 font-semibold rounded text-pink-500 border-pink-300 bg-pink-200 px-2">hapus transaksi</button>
                                 </div>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

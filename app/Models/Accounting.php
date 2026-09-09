@@ -350,4 +350,27 @@ class Accounting extends Model
             // $success_ .= "-saldo setelahnya diperbarui-";
         }
     }
+
+    public static function calculating_balance(string $created_at, UserInstance $user_instance, string $transaction_type, float $amount) {
+        $new_balance = 0;
+
+        $before_trans = Accounting::where('user_instance_id', $user_instance->id)
+            ->where('created_at', '<', $created_at)
+            ->latest()
+            ->first();
+
+        if ($before_trans) {
+            $new_balance = $before_trans->saldo;
+        } else {
+            $last_existing = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
+            if ($last_existing) {
+                $new_balance = $last_existing->saldo;
+            }
+        }
+
+        // Perbarui saldo
+        $new_balance += ($transaction_type === 'pemasukan') ? $amount : -$amount;
+
+        return $new_balance;
+    }
 }

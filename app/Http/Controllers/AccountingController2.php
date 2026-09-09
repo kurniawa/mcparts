@@ -10,6 +10,7 @@ use App\Models\Nota;
 use App\Models\Pembelian;
 use App\Models\TransactionName;
 use App\Models\UserInstance;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -406,8 +407,8 @@ class AccountingController2 extends Controller
     }
 
     function store_kliring_bg(UserInstance $user_instance, Request $request) {
-        dump($user_instance);
-        dd($request->post());
+        // dump($user_instance);
+        // dd($request->post());
         // VALIDASI
         $validated = $request->validate([
             'bilyet_giro_id' => 'required|exists:bilyet_giros,id',
@@ -421,6 +422,7 @@ class AccountingController2 extends Controller
         if ((int)$user_instance->user_id !== Auth::user()->id) {
             $request->validate(['error'=>'required'],['error.required'=>'different user???']);
         }
+        $success_ = '';
         DB::beginTransaction();
         try {
             $bilyetGiro = BilyetGiro::find($validated['bilyet_giro_id']);
@@ -429,20 +431,84 @@ class AccountingController2 extends Controller
             }
             $bilyetGiro->clearing_date = $validated['clearing_date'];
             $bilyetGiro->status = 'CLEARED';
-            $bilyetGiro->save();
+            // dump($bilyetGiro);
             /**
              * Setelah bilyet giro di-clearing, kita perlu membuat entry accounting baru untuk mencatat penerimaan dana dari bilyet giro tersebut.
              * Kita akan membuat entry accounting baru dengan kategori "Penerimaan Piutang".
              */
             // Get TransactionName for this user_instance and bilyet giro
-            $transactionName = TransactionName::where('user_instance_id', $user_instance->id)
+            $transaction_name = TransactionName::where('user_instance_id', $user_instance->id)
                 ->where('desc', 'KLIRING BG')
                 ->first();
-            if (!$transactionName) {
+            if (!$transaction_name) {
                 return back()->withErrors(['error' => 'Transaction name for KLIRING BG not found for this user instance.']);
             }
+            // dd($transaction_name);
+            $time_object = Carbon::parse($request->clearing_date)->setTime(now()->hour, now()->minute, now()->second);
+            $time_key = $time_object->getTimestamp();
+
+            // Pastikan time_key unik
+            while (Accounting::where('time_key', $time_key)->exists()) {
+                $time_key++;
+            }
+
+            $created_at = date('Y-m-d H:i:s', $time_key);
+
+            /**
+             * Calculate the new balance after this transaction. We need to get the last accounting entry for this user_instance and calculate the new balance.
+             */
+            $new_balance = Accounting::calculating_balance($created_at, $user_instance, 'pemasukan', $bilyetGiro->amount);
+            // Update saldo untuk semua transaksi setelahnya
+            $subsequent_transactions = Accounting::where('user_instance_id', $user_instance->id)
+                ->where('created_at', '>', $created_at) // Use the clearing date of the Bilyet Giro
+                ->orderBy('created_at', 'asc')
+                ->get();
+            if ($subsequent_transactions->isNotEmpty()) {
+                $balance_next = $new_balance;
+                foreach ($subsequent_transactions as $st) {
+                    $balance_next += ($st->transaction_type === 'pemasukan') ? $st->jumlah : -$st->jumlah;
+                    $st->saldo = $balance_next;
+                    $st->save();
+                }
+                // $success_ .= "-saldo setelahnya diperbarui-";
+            }
+
+            $bilyetGiro->save();
+            // Create new accounting entry for the cleared Bilyet Giro
+            $new_accounting = Accounting::create([
+                'user_id' => Auth::user()->id,
+                'username' => Auth::user()->username,
+                'user_instance_id' => $user_instance->id,
+                'instance_type' => $user_instance->instance_type,
+                'instance_name' => $user_instance->instance_name,
+                'branch' => $user_instance->branch,
+                'account_number' => $user_instance->account_number,
+                'kode' => $user_instance->kode,
+                'transaction_type' => 'pemasukan',
+                'transaction_desc' => $transaction_name->desc,
+                'kategori_type' => $transaction_name->kategori_type,
+                'kategori_level_one' => $transaction_name->kategori_level_one,
+                'kategori_level_two' => $transaction_name->kategori_level_two,
+                'related_user_id' => $transaction_name->related_user_id,
+                'related_username' => $transaction_name->related_username,
+                'related_desc' => $transaction_name->related_desc,
+                'related_user_instance_id' => $transaction_name->related_user_instance_id,
+                'related_user_instance_type' => $transaction_name->related_user_instance_type,
+                'related_user_instance_name' => $transaction_name->related_user_instance_name,
+                'related_user_instance_branch' => $transaction_name->related_user_instance_branch,
+                'pelanggan_id' => $transaction_name->pelanggan_id,
+                'pelanggan_nama' => $transaction_name->pelanggan_nama,
+                'supplier_id' => $transaction_name->supplier_id,
+                'supplier_nama' => $transaction_name->supplier_nama,
+                'keterangan' => "bilyet_giro_id:$bilyetGiro->id",
+                'jumlah' => $bilyetGiro->amount,
+                'saldo' => $new_balance,
+                'status' => null,
+                'time_key' => $time_key,
+                'created_at' => $created_at,
+            ]);
             DB::commit();
-            return back()->with('success_', 'Bilyet Giro cleared successfully.');
+            return back()->with('success_', 'Bilyet Giro cleared successfully. New accounting entry created for the cleared Bilyet Giro.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error clearing Bilyet Giro: ' . $e->getMessage());

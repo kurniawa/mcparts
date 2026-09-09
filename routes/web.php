@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\AccountingController2;
+use App\Http\Controllers\AccountingController3;
 use App\Http\Controllers\AccountingInvoiceController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
@@ -242,6 +243,10 @@ Route::controller(AccountingController2::class)->group(function(){
     Route::post('/accounting/{accounting}/change_sum','change_sum')->name('accounting.change_sum')->middleware('auth');
     Route::get('/accounting/{user_instance}/kliring_bg','kliring_bg')->name('accounting.kliring_bg')->middleware('auth');
     Route::post('/accounting/{user_instance}/store_kliring_bg','store_kliring_bg')->name('accounting.store_kliring_bg')->middleware('auth');
+});
+
+Route::controller(AccountingController3::class)->group(function(){
+    Route::post('/accounting/{accounting}/{user_instance}/{bilyet_giro}/destroy_accounting_bg','destroy_accounting_bg')->name('accounting.destroy_accounting_bg')->middleware('auth');
 });
 
 Route::controller(NeracaController::class)->group(function(){
