@@ -102,6 +102,7 @@
                         <th class="border border-slate-300 px-4 py-2">Dari</th>
                         <th class="border border-slate-300 px-4 py-2">No. Rek</th>
                         <th class="border border-slate-300 px-4 py-2">Tgl. Kliring</th>
+                        <th class="border border-slate-300 px-4 py-2">Oleh</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,6 +117,7 @@
                             <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_name }}</td>
                             <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_account_number }}</td>
                             <td class="border border-slate-300 px-4 py-2">{{ $bg->clearing_date ? \Carbon\Carbon::parse($bg->clearing_date)->format('d/m/Y') : '' }}</td>
+                            <td class="border border-slate-300 px-4 py-2">{{ $bg->cleared_by ? $bg->clearedBy->username : '' }}</td>
                             <td>
                                 <button id="btn_form_update-{{ $key_bg }}" type="button" class="border rounded border-sky-400 text-sky-400" onclick="toggleForm(this,'form_update-{{ $key_bg }}', 'bg-sky-200')">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -138,7 +140,8 @@
                                         <input type="text" name="amount" id="amount-{{ $key_bg }}" value="{{ old('amount', number_format($bg->amount, 0, ',', '.')) }}" class="text-xs border border-slate-300 rounded p-1 format-indonesian-number">
                                         <input type="text" name="issuer_name" id="issuer_name-{{ $key_bg }}" value="{{ old('issuer_name', $bg->issuer_name) }}" class="text-xs border border-slate-300 rounded p-1">
                                         <input type="text" name="issuer_account_number" id="issuer_account_number-{{ $key_bg }}" value="{{ old('issuer_account_number', $bg->issuer_account_number) }}" class="text-xs border border-slate-300 rounded p-1">
-                                        <input type="date" name="clearing_date" id="clearing_date-{{ $key_bg }}" value="{{ old('clearing_date', \Carbon\Carbon::parse($bg->clearing_date)->format('Y-m-d')) }}" class="text-xs border border-slate-300 rounded p-1">
+                                        {{-- <input type="date" name="clearing_date" id="clearing_date-{{ $key_bg }}" value="{{ old('clearing_date') ?? $bg->clearing_date ? \Carbon\Carbon::parse($bg->clearing_date)->format('Y-m-d') : '' }}" class="text-xs border border-slate-300 rounded p-1" disabled>
+                                        <input type="text" name="cleared_by" id="cleared_by-{{ $key_bg }}" value="{{ old('cleared_by', $bg->cleared_by) }}" class="text-xs border border-slate-300 rounded p-1" disabled> --}}
                                     </div>
                                     <div class="flex gap-2 border border-sky-300 rounded p-2 max-w-fit mt-2">
                                         <div class="flex flex-col gap-1">

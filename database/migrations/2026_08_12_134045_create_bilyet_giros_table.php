@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('bilyet_giros', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
+            $table->foreignId('accounting_id')->nullable()->constrained('accountings')->nullOnDelete();
             $table->string('bilyet_number', 20)->unique();
             $table->foreignId('customer_id')->nullable()->constrained('pelanggans')->nullOnDelete();
             $table->string('customer_name', 255)->nullable();
@@ -35,18 +36,10 @@ return new class extends Migration
                 'cancelled',
             ])->default('pending');
             $table->text('notes')->nullable();
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-            $table->foreignId('updated_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-            $table->foreignId('deleted_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
+            $table->foreignId('cleared_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();
             $table->softDeletes();

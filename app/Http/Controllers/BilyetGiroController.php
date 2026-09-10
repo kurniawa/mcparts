@@ -149,9 +149,10 @@ class BilyetGiroController extends Controller
      */
     public function destroy(BilyetGiro $bilyetGiro)
     {
+        if ($bilyetGiro->status === 'cleared' && $bilyetGiro->accounting_id !== null) {
+            return back()->with('warnings_', 'Bilyet giro tidak dapat dihapus karena sudah dikliring dan sudah terkait dengan akunting.');
+        }
         $bilyetGiro->delete();
-        return redirect()
-            ->route('bilyet-giros.index')
-            ->with('success', 'Bilyet giro berhasil dihapus.');
+        return back()->with('danger_', 'Bilyet giro berhasil dihapus.');
     }
 }

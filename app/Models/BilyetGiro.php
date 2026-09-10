@@ -14,6 +14,7 @@ class BilyetGiro extends Model
 
     protected $fillable = [
         'uuid',
+        'accounting_id',
         'bilyet_number',
         'issuer_name',
         'issuer_bank',
@@ -27,6 +28,7 @@ class BilyetGiro extends Model
         'clearing_date',
         'status',
         'notes',
+        'cleared_by',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -44,5 +46,15 @@ class BilyetGiro extends Model
         static::creating(function ($bilyetGiro) {
             $bilyetGiro->uuid ??= Str::uuid();
         });
+    }
+
+    public function clearedBy()
+    {
+        return $this->belongsTo(User::class, 'cleared_by');
+    }
+
+    public function accounting()
+    {
+        return $this->belongsTo(Accounting::class, 'accounting_id');
     }
 }

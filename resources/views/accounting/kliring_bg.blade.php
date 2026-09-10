@@ -26,12 +26,18 @@
                                 <th class="border border-slate-300 px-4 py-2">Nominal</th>
                                 <th class="border border-slate-300 px-4 py-2">Dari</th>
                                 <th class="border border-slate-300 px-4 py-2">No. Rek</th>
+                                <th class="border border-slate-300 px-4 py-2">Tgl. Kliring</th>
+                                <th class="border border-slate-300 px-4 py-2">Oleh</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($bilyetGiros as $key_bg => $bg)
-                                <tr>
-                                    <td class="border border-slate-300 px-4 py-2"><input type="radio" name="bilyet_giro_id" id="" value="{{ $bg->id }}"></td>
+                                <tr class="{{ $bg->status === 'cleared' ? 'bg-gray-200 text-gray-500' : '' }}">
+                                    <td class="border border-slate-300 px-4 py-2">
+                                        @if ($bg->status === 'pending')
+                                        <input type="radio" name="bilyet_giro_id" id="" value="{{ $bg->id }}" {{ old('bilyet_giro_id') == $bg->id ? 'checked' : '' }}>
+                                        @endif
+                                    </td>
                                     <td class="border border-slate-300 px-4 py-2">{{ \Carbon\Carbon::parse($bg->received_date)->format('d/m/Y') }}</td>
                                     <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_bank }}</td>
                                     <td class="border border-slate-300 px-4 py-2">{{ $bg->bilyet_number }}</td>
@@ -39,6 +45,8 @@
                                     <td class="border border-slate-300 px-4 py-2">{{ number_format($bg->amount, 2, ',', '.') }}</td>
                                     <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_name }}</td>
                                     <td class="border border-slate-300 px-4 py-2">{{ $bg->issuer_account_number }}</td>
+                                    <td class="border border-slate-300 px-4 py-2">{{ \Carbon\Carbon::parse($bg->clearing_date)->format('d/m/Y') }}</td>
+                                    <td class="border border-slate-300 px-4 py-2">{{ $bg->cleared_by ? $bg->clearedBy->username : '' }}</td>
                                     <td>
                                         <button id="btn_detail_bg-{{ $key_bg }}" type="button" class="border rounded border-orange-400 text-orange-400 px-1" onclick="toggleForm(this,'detail_bg-{{ $key_bg }}', 'bg-orange-200')">D</button>
                                     </td>

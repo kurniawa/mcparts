@@ -392,7 +392,7 @@ class AccountingController2 extends Controller
     }
 
     function kliring_bg(UserInstance $user_instance) {
-        $bilyetGiros = BilyetGiro::orderBy('created_at', 'desc')->get();
+        $bilyetGiros = BilyetGiro::orderBy('created_at', 'desc')->limit(500)->get();
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.kliring_bg',
@@ -419,18 +419,23 @@ class AccountingController2 extends Controller
             'clearing_date.required' => 'Clearing date is required.',
             'clearing_date.date' => 'Clearing date must be a valid date.',
         ]);
+        $bilyetGiro = BilyetGiro::find($validated['bilyet_giro_id']);
+        if (!$bilyetGiro) {
+            return back()->withErrors(['bilyet_giro_id' => 'Selected Bilyet Giro does not exist. (2)']);
+        }
+        if ($bilyetGiro->status === 'cleared') {
+            return back()->withErrors(['bilyet_giro_id' => 'Selected Bilyet Giro has already been cleared.']);
+        }
         if ((int)$user_instance->user_id !== Auth::user()->id) {
             $request->validate(['error'=>'required'],['error.required'=>'different user???']);
         }
         $success_ = '';
         DB::beginTransaction();
         try {
-            $bilyetGiro = BilyetGiro::find($validated['bilyet_giro_id']);
-            if (!$bilyetGiro) {
-                return back()->withErrors(['bilyet_giro_id' => 'Selected Bilyet Giro does not exist. (2)']);
-            }
+            
             $bilyetGiro->clearing_date = $validated['clearing_date'];
-            $bilyetGiro->status = 'CLEARED';
+            $bilyetGiro->cleared_by = $user_instance->user_id;
+            $bilyetGiro->status = 'cleared';
             // dump($bilyetGiro);
             /**
              * Setelah bilyet giro di-clearing, kita perlu membuat entry accounting baru untuk mencatat penerimaan dana dari bilyet giro tersebut.
@@ -473,7 +478,6 @@ class AccountingController2 extends Controller
                 // $success_ .= "-saldo setelahnya diperbarui-";
             }
 
-            $bilyetGiro->save();
             // Create new accounting entry for the cleared Bilyet Giro
             $new_accounting = Accounting::create([
                 'user_id' => Auth::user()->id,
@@ -507,6 +511,10 @@ class AccountingController2 extends Controller
                 'time_key' => $time_key,
                 'created_at' => $created_at,
             ]);
+
+            $bilyetGiro->accounting_id = $new_accounting->id;
+            $bilyetGiro->save();
+            
             DB::commit();
             return back()->with('success_', 'Bilyet Giro cleared successfully. New accounting entry created for the cleared Bilyet Giro.');
         } catch (\Exception $e) {
