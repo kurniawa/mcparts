@@ -530,6 +530,9 @@ class AccountingController extends Controller
                     // dd($post);
                     $remaining_balance_new = 0;
                     for ($j=0; $j < $nota_id_number; $j++) {
+                        if ((!isset($post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j]) || !$post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j]) && (!isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j]) || !$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j])) {
+                            continue;
+                        }
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
                         if ($transaction_name->kategori_type == 'UANG KELUAR') {
                             $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);

@@ -832,14 +832,17 @@
                         @else
                         <table id="histori-pembayaran-{{ $key_nota }}" class="w-full text-xs border border-collapse">
                             <tr>
-                                <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Metode</th>
+                                <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Akun</th>
                             </tr>
                             @foreach ($nota->accountingInvoices as $key_acc_inv => $accountingInvoice)
                             <tr>
                                 {{-- {{ dump($key_acc_inv) }} --}}
                                 <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
                                 <td class="text-center">{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
-                                <td class="text-center">{{ number_format(($accountingInvoice->amount_paid + $accountingInvoice->balance_used),0,',','.') }}</td>
+                                <td class="text-center">
+                                    <div class="text-slate-500">{{ number_format(($accountingInvoice->accounting->jumlah),0,',','.') }}</div>
+                                    <div class="text-emerald-500 font-bold">{{ number_format(($accountingInvoice->amount_paid + $accountingInvoice->balance_used),0,',','.') }}</div>
+                                </td>
                                 <td class="text-center">
                                     {{ $accountingInvoice->user_instance_id ? 
                                     ($accountingInvoice->userInstance->username . '-' . $accountingInvoice->userInstance->instance_name . '-' . $accountingInvoice->userInstance->branch)
