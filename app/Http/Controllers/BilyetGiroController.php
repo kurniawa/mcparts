@@ -6,7 +6,7 @@ use App\Http\Requests\BilyetGiroRequest;
 use App\Models\BilyetGiro;
 use App\Models\Menu;
 use App\Models\Pelanggan;
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BilyetGiroController extends Controller

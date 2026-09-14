@@ -357,6 +357,12 @@ class AccountingController extends Controller
         DB::beginTransaction();
         try {
             for ($i = 0; $i < $working_index; $i++) {
+                if (!isset($post['transaction_desc'][$i]) || trim($post['transaction_desc'][$i]) === '') {
+                    continue; // Skip baris kosong
+                }
+                if (trim($post['transaction_desc'][$i]) === 'KLIRING BG') {
+                    continue; // Skip KLIRING BG
+                }
                 // Ambil dan validasi nilai
                 $keluar = is_numeric($post['keluar'][$i] ?? '') ? (float)trim($post['keluar'][$i]) : null;
                 $masuk = is_numeric($post['masuk'][$i] ?? '') ? (float)trim($post['masuk'][$i]) : null;
