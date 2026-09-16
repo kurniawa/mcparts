@@ -840,8 +840,9 @@
                                 <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
                                 <td class="text-center">{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
                                 <td class="text-center">
-                                    <div class="text-slate-500">{{ number_format(($accountingInvoice->accounting->jumlah),0,',','.') }}</div>
+                                    {{-- <div class="text-slate-500">{{ number_format(($accountingInvoice->accounting->jumlah),0,',','.') }}</div> --}}
                                     <div class="text-emerald-500 font-bold">{{ number_format(($accountingInvoice->amount_paid + $accountingInvoice->balance_used),0,',','.') }}</div>
+                                    <div class="text-sky-400 font-bold">{{ number_format(($accountingInvoice->amount_paid_total),0,',','.') }}</div>
                                 </td>
                                 <td class="text-center">
                                     {{ $accountingInvoice->user_instance_id ? 

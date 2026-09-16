@@ -689,7 +689,7 @@ class AccountingController extends Controller
                             'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
                             'discount_description' => $discount_description,
                             'amount_due' => $amount_due_new,
-                            'amount_paid' => $amount_paid_new,
+                            'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
                             'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
                             'total_amount' => $related_nota->harga_total,
                             'remaining_funds' => $remaining_balance_new,

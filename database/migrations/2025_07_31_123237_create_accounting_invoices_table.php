@@ -58,6 +58,7 @@ return new class extends Migration
             $table->decimal('balance_used', 15, 2)->default(0.00); // Berapa jumlah (dari saldo yang sebelumnya sudah ada) yang digunakan untuk membayar
             $table->decimal('remaining_funds', 15, 2)->default(0.00); // Berapa jumlah (dari uang masuk) yang tersisa
             $table->decimal('overpayment', 15, 2)->default(0.00); // Berapa jumlah lebih bayar
+            $table->decimal('amount_paid_total', 15, 2)->default(0.00);
 
             // $table->decimal('discount_percent_old', 5, 2)->default(0.00);
             // $table->decimal('total_discount_old', 15, 2)->default(0.00);
