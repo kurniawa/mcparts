@@ -8,7 +8,7 @@
   <main>
       <x-errors-any></x-errors-any>
       <x-validation-feedback></x-validation-feedback>
-    <div class="flex justify-center">
+    <div class="flex justify-center mt-3">
         @foreach ($spk_menus as $key_spk_menu => $spk_menu)
         @if ($route_now === $spk_menu['route'])
         @if ($key_spk_menu !== 0)

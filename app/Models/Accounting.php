@@ -47,11 +47,11 @@ class Accounting extends Model
             "related_not_yet_paid_off_invoices.nota_id.$i" => "required|array",
             "related_not_yet_paid_off_invoices.nota_id.$i.*" => "numeric",
             "related_not_yet_paid_off_invoices.harga_total.$i" => "required|array",
-            "related_not_yet_paid_off_invoices.harga_total.$i.*" => "numeric",
+            "related_not_yet_paid_off_invoices.harga_total.$i.*" => "numeric|decimal:0,2",
             "related_not_yet_paid_off_invoices.amount_due.$i" => "required|array",
-            "related_not_yet_paid_off_invoices.amount_due.$i.*" => "numeric",
+            "related_not_yet_paid_off_invoices.amount_due.$i.*" => "numeric|decimal:0,2",
             "related_not_yet_paid_off_invoices.amount_paid.$i" => "required|array",
-            "related_not_yet_paid_off_invoices.amount_paid.$i.*" => "numeric",
+            "related_not_yet_paid_off_invoices.amount_paid.$i.*" => "numeric|decimal:0,2",
         ]);
         
         $post = $request->post();

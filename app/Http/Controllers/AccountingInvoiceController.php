@@ -127,4 +127,10 @@ class AccountingInvoiceController extends Controller
         
         return redirect()->back()->with('success_', $success_);
     }
+
+    public function edit_payment_history(Nota $nota)
+    {
+        $accountingInvoices = AccountingInvoice::where('invoice_id', $nota->id)->where('table_name', 'notas')->orderBy('created_at', 'asc')->get();
+        return view('accounting_invoices.edit_payment_history', compact('nota', 'accountingInvoices'));
+    }
 }

@@ -849,7 +849,7 @@
                                     ($accountingInvoice->userInstance->username . '-' . $accountingInvoice->userInstance->instance_name . '-' . $accountingInvoice->userInstance->branch)
                                     : "-" }}
                                 </td>
-                                @if ($key_acc_inv == count($nota->accountingInvoices) - 1)
+                                {{-- @if ($key_acc_inv == count($nota->accountingInvoices) - 1)
                                 <td class="text-center">
                                     <form action="{{ route('accounting_invoices.delete_last_payment_customer', [$nota->id, $accountingInvoice->id]) }}" method="POST" onsubmit="return confirm('Yakin menghapus histori pembayaran terakhir?')">
                                         @csrf
@@ -859,16 +859,17 @@
                                             </svg>
                                         </button>
                                     </form>
-                                @endif
+                                @endif --}}
                             </tr>
                             @endforeach
                         </table>
                         @endif
-                        @if (Auth::user()->username === 'kuruniawa')
+                        {{-- @if (Auth::user()->username === 'kuruniawa') --}}
                         <div class="flex justify-end mt-1">
-                            <a href="{{ route('accounting.search_related_accounting', $nota->id) }}" target="_blank" rel="noopener noreferrer" class="bg-sky-400 text-white font-bold rounded-xl px-1 text-xs">rel.accounting</a>
+                            {{-- <a href="{{ route('accounting.search_related_accounting', $nota->id) }}" target="_blank" rel="noopener noreferrer" class="bg-sky-400 text-white font-bold rounded-xl px-1 text-xs">edit</a> --}}
+                            <a href="{{ route('accounting_invoices.edit_payment_history', $nota->id) }}" target="_blank" rel="noopener noreferrer" class="bg-sky-400 text-white font-bold rounded-xl px-1 text-xs">edit</a>
                         </div>
-                        @endif
+                        {{-- @endif --}}
                     </div>
                     {{-- END - HISTORI PEMBAYARAN --}}
                     {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}

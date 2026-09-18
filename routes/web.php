@@ -255,6 +255,9 @@ Route::controller(NeracaController::class)->group(function(){
 
 Route::controller(AccountingInvoiceController::class)->group(function(){
     Route::post('/accounting-invoices/{nota}/{accounting_invoice}/delete-last-payment-customer','delete_last_payment_customer')->name('accounting_invoices.delete_last_payment_customer')->middleware('auth');
+    Route::post('/accounting-invoices/{accounting_invoice}/delete-payment-history','delete_payment_history')->name('accounting_invoices.delete_payment_history')->middleware('auth');
+    Route::get('/accounting-invoices/{customer_id}/edit_payment_history','edit_payment_history')->name('accounting_invoices.edit_payment_history')->middleware('auth');
+    Route::post('/accounting-invoices/{nota}/update_payment_history','update_payment_history')->name('accounting_invoices.update_payment_history')->middleware('auth');
 });
 
 Route::controller(EmployeeController::class)->middleware('auth')->group(function () {
