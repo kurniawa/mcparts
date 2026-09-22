@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountingInvoice;
+use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\Overpayment;
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AccountingInvoiceController extends Controller
@@ -130,7 +131,18 @@ class AccountingInvoiceController extends Controller
 
     public function edit_payment_history(Nota $nota)
     {
-        $accountingInvoices = AccountingInvoice::where('invoice_id', $nota->id)->where('table_name', 'notas')->orderBy('created_at', 'asc')->get();
-        return view('accounting_invoices.edit_payment_history', compact('nota', 'accountingInvoices'));
+        $accountingInvoices = AccountingInvoice::where('invoice_id', $nota->id)->where('invoice_table', 'notas')->orderBy('created_at', 'asc')->get();
+
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'pembelians.show',
+            'profile_menus' => Menu::get_profile_menus(),
+            'nota' => $nota,
+            'accountingInvoices' => $accountingInvoices,
+        ];
+
+        // dd($nota);
+
+        return view('accounting-invoices.edit-payment-history', $data);
     }
 }

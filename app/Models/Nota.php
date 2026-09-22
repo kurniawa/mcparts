@@ -27,6 +27,11 @@ class Nota extends Model
         return $this->hasMany(SpkProdukNota::class, 'nota_id', 'id');
     }
 
+    function customer()
+    {
+        return $this->belongsTo(Pelanggan::class, 'pelanggan_id', 'id');
+    }
+
     function possible_related_accountings()
     {
         // Get all accountings related to this nota's customer and created_at not more than five months after nota created_at
