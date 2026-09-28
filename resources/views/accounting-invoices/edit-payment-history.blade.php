@@ -64,10 +64,17 @@
                     <tr>
                         <td>Kontak</td><td>:</td>
                         <td>
-                            @if ($nota->cust_kontak!==null)
-                            {{ $nota->cust_kontak }}
+                            @php
+                                $kontak = json_decode($nota->cust_kontak, true);
+                            @endphp
+
+                            @if (data_get($kontak, 'nomor'))
+                                @if (data_get($kontak, 'kodearea'))
+                                    <span>({{ $kontak['kodearea'] }})</span>
+                                @endif
+                                <span>{{ $kontak['nomor'] }}</span>
                             @else
-                            -
+                                -
                             @endif
                         </td>
                     </tr>
