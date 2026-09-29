@@ -145,4 +145,17 @@ class AccountingInvoiceController extends Controller
 
         return view('accounting-invoices.edit-payment-history', $data);
     }
+
+    public function delete_payment_history(AccountingInvoice $accountingInvoice)
+    {
+        // dump($accountingInvoice);
+        // dd($accountingInvoice->accounting->accounting_invoices);
+        $paid = 0;
+        foreach ($accountingInvoice->accounting->accounting_invoices as $acc_inv) {
+            dump($acc_inv->amount_paid);
+            $paid += $acc_inv->amount_paid;
+        }
+        dump($paid);
+        dd($accountingInvoice->accounting->jumlah);
+    }
 }
