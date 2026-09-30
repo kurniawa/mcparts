@@ -138,8 +138,8 @@
                 </div>
             </div>
             {{-- END - OPSI NOTA --}}
-            {{-- HISTORI PEMBAYARAN --}}
             <div class="p-2">
+                {{-- HISTORI PEMBAYARAN --}}
                 <div>
                     <h5 class="font-bold">Histori Pembayaran:</h5>
                     @if (count($nota->accountingInvoices) === 0)
@@ -190,8 +190,47 @@
                     </table>
                     @endif
                 </div>
+                {{-- END - HISTORI PEMBAYARAN --}}
+
+                {{-- AVAILABLE ACCOUNTING INVOICES & Accounting --}}
+                <div class="mt-2">
+                    <h5 class="font-bold">Available Accounting Invoices & Accounting:</h5>
+                    @if (count($available_accounting_invoices) === 0)
+                    <div class="text-center italic text-slate-500">kosong</div>
+                    @else
+                    <form action="{{ route('accounting_invoices.add_payment_history', [$nota->id, $accountingInvoice->id]) }}" method="POST" onsubmit="return confirm('Yakin menambahkan histori pembayaran ini?')">
+                    @csrf
+                    @method('PATCH')
+                        <div class="flex gap-1 items-center justify-center">
+                            <table id="available-accounting-invoices" class="border border-collapse">
+                                <tr><th colspan="2">Accounting Invoices</th></tr>
+                                @foreach ($available_accounting_invoices as $key_acc_inv => $accountingInvoice)
+                                <tr>
+                                    <td class="text-center align-middle"><input type="radio" name="accounting_invoice_id" value="{{ $accountingInvoice->id }}" required></td>
+                                    <td><div class="text-emerald-500 font-bold">{{ number_format(($accountingInvoice->amount_paid + $accountingInvoice->balance_used),0,',','.') }}</div></td>
+                                </tr>
+                                @endforeach
+                            </table>
+                            <table id="available-accountings" class="border border-collapse">
+                                <tr><th colspan="2" class="text-center">Accountings</th></tr>
+                                @foreach ($available_accountings as $key_acc => $accounting)
+                                <tr>
+                                    <td class="text-center align-middle"><input type="radio" name="accounting_id" value="{{ $accounting->id }}" required></td>
+                                    <td class="border-x px-1">{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
+                                    <td><div class="text-emerald-500 font-bold px-1">{{ number_format($accounting->jumlah,0,',','.') }}</div></td>
+                                    <td class="border-x px-1">{{ $accounting->kode }}</td>
+                                </tr>
+                                @endforeach
+                            </table>
+                        </div>
+                        <div class="text-center mt-2">
+                            <button type="submit" class="py-1 px-2 rounded bg-emerald-300 text-white font-bold">Konfirmasi</button>
+                        </div>
+                    </form>
+                    @endif
+                </div>
+                {{-- END - AVAILABLE ACCOUNTING INVOICES --}}
             </div>
-            {{-- END - HISTORI PEMBAYARAN --}}
         </div>
     </div>
 </main>      

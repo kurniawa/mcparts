@@ -20,6 +20,11 @@ class AccountingInvoice extends Model
         return $this->belongsTo(UserInstance::class);
     }
 
+    public function nota()
+    {
+        return $this->belongsTo(Nota::class, 'invoice_id', 'id');
+    }
+
     public function isExistAccountingInvoiceAfter(string $invoice_table) {
         $accounting_invoice_after = AccountingInvoice::where('invoice_table', $invoice_table)
             ->where('invoice_id', $this->invoice_id)
@@ -63,5 +68,38 @@ class AccountingInvoice extends Model
         }
         // dd('stop');
         return true;
+    }
+
+    public function updateKeteranganAccounting(Accounting $accounting) {
+        $payment = 0;
+        foreach ($accounting->accounting_invoices as $acc_inv) {
+            $payment += $acc_inv->amount_paid;
+        }
+        $keterangan = '';
+        if ($accounting->keterangan) {
+            // Analisa $accounting->keterangan, apakah ada string 'sisa:' di dalamnya, kalau ada, hapus dulu sampai karakter '|'
+            $keterangan_parts = explode('|', $accounting->keterangan);
+            foreach ($keterangan_parts as $part) {
+                if (strpos($part, 'sisa:') === false) {
+                    $keterangan .= $part . '|';
+                }
+            }
+            if ($keterangan === '|') {
+                $keterangan = '';
+            }
+        }
+        if ($payment < $accounting->jumlah) {
+            // Cek apakah karakter terakhir adalah '|', kalau bukan, tambahkan '|'
+            if ($keterangan !== '' && substr($keterangan, -1) !== '|') {
+                $keterangan .= '|';
+            }
+            $keterangan .= 'sisa:' . ($accounting->jumlah - $payment) . '|';
+        }
+
+        if ($keterangan === '') {
+            $keterangan = null;
+        }
+
+        return $keterangan;
     }
 }

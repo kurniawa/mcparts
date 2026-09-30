@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Accounting;
 use App\Models\AccountingInvoice;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\Overpayment;
 // use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 
 class AccountingInvoiceController extends Controller
 {
@@ -132,6 +134,8 @@ class AccountingInvoiceController extends Controller
     public function edit_payment_history(Nota $nota)
     {
         $accountingInvoices = AccountingInvoice::where('invoice_id', $nota->id)->where('invoice_table', 'notas')->orderBy('created_at', 'asc')->get();
+        $available_accounting_invoices = AccountingInvoice::whereNull('invoice_id')->whereNull('accounting_id')->where('invoice_table', 'notas')->where('customer_id', $nota->pelanggan_id)->get();
+        $available_accountings = Accounting::where('pelanggan_id', $nota->pelanggan_id)->where('keterangan', 'LIKE', '%sisa%')->orderBy('created_at', 'asc')->get();
 
         $data = [
             'menus' => Menu::get(),
@@ -139,6 +143,8 @@ class AccountingInvoiceController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'nota' => $nota,
             'accountingInvoices' => $accountingInvoices,
+            'available_accounting_invoices' => $available_accounting_invoices,
+            'available_accountings' => $available_accountings,
         ];
 
         // dd($nota);
@@ -148,14 +154,91 @@ class AccountingInvoiceController extends Controller
 
     public function delete_payment_history(AccountingInvoice $accountingInvoice)
     {
-        // dump($accountingInvoice);
-        // dd($accountingInvoice->accounting->accounting_invoices);
-        $paid = 0;
-        foreach ($accountingInvoice->accounting->accounting_invoices as $acc_inv) {
-            dump($acc_inv->amount_paid);
-            $paid += $acc_inv->amount_paid;
+        DB::beginTransaction();
+        try {
+            $accounting = $accountingInvoice->accounting;
+            $nota = $accountingInvoice->nota;
+
+            // Update AccountingInvoice
+            $accountingInvoice->update([
+                'accounting_time_key' => null,
+                'accounting_id' => null,
+                'invoice_id' => null,
+                'invoice_number' => null,
+            ]);
+
+            // Update Keterangan Accounting
+            $accounting->keterangan = $accounting->updateKeteranganAccounting($accounting);
+            $accounting->save();
+
+            // Update Nota
+            $nota->amount_paid -= $accountingInvoice->amount_paid;
+            $nota->balance_used -= $accountingInvoice->balance_used;
+            $nota->amount_due += ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
+            $nota->status_bayar = $nota->UpdatePaymentStatus();
+            $nota->save();
+
+            DB::commit();
+
+            return redirect()->back()->with('success_', 'Data history pembayaran berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            $message = "Error: " . $e->getMessage()
+                . "\n\nFile: " . $e->getFile()
+                . "\n\nFile: " . $e->getLine()
+                . "\n\nTrace: " . $e->getTraceAsString();
+            dd($message);
+
+            return redirect()->back()->with('errors_', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
-        dump($paid);
-        dd($accountingInvoice->accounting->jumlah);
+        
+    }
+
+    public function add_payment_history(Request $request, Nota $nota)
+    {
+        $validated = $request::validate([
+            'accounting_invoice_id' => 'required|exists:accounting_invoices,id',
+            'accounting_id' => 'required|exists:accountings,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $accountingInvoice = AccountingInvoice::findOrFail($validated['accounting_invoice_id']);
+            $accounting = Accounting::findOrFail($validated['accounting_id']);
+
+            // Update AccountingInvoice
+            $accountingInvoice->update([
+                'accounting_time_key' => $accounting->time_key,
+                'accounting_id' => $accounting->id,
+                'invoice_id' => $nota->id,
+                'invoice_number' => $nota->nomor_nota,
+            ]);
+
+            // Update Keterangan Accounting
+            $accounting->keterangan = $accounting->updateKeteranganAccounting($accounting);
+            $accounting->save();
+
+            // Update Nota
+            $nota->amount_paid += $accountingInvoice->amount_paid;
+            $nota->balance_used += $accountingInvoice->balance_used;
+            $nota->amount_due -= ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
+            $nota->status_bayar = $nota->UpdatePaymentStatus();
+            $nota->save();
+
+            DB::commit();
+            return back()->with('success_', 'Data history pembayaran berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            $message = "Error: " . $e->getMessage()
+                . "\n\nFile: " . $e->getFile()
+                . "\n\nFile: " . $e->getLine()
+                . "\n\nTrace: " . $e->getTraceAsString();
+            dd($message);
+
+            return redirect()->back()->with('errors_', 'Terjadi kesalahan saat menambahkan data: ' . $e->getMessage());
+        }
+
     }
 }
