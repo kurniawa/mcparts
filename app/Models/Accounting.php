@@ -373,4 +373,37 @@ class Accounting extends Model
 
         return $new_balance;
     }
+
+    public function updateKeteranganAccounting(Accounting $accounting) {
+        $payment = 0;
+        foreach ($accounting->accounting_invoices as $acc_inv) {
+            $payment += $acc_inv->amount_paid;
+        }
+        $keterangan = '';
+        if ($accounting->keterangan) {
+            // Analisa $accounting->keterangan, apakah ada string 'sisa:' di dalamnya, kalau ada, hapus dulu sampai karakter '|'
+            $keterangan_parts = explode('|', $accounting->keterangan);
+            foreach ($keterangan_parts as $part) {
+                if (strpos($part, 'sisa:') === false) {
+                    $keterangan .= $part . '|';
+                }
+            }
+            if ($keterangan === '|') {
+                $keterangan = '';
+            }
+        }
+        if (bccomp((string)$payment, (string)$accounting->jumlah, 2) !== 0) {
+            // Cek apakah karakter terakhir adalah '|', kalau bukan, tambahkan '|'
+            if ($keterangan !== '' && substr($keterangan, -1) !== '|') {
+                $keterangan .= '|';
+            }
+            $keterangan .= 'sisa:' . ($accounting->jumlah - $payment) . '|';
+        }
+
+        if ($keterangan === '') {
+            $keterangan = null;
+        }
+
+        return $keterangan;
+    }
 }

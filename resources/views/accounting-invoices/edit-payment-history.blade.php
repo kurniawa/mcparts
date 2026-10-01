@@ -198,7 +198,7 @@
                     @if (count($available_accounting_invoices) === 0)
                     <div class="text-center italic text-slate-500">kosong</div>
                     @else
-                    <form action="{{ route('accounting_invoices.add_payment_history', [$nota->id, $accountingInvoice->id]) }}" method="POST" onsubmit="return confirm('Yakin menambahkan histori pembayaran ini?')">
+                    <form action="{{ route('accounting_invoices.add_payment_history', [$nota->id]) }}" method="POST" onsubmit="return confirm('Yakin menambahkan histori pembayaran ini?')">
                     @csrf
                     @method('PATCH')
                         <div class="flex gap-1 items-center justify-center">
@@ -217,7 +217,14 @@
                                 <tr>
                                     <td class="text-center align-middle"><input type="radio" name="accounting_id" value="{{ $accounting->id }}" required></td>
                                     <td class="border-x px-1">{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
-                                    <td><div class="text-emerald-500 font-bold px-1">{{ number_format($accounting->jumlah,0,',','.') }}</div></td>
+                                    <td>
+                                        <div class="text-emerald-500 font-bold px-1">{{ number_format($accounting->jumlah,0,',','.') }}</div>
+                                        {{-- {{ dump($accounting->keterangan) }} --}}
+                                        @php preg_match('/sisa:(-?\d+)\|/', $accounting->keterangan, $matches); @endphp
+                                        @if ($matches[1] ?? false)
+                                        <div class="text-pink-500 font-bold px-1">s:{{ number_format((int) $matches[1], 0, ',', '.') }}</div>
+                                        @endif
+                                    </td>
                                     <td class="border-x px-1">{{ $accounting->kode }}</td>
                                 </tr>
                                 @endforeach

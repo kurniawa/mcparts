@@ -258,7 +258,7 @@ Route::controller(AccountingInvoiceController::class)->group(function(){
     Route::post('/accounting-invoices/{accounting_invoice}/delete-payment-history','delete_payment_history')->name('accounting_invoices.delete_payment_history')->middleware('auth');
     Route::get('/accounting-invoices/{nota}/edit-payment-history','edit_payment_history')->name('accounting_invoices.edit_payment_history')->middleware('auth');
     Route::delete('/accounting-invoices/{accounting_invoice}/delete-payment-history','delete_payment_history')->name('accounting_invoices.delete_payment_history')->middleware('auth');
-    Route::patch('/accounting-invoices/{nota}/{accounting_invoice}/add-payment-history','add_payment_history')->name('accounting_invoices.add_payment_history')->middleware('auth');
+    Route::patch('/accounting-invoices/{nota}/add-payment-history','add_payment_history')->name('accounting_invoices.add_payment_history')->middleware('auth');
 });
 
 Route::controller(EmployeeController::class)->middleware('auth')->group(function () {

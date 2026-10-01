@@ -147,7 +147,7 @@ class AccountingInvoiceController extends Controller
             'available_accountings' => $available_accountings,
         ];
 
-        // dd($nota);
+        // dd($available_accounting_invoices);
 
         return view('accounting-invoices.edit-payment-history', $data);
     }
@@ -171,12 +171,8 @@ class AccountingInvoiceController extends Controller
             $accounting->keterangan = $accounting->updateKeteranganAccounting($accounting);
             $accounting->save();
 
-            // Update Nota
-            $nota->amount_paid -= $accountingInvoice->amount_paid;
-            $nota->balance_used -= $accountingInvoice->balance_used;
-            $nota->amount_due += ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
-            $nota->status_bayar = $nota->UpdatePaymentStatus();
-            $nota->save();
+            // Update Nota, hitung ulang dari semua accounting invoice yang terkait dengan nota ini
+            $nota->updateNotaAndAllRelatedAccountingInvoices();
 
             DB::commit();
 
@@ -219,12 +215,8 @@ class AccountingInvoiceController extends Controller
             $accounting->keterangan = $accounting->updateKeteranganAccounting($accounting);
             $accounting->save();
 
-            // Update Nota
-            $nota->amount_paid += $accountingInvoice->amount_paid;
-            $nota->balance_used += $accountingInvoice->balance_used;
-            $nota->amount_due -= ($accountingInvoice->amount_paid + $accountingInvoice->balance_used);
-            $nota->status_bayar = $nota->UpdatePaymentStatus();
-            $nota->save();
+            // Update Nota, hitung ulang dari semua accounting invoice yang terkait dengan nota ini
+            $nota->updateNotaAndAllRelatedAccountingInvoices();
 
             DB::commit();
             return back()->with('success_', 'Data history pembayaran berhasil ditambahkan.');

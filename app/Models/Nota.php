@@ -347,4 +347,43 @@ class Nota extends Model
         ->where('invoice_table', 'notas')
         ->latest('created_at');
     }
+
+    public function updateNotaAndAllRelatedAccountingInvoices() {
+        $accounting_invoices = $this->accountingInvoices()->get();
+        $sum_amount_paid = 0;
+        $sum_balance_used = 0;
+        $sum_total_discount = 0;
+        $sum_amount_due = $this->harga_total;
+        $payment_status = 'BELUM_LUNAS';
+        foreach ($accounting_invoices as $accounting_invoice) {
+            $sum_amount_paid += $accounting_invoice->amount_paid;
+            $sum_balance_used += $accounting_invoice->balance_used;
+            $sum_total_discount += $accounting_invoice->total_discount;
+            $sum_amount_due -= ($accounting_invoice->amount_paid + $accounting_invoice->balance_used + $accounting_invoice->total_discount);
+
+            $accounting_invoice->amount_due = $sum_amount_due;
+            $accounting_invoice->amount_paid_total = $sum_amount_paid + $sum_balance_used;
+
+            // Update payment_status dari masing-masing accounting_invoice berdasarkan kondisi yang ada
+            if ($sum_amount_due == 0) {
+                $payment_status = 'LUNAS';
+            } else if (($sum_amount_paid + $sum_balance_used) == 0 && ($sum_amount_due == ($this->harga_total - $sum_total_discount) || $sum_amount_due == $this->harga_total)) {
+                $payment_status = 'BELUM_LUNAS'; 
+            } else if (($sum_amount_paid + $sum_balance_used) > 0 && ($sum_amount_due < ($this->harga_total - $sum_total_discount) && $sum_amount_due < $this->harga_total)) {
+                $payment_status = 'SEBAGIAN';
+            }
+
+            $accounting_invoice->payment_status = $payment_status;
+            $accounting_invoice->updated_by = Auth::user()->username;
+            $accounting_invoice->save();
+        }
+        // Update the nota's payment status and amounts based on the sums calculated
+        $this->amount_paid = $sum_amount_paid;
+        $this->balance_used = $sum_balance_used;
+        $this->total_discount = $sum_total_discount;
+        $this->amount_due = $sum_amount_due;
+        $this->status_bayar = $payment_status;
+        $this->updated_by = Auth::user()->username;
+        $this->save();
+    }
 }
