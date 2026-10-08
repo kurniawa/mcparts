@@ -13,10 +13,24 @@ class FilterForm extends Component
      */
     public string $action;
     public bool $showCustomer;
-    public function __construct(string $action = '', bool $showCustomer = true)
+    public ?string $timerange;
+    public ?string $fromDay;
+    public ?string $fromMonth;
+    public ?string $fromYear;
+    public ?string $toDay;
+    public ?string $toMonth;
+    public ?string $toYear;
+    public function __construct(string $action = '', bool $showCustomer = true, ?string $timerange = null, ?string $fromDay = null, ?string $fromMonth = null, ?string $fromYear = null, ?string $toDay = null, ?string $toMonth = null, ?string $toYear = null)
     {
         $this->action = $action;
         $this->showCustomer = $showCustomer;
+        $this->timerange = $timerange;
+        $this->fromDay = $fromDay;
+        $this->fromMonth = $fromMonth;
+        $this->fromYear = $fromYear;
+        $this->toDay = $toDay;
+        $this->toMonth = $toMonth;
+        $this->toYear = $toYear;
     }
 
     /**

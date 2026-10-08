@@ -23,6 +23,46 @@ use Illuminate\Support\Facades\DB;
 
 class NotaController extends Controller
 {
+    public function show(Nota $nota) {
+        $spk = $nota->spk[0];
+        // dd($spk);
+        $data_spk = Spk::get_data_SPK($spk);
+        $user = Auth::user();
+        $data = [
+            'menus' => Menu::get(),
+            'route_now' => 'spks.create',
+            'profile_menus' => Menu::get_profile_menus(),
+            'spk' => $spk,
+            'nama_pelanggan' => $data_spk['data_spk_nota_srjalans']['nama_pelanggan'],
+            'spk_produks' => $data_spk['data_spk_nota_srjalans']['spk_produks'],
+            'notas' => $data_spk['data_spk_nota_srjalans']['notas'],
+            'cust_kontaks' => $data_spk['data_spk_nota_srjalans']['cust_kontaks'],
+            'col_spk_produk_notas' => $data_spk['data_spk_nota_srjalans']['col_spk_produk_notas'],
+            'col_srjalans' => $data_spk['data_spk_nota_srjalans']['col_srjalans'],
+            'col_ekspedisi_kontaks' => $data_spk['data_spk_nota_srjalans']['col_ekspedisi_kontaks'],
+            'col_col_spk_produk_nota_srjalans' => $data_spk['data_spk_nota_srjalans']['col_col_spk_produk_nota_srjalans'],
+            'data_spk_produks' => $data_spk['data_spk_nota_srjalans']['data_spk_produks'],
+            'data_spk_produk_notas' => $data_spk['data_spk_nota_srjalans']['data_spk_produk_notas'],
+            'label_pelanggans' => $data_spk['label_pelanggans'],
+            'label_produks' => $data_spk['label_produks'],
+            'data_packings' => $data_spk['data_packings'],
+            'alamat_id_terpilih' => $data_spk['alamat_id_terpilih'],
+            'pilihan_alamat' => $data_spk['pilihan_alamat'],
+            'pilihan_kontak' => $data_spk['pilihan_kontak'],
+            'kontak_id_terpilih' => $data_spk['kontak_id_terpilih'],
+            'pilihan_ekspedisi' => $data_spk['pilihan_ekspedisi'],
+            'pilihan_transit' => $data_spk['pilihan_transit'],
+            'pilihan_srjalan' => $data_spk['pilihan_srjalan'],
+            'user' => $user,
+        ];
+        // dump($data_spk_nota_srjalans['notas']);
+        // dd($data_spk_nota_srjalans['col_srjalans']);
+        // dd($data_spk_nota_srjalans['notas'][0]);
+        // dd($data_packings);
+        // dd($data_spk_nota_srjalans['col_srjalans']);
+        return view('spks.show', $data);
+    }
+
     public function create_or_edit_jumlah_spk_produk_nota(Spk $spk, SpkProduk $spk_produk, Request $request) {
         $post = $request->post();
         // dump($post['jumlah']);
@@ -173,6 +213,7 @@ class NotaController extends Controller
         $success_ = '';
 
         // Mulai transaksi untuk menjaga konsistensi
+        $work_with_existing_invoice = false;
         DB::beginTransaction();
 
         try {
@@ -220,7 +261,7 @@ class NotaController extends Controller
                     'copy' => $spk->copy,
                 ]);
 
-                $nota->no_nota = "N-$nota->id";
+                $nota->nomor_nota = "N-$nota->id";
                 $nota->save();
 
                 SpkNota::create([
@@ -234,6 +275,7 @@ class NotaController extends Controller
                 if (!$nota) {
                     return back()->withErrors(['error' => 'Nota tidak ditemukan.']);
                 }
+                $work_with_existing_invoice = true;
             }
 
             // Proses semua produk dalam SPK
@@ -276,8 +318,15 @@ class NotaController extends Controller
             // dd($nota);
 
             // Update status pembayaran dan related accounting_invoices
-
-            $nota->updatePaymentAndAccountingInvoice();
+            if ($work_with_existing_invoice) {
+                $accounting_invoice = $nota->lastAccountingInvoice;
+                $accounting_invoice->update([
+                    'total_amount' => $harga_total,
+                    'amount_due' => $harga_total
+                ]);
+            } elseif (!$work_with_existing_invoice) {
+                $nota->updatePaymentAndAccountingInvoice_NewInvoice();
+            }
             $success_ .= ' - nota diperbarui -';
 
             DB::commit();
@@ -286,7 +335,12 @@ class NotaController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Gagal membuat nota: ' . $e->getMessage()]);
+            $message = "Error: " . $e->getMessage()
+                . "\n\nFile: " . $e->getFile()
+                . "\n\nFile: " . $e->getLine()
+                . "\n\nTrace: " . $e->getTraceAsString();
+            dd($message);
+            // return back()->withErrors(['error' => 'Gagal membuat nota: ' . $e->getMessage()]);
         }
     }
 
@@ -299,6 +353,7 @@ class NotaController extends Controller
             $request->validate(['error'=>'required'],['error.required'=>'created_at?']);
         }
         if ($post['finished_day'] !== null) {
+            return back()->with('errors_', "Tanggal selesai dapat diubah melalui laman Accounting, yakni pada input transaksi 'PENERIMAAN PIUTANG'");
             if ($post['finished_month'] === null || $post['finished_year'] === null) {
                 $request->validate(['error'=>'required'],['error.required'=>'finished_at?']);
             }
@@ -324,6 +379,19 @@ class NotaController extends Controller
         $nota->updated_by = $user->username;
         $nota->save();
         $success_ = '-$nota->created_at, finished_at updated-';
+        return back()->with('success_', $success_);
+    }
+
+    public function DeleteFinishedAt(Nota $nota) {
+        // dump($nota);
+        $user = Auth::user();
+        $nota->finished_at = null;
+        $nota->status_bayar = 'BELUM_LUNAS';
+        $nota->amount_due = $nota->harga_total;
+        $nota->amount_paid = 0;
+        $nota->updated_by = $user->username;
+        $nota->save();
+        $success_ = '$nota->finished_at deleted-';
         return back()->with('success_', $success_);
     }
 
@@ -499,16 +567,48 @@ class NotaController extends Controller
         $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
 
         $harga_total = 0;
-        foreach ($spk_produk_notas as $spk_produk_nota) {
-            $harga_total += $spk_produk_nota->harga_t;
+        foreach ($spk_produk_notas as $spn) {
+            $harga_total += $spn->harga_t;
         }
 
-        $nota->harga_total = $harga_total;
-        $nota->save();
-        $success_ .= '-nota:harga_total updated-';
+        if ($nota->harga_total != $harga_total) {
+            $nota->harga_total = $harga_total;
+            $nota->amount_due = $nota->harga_total - $nota->amount_paid;
+            $nota->status_bayar = $nota->UpdatePaymentStatus();
+            $nota->save();
+            $success_ .= 'nota:harga_total status_bayar & amount_due updated-';
+
+            // UPDATE ACCOUNTING_INVOICE
+            if ($nota->updateLastAccountingInvoice()) {
+                $success_ .= '-accounting_invoice updated-';
+            }
+        }
 
         return back()->with('success_', $success_);
     }
 
-    
+    function update_status_bayar_nota(Nota $nota, Request $request) {
+        // dump($request->post());
+        // dd($nota);
+
+        $validatedData = $request->validate([
+            'status_bayar' => 'required|in:LUNAS,BELUM_LUNAS,SEBAGIAN',
+            'amount_paid' => 'required|numeric|min:0',
+            'amount_due' => 'required|numeric|min:0',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $nota->status_bayar = $validatedData['status_bayar'];
+            $nota->amount_paid = $validatedData['amount_paid'];
+            $nota->amount_due = $validatedData['amount_due'];
+            $nota->save();
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dd($th);
+        }
+
+        return back()->with('success_', 'Status pembayaran nota berhasil diperbarui.');
+    }
 }

@@ -21,3 +21,5 @@ yarn-error.log
 .HTACCESS
 composer.lock
 package-lock.json
+vendor.zip
+node_modules.zip

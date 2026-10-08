@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alamat;
+use App\Models\Kategori;
 use App\Models\Menu;
 use App\Models\Pelanggan;
 use App\Models\Supplier;
@@ -10,6 +11,7 @@ use App\Models\SupplierAlamat;
 use App\Models\SupplierKontak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SupplierController extends Controller
 {
@@ -40,6 +42,7 @@ class SupplierController extends Controller
         // END - ALAMAT_KONTAK
 
         $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
+        // dd($label_kategori_uang_keluar);
 
         $data = [
             'menus' => Menu::get(),
@@ -149,6 +152,8 @@ class SupplierController extends Controller
             $alamats->push($alamat);
         }
         $supplier_kontaks = SupplierKontak::where('supplier_id', $supplier->id)->get();
+        $label_kategori_uang_keluar = Kategori::kategoriUangKeluar();
+        $label_kategori = ['BIAYA BAHAN BAKU', 'BIAYA BAHAN PENDUKUNG', 'BIAYA PENGIRIMAN BARANG', 'BIAYA UTILITAS', 'PAJAK', 'BIAYA INVENTARIS (PERALATAN DAN PERLENGKAPAN)', 'BIAYA MAINTENANCE', 'BIAYA LAIN-LAIN'];
 
         $data = [
             // 'goback' => 'home',
@@ -161,6 +166,8 @@ class SupplierController extends Controller
             'alamats' => $alamats,
             'supplier_kontaks' => $supplier_kontaks,
             'tipe_kontaks' => Alamat::tipe_kontaks(),
+            'label_kategori_uang_keluar' => $label_kategori_uang_keluar,
+            'label_kategori' => $label_kategori,
         ];
         // dd($alamats);
         // dd($alamat_ekspedisis);
@@ -329,5 +336,36 @@ class SupplierController extends Controller
     function delete(Supplier $supplier) {
         $supplier->delete();
         return back()->with('danger_', '-supplier deleted-');
+    }
+
+    function update_kategori(Supplier $supplier, Request $request) {
+        // $post = $request->post();
+        // dd($post);
+        $validated = $request->validate([
+            'kategori_id' => 'nullable|numeric',
+            'kategori_nama' => 'required|string|max:100',
+        ]);
+        if (!isset($validated['kategori_id'])) {
+            $validated['kategori_id'] = null;
+        }
+        DB::beginTransaction();
+        try {
+            $supplier->update([
+                'kategori_id' => $validated['kategori_id'],
+                'kategori_nama' => $validated['kategori_nama'],
+            ]);
+            foreach ($supplier->barangs as $barang) {
+                $barang->update([
+                    'kategori_id' => $validated['kategori_id'],
+                    'kategori_nama' => $validated['kategori_nama'],
+                ]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('danger_', '-kategori update failed.-');
+        }
+
+        return back()->with('success_', '-kategori updated.-');
     }
 }

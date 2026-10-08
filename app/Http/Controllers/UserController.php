@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -47,9 +48,21 @@ class UserController extends Controller
     }
 
     function update_password(Request $request) {
-        $post = $request->post();
-        dd($post);
-        return back();
+        // 1. Validasi input sesuai dengan field yang Anda post
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'], 
+            'new_password'     => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()], // Otomatis mencari 'new_password_confirmation'
+        ]);
+
+        // 2. Ambil data user yang sedang login
+        $user = User::find(Auth::id());
+
+        // 3. Update password menggunakan field 'new_password'
+        $user->password = Hash::make($validated['new_password']);
+        $user->save();
+
+        // 4. Kembali ke halaman sebelumnya dengan pesan sukses
+        return redirect()->back()->with('status', 'Password berhasil diperbarui.');
     }
 
     function update_photo(User $user, Request $request) {

@@ -32,8 +32,8 @@ return new class extends Migration
             // $table->string('data_selesai')->nullable();
             // $table->string('data_nota')->nullable();
             // $table->string('data_srjalan')->nullable();
-            // $table->string('status_nota')->nullable()->default('BELUM');
-            // $table->string('status_srjalan')->nullable()->default('BELUM');
+            // $table->string('status_nota')->nullable()->default('BELUM_LUNAS');
+            // $table->string('status_srjalan')->nullable()->default('BELUM_LUNAS');
             // Ketika SPK Selesai: tanggal, nama_produk
             $table->string('nama_produk')->nullable(); // nama produk nullable mungkin karena tadinya memang tidak perlu diisi, tetapi nanti ke depannya untuk database aslinya diubah tidak nullable
             $table->timestamp('finished_at')->nullable();

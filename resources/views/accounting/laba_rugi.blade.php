@@ -16,7 +16,8 @@
             </div> --}}
         </div>
         <div class="mt-2">
-            <x-filter-form :action="route('accounting.laba_rugi')" :showCustomer="false"></x-filter-form>
+            {{-- {{ dump($timerange) }} --}}
+            <x-filter-form :action="route('accounting.laba_rugi')" :showCustomer="false" :timerange="$timerange" :fromDay="$from_day" :fromMonth="$from_month" :fromYear="$from_year" :toDay="$to_day" :toMonth="$to_month" :toYear="$to_year"></x-filter-form>
         </div>
         <div class="mt-2">
             <table class="table-nice">
@@ -26,15 +27,21 @@
                         <th>NAMA AKUN</th>
                     </tr>
                 </thead>
-                <tr>
-                    <td></td>
-                    <td class="font-bold">PENDAPATAN</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td class="text-left">PENJUALAN BARANG DAN JASA</td>
-                    <td>{{ number_format($penjualan_barang_dan_jasa, 0, ',', '.') }}</td>
-                </tr>
+                <tbody>
+                    @foreach ($income_statement as $section)
+                        <tr>
+                            <td></td>
+                            <td class="font-bold">{{ $section['name'] }}</td>
+                        </tr>
+                        @foreach ($section['childs'] as $account)
+                            <tr>
+                                <td></td>
+                                <td class="text-left">{{ $account['name'] }}</td>
+                                <td>{{ number_format($account['amount'], 0, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                </tbody>
             </table>
         </div>
     </div>

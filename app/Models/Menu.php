@@ -19,12 +19,14 @@ class Menu extends Model
                 ['name'=>'Penjualan','route'=>'penjualans.index'],
                 ['name'=>'Pembelian','route'=>'pembelians.index'],
                 ['name'=>'Accounting','route'=>'accounting.index'],
+                ['name'=>'Employee','route'=>'employees.index'],
             ]);
         } else {
             $menus = collect([
                 ['name'=>'Penjualan','route'=>'penjualans.index'],
                 ['name'=>'Pembelian','route'=>'pembelians.index'],
                 ['name'=>'Accounting','route'=>'accounting.index'],
+                ['name'=>'Employee','route'=>'employees.index'],
                 ['name'=>'Artisan','route'=>'artisan.index'],
             ]);
         }
@@ -58,6 +60,7 @@ class Menu extends Model
             ['name'=>'Pelanggan','route'=>'pelanggans.index'],
             ['name'=>'Ekspedisi','route'=>'ekspedisis.index'],
             ['name'=>'Produk','route'=>'produks.index'],
+            ['name'=>'Giro','route'=>'bilyet-giros.index'],
         ]);
 
         return $menus;

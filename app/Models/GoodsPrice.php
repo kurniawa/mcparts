@@ -9,4 +9,7 @@ class GoodsPrice extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+    protected $casts = [
+        'price'  => 'decimal:2',
+    ];
 }

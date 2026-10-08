@@ -13,7 +13,7 @@ return new class extends Migration
     {
         // 1. Tambahkan kolom time_key yang nullable dulu
         Schema::table('accountings', function (Blueprint $table) {
-            $table->bigInteger('time_key')->after('status')->nullable();
+            $table->bigInteger('time_key')->after('id')->nullable();
         });
 
         // 2. Isi kolom time_key berdasarkan created_at (pakai raw SQL lebih cepat)

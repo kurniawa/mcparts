@@ -41,7 +41,7 @@
                                     <td>Satuan Utama</td><td><div class="mx-1">:</div></td><td><input type="text" name="satuan_main" value="{{ $barang->satuan_main }}" class="text-xs rounded p-1 w-3/4"></td>
                                     <td>Jumlah</td><td><div class="mx-1">:</div></td>
                                     <td>
-                                        <input type="number" name="jumlah_main" id="jumlah_main" value="{{ $barang->jumlah_main / 100 }}" class="text-xs rounded p-1 w-3/4" oninput="count_harga_total_main()">
+                                        <input type="number" name="jumlah_main" id="jumlah_main" value="{{ $barang->jumlah_main }}" class="text-xs rounded p-1 w-3/4" oninput="count_harga_total_main()">
                                     </td>
                                     <td>Harga</td><td><div class="mx-1">:</div></td>
                                     <td>
@@ -58,7 +58,7 @@
                                     <td>Satuan Sub</td><td><div class="mx-1">:</div></td><td><input type="text" name="satuan_sub" value="{{ $barang->satuan_sub }}" class="text-xs rounded p-1 w-3/4"></td>
                                     <td>Jumlah</td><td><div class="mx-1">:</div></td>
                                     <td>
-                                        <input type="number" name="jumlah_sub" id="jumlah_sub" value="{{ $barang->jumlah_sub / 100 }}" class="text-xs rounded p-1 w-3/4" oninput="count_harga_total_sub()">
+                                        <input type="number" name="jumlah_sub" id="jumlah_sub" value="{{ $barang->jumlah_sub }}" class="text-xs rounded p-1 w-3/4" oninput="count_harga_total_sub()">
                                     </td>
                                     <td>Harga</td><td><div class="mx-1">:</div></td>
                                     <td>

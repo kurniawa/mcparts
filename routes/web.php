@@ -2,11 +2,16 @@
 
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\AccountingController2;
+use App\Http\Controllers\AccountingController3;
+use App\Http\Controllers\AccountingInvoiceController;
 use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BilyetGiroController;
 use App\Http\Controllers\EkspedisiController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NeracaController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
@@ -77,15 +82,18 @@ Route::controller(SpkController::class)->group(function(){
 });
 
 Route::controller(NotaController::class)->group(function(){
+    Route::get('/notas/{nota}/show','show')->name('notas.show')->middleware('auth');
     Route::get('/notas/{nota}/print_out','print_out')->name('notas.print_out');
     Route::post('/notas/{spk}/{spk_produk}/create_or_edit_jumlah_spk_produk_nota','create_or_edit_jumlah_spk_produk_nota')->name('notas.create_or_edit_jumlah_spk_produk_nota')->middleware('auth');
     Route::post('/notas/{spk}/{nota}/delete','delete')->name('notas.delete')->middleware('auth');
     Route::post('/notas/{spk}/nota_all','nota_all')->name('notas.nota_all')->middleware('auth');
     Route::post('/notas/{nota}/edit_tanggal','edit_tanggal')->name('notas.edit_tanggal')->middleware('auth');
+    Route::post('/notas/{nota}/delete-finished-at','DeleteFinishedAt')->name('notas.DeleteFinishedAt')->middleware('auth');
     Route::post('/notas/{spk}/{spk_produk_nota}/delete_item','delete_item')->name('notas.delete_item')->middleware('auth');
     Route::post('/notas/{spk}/edit_alamat','edit_alamat')->name('notas.edit_alamat')->middleware('auth');
     Route::post('/notas/{spk}/edit_kontak','edit_kontak')->name('notas.edit_kontak')->middleware('auth');
     Route::post('/notas/{spk}/{nota}/{spk_produk_nota}/edit_harga_item','edit_harga_item')->name('notas.edit_harga_item')->middleware('auth');
+    Route::patch('/notas/{nota}/update_status_bayar_nota','update_status_bayar_nota')->name('notas.update_status_bayar_nota')->middleware('auth');
 });
 
 Route::controller(SrjalanController::class)->group(function(){
@@ -179,6 +187,7 @@ Route::controller(PembelianController::class)->group(function(){
     Route::post('/pembelians/{pembelian}/pelunasan','pelunasan')->name('pembelians.pelunasan');
     Route::post('/pembelians/{pembelian}/pembatalan_pelunasan','pembatalan_pelunasan')->name('pembelians.pembatalan_pelunasan');
     Route::post('/pembelians/{pembelian}/{pembelian_barang}/delete_pembelian_barang','delete_pembelian_barang')->name('pembelians.delete_pembelian_barang');
+    Route::post('/pembelians/{pembelian_barang}/change','changePembelianBarang')->name('pembelians.changePembelianBarang');
 });
 
 Route::controller(BarangController::class)->group(function(){
@@ -188,6 +197,7 @@ Route::controller(BarangController::class)->group(function(){
     Route::post('/barangs/{barang}/update','update')->name('barangs.update');
     Route::post('/barangs','store')->name('barangs.store');
     Route::post('/barangs/{barang}/delete','delete')->name('barangs.delete');
+    Route::patch('/barangs/{barang}/update_kategori','update_kategori')->name('barangs.update_kategori');
 });
 
 Route::controller(SupplierController::class)->group(function(){
@@ -203,6 +213,7 @@ Route::controller(SupplierController::class)->group(function(){
     Route::post('/suppliers/{supplier_kontak}/kontak_edit','kontak_edit')->name('suppliers.kontak_edit')->middleware('auth');
     Route::post('/suppliers/{supplier_kontak}/kontak_delete','kontak_delete')->name('suppliers.kontak_delete')->middleware('auth');
     Route::post('/suppliers/{supplier}/{supplier_kontak}/kontak_utama','kontak_utama')->name('suppliers.kontak_utama')->middleware('auth');
+    Route::patch('/suppliers/{supplier}/update_kategori','update_kategori')->name('suppliers.update_kategori')->middleware('auth');
 });
 
 Route::controller(AccountingController::class)->group(function(){
@@ -221,12 +232,47 @@ Route::controller(AccountingController::class)->group(function(){
     Route::post('/accounting/store_transactions_relations','store_transactions_relations')->name('accounting.store_transactions_relations')->middleware('auth');
     Route::post('/accounting/{transaction_name}/delete_transaction_relation','delete_transaction_relation')->name('accounting.delete_transaction_relation')->middleware('auth');
     Route::post('/accounting/{user_instance}/{accounting}/up_down_transaction','up_down_transaction')->name('accounting.up_down_transaction')->middleware('auth');
-});
-
+    });
+    
 Route::controller(AccountingController2::class)->group(function(){
     Route::get('/accounting/laba-rugi','laba_rugi')->name('accounting.laba_rugi')->middleware('auth');
     Route::get('/accounting/{transaction_name}/get-related-not-yet-paid-off-invoices','getRelatedNotYetPaidOffInvoices')->name('accounting.get_related_not_yet_paid_off_invoices')->middleware('auth');
+    Route::get('/accounting/{nota}/search_related_accounting','search_related_accounting')->name('accounting.search_related_accounting')->middleware('auth');
+    Route::post('/accounting/{nota}/{accounting}/link_nota_accounting','link_nota_accounting')->name('accounting.link_nota_accounting')->middleware('auth');
+    Route::post('/accounting/{accounting}/change_date','change_date')->name('accounting.change_date')->middleware('auth');
+    Route::post('/accounting/{accounting}/change_sum','change_sum')->name('accounting.change_sum')->middleware('auth');
+    Route::get('/accounting/{user_instance}/kliring_bg','kliring_bg')->name('accounting.kliring_bg')->middleware('auth');
+    Route::post('/accounting/{user_instance}/store_kliring_bg','store_kliring_bg')->name('accounting.store_kliring_bg')->middleware('auth');
 });
+
+Route::controller(AccountingController3::class)->group(function(){
+    Route::post('/accounting/{accounting}/{user_instance}/{bilyet_giro}/destroy_accounting_bg','destroy_accounting_bg')->name('accounting.destroy_accounting_bg')->middleware('auth');
+});
+
+Route::controller(NeracaController::class)->group(function(){
+    Route::get('/neraca/index','index')->name('neraca.index')->middleware('auth');
+});
+
+Route::controller(AccountingInvoiceController::class)->group(function(){
+    Route::post('/accounting-invoices/{nota}/{accounting_invoice}/delete-last-payment-customer','delete_last_payment_customer')->name('accounting_invoices.delete_last_payment_customer')->middleware('auth');
+    Route::post('/accounting-invoices/{accounting_invoice}/delete-payment-history','delete_payment_history')->name('accounting_invoices.delete_payment_history')->middleware('auth');
+    Route::get('/accounting-invoices/{nota}/edit-payment-history','edit_payment_history')->name('accounting_invoices.edit_payment_history')->middleware('auth');
+    Route::delete('/accounting-invoices/{accounting_invoice}/delete-payment-history','delete_payment_history')->name('accounting_invoices.delete_payment_history')->middleware('auth');
+    Route::patch('/accounting-invoices/{nota}/add-payment-history','add_payment_history')->name('accounting_invoices.add_payment_history')->middleware('auth');
+});
+
+Route::controller(EmployeeController::class)->middleware('auth')->group(function () {
+    Route::get('employees/export', 'export')->name('employees.export');
+    Route::post('employees/import', 'import')->name('employees.import');
+    Route::patch('employees/{employee}/activate', 'activate')->name('employees.activate');
+    Route::patch('employees/{employee}/deactivate', 'deactivate')->name('employees.deactivate');
+});
+
+Route::resource('employees', EmployeeController::class)->middleware('auth');
+
+Route::controller(BilyetGiroController::class)->middleware('auth')->group(function () {
+});
+Route::resource('bilyet-giros', BilyetGiroController::class)->middleware('auth');
 
 Route::controller(ArtisanController::class)->group(function(){
     Route::get('/artisan-command','index')->name('artisan.index')->middleware('auth');

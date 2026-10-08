@@ -404,7 +404,7 @@
                             @foreach ($notas as $key_pilih_nota => $nota)
                             <div class="flex items-center mt-1">
                                 <input type="radio" name="nota_id" id="pilih_nota_id-{{ $key_pilih_nota }}" value="{{ $nota['id'] }}">
-                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
+                                <label for="pilih_nota_id-{{ $key_pilih_nota }}" class="ml-1">{{ $nota['nomor_nota'] }}</label>
                             </div>
                             @endforeach
                             <div class="flex items-center mt-1">
@@ -460,7 +460,7 @@
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
                                     <input type="radio" name="nota_id" id="nota_id-{{ $key_nota }}" value="{{ $nota['id'] }}">
-                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
+                                    <label for="nota_id-{{ $key_nota }}" class="ml-1">{{ $nota['nomor_nota'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -494,7 +494,7 @@
                                 @foreach ($notas as $key_nota => $nota)
                                 <div class="flex item-center ml-2">
                                     <input type="radio" name="nota_id" id="nota_id_kontak-{{ $key_nota }}" value="{{ $nota['id'] }}">
-                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota['no_nota'] }}</label>
+                                    <label for="nota_id_kontak-{{ $key_nota }}" class="ml-1">{{ $nota['nomor_nota'] }}</label>
                                 </div>
                                 @endforeach
                             </div>
@@ -508,7 +508,7 @@
                     <div class="grid grid-cols-2">
                         <table class="w-full">
                             <tr>
-                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['no_nota'] }}</div></td>
+                                <td>No.</td><td>:</td><td><div class="font-bold text-sm text-slate-500">{{ $nota['nomor_nota'] }}</div></td>
                             </tr>
                             <tr>
                                 <td>Tgl.</td><td>:</td>
@@ -778,10 +778,33 @@
                     {{-- END - Nota Items --}}
                     {{-- OPSI NOTA --}}
                     <div class="flex justify-between">
-                        <div class="font-bold">
-                            <p>status: {{ $nota['status_bayar'] }}</p>
-                            <p class="text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'],0,',','.') }}</p>
-                            <p class="text-red-500">sisa bayar: {{ number_format($nota['amount_due'],0,',','.') }}</p>
+                        <div>
+                            <p class="font-bold">status: {{ $nota['status_bayar'] }}</p>
+                            <p class="font-bold text-emerald-500">pembayaran: {{ number_format($nota['amount_paid'] + $nota['balance_used'],0,',','.') }}</p>
+                            <p class="font-bold text-red-500">sisa bayar: {{ number_format($nota['amount_due'],0,',','.') }}</p>
+                            <button type="button" class="border border-slate-200 text-slate-500 rounded font-bold text-md px-1 mt-2" id="btn_ubah_status_bayar_nota-{{ $key_nota }}" onclick="toggle_light(this.id,'form_ubah_status_bayar_nota-{{ $key_nota }}',[],['bg-slate-200'], 'block')">Edit Status Bayar</button>
+                            <form id="form_ubah_status_bayar_nota-{{ $key_nota }}" action="{{ route('notas.update_status_bayar_nota', $nota['id']) }}" method="POST" class="hidden border rounded p-1 mt-1">
+                                @csrf
+                                @method('PATCH')
+                                <div class="grid grid-cols-2 gap-1 items-center">
+                                    <label for="status_bayar-{{ $key_nota }}">Ubah status:</label>
+                                    <select name="status_bayar" id="status_bayar-{{ $key_nota }}" class="rounded text-xs">
+                                        <option value="">-</option>
+                                        <option value="BELUM_LUNAS">BELUM_LUNAS</option>
+                                        <option value="LUNAS">LUNAS</option>
+                                        <option value="SEBAGIAN">SEBAGIAN</option>
+                                    </select>
+
+                                    <label for="amount_paid-{{ $key_nota }}">Jumlah pembayaran:</label>
+                                    <input type="number" name="amount_paid" id="amount_paid-{{ $key_nota }}" class="rounded text-xs">
+
+                                    <label for="amount_due-{{ $key_nota }}">Jumlah sisa bayar:</label>
+                                    <input type="number" name="amount_due" id="amount_due-{{ $key_nota }}" class="rounded text-xs">
+                                </div>
+                                <div class="text-center mt-2">
+                                    <button type="submit" class="bg-orange-200 text-orange-500 rounded px-2 py-1 text-sm">Konfirmasi</button>
+                                </div>
+                            </form>
                         </div>
                         <div class="flex justify-end mt-1 mb-2 items-center gap-1">
                             <a href="{{ route('notas.print_out', $nota['id']) }}" class="rounded text-slate-500">
@@ -801,6 +824,54 @@
                         </div>
                     </div>
                     {{-- END - OPSI NOTA --}}
+                    {{-- HISTORI PEMBAYARAN --}}
+                    <div class="mt-2">
+                        <h5 class="font-bold">Histori Pembayaran:</h5>
+                        @if (count($nota->accountingInvoices) === 0)
+                        <div class="text-center italic text-slate-500">kosong</div>
+                        @else
+                        <table id="histori-pembayaran-{{ $key_nota }}" class="w-full text-xs border border-collapse">
+                            <tr>
+                                <th>Tgl.</th><th>Sisa Bayar</th><th>Jumlah Bayar</th><th>Akun</th>
+                            </tr>
+                            @foreach ($nota->accountingInvoices as $key_acc_inv => $accountingInvoice)
+                            <tr>
+                                {{-- {{ dump($key_acc_inv) }} --}}
+                                <td class="text-center">{{ date('d-m-Y', strtotime($accountingInvoice->created_at)) }}</td>
+                                <td class="text-center">{{ number_format($accountingInvoice->amount_due,0,',','.') }}</td>
+                                <td class="text-center">
+                                    {{-- <div class="text-slate-500">{{ number_format(($accountingInvoice->accounting->jumlah),0,',','.') }}</div> --}}
+                                    <div class="text-emerald-500 font-bold">{{ number_format(($accountingInvoice->amount_paid + $accountingInvoice->balance_used),0,',','.') }}</div>
+                                    <div class="text-sky-400 font-bold">{{ number_format(($accountingInvoice->amount_paid_total),0,',','.') }}</div>
+                                </td>
+                                <td class="text-center">
+                                    {{ $accountingInvoice->user_instance_id ? 
+                                    ($accountingInvoice->userInstance->username . '-' . $accountingInvoice->userInstance->instance_name . '-' . $accountingInvoice->userInstance->branch)
+                                    : "-" }}
+                                </td>
+                                {{-- @if ($key_acc_inv == count($nota->accountingInvoices) - 1)
+                                <td class="text-center">
+                                    <form action="{{ route('accounting_invoices.delete_last_payment_customer', [$nota->id, $accountingInvoice->id]) }}" method="POST" onsubmit="return confirm('Yakin menghapus histori pembayaran terakhir?')">
+                                        @csrf
+                                        <button type="submit" class="text-red-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif --}}
+                            </tr>
+                            @endforeach
+                        </table>
+                        @endif
+                        {{-- @if (Auth::user()->username === 'kuruniawa') --}}
+                        <div class="flex justify-end mt-1">
+                            {{-- <a href="{{ route('accounting.search_related_accounting', $nota->id) }}" target="_blank" rel="noopener noreferrer" class="bg-sky-400 text-white font-bold rounded-xl px-1 text-xs">edit</a> --}}
+                            <a href="{{ route('accounting_invoices.edit_payment_history', $nota->id) }}" target="_blank" rel="noopener noreferrer" class="bg-sky-400 text-white font-bold rounded-xl px-1 text-xs">edit</a>
+                        </div>
+                        {{-- @endif --}}
+                    </div>
+                    {{-- END - HISTORI PEMBAYARAN --}}
                     {{-- SRJALAN_ALL -> PILIHAN SRJALAN --}}
                     <div class="hidden" id="pilihan_srjalan-{{ $key_nota }}">
                         <div class="mt-1 flex justify-end">
@@ -1238,7 +1309,6 @@
         </div>
     </div>
   </main>
-</div>
 
 <script>
     function toggle_detail_classes(btn_id, class_name) {

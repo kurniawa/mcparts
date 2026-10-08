@@ -7,6 +7,7 @@ use App\Models\AccountingInvoice;
 use App\Models\Kategori;
 use App\Models\Menu;
 use App\Models\Nota;
+use App\Models\Pembelian;
 use App\Models\Overpayment;
 use App\Models\Pelanggan;
 use App\Models\Supplier;
@@ -161,7 +162,8 @@ class AccountingController extends Controller
 
         $related_users = User::where('id', '!=', $user->id)->get();
 
-        $label_deskripsi = TransactionName::select('id', 'desc as label', 'desc as value')->where('user_instance_id', $userInstance->id)->orderBy('desc')->get();
+        $labelDeskripsi = TransactionName::select('id', 'desc as label', 'desc as value', 'kategori_level_one', 'kategori_type', 'pelanggan_id', 'supplier_id')->where('user_instance_id', $userInstance->id)->orderBy('desc')->get();
+        // dd($labelDeskripsi->where('value', 'KLIRING BG'));
         // $label_kategori_level_one = Kategori::select('id', 'kategori_level_one as label', 'kategori_level_one as value')->get();
         // $label_kategori_level_two = Kategori::where('kategori_level_two', '!=', null)->select('id', 'kategori_level_two as label', 'kategori_level_two as value')->get();
         // $transaction_names = TransactionName::all();
@@ -182,7 +184,7 @@ class AccountingController extends Controller
             'keluar_total' => $keluar_total,
             'masuk_total' => $masuk_total,
             'related_users' => $related_users,
-            'label_deskripsi' => $label_deskripsi,
+            'labelDeskripsi' => $labelDeskripsi,
             'saldo_awal' => $saldo_awal,
             'from' => $from,
             // 'notifications' => $notifications,
@@ -193,7 +195,7 @@ class AccountingController extends Controller
         ];
 
         // dd($label_kategori_level_two);
-        // dump($label_deskripsi);
+        // dump($labelDeskripsi);
         // dump($accountings);
         return view('accounting.show_transactions', $data);
     }
@@ -219,7 +221,7 @@ class AccountingController extends Controller
 
         $working_index = count($post['transaction_desc']);
         $warnings_ = '';
-
+        $array_balance_used = [];
         for ($i = 0; $i < $working_index; $i++) {
             $created_at = null;
 
@@ -237,6 +239,19 @@ class AccountingController extends Controller
 
             $keluar = trim($post['keluar'][$i] ?? '');
             $masuk = trim($post['masuk'][$i] ?? '');
+            $balance_used = null;
+            if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
+                $balance_used = 0;
+                foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
+                    if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
+                        ]);
+                    }
+                    $balance_used += (float)$value;
+                }
+            }
+            $array_balance_used[$i] = $balance_used;
 
             $keluar = is_numeric($keluar) ? $keluar : null;
             $masuk = is_numeric($masuk) ? $masuk : null;
@@ -244,7 +259,7 @@ class AccountingController extends Controller
             $desc = $post['transaction_desc'][$i] ?? null;
             $trans_id = $post['transaction_id'][$i] ?? null;
 
-            $is_valid_entry = $created_at !== null && $desc !== null && ($keluar !== null || $masuk !== null);
+            $is_valid_entry = $created_at !== null && $desc !== null && ($keluar !== null || $masuk !== null || $balance_used !== null);
 
             $transaction_name = null; // Definisi transaction_name disini karena akan digunakan nantinya untuk validasi data untuk kategori "PENERIMAAN PIUTANG"
             if ($is_valid_entry) {
@@ -287,7 +302,7 @@ class AccountingController extends Controller
                 }
 
                 if (
-                    ($transaction_name->kategori_type === 'UANG MASUK' && $masuk === null) ||
+                    ($transaction_name->kategori_type === 'UANG MASUK' && $masuk === null && $balance_used === null) ||
                     ($transaction_name->kategori_type === 'UANG KELUAR' && $keluar === null)
                 ) {
                     $request->validate(['error' => 'required'], [
@@ -307,7 +322,7 @@ class AccountingController extends Controller
                             'error.required' => "Deskripsi kosong pada baris ke-$i"
                         ]);
                     }
-                    if ($keluar === null && $masuk === null) {
+                    if ($keluar === null && $masuk === null && $balance_used === null) {
                         $request->validate(['error' => 'required'], [
                             'error.required' => "Jumlah keluar/masuk kosong pada baris ke-$i"
                         ]);
@@ -324,17 +339,30 @@ class AccountingController extends Controller
                 }
             }
 
+            // dd($transaction_name);
             // dump($post);
-            if ($transaction_name->kategori_level_one === "PENERIMAAN PIUTANG") {
-                Accounting::validasi_data_untuk_penerimaan_piutang($request, $i);
+            if ($transaction_name->pelanggan_id || $transaction_name->supplier_id) {
+                Accounting::validasi_data_untuk_pemasukan_pengeluaran($request, $i, $transaction_name->kategori_type);
                 // dump('VALID');
                 // dd($post);
             }
         }
 
+        // dump($post);
+        $index_j = 0;
+        $error_loc = '';
+        $chosen_selection = 0;
+        // dump($post);
+        // dd('ready to store');
         DB::beginTransaction();
         try {
             for ($i = 0; $i < $working_index; $i++) {
+                if (!isset($post['transaction_desc'][$i]) || trim($post['transaction_desc'][$i]) === '') {
+                    continue; // Skip baris kosong
+                }
+                if (trim($post['transaction_desc'][$i]) === 'KLIRING BG') {
+                    continue; // Skip KLIRING BG
+                }
                 // Ambil dan validasi nilai
                 $keluar = is_numeric($post['keluar'][$i] ?? '') ? (float)trim($post['keluar'][$i]) : null;
                 $masuk = is_numeric($post['masuk'][$i] ?? '') ? (float)trim($post['masuk'][$i]) : null;
@@ -349,17 +377,19 @@ class AccountingController extends Controller
                 } else {
                     $transaction_name = TransactionName::find($post['transaction_id'][$i]);
                 }
-
+                // dd($transaction_name);
                 // Default
                 $jumlah = null;
                 $transaction_type = 'pengeluaran';
 
                 if ($transaction_name->kategori_type === 'UANG MASUK') {
-                    $transaction_type = 'pemasukan';
-                    $jumlah = $masuk * 100;
-                    $keluar = null;
+                    if ($masuk !== null) {
+                        $transaction_type = 'pemasukan';
+                        $jumlah = $masuk;
+                        $keluar = null;
+                    }
                 } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
-                    $jumlah = $keluar * 100;
+                    $jumlah = $keluar;
                     $masuk = null;
                 }
 
@@ -367,7 +397,6 @@ class AccountingController extends Controller
 
                 // Hitung tanggal dan time_key
                 $datetime = new DateTime("{$post['year'][$i]}-{$post['month'][$i]}-{$post['day'][$i]} " . date('H:i:s'));
-                $created_at = $datetime->format('Y-m-d H:i:s');
                 $time_key = $datetime->getTimestamp();
 
                 // Pastikan time_key unik
@@ -377,6 +406,7 @@ class AccountingController extends Controller
 
                 // Hitung saldo
                 $saldo = 0;
+                $created_at = date('Y-m-d H:i:s', $time_key);
                 $after_trans = Accounting::where('user_instance_id', $user_instance->id)
                     ->where('created_at', '>', $created_at)
                     ->orderBy('created_at')
@@ -411,79 +441,206 @@ class AccountingController extends Controller
                 }
 
                 // Simpan transaksi baru
-                $new_accounting = Accounting::create([
-                    'user_id' => $user->id,
-                    'username' => $user->username,
-                    'user_instance_id' => $user_instance->id,
-                    'instance_type' => $user_instance->instance_type,
-                    'instance_name' => $user_instance->instance_name,
-                    'branch' => $user_instance->branch,
-                    'account_number' => $user_instance->account_number,
-                    'kode' => $post['kode'][$i],
-                    'transaction_type' => $transaction_type,
-                    'transaction_desc' => $transaction_name->desc,
-                    'kategori_type' => $transaction_name->kategori_type,
-                    'kategori_level_one' => $transaction_name->kategori_level_one,
-                    'kategori_level_two' => $transaction_name->kategori_level_two,
-                    'related_user_id' => $transaction_name->related_user_id,
-                    'related_username' => $transaction_name->related_username,
-                    'related_desc' => $transaction_name->related_desc,
-                    'related_user_instance_id' => $transaction_name->related_user_instance_id,
-                    'related_user_instance_type' => $transaction_name->related_user_instance_type,
-                    'related_user_instance_name' => $transaction_name->related_user_instance_name,
-                    'related_user_instance_branch' => $transaction_name->related_user_instance_branch,
-                    'pelanggan_id' => $transaction_name->pelanggan_id,
-                    'pelanggan_nama' => $transaction_name->pelanggan_nama,
-                    'supplier_id' => $transaction_name->supplier_id,
-                    'supplier_nama' => $transaction_name->supplier_nama,
-                    'keterangan' => $post['keterangan'][$i],
-                    'jumlah' => $jumlah,
-                    'saldo' => $saldo,
-                    'status' => $status,
-                    'time_key' => $time_key,
-                    'created_at' => $created_at,
-                ]);
+                $new_accounting = null;
+                if ($transaction_name->kategori_type == 'UANG MASUK' && $masuk === null) {
+                    // Skip pembuatan accounting jika kategori UANG MASUK tapi nilai masuk null
+                    if ($array_balance_used[$i] == null) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Kategori UANG MASUK tapi nilai masuk dan saldo yang digunakan null pada baris ke-$i"
+                        ]);
+                    }
+                    // Cari data salah satu nota yang di post
+                    $get_nota = Nota::find($post['invoiceID'][0][0]);
+                    // dd($get_nota);
+                    // Cari Overpayment yang terkait dengan pelanggan ini, lalu dari situ dapat dicari accounting yang terkait
+                    $overpayment = Overpayment::where('customer_id', $get_nota->pelanggan_id)->first();
+                    if ($overpayment) {
+                        $new_accounting = $overpayment->accounting;
+                    } else {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Tidak ditemukan Overpayment yang terkait dengan pelanggan pada baris ke-$i"
+                        ]);
+                    }
+                    
+                } elseif ($transaction_name->kategori_type == 'UANG KELUAR' && $keluar === null) {
+                    // Skip pembuatan accounting jika kategori UANG KELUAR tapi nilai keluar null
+                    if ($array_balance_used[$i] == null) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Kategori UANG KELUAR tapi nilai keluar dan saldo yang digunakan null pada baris ke-$i"
+                        ]);
+                    }
+                    // Cari data salah satu nota yang di post
+                    $get_nota = Pembelian::find($post['invoiceID'][0][0]);
+                    // dd($get_nota);
+                    // Cari Overpayment yang terkait dengan pelanggan ini, lalu dari situ dapat dicari accounting yang terkait
+                    $overpayment = Overpayment::where('supplier_id', $get_nota->supplier_id)->first();
+                    if ($overpayment) {
+                        $new_accounting = $overpayment->accounting;
+                    } else {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Tidak ditemukan Overpayment yang terkait dengan supplier pada baris ke-$i"
+                        ]);
+                    }
+                } else {
+                    $new_accounting = Accounting::create([
+                        'user_id' => $user->id,
+                        'username' => $user->username,
+                        'user_instance_id' => $user_instance->id,
+                        'instance_type' => $user_instance->instance_type,
+                        'instance_name' => $user_instance->instance_name,
+                        'branch' => $user_instance->branch,
+                        'account_number' => $user_instance->account_number,
+                        'kode' => $post['kode'][$i],
+                        'transaction_type' => $transaction_type,
+                        'transaction_desc' => $transaction_name->desc,
+                        'kategori_type' => $transaction_name->kategori_type,
+                        'kategori_level_one' => $transaction_name->kategori_level_one,
+                        'kategori_level_two' => $transaction_name->kategori_level_two,
+                        'related_user_id' => $transaction_name->related_user_id,
+                        'related_username' => $transaction_name->related_username,
+                        'related_desc' => $transaction_name->related_desc,
+                        'related_user_instance_id' => $transaction_name->related_user_instance_id,
+                        'related_user_instance_type' => $transaction_name->related_user_instance_type,
+                        'related_user_instance_name' => $transaction_name->related_user_instance_name,
+                        'related_user_instance_branch' => $transaction_name->related_user_instance_branch,
+                        'pelanggan_id' => $transaction_name->pelanggan_id,
+                        'pelanggan_nama' => $transaction_name->pelanggan_nama,
+                        'supplier_id' => $transaction_name->supplier_id,
+                        'supplier_nama' => $transaction_name->supplier_nama,
+                        'keterangan' => $post['keterangan'][$i],
+                        'jumlah' => $jumlah,
+                        'saldo' => $saldo,
+                        'status' => $status,
+                        'time_key' => $time_key,
+                        'created_at' => $created_at,
+                    ]);
+                }
 
                 /**
                  * Apabila transaksi/accounting terkait dengan nota/invoice tertentu, maka:
                  * insert relasi antara accountings dengan invoices/notas,
                  * yakni pada tabel 'accounting_invoices'.
                  */
-    
-                if ($new_accounting->kategori_level_one == 'PENERIMAAN PIUTANG') {
-                    $success_ .= "penerimaan piutang-";
+                $last_index = 0;
+                if ($transaction_name->pelanggan_id || $transaction_name->supplier_id) {
+                    $success_ .= "$transaction_name->kategori_level_one-";
+                    $invoice_table = $transaction_name->kategori_type == 'UANG MASUK' ? 'notas' : 'pembelians';
                     $total_balance_used = 0;
                     $saldo_awal = $post['saldo_awal'][$i];
                     $sisa_saldo = $post['sisa_saldo'][$i];
-                    for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) {
+                    $array_accounting_invoice = []; // Untuk diupdate nanti.
+                    $array_related_nota = []; // Untuk diupdate nanti.
+                    $nota_id_number = count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]);
+                    $this_time_key = time();
+                    $accounting_id = null;
+                    // dd($post);
+                    $remaining_balance_new = 0;
+                    for ($j=0; $j < $nota_id_number; $j++) {
+                        if ((!isset($post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j]) || !$post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j]) && (!isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j]) || !$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j])) {
+                            continue;
+                        }
                         $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                        if ($transaction_name->kategori_type == 'UANG KELUAR') {
+                            $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+                        }
+                        $customer_id = null;
+                        $customer_name = null;
+                        $supplier_id = null;
+                        $supplier_name = null;
+                        if ($invoice_table == 'notas') {
+                            $customer_id = $related_nota->pelanggan_id;
+                            $customer_name = $related_nota->pelanggan_nama;
+                        }
+                        if ($invoice_table == 'pembelians') {
+                            $supplier_id = $related_nota->supplier_id;
+                            $supplier_name = $related_nota->supplier_nama;
+                        }
                         /**
                          * Create / Update data akan dilakukan apabila memang terjadi pembayaran.
                          * Artinya ada perubahan nilai amount_due atau amount_paid antara yang lama dan yang baru.
                          */
                         $amount_due_new = $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j];
                         $amount_paid_new = $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j];
-                        if ($amount_due_new == $related_nota->amount_due || $amount_paid_new == $related_nota->amount_paid_new) {
-                            continue;
-                        }
+                        // if ($amount_due_new == $related_nota->amount_due || $amount_paid_new == $related_nota->amount_paid_new) {
+                        //     continue;
+                        // }
                         // Update data nota terkait
+                        // $error_loc = "payment_status index: $i $j";
                         $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
                         $finished_at = null;
-                        if ($payment_status == 'lunas') {
+                        $tanggal_lunas = null;
+
+                        $accounting_invoice_status = 'active';
+                        if ($payment_status == 'LUNAS') {
                             $finished_at = $created_at;
+                            $accounting_invoice_status = 'inactive';
+                            $tanggal_lunas = $invoice_table == 'pembelians' ? $finished_at : null;
+                        }
+                        $balance_used_new = bcadd(
+                        (string) $related_nota->balance_used,
+                        (string) $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
+                        2 // skala desimal sesuai decimal(15,2)
+                        );
+                        $amount_paid_new = bcadd(
+                        (string) $related_nota->amount_paid,
+                        (string) $amount_paid_new,
+                        2 // skala desimal sesuai decimal(15,2)
+                        );
+
+                        if ($j == 0) {
+                            if ($transaction_name->kategori_type === 'UANG MASUK') {
+                                $remaining_balance_new = $post['remaining_balance_masuk'][$i];
+                            } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
+                                $remaining_balance_new = $post['remaining_balance_keluar'][$i];
+                            }
+    
+                            if (!is_numeric($remaining_balance_new)) {
+                                $remaining_balance_new = 0;
+                            }
+                        }
+                        // dd($post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j]);
+                        // Data Discount
+                        $discount_percent = (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j];
+                        $other_discount = bcadd(
+                            (string) $related_nota->other_discount,
+                            (string) $post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
+                        $discount_amount = bcadd(
+                            (string) $related_nota->discount_amount,
+                            (string) $post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
+                        $total_discount = bcadd(
+                            (string) $related_nota->total_discount,
+                            (string) $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            2 // skala desimal sesuai decimal(15,2)
+                        );
+                        $discount_description = null;
+                        if (isset($post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j]) && $post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j] !== null) {
+                            $discount_description = $post['related_not_yet_paid_off_invoices']['discount_description'][$i][$j];
                         }
                         $related_nota->update([
-                            'status_bayar' => $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j],
-                            'discount_percentage' => $post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j],
-                            'total_discount' => $post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
-                            'amount_due' => $post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j],
-                            'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
-                            'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
+                            'status_bayar' => $payment_status,
+                            'discount_percent' => $discount_percent,
+                            'discount_amount' => $discount_amount,
+                            'other_discount' => $other_discount,
+                            'total_discount' => $total_discount,
+                            'discount_description' => $discount_description,
+                            'amount_due' => $amount_due_new,
+                            'amount_paid' => $amount_paid_new,
+                            'balance_used' => $balance_used_new,
+                            'overpayment' => $remaining_balance_new,
                             'finished_at' => $finished_at,
                         ]);
+                        if ($invoice_table == 'pembelians' && $tanggal_lunas) {
+                            $related_nota->update(['tanggal_lunas' => $tanggal_lunas]);
+                        }
                         $success_ .= "related_nota updated-";
+                        $array_related_nota[] = $related_nota;
+                        $last_index = count($array_related_nota) - 1;
                         // $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $new_accounting->transaction_desc)->first();
-    
+
                         /**
                          * CREATE OR UPDATE AccountingInvoice
                          * ----------------------------------
@@ -492,86 +649,182 @@ class AccountingController extends Controller
                          * tidak boleh melakukan update data record tersebut.
                          * Maka perlu untuk membuat record baru di tabel accounting_invoices.
                          */
-                        $related_accounting_invoice = AccountingInvoice::where('invoice_table', 'notas')
+
+                        $related_accounting_invoice = AccountingInvoice::where('invoice_table', $invoice_table)
                             ->where('invoice_id', $related_nota->id)
-                            ->latest('time_key')->first();
+                            ->where('status', 'active')
+                            ->latest('created_at')->first();
+                        // \Illuminate\Support\Facades\Log::info("related_accounting_invoice = " . $related_accounting_invoice);
 
-                        while(AccountingInvoice::where('time_key', $time_key)->first()) {
-                            $time_key++;
+                        if ($new_accounting) {
+                            $accounting_id = $new_accounting->id;
                         }
-
-                        if (!$related_accounting_invoice || ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null)) {
-                            AccountingInvoice::create([
-                                'time_key' => $time_key,
-                                'invoice_id' => $related_nota->id,
-                                'invoice_table' => 'notas',
-                                'invoice_number' => $related_nota->no_nota,
-                                'accounting_id' => $new_accounting->id,
-                                'transaction_name_id' => $transaction_name->id,
-                                'transaction_name_desc' => $transaction_name->desc,
-                                'customer_id' => $related_nota->pelanggan_id,
-                                'customer_name' => $related_nota->pelanggan_nama,
-                                'payment_status' => $related_nota->status_bayar,
-                                'amount_due' => $related_nota->amount_due,
-                                'amount_paid' => $related_nota->amount_paid,
-                                'balance_used' => $related_nota->balance_used,
-                                'total_amount' => $related_nota->harga_total,
-                            ]);
-                            $success_ .= "AccountingInvoice created-";
+                        // Pastikan bahwa time_key unik
+                        while (AccountingInvoice::where('time_key', $this_time_key)->exists()) {
+                            $this_time_key++;
+                        }
+                        // Pastikan bahwa created_at juga unik, untuk memudahkan tracking history
+                        $created_at_check = $created_at;
+                        while (AccountingInvoice::where('created_at', $created_at_check)->exists()) {
+                            $created_at_check = date('Y-m-d H:i:s', strtotime($created_at_check) + 1);
+                        }
+                        $created_at = $created_at_check;
+                        $invoice_data = [
+                            'accounting_time_key' => $time_key,
+                            'accounting_id' => $accounting_id,
+                            'user_instance_id' => $user_instance->id,
+                            'invoice_id' => $related_nota->id,
+                            'invoice_table' => $invoice_table,
+                            'invoice_number' => $related_nota->nomor_nota,
+                            'transaction_name_id' => $transaction_name->id,
+                            'transaction_name_desc' => $transaction_name->desc,
+                            'customer_id' => $customer_id,
+                            'customer_name' => $customer_name,
+                            'supplier_id' => $supplier_id,
+                            'supplier_name' => $supplier_name,
+                            'payment_status' => $related_nota->status_bayar,
+                            'discount_percent' => (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j],
+                            'discount_amount' => (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j],
+                            'other_discount' => (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j],
+                            'total_discount' => (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j],
+                            'discount_description' => $discount_description,
+                            'amount_due' => $amount_due_new,
+                            'amount_paid' => $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j],
+                            'balance_used' => $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j],
+                            'total_amount' => $related_nota->harga_total,
+                            'remaining_funds' => $remaining_balance_new,
+                            'balance' => $post['sisa_saldo'][$i],
+                            'overpayment' => $remaining_balance_new,
+                            'status' => $accounting_invoice_status,
+                            'created_at' => $created_at,
+                        ];
+                        if (!$related_accounting_invoice) {
+                            // Buat record baru di tabel accounting_invoices
+                            $chosen_selection = 1;
+                            if ( (float) $post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j] > 0.00) {
+                                $invoice_data['time_key'] = $this_time_key;
+                                $invoice_data['created_at'] = $created_at;
+                                $related_accounting_invoice = AccountingInvoice::create($invoice_data);
+                                $success_ .= "AccountingInvoice created-";
+                            } else {
+                                $chosen_selection = 0;
+                                $success_ .= "chosen_selection = 0, AccountingInvoice tidak dibuat-";
+                            }
                         } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id == null) {
-                            $related_accounting_invoice->update([
-                                'time_key' => $time_key,
-                                'invoice_id' => $related_nota->id,
-                                'invoice_table' => 'notas',
-                                'invoice_number' => $related_nota->no_nota,
-                                'accounting_id' => $new_accounting->id,
-                                'transaction_name_id' => $transaction_name->id,
-                                'transaction_name_desc' => $transaction_name->desc,
-                                'customer_id' => $related_nota->pelanggan_id,
-                                'customer_name' => $related_nota->pelanggan_nama,
-                                'payment_status' => $related_nota->status_bayar,
-                                'amount_due' => $related_nota->amount_due,
-                                'amount_paid' => $related_nota->amount_paid,
-                                'balance_used' => $related_nota->balance_used,
-                                'total_amount' => $related_nota->harga_total,
-                                'updated_by' => $user->username,
-                            ]);
+                            $chosen_selection = 2;
+                            $invoice_data['updated_by'] = $user->username;
+                            $invoice_data['updated_at'] = $created_at;
+                            $related_accounting_invoice->update($invoice_data);
                             $success_ .= "AccountingInvoice updated-";
+                        } elseif ($related_accounting_invoice && $related_accounting_invoice->accounting_id != null) {
+                            $chosen_selection = 3;
+                            // $accounting_id = $related_accounting_invoice->accounting_id;
+                            // \Illuminate\Support\Facades\Log::info("elseif ke-3 accounting_id = " . $accounting_id);
+                            // Buat record baru di tabel accounting_invoices
+                            $invoice_data['time_key'] = $this_time_key;
+                            $invoice_data['created_at'] = $created_at;
+                            $related_accounting_invoice = AccountingInvoice::create($invoice_data);
+                            $success_ .= "AccountingInvoice created-";
                         }
+                        $array_accounting_invoice[] = $related_accounting_invoice;
 
                         $total_balance_used += (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
-                    }
-                    /**
-                     * CREATE or UPDATE customer_balance / overpayment
-                     */
-                    $remaining_balance_masuk = (float)$post['remaining_balance_masuk'][$i];
-                    if ( $remaining_balance_masuk != 0 || ($total_balance_used > 0 && $saldo_awal != $sisa_saldo) ) {
-                        $overpayment = Overpayment::where('customer_id', $related_nota->id)->first();
-                        $sisa_saldo_real = $remaining_balance_masuk + $sisa_saldo;
-                        if ($overpayment) {
-                            $overpayment->update([
-                                'time_key' => $time_key,
-                                'accounting_id' => $new_accounting->id,
-                                'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $sisa_saldo_real
-                            ]);
-                        } else {
-                            Overpayment::create([
-                                'time_key' => $time_key,
-                                'accounting_id' => $new_accounting->id,
-                                'customer_id' => $transaction_name->pelanggan_id,
-                                'amount' => $sisa_saldo_real
-                            ]);
+                        /**Apabila ada AccountingInvoice setelahnya, akan membuat data amount_due tidak sesuai. */
+                        if($related_accounting_invoice &&$related_accounting_invoice->isExistAccountingInvoiceAfter($invoice_table)) {
+                            $success_ .= "accounting_invoice after exist, history pembayaran diupdate-";
                         }
-                        $success_ .= 'overpayment created/updated-';
+
+                        // Perhitungan Overpayment hanya pada index pertama saja
+                        $overpayment_check = null;
+                        if ($j == 0) {
+                            /**
+                             * CREATE or UPDATE customer_balance / overpayment
+                             */
+                            $overpayment_new = (float)$remaining_balance_new + $sisa_saldo;
+                            $overpayment_old = Overpayment::where('customer_id', $new_accounting->pelanggan_id)->first();
+                            if ($overpayment_new > 0) {
+                                if ($overpayment_old && $overpayment_old->amount != $overpayment_new) {
+                                    $overpayment_old->update([
+                                        'time_key' => $this_time_key,
+                                        'accounting_id' => $accounting_id,
+                                        'customer_id' => $transaction_name->pelanggan_id,
+                                        'customer_name' => $transaction_name->pelanggan_nama,
+                                        'supplier_id' => $transaction_name->supplier_id,
+                                        'supplier_name' => $transaction_name->supplier_nama,
+                                        'amount' => $overpayment_new,
+                                        'updated_by' => $user->username,
+                                    ]);
+                                    $overpayment_check = $overpayment_old;
+                                } elseif (!$overpayment_old) {
+                                    $overpayment_check = Overpayment::create([
+                                        'time_key' => $this_time_key,
+                                        'accounting_id' => $accounting_id,
+                                        'customer_id' => $transaction_name->pelanggan_id,
+                                        'customer_name' => $transaction_name->pelanggan_nama,
+                                        'supplier_id' => $transaction_name->supplier_id,
+                                        'supplier_name' => $transaction_name->supplier_nama,
+                                        'amount' => $overpayment_new,
+                                        'created_by' => $user->username,
+                                    ]);
+                                    $success_ .= 'overpayment created-';
+                                }
+                                
+                                /**
+                                 * UPDATE $related_nota dan $related_accounting_invoice,
+                                 * apabila terdapat overpayment yang baru.
+                                 * UPDATE hanya dilakukan pada nota terakhir yang di proses pada iterasi ini.
+                                 */
+                                // dd($array_related_nota);
+                                // $array_related_nota[$last_index]->update([
+                                //     'overpayment' => $overpayment_new,
+                                // ]);
+                                // $array_accounting_invoice[$last_index]->update([
+                                //     'remaining_funds' => $remaining_balance_masuk,
+                                //     'balance' => $sisa_saldo,
+                                //     'overpayment' => $overpayment_new,
+                                //     'updated_by' => $user->username,
+                                // ]);
+                            } elseif ($overpayment_new == 0) {
+                                if ($overpayment_old) {
+                                    $overpayment_old->delete();
+                                }
+                                $success_ .= 'overpayment deleted-';
+                            }
+                        }
+                        // dump($post);
+                        // dump("chosen_selection: $chosen_selection");
+                        // dump("transaction_name:");
+                        // dump($transaction_name);
+                        // dump("related_accounting_invoice:");
+                        // dump($related_accounting_invoice);
+                        // dump("related_nota:");
+                        // dump($related_nota);
+                        // dump("overpayment_check:");
+                        // dd($overpayment_check);
                     }
+                    // dd($array_accounting_invoice);
+                    
                 }
             }
 
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->withErrors(['errors_' => 'Gagal menyimpan transaksi: ' . $th->getMessage()]);
+            dump($post);
+            dump("chosen_selection: $chosen_selection");
+
+            $message = "Error: " . $th->getMessage()
+                . "\n\nFile: " . $th->getFile()
+                . "\n\nFile: " . $th->getLine()
+                . "\n\nTrace: " . $th->getTraceAsString();
+            dd($message);
+
+            return back()->withErrors([
+                'error Gagal menyimpan transaksi: ' . $th->getMessage(),
+                'index i => ' . $i,
+                'index j => ' . $index_j,
+                'error_loc => ' . $error_loc,
+            ]);
         }
 
         $success_ .= '-transaksi berhasil dibuat-';
@@ -811,6 +1064,11 @@ class AccountingController extends Controller
             dump("transaction_name?");
             dd($post);
         }
+        
+        // elseif ($transaction_name && $transaction_name->kategori_level_one == 'PENERIMAAN PIUTANG') {
+        //     $request->validate(['error'=>'required'],['error.required'=>'Belum mendukung edit entri dengan kategori PENERIMAAN PIUTANG']);
+        // }
+
         $jumlah = null;
         $transaction_type = 'pengeluaran';
 
@@ -837,10 +1095,10 @@ class AccountingController extends Controller
 
         if ($transaction_name->kategori_type === 'UANG MASUK') {
             $transaction_type = 'pemasukan';
-            $jumlah = (float)$masuk * 100;
+            $jumlah = (float)$masuk;
             $keluar = null;
         } elseif ($transaction_name->kategori_type === 'UANG KELUAR') {
-            $jumlah = (float)$keluar * 100;
+            $jumlah = (float)$keluar;
             $masuk = null;
         }
 
@@ -854,137 +1112,149 @@ class AccountingController extends Controller
         // dd($accounting);
         $saldo_to_update = (int)$accounting->saldo;
 
-        if ($mode === 'tanggal_mundur') {
-            // MODE TRANSAKSI MUNDUR
-            $transactions_between = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at', [$created_at_new, $created_at_old])->where('id', '!=', $accounting->id)->orderBy('created_at')->get();
-            $saldo_akhir = 0;
-            // dump($created_at_old);
-            // dump($created_at_new);
-            // dd($transactions_between);
-            if (count($transactions_between) > 0) {
-                $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_new)->latest()->first();
-                if ($transaction_batas_atas) {
-                    $saldo_akhir = (int)$transaction_batas_atas->saldo;
+        DB::beginTransaction();
+        try {
+            if ($mode === 'tanggal_mundur') {
+                // MODE TRANSAKSI MUNDUR
+                $transactions_between = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at', [$created_at_new, $created_at_old])->where('id', '!=', $accounting->id)->orderBy('created_at')->get();
+                $saldo_akhir = 0;
+                // dump($created_at_old);
+                // dump($created_at_new);
+                // dd($transactions_between);
+                if (count($transactions_between) > 0) {
+                    $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_new)->latest()->first();
+                    if ($transaction_batas_atas) {
+                        $saldo_akhir = (int)$transaction_batas_atas->saldo;
+                    }
                 }
-            }
 
-            if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                $saldo_akhir -= $jumlah;
-            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                $saldo_akhir += $jumlah;
-            }
-
-            $saldo_to_update = $saldo_akhir;
-
-            foreach ($transactions_between as $transaction_between) {
-                if ($transaction_between->transaction_type === 'pengeluaran') {
-                    $saldo_akhir -= (int)$transaction_between->jumlah;
-                } elseif ($transaction_between->transaction_type === 'pemasukan') {
-                    $saldo_akhir += (int)$transaction_between->jumlah;
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo_akhir -= $jumlah;
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo_akhir += $jumlah;
                 }
-                $transaction_between->saldo = (string)$saldo_akhir;
-                $transaction_between->save();
-            }
 
-            $success_ .= '-tanggal_mundur, transactions_between updated-';
+                $saldo_to_update = $saldo_akhir;
 
-        } elseif ($mode === 'tanggal_maju') {
-            // MODE TRANSAKSI MAJU
-            $transactions_between = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at', [$created_at_old, $created_at_new])->where('id', '!=', $accounting->id)->orderBy('created_at')->get();
-            // dump($created_at_old);
-            // dump($created_at_new);
-            // dd($transactions_between);
-            $saldo_akhir = 0;
-            if (count($transactions_between) > 0) {
+                foreach ($transactions_between as $transaction_between) {
+                    if ($transaction_between->transaction_type === 'pengeluaran') {
+                        $saldo_akhir -= (int)$transaction_between->jumlah;
+                    } elseif ($transaction_between->transaction_type === 'pemasukan') {
+                        $saldo_akhir += (int)$transaction_between->jumlah;
+                    }
+                    $transaction_between->saldo = (string)$saldo_akhir;
+                    $transaction_between->save();
+                }
+
+                $success_ .= '-tanggal_mundur, transactions_between updated-';
+
+            } elseif ($mode === 'tanggal_maju') {
+                // MODE TRANSAKSI MAJU
+                $transactions_between = Accounting::where('user_instance_id', $user_instance->id)->whereBetween('created_at', [$created_at_old, $created_at_new])->where('id', '!=', $accounting->id)->orderBy('created_at')->get();
+                // dump($created_at_old);
+                // dump($created_at_new);
+                // dd($transactions_between);
+                $saldo_akhir = 0;
+                if (count($transactions_between) > 0) {
+                    $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_old)->latest()->first();
+                    if ($transaction_batas_atas) {
+                        $saldo_akhir = (int)$transaction_batas_atas->saldo;
+                    }
+                }
+
+                foreach ($transactions_between as $transaction_between) {
+                    if ($transaction_between->transaction_type === 'pengeluaran') {
+                        $saldo_akhir -= (int)$transaction_between->jumlah;
+                    } elseif ($transaction_between->transaction_type === 'pemasukan') {
+                        $saldo_akhir += (int)$transaction_between->jumlah;
+                    }
+                    $transaction_between->saldo = (string)$saldo_akhir;
+                    $transaction_between->save();
+                }
+
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo_akhir -= $jumlah;
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo_akhir += $jumlah;
+                }
+
+                $saldo_to_update = $saldo_akhir;
+                $success_ .= '-tanggal_maju, transactions_between updated-';
+            } else {
+                $created_at_new = $created_at_old;
+                $saldo_akhir = 0;
+
                 $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_old)->latest()->first();
                 if ($transaction_batas_atas) {
                     $saldo_akhir = (int)$transaction_batas_atas->saldo;
                 }
-            }
 
-            foreach ($transactions_between as $transaction_between) {
-                if ($transaction_between->transaction_type === 'pengeluaran') {
-                    $saldo_akhir -= (int)$transaction_between->jumlah;
-                } elseif ($transaction_between->transaction_type === 'pemasukan') {
-                    $saldo_akhir += (int)$transaction_between->jumlah;
+                if ($transaction_name->kategori_type === 'UANG KELUAR') {
+                    $saldo_akhir -= $jumlah;
+                } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
+                    $saldo_akhir += $jumlah;
                 }
-                $transaction_between->saldo = (string)$saldo_akhir;
-                $transaction_between->save();
-            }
 
-            if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                $saldo_akhir -= $jumlah;
-            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                $saldo_akhir += $jumlah;
-            }
+                $saldo_to_update = $saldo_akhir;
 
-            $saldo_to_update = $saldo_akhir;
-            $success_ .= '-tanggal_maju, transactions_between updated-';
-        } else {
-            $created_at_new = $created_at_old;
-            $saldo_akhir = 0;
+                $transactions_after = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '>' , $created_at_old)->orderBy('created_at')->get();
 
-            $transaction_batas_atas = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '<' , $created_at_old)->latest()->first();
-            if ($transaction_batas_atas) {
-                $saldo_akhir = (int)$transaction_batas_atas->saldo;
-            }
-
-            if ($transaction_name->kategori_type === 'UANG KELUAR') {
-                $saldo_akhir -= $jumlah;
-            } elseif ($transaction_name->kategori_type === 'UANG MASUK') {
-                $saldo_akhir += $jumlah;
-            }
-
-            $saldo_to_update = $saldo_akhir;
-
-            $transactions_after = Accounting::where('user_instance_id', $user_instance->id)->where('created_at', '>' , $created_at_old)->orderBy('created_at')->get();
-
-            foreach ($transactions_after as $transaction_after) {
-                if ($transaction_after->transaction_type === 'pengeluaran') {
-                    $saldo_akhir -= (int)$transaction_after->jumlah;
-                } elseif ($transaction_after->transaction_type === 'pemasukan') {
-                    $saldo_akhir += (int)$transaction_after->jumlah;
+                foreach ($transactions_after as $transaction_after) {
+                    if ($transaction_after->transaction_type === 'pengeluaran') {
+                        $saldo_akhir -= (int)$transaction_after->jumlah;
+                    } elseif ($transaction_after->transaction_type === 'pemasukan') {
+                        $saldo_akhir += (int)$transaction_after->jumlah;
+                    }
+                    $transaction_after->saldo = (string)$saldo_akhir;
+                    $transaction_after->save();
                 }
-                $transaction_after->saldo = (string)$saldo_akhir;
-                $transaction_after->save();
+
+                $success_ .= '-tanggal_sama, transactions_between none, transactions_after updated-';
             }
 
-            $success_ .= '-tanggal_sama, transactions_between none, transactions_after updated-';
+            $accounting->update([
+                'user_id'=>$user->id,
+                'username'=>$user->username,
+                'user_instance_id'=>$user_instance->id,
+                'instance_type'=>$user_instance->instance_type,
+                'instance_name'=>$user_instance->instance_name,
+                'branch'=>$user_instance->branch,
+                'account_number'=>$user_instance->account_number,
+                'kode'=>$post['kode'],
+                'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
+                'transaction_desc'=>$post['transaction_desc'],
+                'kategori_type'=>$transaction_name->kategori_type,
+                'kategori_level_one'=>$transaction_name->kategori_level_one,
+                'kategori_level_two'=>$transaction_name->kategori_level_two,
+                'related_user_id'=>$transaction_name->related_user_id,
+                'related_username'=>$transaction_name->related_username,
+                'related_desc'=>$transaction_name->related_desc,
+                'related_user_instance_id'=>$transaction_name->related_user_instance_id,
+                'related_user_instance_type'=>$transaction_name->related_user_instance_type,
+                'related_user_instance_name'=>$transaction_name->related_user_instance_name,
+                'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
+                'pelanggan_id'=>$transaction_name->pelanggan_id,
+                'pelanggan_nama'=>$transaction_name->pelanggan_nama,
+                'supplier_id'=>$transaction_name->supplier_id,
+                'supplier_nama'=>$transaction_name->supplier_nama,
+                'keterangan'=>$post['keterangan'], // keterangan tambahan akan ditulis dalam tanda kurung
+                'jumlah'=>$jumlah,
+                'saldo'=>(string)$saldo_to_update,
+                'status'=>$status, // read or not read yet by other user
+                'created_at'=>$created_at_new
+            ]);
+
+            $success_ .= '-transactions updated-';
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dump($post);
+            dump("created_at_old: $created_at_old");
+            dump("created_at_new: $created_at_new");
+            dump("mode: $mode");
+            dd($th->getMessage());
         }
-
-        $accounting->update([
-            'user_id'=>$user->id,
-            'username'=>$user->username,
-            'user_instance_id'=>$user_instance->id,
-            'instance_type'=>$user_instance->instance_type,
-            'instance_name'=>$user_instance->instance_name,
-            'branch'=>$user_instance->branch,
-            'account_number'=>$user_instance->account_number,
-            'kode'=>$post['kode'],
-            'transaction_type'=>$transaction_type, // pemasukan, pengeluaran
-            'transaction_desc'=>$post['transaction_desc'],
-            'kategori_type'=>$transaction_name->kategori_type,
-            'kategori_level_one'=>$transaction_name->kategori_level_one,
-            'kategori_level_two'=>$transaction_name->kategori_level_two,
-            'related_user_id'=>$transaction_name->related_user_id,
-            'related_username'=>$transaction_name->related_username,
-            'related_desc'=>$transaction_name->related_desc,
-            'related_user_instance_id'=>$transaction_name->related_user_instance_id,
-            'related_user_instance_type'=>$transaction_name->related_user_instance_type,
-            'related_user_instance_name'=>$transaction_name->related_user_instance_name,
-            'related_user_instance_branch'=>$transaction_name->related_user_instance_branch,
-            'pelanggan_id'=>$transaction_name->pelanggan_id,
-            'pelanggan_nama'=>$transaction_name->pelanggan_nama,
-            'supplier_id'=>$transaction_name->supplier_id,
-            'supplier_nama'=>$transaction_name->supplier_nama,
-            'keterangan'=>$post['keterangan'], // keterangan tambahan akan ditulis dalam tanda kurung
-            'jumlah'=>$jumlah,
-            'saldo'=>(string)$saldo_to_update,
-            'status'=>$status, // read or not read yet by other user
-            'created_at'=>$created_at_new
-        ]);
-
-        $success_ .= '-transactions updated-';
+        
         // dump('updated!');
         return back()->with('success_', $success_);
 
@@ -1001,33 +1271,112 @@ class AccountingController extends Controller
 
         $warnings_ = '';
 
-        $saldo = 0;
-        // Cari apakah ada transaksi dengan tanggal yang setelahnya?
-        $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
+        DB::beginTransaction();
+        try {
+            $saldo = 0;
+            // Cari apakah ada transaksi dengan tanggal yang setelahnya?
+            $last_transactions = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','>',$accounting->created_at)->orderBy('created_at')->get();
 
-        if (count($last_transactions) !== 0) {
-            $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$accounting->created_at)->latest()->first();
-            // dump('before_last_transaction: ', $before_last_transaction);
-            if ($before_last_transaction !== null) {
-                $saldo = $before_last_transaction->saldo;
-            }
-
-            $saldo_next = $saldo;
-            foreach ($last_transactions as $last_transaction) {
-                if ($last_transaction->transaction_type === 'pengeluaran') {
-                    $saldo_next -= $last_transaction->jumlah;
-                } elseif ($last_transaction->transaction_type === 'pemasukan') {
-                    $saldo_next += $last_transaction->jumlah;
+            if (count($last_transactions) !== 0) {
+                $before_last_transaction = Accounting::where('user_instance_id', $user_instance->id)->where('created_at','<',$accounting->created_at)->latest()->first();
+                // dump('before_last_transaction: ', $before_last_transaction);
+                if ($before_last_transaction !== null) {
+                    $saldo = $before_last_transaction->saldo;
                 }
-                $last_transaction->saldo = $saldo_next;
-                $last_transaction->save();
+
+                $saldo_next = $saldo;
+                foreach ($last_transactions as $last_transaction) {
+                    if ($last_transaction->transaction_type === 'pengeluaran') {
+                        $saldo_next -= $last_transaction->jumlah;
+                    } elseif ($last_transaction->transaction_type === 'pemasukan') {
+                        $saldo_next += $last_transaction->jumlah;
+                    }
+                    $last_transaction->saldo = $saldo_next;
+                    $last_transaction->save();
+                }
+                $warnings_ .= '-jumlah saldo edited-';
+
             }
-            $warnings_ .= '-jumlah saldo editted-';
 
+            
+            /**
+             * DELETE AccountingInvoice terkait pada time_key terkait.
+             * dan UPDATE Nota terkait.
+             * Tabel yang perlu diperhatikan: Nota, AccountingInvoice, Overpayment
+             */
+            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->latest('created_at')->get();
+            // dd($accounting_invoices);
+            foreach ($accounting_invoices as $accounting_invoice) {
+                if ($accounting_invoice->overpayment > 0 || $accounting_invoice->balance_used > 0) {
+                    $overpayment = $invoice_table == 'notas' ? Overpayment::where('customer_id', $accounting_invoice->customer_id)->first() : Overpayment::where('supplier_id', $accounting_invoice->supplier_id)->first();
+                    if ($overpayment) {
+                        $overpayment->amount += $accounting_invoice->balance_used;
+                        $overpayment->amount -= $accounting_invoice->overpayment;
+                        if ($overpayment->amount == 0) {
+                            $overpayment->delete();
+                            $warnings_ .= 'overpayment deleted-';
+                        } else {
+                            $overpayment->save();
+                            $warnings_ .= 'overpayment updated-';
+                        }
+                    }
+                }
+                $invoice_table = $accounting_invoice->invoice_table;
+                if ($invoice_table == 'notas' || $invoice_table == 'pembelians') {
+                    $nota = $invoice_table == 'notas' ? Nota::find($accounting_invoice->invoice_id) : Pembelian::find($accounting_invoice->invoice_id);
+                    // dd($nota);
+                    $nota->amount_due += ($accounting_invoice->amount_paid + $accounting_invoice->balance_used + $accounting_invoice->total_discount);
+                    $nota->amount_paid -= $accounting_invoice->amount_paid;
+                    $nota->balance_used -= $accounting_invoice->balance_used;
+                    $nota->overpayment -= $accounting_invoice->overpayment;
+                    // UPDATE status_bayar pada Nota
+                    $payment_status = $nota->UpdatePaymentStatus();
+                    $nota->status_bayar = $payment_status;
+                    if ($payment_status != 'LUNAS') {
+                        if ($invoice_table == 'notas') {$nota->finished_at = null;}
+                        elseif ($invoice_table == 'pembelians') {$nota->tanggal_lunas = null;}
+                    } elseif ($payment_status == 'error') {
+                        $nota->status_bayar = 'BELUM_LUNAS';
+                        $nota->discount_percent = 0.00;
+                        $nota->total_discount = 0;
+                        $nota->discount_description = null;
+                        $nota->amount_due = $nota->harga_total;
+                        $nota->amount_paid = 0;
+                        $nota->balance_used = 0;
+                        $nota->overpayment = 0;
+                        $warnings_ .= "$invoice_table payment_status error -> reset $invoice_table value-";
+                    }
+                    $nota->save();
+                }
+
+                // Hapus AccountingInvoice terkait
+                $accounting_invoice->delete();
+                $warnings_ .= 'accounting_invoice deleted-';
+
+                // UPDATE AccountingInvoice sebelumnya,
+                // kalau exist maka ubah status nya menjadi active
+                // $previous_accounting_invoice = AccountingInvoice::where('invoice_table', $accounting_invoice->invoice_table)
+                //     ->where('invoice_id', $accounting_invoice->invoice_id)
+                //     ->latest('time_key')
+                //     ->first();
+                // if ($previous_accounting_invoice) {
+                //     $previous_accounting_invoice->status = 'active';
+                //     $previous_accounting_invoice->updated_by = $user->username;
+                //     $previous_accounting_invoice->save();
+                //     $warnings_ .= '-previous_accounting_invoice status changed to active-';
+                // }
+
+            }
+
+            $accounting->delete();
+            $warnings_ .= '-transaction deleted-';
+            // $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->where('accounting_time_key', $accounting->time_key)->latest('created_at')->get();
+            // dd($accounting_invoices);
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withErrors(['errors_' => 'Gagal menyimpan transaksi: ' . $th->getMessage()]);
         }
-
-        $accounting->delete();
-        $warnings_ .= '-transaction deleted-';
 
         return back()->with('warnings_', $warnings_);
     }
@@ -1436,6 +1785,7 @@ class AccountingController extends Controller
         // dd($label_deskripsi_masuk);
         $kategoris = Kategori::all();
         // $label_kategori_level_one = Kategori::select('kategori_level_one as label', 'kategori_level_one as value')->groupBy('kategori_level_one')->orderBy('kategori_level_one')->get();
+        // dd($transaction_names);
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.transactions_relations',
@@ -1467,6 +1817,18 @@ class AccountingController extends Controller
             'desc' => 'required',
             'kategori_level_one' => 'required',
         ]);
+
+        if ($post['kategori_level_one'] === 'PENERIMAAN PIUTANG') {
+            $request->validate([
+                'pelanggan_id' => 'required',
+                'pelanggan_nama' => 'required',
+            ]);
+        } elseif ($post['kategori_level_one'] === 'BAYAR HUTANG BAHAN BAKU') {
+            $request->validate([
+                'supplier_id' => 'required',
+                'supplier_nama' => 'required',
+            ]);
+        }
 
         $success_ = '';
         $user_instance = UserInstance::find($post['user_instance_id']);
@@ -1568,10 +1930,96 @@ class AccountingController extends Controller
         return back()->with('success_', $success_);
     }
 
-    function delete_transaction_relation(TransactionName $transaction_name) {
+    function delete_transaction_relation(TransactionName $transaction_name, Request $request) {
         // dd($transaction_name);
-        $transaction_name->delete();
-        return back()->with('danger_', '-transaction_relation deleted!-');
+        $post = $request->post();
+        // dump($post);
+        // dump($transaction_name);
+        // VALIDATION
+        $user = Auth::user();
+        // dump($user);
+        if ($post['action'] !== 'edit') {
+            $request->validate([
+                'user_instance_id' => 'required',
+                'type' => 'required|string|in:UANG KELUAR,UANG MASUK',
+                'desc' => 'required|string',
+                'kategori_level_one' => 'required|string',
+                'action' => 'required|string|in:delete, edit',
+            ]);
+            if ($post['related_user_instance_id']) {
+                $request->validate([
+                    'related_desc' => 'required|string',
+                ]);
+            }
+        }
+        $user_instance = UserInstance::find($post['user_instance_id']);
+        // dd($user_instance);
+        if ($user_instance->user_id != $user->id) {
+            $request->validate(['error'=>'required'],['error.required'=>'user not authorized']);
+        }
+
+        // PROCESS
+        if ($post['action'] === 'delete') {
+            $transaction_name->delete();
+            return back()->with('danger_', '-transaction_relation deleted!-');
+        } elseif ($post['action'] === 'edit') {
+            // PELANGGAN
+            $pelanggan_id = null;
+            $pelanggan_nama = null;
+
+            if ($post['pelanggan_nama']) {
+                $pelanggan = Pelanggan::find($post['pelanggan_id']);
+                if (!$pelanggan) {
+                    dd('isset($post["pelanggan_id"]) but pelanggan?');
+                }
+                $pelanggan_id = $pelanggan->id;
+                $pelanggan_nama = $pelanggan->nama;
+            }
+            // SUPPLIER
+            $supplier_id = null;
+            $supplier_nama = null;
+            if ($post['supplier_nama']) {
+                $supplier = Supplier::find($post['supplier_id']);
+                $supplier_id = $supplier->id;
+                $supplier_nama = $supplier->nama;
+            }
+
+            // RELATED USER INSTANCE
+            $related_user_instance_id = $post['related_user_instance_id'] ?? null;
+            $related_user_instance = null;
+            $related_user_instance_type = null;
+            $related_user_instance_name = null;
+            $related_user_instance_branch = null;
+
+            if ($related_user_instance_id) {
+                $related_user_instance = UserInstance::find($related_user_instance_id);
+                if (!$related_user_instance) {
+                    dd('related_user_instance?');
+                }
+                if ($related_user_instance->id === $transaction_name->user_instance_id) {
+                    dd('related_user_instance = user_instance ?');
+                }
+                $related_user_instance_type = $related_user_instance->instance_type;
+                $related_user_instance_name = $related_user_instance->instance_name;
+                $related_user_instance_branch = $related_user_instance->branch;
+            }
+            $transaction_name->update([
+                'desc'=>$post['desc'],
+                'kategori_type'=>$post['type'],
+                'kategori_level_one'=>$post['kategori_level_one'],
+                'kategori_level_two'=>$post['kategori_level_two'],
+                'pelanggan_id'=>$pelanggan_id,
+                'pelanggan_nama'=>$pelanggan_nama,
+                'supplier_id'=>$supplier_id,
+                'supplier_nama'=>$supplier_nama,
+                // 'related_user_id'=>$post['related_user_id'],
+                // 'related_username'=>$post['related_username'],
+                'related_user_instance_type'=>$related_user_instance_type,
+                'related_user_instance_name'=>$related_user_instance_name,
+                'related_user_instance_branch'=>$related_user_instance_branch,
+            ]);
+            return back()->with('success_', '-transaction_relation updated!-');
+        }
     }
 
     function up_down_transaction(UserInstance $user_instance, Accounting $accounting, Request $request) {

@@ -10,10 +10,14 @@ class Pembelian extends Model
     use HasFactory;
     protected $guarded=['id'];
 
+    protected $casts = [
+        'harga_total'  => 'decimal:2',
+    ];
+
     static function lengkapi_data_pembelian($pembelian, $pembelian_temp) {
         $isi = array();
         $harga_total = 0;
-        $status_bayar = 'BELUM';
+        $status_bayar = 'BELUM_LUNAS';
         $jumlah_lunas = 0;
         $keterangan_bayar = '';
         $tanggal_lunas = null;
@@ -159,5 +163,49 @@ class Pembelian extends Model
         }
 
         return $harga_total;
+    }
+
+    function pembelianBarangs() {
+        return $this->hasMany(PembelianBarang::class, 'pembelian_id', 'id');
+    }
+
+    public function accountingInvoices() {
+        return $this->hasMany(AccountingInvoice::class, 'invoice_id', 'id')
+            ->where('invoice_table', 'pembelians')
+            ->orderBy('created_at');
+    }
+
+    public function latestAccountingInvoice() {
+        return $this->hasOne(AccountingInvoice::class, 'invoice_id', 'id')
+            ->where('invoice_table', 'pembelians')
+            ->latestOfMany('time_key');
+    }
+
+    /**
+     * @param int|float $jumlah_bayar_total
+     */
+    public static function new_status_bayar(Pembelian $pembelian, $jumlah_bayar_total) {
+        $status_bayar = 'BELUM_LUNAS';
+        if ($jumlah_bayar_total >= $pembelian->harga_total) {
+            $status_bayar = 'LUNAS';
+        } elseif ($jumlah_bayar_total > 0 && $jumlah_bayar_total < $pembelian->harga_total) {
+            $status_bayar = 'SEBAGIAN';
+        }
+
+        return $status_bayar;
+    }
+
+    public function UpdatePaymentStatus() {
+        $payment_status = 'error';
+        if ($this->amount_due == 0) {
+            $payment_status = 'LUNAS';
+        } else if (($this->amount_paid + $this->balance_used) == 0 && ($this->amount_due == ($this->harga_total - $this->total_discount) || $this->amount_due == $this->harga_total)) {
+            $payment_status = 'BELUM_LUNAS'; 
+        } else if (($this->amount_paid + $this->balance_used) > 0 && ($this->amount_due < ($this->harga_total - $this->total_discount) && $this->amount_due < $this->harga_total)) {
+            $payment_status = 'SEBAGIAN';
+        }
+        if ($payment_status == 'error') {
+        }
+        return $payment_status;
     }
 }

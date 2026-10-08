@@ -98,6 +98,24 @@ class Kategori extends Model
             ],
         ];
     }
+
+    public function getLabelAttribute()
+    {
+        return filled($this->kategori_level_two)
+            ? "{$this->kategori_level_one}--{$this->kategori_level_two}"
+            : $this->kategori_level_one;
+    }
+
+    public static function kategoriUangKeluar()
+    {
+        return self::where('type', 'UANG KELUAR')
+            ->get(['id', 'kategori_level_one', 'kategori_level_two'])
+            ->map(fn ($kategori) => [
+                'id' => $kategori->id,
+                'label' => $kategori->label,
+            ])
+            ->toArray();
+    }
 }
 // Cangcimen AQUATIC & TERRESTRIAL INDONESIA
 // CangciMen AQUATIC & TERRESTRIAL INDONESIA

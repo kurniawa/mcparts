@@ -266,7 +266,7 @@
                         </td>
                         <td>
                             <div>
-                                <button id="toggle-detail_transaction_type-{{ $key_kategori }}-{{ $key_tr_name }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'detail_transaction_type-{{ $key_kategori }}-{{ $key_tr_name }}')">
+                                <button id="toggle-detail_transaction_type-{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" class="rounded bg-white shadow drop-shadow" onclick="showDropdown(this.id, 'detail_transaction_type-{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}')">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                     </svg>
@@ -275,23 +275,23 @@
                         </td>
                     </tr>
                     {{-- DETAIL AND EDIT OR DELETE --}}
-                    <tr class="hidden" id="detail_transaction_type-{{ $key_kategori }}-{{ $key_tr_name }}">
+                    <tr class="hidden" id="detail_transaction_type-{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}">
                         <td colspan="5">
                             <div class="flex justify-center">
                                 <div class="rounded p-2 bg-white shadow drop-shadow inline-block mt-1">
-                                    <form action="{{ route('accounting.delete_transaction_relation', $tr_name->id) }}" method="POST" onsubmit="return confirm('Hapus Relasi Transaksi?')">
+                                    <form action="{{ route('accounting.delete_transaction_relation', $tr_name->id) }}" method="POST" onsubmit="return confirm('Yakin hapus/edit Relasi Transaksi?')">
                                         @csrf
                                         <div class="flex">
                                             <div>
                                                 <label>User Instance:</label>
-                                                @foreach ($user_instances_all as $key => $user_instance_this)
+                                                @foreach ($user_instances_all as $user_instance_this)
                                                 <div class="flex mt-1">
                                                     @if ($tr_name->user_instance_id === $user_instance_this->id)
-                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}" checked>
+                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}" checked>
                                                     @else
-                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}">
+                                                    <input type="radio" name="user_instance_id" id="edit-user_instance_id-{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance_this->id }}">
                                                     @endif
-                                                    <label for="edit-user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance_this->instance_type }} - {{ $user_instance_this->instance_name }} - {{ $user_instance_this->branch }} - {{ $user_instance_this->account_number }}</label>
+                                                    <label for="edit-user_instance_id-{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" class="ml-1">{{ $user_instance_this->instance_type }} - {{ $user_instance_this->instance_name }} - {{ $user_instance_this->branch }} - {{ $user_instance_this->account_number }}</label>
                                                 </div>
                                                 @endforeach
                                             </div>
@@ -336,7 +336,7 @@
                                                     <input type="radio" name="related_user_instance_id" id="edit-related_user_instance_id-none" value="" checked>
                                                     <label for="edit-related_user_instance_id-none" class="ml-1">none</label>
                                                 </div>
-                                                @foreach ($user_instances_all as $key => $user_instance)
+                                                @foreach ($user_instances_all as $user_instance)
                                                 <div class="flex mt-1">
                                                     @if ($tr_name->related_user_instance_id === $user_instance->id)
                                                     <input type="radio" name="related_user_instance_id" id="edit-related_user_instance_id-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $user_instance->id }}" checked>
@@ -358,27 +358,28 @@
                                                     <div>
                                                         <label>pelanggan:</label>
                                                         <div>
-                                                            <input type="text" name="pelanggan_nama" id="edit-pelanggan" class="border rounded p-1 text-xs" value="{{ $tr_name->pelanggan_nama }}">
-                                                            <input type="hidden" name="pelanggan_id" id="edit-pelanggan_id" value="{{ $tr_name->pelanggan_id }}">
+                                                            <input type="text" name="pelanggan_nama" id="edit-pelanggan_{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" class="input-edit-pelanggan border rounded p-1 text-xs" value="{{ $tr_name->pelanggan_nama }}">
+                                                            <input type="hidden" name="pelanggan_id" id="edit-pelanggan-id_{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $tr_name->pelanggan_id }}">
                                                         </div>
                                                     </div>
                                                     <div class="ml-1">
                                                         <label>supplier:</label>
                                                         <div>
-                                                            <input type="text" name="supplier_nama" id="edit-supplier" class="border rounded p-1 text-xs" value="{{ $tr_name->supplier_nama }}">
-                                                            <input type="hidden" name="supplier_id" id="edit-supplier_id" value="{{ $tr_name->supplier_id }}">
+                                                            <input type="text" name="supplier_nama" id="edit-supplier_{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" class="input-edit-supplier border rounded p-1 text-xs" value="{{ $tr_name->supplier_nama }}">
+                                                            <input type="hidden" name="supplier_id" id="edit-supplier-id_{{ $key }}-{{ $key_kategori }}-{{ $key_tr_name }}" value="{{ $tr_name->supplier_id }}">
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         @if ((int)$tr_name->user_id === Auth::user()->id)
-                                        <div class="flex mt-3 justify-center">
-                                            <div>
-                                                <button type="submit" class="ml-2 flex items-center bg-pink-400 text-white py-1 px-3 rounded hover:bg-pink-600">
-                                                    <span class="ml-1">Hapus Relasi Transaksi</span>
-                                                </button>
-                                            </div>
+                                        <div class="flex mt-3 justify-center gap-1">
+                                            <button type="submit" class="flex items-center bg-pink-200 text-pink-400 py-1 px-3 rounded hover:bg-pink-300" value="delete" name="action">
+                                                <span class="font-bold">Hapus Relasi Transaksi</span>
+                                            </button>
+                                            <button type="submit" class="flex items-center bg-emerald-200 text-emerald-400 py-1 px-3 rounded hover:bg-emerald-300" value="edit" name="action">
+                                                <span class="font-bold">Confirm Edit</span>
+                                            </button>
                                         </div>
                                         @endif
                                     </form>
@@ -520,14 +521,28 @@
     function set_autocomplete_kategori_level_two() {
         console.log(label_kategori_level_two);
         $('#new_relasi_transaksi-kategori_level_two').autocomplete({
-        source: label_kategori_level_two,
-        select: function (event, ui) {
-            console.log(ui.item);
-            // document.getElementById('new_relasi_transaksi-kategori_level_one').value = ui.item.id;
-            document.getElementById('new_relasi_transaksi-kategori_level_two').value = ui.item.value;
-        }
-    });
+            source: label_kategori_level_two,
+            select: function (event, ui) {
+                console.log(ui.item);
+                // document.getElementById('new_relasi_transaksi-kategori_level_one').value = ui.item.id;
+                document.getElementById('new_relasi_transaksi-kategori_level_two').value = ui.item.value;
+            }
+        });
     }
+
+    document.querySelectorAll('.input-edit-pelanggan').forEach(item => {
+        let id_parts = item.id.split('_');
+        $(`#${item.id}`).autocomplete({
+            source: label_pelanggans,
+            select: function (event, ui) {
+                // console.log(ui.item);
+                document.getElementById('edit-pelanggan-id_' + id_parts[1]).value = ui.item.id;
+                document.getElementById(item.id).value = ui.item.value;
+                // console.log(document.getElementById(item.id));
+                // console.log(document.getElementById(item.id).value);
+            }
+        });
+    });
 </script>
 
 @endsection

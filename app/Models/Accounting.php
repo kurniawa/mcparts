@@ -9,6 +9,10 @@ class Accounting extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+    protected $casts = [
+        'jumlah' => 'decimal:2',
+        'saldo'  => 'decimal:2',
+    ];
     static function get_instance_types() {
         return [
             'safe',
@@ -32,25 +36,62 @@ class Accounting extends Model
         ];
     }
 
-    static function validasi_data_untuk_penerimaan_piutang($request, $i) {
+    // Related AccountingInvoices
+    public function accounting_invoices() {
+        return $this->hasMany(AccountingInvoice::class, 'accounting_id', 'id');
+    }
+
+    static function validasi_data_untuk_pemasukan_pengeluaran($request, $i, $kategori_type) {
         $request->validate([
-            "remaining_balance_masuk.$i" => "required|numeric",
+            // "remaining_balance_masuk.$i" => "required|numeric",
             "related_not_yet_paid_off_invoices.nota_id.$i" => "required|array",
             "related_not_yet_paid_off_invoices.nota_id.$i.*" => "numeric",
             "related_not_yet_paid_off_invoices.harga_total.$i" => "required|array",
-            "related_not_yet_paid_off_invoices.harga_total.$i.*" => "numeric",
+            "related_not_yet_paid_off_invoices.harga_total.$i.*" => "numeric|decimal:0,2",
             "related_not_yet_paid_off_invoices.amount_due.$i" => "required|array",
-            "related_not_yet_paid_off_invoices.amount_due.$i.*" => "numeric",
+            "related_not_yet_paid_off_invoices.amount_due.$i.*" => "numeric|decimal:0,2",
             "related_not_yet_paid_off_invoices.amount_paid.$i" => "required|array",
-            "related_not_yet_paid_off_invoices.amount_paid.$i.*" => "numeric",
+            "related_not_yet_paid_off_invoices.amount_paid.$i.*" => "numeric|decimal:0,2",
         ]);
-
-        // Validasi perbandingan nilai-nilai yang di post dengan yang ada di database, apakah sudah sesuai?
+        
         $post = $request->post();
+        
+        // Validasi perbandingan nilai-nilai yang di post dengan yang ada di database, apakah sudah sesuai?
         $total_amount_paid_posted = 0;
         $total_saldo_used = 0;
+        $customer_id = null;
+        $supplier_id = null;
         for ($j=0; $j < count($post['related_not_yet_paid_off_invoices']['nota_id'][$i]); $j++) { 
-            $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            if ($post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j] == 0 && $post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j] == 0) {
+                continue;
+            }
+            // Validasi accountingInvoice, cek tanggalnya, apabila sudah ada tanggal setelahnya,
+            // maka accountingInvoice tidak dapat diinput/disimpan.
+            $created_at_new = \Carbon\Carbon::create(
+                $post['year'][$i],
+                $post['month'][$i],
+                $post['day'][$i],
+                now()->hour,
+                now()->minute,
+                now()->second
+            );
+            // dump($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            // $accounting_invoice_after = AccountingInvoice::where('invoice_table', 'notas')
+            //     ->where('invoice_id', $post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j])
+            //     ->where('status', 'active')
+            //     ->where('created_at', '>', $created_at_new)->get();
+            // // dd($accounting_invoice_after);
+            
+            // if (count($accounting_invoice_after)) {
+            //     dump('Terdapat accounting_invoice setelah nya');
+            //     dd($accounting_invoice_after);
+            // }
+            $related_nota = null;
+            if ($kategori_type === 'UANG MASUK') {
+                $related_nota = Nota::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            } elseif ($kategori_type === 'UANG KELUAR') {
+                $related_nota = Pembelian::find($post['related_not_yet_paid_off_invoices']['nota_id'][$i][$j]);
+            }
 
             if (!$related_nota) {
                 $request->validate(['error' => 'required'], [
@@ -58,7 +99,7 @@ class Accounting extends Model
                 ]);
             }
 
-            $related_transaction_name = TransactionName::where('kategori_level_one', 'PENERIMAAN PIUTANG')->where('desc', $post['transaction_desc'][$i])->first();
+            $related_transaction_name = TransactionName::where('kategori_type', $kategori_type)->where('desc', $post['transaction_desc'][$i])->first();
 
             if (!$related_transaction_name) {
                 $request->validate(['error' => 'required'], [
@@ -70,15 +111,17 @@ class Accounting extends Model
 
             $amount_paid = (float)$post['related_not_yet_paid_off_invoices']['amount_paid'][$i][$j];
             $amount_due = (float)$post['related_not_yet_paid_off_invoices']['amount_due'][$i][$j];
-            $discount_percentage = (float)$post['related_not_yet_paid_off_invoices']['discount_percentage'][$i][$j];
+            $discount_percent = (float)$post['related_not_yet_paid_off_invoices']['discount_percent'][$i][$j];
+            $discount_amount = (float)$post['related_not_yet_paid_off_invoices']['discount_amount'][$i][$j];
+            $other_discount = (float)$post['related_not_yet_paid_off_invoices']['other_discount'][$i][$j];
             $total_discount = (float)$post['related_not_yet_paid_off_invoices']['total_discount'][$i][$j];
             $payment_status = $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j];
             $balance_used = (float)$post['related_not_yet_paid_off_invoices']['balance_used'][$i][$j];
 
             // Validasi Potongan Harga
             $total_discount_new = $total_discount;
-            if ($discount_percentage > 0) {
-                $total_discount_new = ($discount_percentage / 100) * $amount_due_old;
+            if ($discount_percent > 0) {
+                $total_discount_new = $discount_amount + $other_discount;
             }
 
             if ($total_discount_new != $total_discount) {
@@ -88,24 +131,45 @@ class Accounting extends Model
             }
 
             // Validasi Amount Due / Sisa Bayar
-            // dump($related_nota);
-            // dump($amount_due_old, $total_discount_new, $amount_paid, $balance_used);
+            // Yang mempengaruhi amount_due adalah total_discount, amount_paid, balance_used
             $amount_due_new = $amount_due_old - $total_discount_new - $amount_paid - $balance_used;
-            // dd($amount_due_new, $amount_due);
             if ($amount_due_new != $amount_due) {
+                // $request->validate(['error' => 'required'], [
+                //     'error.required' => "amount_due_new != amount_due --> $amount_due_new != $amount_due"
+                // ]);
+                dd("amount_due_new != amount_due --> $amount_due_new != $amount_due", [
+                    'amount_due_old' => $amount_due_old,
+                    'total_discount_new' => $total_discount_new,
+                    'amount_paid' => $amount_paid,
+                    'balance_used' => $balance_used,
+                ]);
+            }
+
+            // Validasi nilai negatif pada amount_paid dan nilai negatif pada saldo dan sisa bayar
+            if ($amount_paid < 0) {
                 $request->validate(['error' => 'required'], [
-                    'error.required' => "amount_due_new != amount_due --> $amount_due_new != $amount_due"
+                    'error.required' => "[Nilai tidak sesuai pada balance masuk yang digunakan]"
+                ]);
+            }
+            if ($balance_used < 0) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "[Nilai tidak sesuai pada saldo yang digunakan.]"
+                ]);
+            }
+            if ($amount_due_new < 0) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "[Nilai tidak sesuai pada sisa bayar.]"
                 ]);
             }
 
             // Validasi Payment Status
             $payment_status_new = 'error';
             if ($amount_due_new <= 0) {
-                $payment_status_new = 'lunas';
+                $payment_status_new = 'LUNAS';
             } else if ($amount_due_new == ($amount_due_old - $total_discount_new)) {
-                $payment_status_new = 'belum_lunas'; 
+                $payment_status_new = 'BELUM_LUNAS'; 
             } else if ($amount_due_new > 0 && $amount_due_new < ($amount_due_old - $total_discount_new)) {
-                $payment_status_new = 'sebagian';
+                $payment_status_new = 'SEBAGIAN';
             }
             if ($payment_status_new == 'error') {
                 $request->validate(['error' => 'required'], [
@@ -119,32 +183,227 @@ class Accounting extends Model
 
             $total_amount_paid_posted += $amount_paid; // Akumulasi total_amount_paid_posted
             $total_saldo_used += $balance_used; // Akumulasi total_saldo_used/total_balance_used
+
+            if ($kategori_type === 'UANG MASUK') {
+                if ($customer_id === null) {
+                    $customer_id = $related_nota->pelanggan_id;
+                }
+            } elseif ($kategori_type === 'UANG KELUAR') {
+                if ($supplier_id === null) {
+                    $supplier_id = $related_nota->supplier_id;
+                }
+            }
         }
         // Validasi Saldo dan Sisa Saldo
-        $overpayment = Overpayment::where('customer_id')->latest()->first();
+        $overpayment = null;
+        if ($kategori_type === 'UANG MASUK') {
+            $overpayment = Overpayment::where('customer_id', $customer_id)->latest()->first();
+        } elseif ($kategori_type === 'UANG KELUAR') {
+            $overpayment = Overpayment::where('supplier_id', $supplier_id)->latest()->first();
+        }
         $saldo_awal_old = 0;
         if ($overpayment) {
             $saldo_awal_old = $overpayment->amount;
         }
+        // dump($post);
+        // dd($post['saldo_awal'][$i], $saldo_awal_old);
         if ($saldo_awal_old != $post['saldo_awal'][$i]) {
             $request->validate(['error' => 'required'], [
-                'error.required' => "saldo_awal_old != post[saldo_awal][$i] --> $saldo_awal_old != $post[saldo_awal][$i]"
+                'error.required' => "saldo_awal_old != post[saldo_awal][$i] --> $saldo_awal_old != " . $post['saldo_awal'][$i]
             ]);
         }
 
         $sisa_saldo_new = $saldo_awal_old - $total_saldo_used;
         if ($sisa_saldo_new != $post['sisa_saldo'][$i]) {
             $request->validate(['error' => 'required'], [
-                'error.required' => "sisa_saldo_new != post[sisa_saldo][$i] --> $sisa_saldo_new != $post[sisa_saldo][$i]"
+                'error.required' => "sisa_saldo_new != post[sisa_saldo][$i] --> $sisa_saldo_new != " . $post['sisa_saldo'][$i]
             ]);
         }
 
-        // Validasi Remaining Balance Masuk
-        $remaining_balance_new = (float)$post['masuk'][$i] - $total_amount_paid_posted;
-        if ($remaining_balance_new != $post['remaining_balance_masuk'][$i]) {
-            $request->validate(['error' => 'required'], [
-                'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != $post[related_not_yet_paid_off_invoices][payment_status][$i][$j]"
-            ]);
+        if ($kategori_type === 'UANG MASUK') {
+            // Validasi Remaining Balance Masuk - Uang Masuk tidak boleh kosong atau kurang dari 0
+            $masuk = $post['masuk'][$i] ?? null;
+            $balance_used = null;
+            if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
+                $balance_used = 0;
+                foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
+                    if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
+                        ]);
+                    }
+                    $balance_used += (float)$value;
+                }
+            }
+            if ($masuk && !$balance_used) {
+                if ((float)$masuk > 0) {
+                    $remaining_balance_new = (float)$masuk - $total_amount_paid_posted;
+                    if ($remaining_balance_new != $post['remaining_balance_masuk'][$i]) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != " . $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j]
+                        ]);
+                    }
+                } elseif ((float)$masuk <= 0) {
+                    $request->validate(['error' => 'required'], [
+                        'error.required' => "input uang masuk[$i][$j] --> " . $post['masuk'][$i]
+                    ]);
+                }
+            } elseif (!$masuk && !$balance_used) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "input uang masuk dan saldo yang digunakan tidak sesuai"
+                ]);
+            }
+        } elseif ($kategori_type === 'UANG KELUAR') {
+            // Validasi Remaining Balance Keluar - Uang Keluar tidak boleh kosong atau kurang dari 0
+            $keluar = $post['keluar'][$i] ?? null;
+            $balance_used = null;
+            if (isset($post['related_not_yet_paid_off_invoices']['balance_used'][$i])) {
+                $balance_used = 0;
+                foreach ($post['related_not_yet_paid_off_invoices']['balance_used'][$i] as $key => $value) {
+                    if (!is_numeric(trim($value)) || (float)trim($value) < 0) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "Nilai saldo yang digunakan tidak sesuai pada baris ke-$i"
+                        ]);
+                    }
+                    $balance_used += (float)$value;
+                }
+            }
+            if ($keluar && !$balance_used) {
+                if ((float)$keluar > 0) {
+                    $remaining_balance_new = (float)$keluar - $total_amount_paid_posted;
+                    if ($remaining_balance_new != $post['remaining_balance_keluar'][$i]) {
+                        $request->validate(['error' => 'required'], [
+                            'error.required' => "remaining_balance_new != post[related_not_yet_paid_off_invoices][payment_status][$i][$j] --> $remaining_balance_new != " . $post['related_not_yet_paid_off_invoices']['payment_status'][$i][$j]
+                        ]);
+                    }
+                } elseif ((float)$keluar <= 0) {
+                    $request->validate(['error' => 'required'], [
+                        'error.required' => "input uang keluar[$i][$j] --> " . $post['keluar'][$i]
+                    ]);
+                }
+            } elseif (!$keluar && !$balance_used) {
+                $request->validate(['error' => 'required'], [
+                    'error.required' => "input uang keluar dan saldo yang digunakan tidak sesuai"
+                ]);
+            }
         }
+        
+        
+        //  elseif (!$masuk && $balance_used) {
+        //     $amount_due_to_validate = $amount_due_old - (float)$balance_used;
+        //     if ($amount_due_new != $amount_due_to_validate) {
+        //         dd($amount_due_new, $amount_due, $amount_due_old, $total_discount_new, $amount_paid, $balance_used);
+        //         $request->validate(['error' => 'required'], [
+        //             'error.required' => "amount_due_new != amount_due_to_validate --> $amount_due_new != $amount_due_to_validate"
+        //         ]);
+        //     }
+        // } elseif ($masuk && $balance_used) {
+        //     $amount_due_to_validate = $amount_due_old ($amount_paid + (float)$balance_used);
+        //     if ($amount_due_new != $amount_due_to_validate) {
+        //         $request->validate(['error' => 'required'], [
+        //             'error.required' => "amount_due_new != amount_due_to_validate --> $amount_due_new != $amount_due_to_validate"
+        //         ]);
+        //     }
+        // }
+
+        // Validasi total saldo yang digunakan tidak melebih saldo awal, karena tidak make sense.
+        // if ($total_saldo_used > saldoAwalRealValue) {
+        //     $request->validate(['error' => 'required'], [
+        //         'error.required' => "input uang masuk[$i][$j] --> $post[masuk][$i]"
+        //     ]);
+        // }
+    }
+
+    public function updateAccountingAfter() {
+        // Hitung saldo
+        $saldo = 0;
+        $after_trans = Accounting::where('user_instance_id', $this->user_instance_id)
+            ->where('created_at', '>', $this->created_at)
+            ->orderBy('created_at')
+            ->get();
+
+        $before_trans = Accounting::where('user_instance_id', $this->user_instance_id)
+            ->where('created_at', '<', $this->created_at)
+            ->latest()
+            ->first();
+
+        if ($before_trans) {
+            $saldo = $before_trans->saldo;
+        } else {
+            $last_existing = Accounting::where('user_instance_id', $this->user_instance_id)->latest()->first();
+            if ($last_existing) {
+                $saldo = $last_existing->saldo;
+            }
+        }
+
+        // Perbarui saldo
+        $saldo += ($this->transaction_type === 'pemasukan') ? $this->jumlah : -$this->jumlah;
+
+        // Update saldo untuk semua transaksi setelahnya
+        if ($after_trans->isNotEmpty()) {
+            $saldo_next = $saldo;
+            foreach ($after_trans as $aft) {
+                $saldo_next += ($aft->transaction_type === 'pemasukan') ? $aft->jumlah : -$aft->jumlah;
+                $aft->saldo = $saldo_next;
+                $aft->save();
+            }
+            // $success_ .= "-saldo setelahnya diperbarui-";
+        }
+    }
+
+    public static function calculating_balance(string $created_at, UserInstance $user_instance, string $transaction_type, float $amount) {
+        $new_balance = 0;
+
+        $before_trans = Accounting::where('user_instance_id', $user_instance->id)
+            ->where('created_at', '<', $created_at)
+            ->latest()
+            ->first();
+
+        if ($before_trans) {
+            $new_balance = $before_trans->saldo;
+        } else {
+            $last_existing = Accounting::where('user_instance_id', $user_instance->id)->latest()->first();
+            if ($last_existing) {
+                $new_balance = $last_existing->saldo;
+            }
+        }
+
+        // Perbarui saldo
+        $new_balance += ($transaction_type === 'pemasukan') ? $amount : -$amount;
+
+        return $new_balance;
+    }
+
+    public function updateKeteranganAccounting(Accounting $accounting) {
+        $payment = 0;
+        foreach ($accounting->accounting_invoices as $acc_inv) {
+            $payment += $acc_inv->amount_paid;
+        }
+        $keterangan = '';
+        if ($accounting->keterangan) {
+            // Analisa $accounting->keterangan, apakah ada string 'sisa:' di dalamnya, kalau ada, hapus dulu sampai karakter '|'
+            $keterangan_parts = explode('|', $accounting->keterangan);
+            foreach ($keterangan_parts as $part) {
+                if (strpos($part, 'sisa:') === false) {
+                    $keterangan .= $part . '|';
+                }
+            }
+            if ($keterangan === '|') {
+                $keterangan = '';
+            }
+        }
+        if (bccomp((string)$payment, (string)$accounting->jumlah, 2) !== 0) {
+            // Cek apakah karakter terakhir adalah '|', kalau bukan, tambahkan '|'
+            if ($keterangan !== '' && substr($keterangan, -1) !== '|') {
+                $keterangan .= '|';
+            }
+            $keterangan .= 'sisa:' . ($accounting->jumlah - $payment) . '|';
+        }
+
+        if ($keterangan === '') {
+            $keterangan = null;
+        }
+
+        return $keterangan;
     }
 }

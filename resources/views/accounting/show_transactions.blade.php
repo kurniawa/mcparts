@@ -12,18 +12,18 @@
     </div>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 relative">
         <h1 class="text-xl font-bold">Data Transaksi - <span class="text-slate-500">{{ $user->username }}</span></h1>
-        <div class="flex">
+        <div class="grid gap-1 md:flex">
             <div id="filter-content">
-                <div class="rounded p-2 bg-white shadow drop-shadow">
-                    <form action="" method="GET" class="text-xs">
-                        <div class="flex items-end">
+                <div class="rounded p-2 bg-white shadow drop-shadow overflow-x-auto w-full">
+                    <form action="" method="GET" class="text-xs w-max min-w-full">
+                        <div class="grid md:flex md:items-end">
                             <div>
                                 <label>Desc:</label>
-                                <div class="flex mt-1">
+                                <div class="mt-1">
                                     <input type="text" class="border rounded text-xs p-1" name="desc" placeholder="Deskripsi/Keterangan" id="filter-desc">
                                 </div>
                             </div>
-                            <div class="flex items-center ml-2 gap-2">
+                            <div class="grid grid-cols-2 gap-1 md:flex items-center md:ml-2 md:gap-2">
                                 <div><input type="radio" name="timerange" value="triwulan" id="triwulan" onclick="set_time_range('triwulan')"><label for="triwulan" class="ml-1">triwulan</label></div>
                                 <div><input type="radio" name="timerange" value="triwulan_lalu" id="triwulan_lalu" onclick="set_time_range('triwulan_lalu')"><label for="triwulan_lalu" class="ml-1">triwulan lalu</label></div>
                                 <div><input type="radio" name="timerange" value="7d" id="7d" onclick="set_time_range('7d')"><label for="7d" class="ml-1">7d</label></div>
@@ -131,13 +131,13 @@
                     <th>
                         <div class="flex justify-between bg-pink-300">
                             <span>Rp</span>
-                            <span>{{ number_format($keluar_total / 100,2,',','.') }}</span>
+                            <span>{{ number_format($keluar_total,2,',','.') }}</span>
                         </div>
                     </th>
                     <th>
                         <div class="flex justify-between bg-emerald-300">
                             <span>Rp</span>
-                            <span>{{ number_format($masuk_total / 100,2,',','.') }}</span>
+                            <span>{{ number_format($masuk_total,2,',','.') }}</span>
                         </div>
                     </th>
                     <th>
@@ -145,7 +145,7 @@
                             <span>Rp</span>
                             @if ($from)
                             @if (count($accountings) !== 0)
-                            <span>{{ number_format($accountings[count($accountings) - 1]->saldo / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accountings[count($accountings) - 1]->saldo,2,',','.') }}</span>
                             @else
                             <span>0</span>
                             @endif
@@ -165,16 +165,32 @@
                     <td>
                         <div class="flex justify-between">
                             <span>Rp.</span>
-                            <span>{{ number_format($saldo_awal / 100,2,',','.') }}</span>
+                            <span>{{ number_format($saldo_awal,2,',','.') }}</span>
                         </div>
                     </td>
                 </tr>
                 @foreach ($accountings as $key_accounting => $accounting)
                 <tr>
-                    <td>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</td>
+                    <td>
+                        <div class="flex gap-1 items-center">
+                            <span>{{ date('d-m-Y', strtotime($accounting->created_at)) }}</span>
+                            <button id="btn-toggle-form_change_date-{{ $key_accounting }}" type="button" class="border rounded" onclick="toggle_light(this.id, 'form_change_date-{{ $key_accounting }}', [], ['bg-gray-200'], 'block')">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form id="form_change_date-{{ $key_accounting }}" action="{{ route('accounting.change_date', $accounting->id) }}" method="POST" onsubmit="return confirm('Ingin ubah tanggal?')" class="hidden">
+                            @csrf
+                            <div class="flex gap-1 items-center">
+                                <input type="date" name="new_date" class="border p-1 text-xs mt-1 w-20" value="{{ date('Y-m-d', strtotime($accounting->created_at)) }}">
+                                <button type="submit" class="rounded bg-blue-200 text-blue-600 px-1">change date</button>
+                            </div>
+                        </form>
+                    </td>
                     <td>{{ $accounting->kode }}</td>
                     @if ($accounting->keterangan !== null)
-                    <td>{{ $accounting->transaction_desc }} <span class="font-bold text-blue-300">- {{ $accounting->keterangan }} -</span></td>
+                    <td>{{ $accounting->transaction_desc }} <span class="font-bold text-blue-300">- {{ str_contains($accounting->keterangan, 'bilyet_giro_id:') ? 'BG' : $accounting->keterangan }} -</span></td>
                     @else
                     <td>{{ $accounting->transaction_desc }}</td>
                     @endif
@@ -182,7 +198,7 @@
                         @if ($accounting->transaction_type === 'pengeluaran')
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->jumlah / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accounting->jumlah,2,',','.') }}</span>
                         </div>
                         @endif
                     </td>
@@ -190,14 +206,14 @@
                         @if ($accounting->transaction_type === 'pemasukan')
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->jumlah / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accounting->jumlah,2,',','.') }}</span>
                         </div>
                         @endif
                     </td>
                     <td>
                         <div class="flex justify-between">
                             <span>Rp</span>
-                            <span>{{ number_format($accounting->saldo / 100,2,',','.') }}</span>
+                            <span>{{ number_format($accounting->saldo,2,',','.') }}</span>
                         </div>
                     </td>
                     @if ((int)$userInstance->user_id === $user->id)
@@ -263,13 +279,13 @@
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">keterangan tambahan:</label>
-                                        <input type="text" name="keterangan" id="edit-{{ $key_accounting }}-keterangan" class="border p-1 text-xs mt-1 w-60" value="{{ $accounting->keterangan }}">
+                                        <input type="text" name="keterangan" id="edit-{{ $key_accounting }}-keterangan" class="border p-1 text-xs mt-1 w-60" value="{{ str_contains($accounting->keterangan, 'bilyet_giro_id:') ? 'BG' : $accounting->keterangan }}">
                                     </div>
                                     <div class="ml-1">
                                         <label for="" class="block">keluar:</label>
                                         @if ($accounting->transaction_type === 'pengeluaran')
-                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah / 100,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
-                                        <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted" value="{{ $accounting->jumlah / 100 }}">
+                                        <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-keluar-unformatted')">
+                                        <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
                                         <input type="text" id="edit-{{ $key_accounting }}-keluar" class="border p-1 text-xs mt-1 w-36">
                                         <input type="hidden" name="keluar" id="edit-{{ $key_accounting }}-keluar-unformatted">
@@ -278,8 +294,8 @@
                                     <div class="ml-1">
                                         <label for="" class="block">masuk:</label>
                                         @if ($accounting->transaction_type === 'pemasukan')
-                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah / 100,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
-                                        <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted" value="{{ $accounting->jumlah / 100 }}">
+                                        <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36" value="{{ number_format($accounting->jumlah,0,',','.') }}" onchange="formatNumber(this, 'edit-{{ $key_accounting }}-masuk-unformatted')">
+                                        <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted" value="{{ $accounting->jumlah }}">
                                         @else
                                         <input type="text" id="edit-{{ $key_accounting }}-masuk" class="border p-1 text-xs mt-1 w-36">
                                         <input type="hidden" name="masuk" id="edit-{{ $key_accounting }}-masuk-unformatted">
@@ -317,12 +333,21 @@
                                     <button type="submit" class="border-2 font-semibold rounded text-emerald-500 border-emerald-300 bg-emerald-200 px-2">confirm edit</button>
                                 </div>
                             </form>
+                            @if ($accounting->transaction_desc === 'KLIRING BG' && preg_match('/bilyet_giro_id:(\d+)/', $accounting->keterangan, $matches))
+                            <form action="{{ route('accounting.destroy_accounting_bg', [$accounting->id, $userInstance->id, $matches[1]]) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus transaksi ini?')" class="mt-1">
+                                @csrf
+                                <div class="flex justify-center">
+                                    <button type="submit" class="border-2 font-semibold rounded text-pink-500 border-pink-300 bg-pink-200 px-2">hapus transaksi</button>
+                                </div>
+                            </form>
+                            @else
                             <form action="{{ route('accounting.delete_entry', [$userInstance->id, $accounting->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus transaksi ini?')" class="mt-1">
                                 @csrf
                                 <div class="flex justify-center">
                                     <button type="submit" class="border-2 font-semibold rounded text-pink-500 border-pink-300 bg-pink-200 px-2">hapus transaksi</button>
                                 </div>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -337,12 +362,12 @@
             <table id="table-transactions">
                 <tr>
                     <th></th><th></th><th></th>
-                    <th>{{ $keluar_total / 100 }}</th>
-                    <th>{{ $masuk_total / 100 }}</th>
+                    <th>{{ $keluar_total }}</th>
+                    <th>{{ $masuk_total }}</th>
                     <th>
                         @if ($from)
                         @if (count($accountings) !== 0)
-                        <span>{{ $accountings[count($accountings) - 1]->saldo / 100 }}</span>
+                        <span>{{ $accountings[count($accountings) - 1]->saldo }}</span>
                         @else
                         <span>0</span>
                         @endif
@@ -371,16 +396,16 @@
                     @endif
                     <td>
                         @if ($accounting->transaction_type === 'pengeluaran')
-                        {{ $accounting->jumlah / 100 }}
+                        {{ $accounting->jumlah }}
                         @endif
                     </td>
                     <td>
                         @if ($accounting->transaction_type === 'pemasukan')
-                        {{ $accounting->jumlah / 100 }}
+                        {{ $accounting->jumlah }}
                         @endif
                     </td>
                     <td>
-                        {{ $accounting->saldo / 100 }}
+                        {{ $accounting->saldo }}
                     </td>
 
                 </tr>
@@ -391,7 +416,7 @@
 
         {{-- STORE NEW TRANSACTIONS --}}
         @if ((int)$userInstance->user_id === $user->id)
-        <x-add-transactions :userInstance="$userInstance"></x-add-transactions>
+        <x-add-transactions :userInstance="$userInstance" :labelDeskripsi="$labelDeskripsi"></x-add-transactions>
         @endif
         {{-- END - STORE NEW TRANSACTIONS --}}
     </div>
@@ -408,7 +433,6 @@
 
 <script>
     const related_users = {!! json_encode($related_users, JSON_HEX_TAG) !!};
-    const label_deskripsi = {!! json_encode($label_deskripsi, JSON_HEX_TAG) !!};
     const user_instance = {!! json_encode($userInstance, JSON_HEX_TAG) !!};
     const count_accountings = {!! json_encode(count($accountings), JSON_HEX_TAG) !!};
 
@@ -428,70 +452,51 @@
 
     // console.log(html_option_related_users);
 
-    let transaction_index = 7;
-    function add_transaction(tr_id, parent_id) {
-        document.getElementById(tr_id).remove();
-        let parent = document.getElementById(parent_id);
-        parent.insertAdjacentHTML('beforeend',
-        `
-        <tr>
-            <td>
-                <div class="flex items-center">
-                    <input type="text" name="day[]" id="day-${transaction_index}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
-                    <span>-</span>
-                    <input type="text" name="month[]" id="month-${transaction_index}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
-                    <span>-</span>
-                    <input type="text" name="year[]" id="year-${transaction_index}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
-                </div>
-            </td>
-            <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs w-20" value="${user_instance.kode}"></td>
-            <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
-            <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>
-            <td>
-                <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
-                <input type="hidden" name="keluar[]" id="keluar-${transaction_index}-unformatted">
-            </td>
-            <td>
-                <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
-                <input type="hidden" name="masuk[]" id="masuk-${transaction_index}-unformatted">
-                <input type="hidden" name="transaction_id[]" id="transaction_id-${transaction_index}">
-            </td>
-        </tr>
-        <tr id="tr_add_transaction">
-            <td>
-                <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </button>
-            </td>
-        </tr>
-        `);
-        setTimeout(() => {
-            // setAutocompleteSPKItem(`produk_nama-${transaction_index}`, `produk_nama-${transaction_index}`, `produk_id-${transaction_index}`);
-            autocomplete_deskripsi(transaction_index);
-            transaction_index++;
-        }, 100);
-    }
-
-    for (let i = 0; i < transaction_index; i++) {
-        autocomplete_deskripsi(i);
-    }
-
-    function autocomplete_deskripsi(index) {
-        $(`#transaction_desc-${index}`).autocomplete({
-            source: label_deskripsi,
-            select: function (event, ui) {
-                // console.log(ui.item);
-                // document.getElementById(`transaction_desc-${index}`).value = ui.item.id;
-                document.getElementById(`transaction_desc-${index}`).value = ui.item.value;
-                document.getElementById(`transaction_id-${index}`).value = ui.item.id;
-                // autofill_transaction(index, ui.item.value);
-                // console.log("autocomplete_deskripsi: " + ui.item.id);
-                accountingGetRelatedInvoice(ui.item.id, index);
-            }
-        });
-    }
+    // let transaction_index = 7;
+    // function add_transaction(tr_id, parent_id) {
+    //     document.getElementById(tr_id).remove();
+    //     let parent = document.getElementById(parent_id);
+    //     parent.insertAdjacentHTML('beforeend',
+    //     `
+    //     <tr>
+    //         <td>
+    //             <div class="flex items-center">
+    //                 <input type="text" name="day[]" id="day-${transaction_index}" class="border p-1 text-xs w-8" placeholder="dd" value="{{ old('day.' . $i) ? old('day.' . $i) : date('d') }}">
+    //                 <span>-</span>
+    //                 <input type="text" name="month[]" id="month-${transaction_index}" class="border p-1 text-xs w-8" placeholder="mm" value="{{ old('month.' . $i) ? old('month.' . $i) : date('m') }}">
+    //                 <span>-</span>
+    //                 <input type="text" name="year[]" id="year-${transaction_index}" class="border p-1 text-xs w-10" placeholder="yyyy" value="{{ old('year.' . $i) ? old('year.' . $i) : date('Y') }}">
+    //             </div>
+    //         </td>
+    //         <td><input type="text" name="kode[]" id="kode-${transaction_index}" class="border p-1 text-xs w-20" value="${user_instance.kode}"></td>
+    //         <td><input type="text" name="transaction_desc[]" id="transaction_desc-${transaction_index}" class="border p-1 text-xs w-60"></td>
+    //         <td><input type="text" name="keterangan[]" id="keterangan-${transaction_index}" class="border p-1 text-xs w-full"></td>
+    //         <td>
+    //             <input type="text" id="keluar-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'keluar-${transaction_index}-unformatted')">
+    //             <input type="hidden" name="keluar[]" id="keluar-${transaction_index}-unformatted">
+    //         </td>
+    //         <td>
+    //             <input type="text" id="masuk-${transaction_index}" class="border p-1 text-xs w-36" onchange="formatNumber(this, 'masuk-${transaction_index}-unformatted')">
+    //             <input type="hidden" name="masuk[]" id="masuk-${transaction_index}-unformatted">
+    //             <input type="hidden" name="transaction_id[]" id="transaction_id-${transaction_index}">
+    //         </td>
+    //     </tr>
+    //     <tr id="tr_add_transaction">
+    //         <td>
+    //             <button type="button" class="rounded bg-emerald-200 text-emerald-600" onclick="add_transaction('tr_add_transaction','table_add_transactions')">
+    //                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+    //                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    //                 </svg>
+    //             </button>
+    //         </td>
+    //     </tr>
+    //     `);
+    //     setTimeout(() => {
+    //         // setAutocompleteSPKItem(`produk_nama-${transaction_index}`, `produk_nama-${transaction_index}`, `produk_id-${transaction_index}`);
+    //         autocomplete_deskripsi(transaction_index);
+    //         transaction_index++;
+    //     }, 100);
+    // }
 
     setTimeout(() => {
         for (let j = 0; j < count_accountings; j++) {
@@ -546,18 +551,6 @@
     //     $spinner = $('#spinner');
     //     $spinner.hide();
     // }, 1000);
-
-    $spinner = $('#spinner');
-    $spinner.hide(500);
-    const loading_animation = () => {
-        $loading_to_disable = $('#loading_to_disable')
-        $loading_to_disable.prop('disabled', true);
-        $loading_to_hide = $('#loading_to_hide');
-        $loading_to_hide.hide()
-        // console.log('loading_animation');
-        $spinner = $('#spinner');
-        $spinner.show();
-    }
 
     // const get_scroll = () => {
     //     const scrollValue = localStorage.getItem("scrollValue")

@@ -12,6 +12,50 @@ class Nota extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
+    public function spk()
+    {
+        return $this->belongsToMany(
+            Spk::class,          // Model tujuan
+            'spk_notas',         // Nama tabel pivot
+            'nota_id',           // Foreign key di tabel pivot yang merujuk ke Nota
+            'spk_id'             // Foreign key di tabel pivot yang merujuk ke Spk
+        ); // Mengambil hanya satu Spk yang terkait dengan Nota
+    }
+
+    function spk_produk_notas()
+    {
+        return $this->hasMany(SpkProdukNota::class, 'nota_id', 'id');
+    }
+
+    function customer()
+    {
+        return $this->belongsTo(Pelanggan::class, 'pelanggan_id', 'id');
+    }
+
+    function possible_related_accountings()
+    {
+        // Get all accountings related to this nota's customer and created_at not more than five months after nota created_at
+        // dump($this->pelanggan_id);
+        // dump($this->created_at);
+        // dump($this->harga_total);
+        $accountings = Accounting::where('pelanggan_id', $this->pelanggan_id)
+            ->where('created_at', '>=', $this->created_at)
+            ->where('created_at', '<=', date('Y-m-d H:i:s', strtotime($this->created_at . ' +5 months')))
+            ->get();
+        // dump($accountings);
+        // Filter only accountings which not related with any accounting_invoices
+        $related_accountings = collect();
+        foreach ($accountings as $accounting) {
+            $accounting_invoices = AccountingInvoice::where('accounting_id', $accounting->id)->get();
+            if (count($accounting_invoices) == 0) {
+                $related_accountings->push($accounting);
+            }
+        }
+        // dump($related_accountings);
+        return $related_accountings;
+        
+    }
+
     public static function create_from_spk_produk($spk, $spk_produk, $jumlah_total) {
         $alamat_id = null;
         $kontak_id = null;
@@ -81,7 +125,7 @@ class Nota extends Model
             'copy'=>$spk->copy,
         ]);
         // UPDATE NO_NOTA
-        $nota->no_nota = "N-$nota->id";
+        $nota->nomor_nota = "N-$nota->id";
         $nota->save();
         // CREATE SPK_NOTA
         $spk_nota = SpkNota::create([
@@ -117,13 +161,13 @@ class Nota extends Model
             $jumlah_sudah_nota_gabungan += $jumlah_sudah_nota;
         }
 
-        $status_nota = 'BELUM';
+        $status_nota = 'BELUM_LUNAS';
         if ($spk->jumlah_total === $jumlah_sudah_nota_gabungan) {
             $status_nota = 'SEMUA';
         } elseif ($jumlah_sudah_nota_gabungan > 0) {
             $status_nota = 'SEBAGIAN';
         } elseif ($jumlah_sudah_nota_gabungan <= 0) {
-            $status_nota = 'BELUM';
+            $status_nota = 'BELUM_LUNAS';
         }
 
         $spk->status_nota = $status_nota;
@@ -163,11 +207,29 @@ class Nota extends Model
          * karena belum ada transaksi pembayaran terkait dengan invoice ini,
          * karena invoice baru saja dibuat.
          */
+
+        // Update the status_bayar pada nota
+        if ($this->amount_paid == 0) {
+            $this->status_bayar = 'BELUM_LUNAS';
+        } elseif ($this->amount_paid < $this->harga_total) {
+            $this->status_bayar = 'SEBAGIAN';
+        } elseif ($this->amount_paid >= $this->harga_total) {
+            $this->status_bayar = 'LUNAS';
+            $this->finished_at = now();
+        }
+
+        $this->amount_due = $this->harga_total - $this->amount_paid;
+
+        // Save the changes to the nota
+        $this->updated_by = Auth::user()->username;
+        $this->save();
+
+        
         AccountingInvoice::create([
             'time_key' => strtotime($this->created_at),
             'invoice_id' => $this->id,
             'invoice_table' => 'notas',
-            'invoice_number' => $this->no_nota,
+            'invoice_number' => $this->nomor_nota,
             // 'transaction_name_id' => $related_transaction_name->id,
             // 'transaction_name_desc' => $related_transaction_name->desc,
             'customer_id' => $this->pelanggan_id,
@@ -177,22 +239,6 @@ class Nota extends Model
             'amount_paid' => 0,
             'total_amount' => $this->harga_total,
         ]);
-
-        // Update the status_bayar pada nota
-        if ($this->amount_paid == 0) {
-            $this->status_bayar = 'belum_lunas';
-        } elseif ($this->amount_paid < $this->harga_total) {
-            $this->status_bayar = 'sebagian';
-        } elseif ($this->amount_paid >= $this->harga_total) {
-            $this->status_bayar = 'lunas';
-            $this->finished_at = now();
-        }
-
-        $this->amount_due = $this->harga_total - $this->amount_paid;
-
-        // Save the changes to the nota
-        $this->updated_by = Auth::user()->username;
-        $this->save();
     }
     public function updatePaymentAndAccountingInvoice_AccountingInvoiceIsExist($accounting, $accounting_invoice, $transaction_name, $amount_due, $amount_paid, $payment_status) {
         /**
@@ -202,11 +248,11 @@ class Nota extends Model
         if ($amount_due_to_compare < 0) {
             $amount_due_to_compare = 0;
         }
-        $payment_status_to_compare = "belum_lunas";
+        $payment_status_to_compare = "BELUM_LUNAS";
         if ($amount_due_to_compare == 0) {
-            $payment_status_to_compare = 'lunas';
+            $payment_status_to_compare = 'LUNAS';
         } elseif ($amount_due_to_compare > 0 && $amount_due_to_compare < $this->harga_total) {
-            $payment_status_to_compare = 'sebagian';
+            $payment_status_to_compare = 'SEBAGIAN';
         }
 
         if ($amount_due_to_compare != $amount_due || $payment_status_to_compare !== $payment_status) {
@@ -237,7 +283,7 @@ class Nota extends Model
                 'time_key' => strtotime($this->created_at),
                 'invoice_id' => $this->id,
                 'invoice_table' => 'notas',
-                'invoice_number' => $this->no_nota,
+                'invoice_number' => $this->nomor_nota,
                 'transaction_name_id' => $transaction_name->id,
                 'transaction_name_desc' => $transaction_name->desc,
                 'customer_id' => $this->pelanggan_id,
@@ -252,6 +298,90 @@ class Nota extends Model
         // Update the status_bayar pada nota
         $this->amount_paid = $amount_paid;
         $this->amount_due = $amount_due;
+        $this->status_bayar = $payment_status;
+        $this->updated_by = Auth::user()->username;
+        $this->save();
+    }
+
+    public function UpdatePaymentStatus() {
+        // Validasi Payment Status
+        $payment_status = 'error';
+        if ($this->amount_due == 0) {
+            $payment_status = 'LUNAS';
+        } else if (($this->amount_paid + $this->balance_used) == 0 && ($this->amount_due == ($this->harga_total - $this->total_discount) || $this->amount_due == $this->harga_total)) {
+            $payment_status = 'BELUM_LUNAS'; 
+        } else if (($this->amount_paid + $this->balance_used) > 0 && ($this->amount_due < ($this->harga_total - $this->total_discount) && $this->amount_due < $this->harga_total)) {
+            $payment_status = 'SEBAGIAN';
+        }
+        if ($payment_status == 'error') {
+//             dd("amount_paid: $this->amount_paid
+// balance_used: $this->balance_used
+// amount_due: $this->amount_due
+// harga_total: $this->harga_total
+// total_discount: $this->total_discount");
+        }
+        return $payment_status;
+    }
+
+    public function updateLastAccountingInvoice() {
+        $last_accounting_invoice = $this->accountingInvoices()->latest('time_key')->first();
+        if ($last_accounting_invoice) {
+            $last_accounting_invoice->payment_status = $this->status_bayar;
+            $last_accounting_invoice->amount_due = $this->amount_due;
+            $last_accounting_invoice->amount_paid = $this->amount_paid;
+            $last_accounting_invoice->updated_by = Auth::user()->username;
+            $last_accounting_invoice->save();
+            return true;
+        }
+        return false;
+    }
+
+    public function accountingInvoices() {
+        return $this->hasMany(AccountingInvoice::class, 'invoice_id', 'id')
+            ->where('invoice_table', 'notas')
+            ->orderBy('created_at');
+    }
+
+    public function lastAccountingInvoice() {
+        return $this->hasOne(AccountingInvoice::class, 'invoice_id', 'id')
+        ->where('invoice_table', 'notas')
+        ->latest('created_at');
+    }
+
+    public function updateNotaAndAllRelatedAccountingInvoices() {
+        $accounting_invoices = $this->accountingInvoices()->get();
+        $sum_amount_paid = 0;
+        $sum_balance_used = 0;
+        $sum_total_discount = 0;
+        $sum_amount_due = $this->harga_total;
+        $payment_status = 'BELUM_LUNAS';
+        foreach ($accounting_invoices as $accounting_invoice) {
+            $sum_amount_paid += $accounting_invoice->amount_paid;
+            $sum_balance_used += $accounting_invoice->balance_used;
+            $sum_total_discount += $accounting_invoice->total_discount;
+            $sum_amount_due -= ($accounting_invoice->amount_paid + $accounting_invoice->balance_used + $accounting_invoice->total_discount);
+
+            $accounting_invoice->amount_due = $sum_amount_due;
+            $accounting_invoice->amount_paid_total = $sum_amount_paid + $sum_balance_used;
+
+            // Update payment_status dari masing-masing accounting_invoice berdasarkan kondisi yang ada
+            if ($sum_amount_due == 0) {
+                $payment_status = 'LUNAS';
+            } else if (($sum_amount_paid + $sum_balance_used) == 0 && ($sum_amount_due == ($this->harga_total - $sum_total_discount) || $sum_amount_due == $this->harga_total)) {
+                $payment_status = 'BELUM_LUNAS'; 
+            } else if (($sum_amount_paid + $sum_balance_used) > 0 && ($sum_amount_due < ($this->harga_total - $sum_total_discount) && $sum_amount_due < $this->harga_total)) {
+                $payment_status = 'SEBAGIAN';
+            }
+
+            $accounting_invoice->payment_status = $payment_status;
+            $accounting_invoice->updated_by = Auth::user()->username;
+            $accounting_invoice->save();
+        }
+        // Update the nota's payment status and amounts based on the sums calculated
+        $this->amount_paid = $sum_amount_paid;
+        $this->balance_used = $sum_balance_used;
+        $this->total_discount = $sum_total_discount;
+        $this->amount_due = $sum_amount_due;
         $this->status_bayar = $payment_status;
         $this->updated_by = Auth::user()->username;
         $this->save();

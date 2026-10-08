@@ -32,15 +32,33 @@ class PenjualanController extends Controller
             }
 
             if ($get['pelanggan_nama'] && $date_start && $date_end) {
-                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->orderBy('created_at')->get();
+                $notas = Nota::with('spk')->whereBetween('created_at', [$date_start, $date_end])->where('pelanggan_nama', 'like', "%$get[pelanggan_nama]%")->orderBy('pelanggan_nama')->orderBy('created_at')->get()->map(function ($nota) {
+                    $nota->spk_id = optional($nota->spk->first())->id;
+                    return $nota;
+                });
                 $pelanggan = Pelanggan::where('nama', 'like', "%$get[pelanggan_nama]%")->first();
                 $pelanggan_id = $pelanggan->id;
             } elseif ($get['pelanggan_nama'] && !$date_start && !$date_end) {
-                $pelanggans = Pelanggan::where('nama', 'like', "%$get[pelanggan_nama]%")->get();
-                $notas = collect();
-                foreach ($pelanggans as $key => $pelanggan) {
-                    $notas = $notas->merge(Nota::where('pelanggan_nama', $pelanggan->nama)->latest()->limit(300)->get()->sortBy('created_at'));
-                }
+                // $pelanggans = Pelanggan::where('nama', 'like', "%$get[pelanggan_nama]%")->get();
+                // $notas = collect();
+                // foreach ($pelanggans as $pelanggan) {
+                //     $notas = $notas->merge(Nota::with('spk')->where('pelanggan_nama', $pelanggan->nama)->latest()->limit(300)->get()->map(function ($nota) {
+                //         $nota->spk_id = optional($nota->spk)->id;
+                //         return $nota;
+                //     })->sortBy('created_at'));
+                // }
+
+                $pelanggans = Pelanggan::where('nama', 'like', "%$get[pelanggan_nama]%")->pluck('nama');
+                $notas = Nota::with('spk')
+                    ->whereIn('pelanggan_nama', $pelanggans)
+                    ->orderBy('created_at')
+                    ->latest()
+                    ->limit(300)
+                    ->get()
+                    ->map(function ($nota) {
+                        $nota->spk_id = optional($nota->spk->first())->id;
+                        return $nota;
+                    });
                 // $notas_orderby_date = $notas->sortBy('created_at');
                 // $date_start = $notas_orderby_date[0]->created_at;
                 // $date_start = date('Y-m-d', strtotime($date_start));
@@ -49,14 +67,24 @@ class PenjualanController extends Controller
                 // $pelanggan = Pelanggan::where('nama', $get['pelanggan_nama'])->first();
                 // $pelanggan_id = $pelanggan->id;
             } elseif (!$get['pelanggan_nama'] && $date_start && $date_end) {
-                $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get();
+                $notas = Nota::with('spk')->whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get()->map(function ($nota) {
+                    $nota->spk_id = optional($nota->spk->first())->id;
+                    return $nota;
+                });
             } else {
                 $request->validate(['error'=>'required'],['error.required'=>'customer || time_range']);
             }
         } else {
             $date_start = date('Y') . "-" . date('m') . "-01";
             $date_end = date('Y') . "-" . date('m') . "-" . date('d') . " 23:59:59";
-            $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get();
+            // $notas = Nota::whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get();
+            $notas = Nota::with('spk')->whereBetween('created_at', [$date_start, $date_end])->orderBy('pelanggan_nama')->orderBy('created_at')->get()->map(function ($nota) {
+                // dump($nota->id);
+                // dd(optional($nota->spk->first())->id);
+                // dd($nota->spk);
+                $nota->spk_id = optional($nota->spk->first())->id;
+                return $nota;
+            });
         }
 
         // dump($notas);
@@ -83,25 +111,27 @@ class PenjualanController extends Controller
             $total_penjualan_for_piutang = 0;
             foreach ($notas_grouped as $key_nota => $nota) {
                 $class = 'bg-red-200';
-                if ($nota->status_bayar === 'lunas') {
+                if ($nota->status_bayar === 'LUNAS') {
                     $class = 'bg-green-200';
-                } elseif ($nota->status_bayar === 'sebagian') {
+                } elseif ($nota->status_bayar === 'SEBAGIAN') {
                     $class = 'bg-orange-200';
                 }
                 $total_penjualan += $nota->harga_total;
                 if ($key_nota === count($notas_grouped) - 1) {
                     $notaSubtotalAll[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
+                        'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'harga_total' => $nota->harga_total,
                         'subtotal' => $total_penjualan,
                         'class' => $class,
                     ];
-                    if ($nota->status_bayar !== 'lunas') {
+                    if ($nota->status_bayar !== 'LUNAS') {
                         $notaSubtotalAllForPiutang[] = [
                             'created_at' => $nota->created_at,
-                            'no_nota' => $nota->no_nota,
+                            'nomor_nota' => $nota->nomor_nota,
+                            'spk_id' => $nota->spk_id,
                             'pelanggan_nama' => $nota->pelanggan_nama,
                             'harga_total' => $nota->harga_total,
                             'subtotal' => $total_penjualan,
@@ -112,16 +142,18 @@ class PenjualanController extends Controller
                 } else {
                     $notaSubtotalAll[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
+                        'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'harga_total' => $nota->harga_total,
                         'subtotal' => null,
                         'class' => $class,
                     ];
-                    if ($nota->status_bayar !== 'lunas') {
+                    if ($nota->status_bayar !== 'LUNAS') {
                         $notaSubtotalAllForPiutang[] = [
                             'created_at' => $nota->created_at,
-                            'no_nota' => $nota->no_nota,
+                            'nomor_nota' => $nota->nomor_nota,
+                            'spk_id' => $nota->spk_id,
                             'pelanggan_nama' => $nota->pelanggan_nama,
                             'harga_total' => $nota->harga_total,
                             'subtotal' => $total_penjualan,
@@ -132,13 +164,14 @@ class PenjualanController extends Controller
                 }
                 $spk_produk_notas = SpkProdukNota::where('nota_id', $nota->id)->get();
                 $spk_produk_notas_for_piutang = [];
-                if ($nota->status_bayar !== 'lunas') {
+                if ($nota->status_bayar !== 'LUNAS') {
                     $spk_produk_notas_for_piutang = SpkProdukNota::where('nota_id', $nota->id)->get();
                 }
                 foreach ($spk_produk_notas as $spk_produk_nota) {
                     $notaDetailItemsAll[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
+                        'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'cust_short' => $nota->cust_short,
                         'nama_nota' => $spk_produk_nota->nama_nota,
@@ -157,7 +190,8 @@ class PenjualanController extends Controller
                 foreach ($spk_produk_notas_for_piutang as $spk_produk_nota) {
                     $notaDetailItemsAllForPiutang[] = [
                         'created_at' => $nota->created_at,
-                        'no_nota' => $nota->no_nota,
+                        'nomor_nota' => $nota->nomor_nota,
+                        'spk_id' => $nota->spk_id,
                         'pelanggan_nama' => $nota->pelanggan_nama,
                         'cust_short' => $nota->cust_short,
                         'nama_nota' => $spk_produk_nota->nama_nota,

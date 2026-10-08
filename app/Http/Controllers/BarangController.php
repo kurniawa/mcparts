@@ -8,63 +8,30 @@ use App\Models\Menu;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
     function index(Request $request) {
-        $get = $request->query();
-
-        $suppliers = collect();
-        $barangs = collect();
-        
-
-        if (count($get) !== 0) {
-            // dd($get);
-
-            if ($get['barang_id']) {
-                $supplier_barangs = Barang::where('id', $get['barang_id'])->get();
-                $suppliers = Supplier::where('id', $supplier_barangs[0]->supplier_id)->get();
-                $barangs->push($supplier_barangs);
-            } else if ($get['barang_nama']) {
-                $suppliers_temp = Barang::where('nama', 'like', "%$get[barang_nama]%")->select('supplier_id')->groupBy('supplier_id')->orderBy('supplier_nama')->get();
-                // dd($suppliers_temp);
-                foreach ($suppliers_temp as $supplier_id) {
-                    $suppliers->push(Supplier::find($supplier_id['supplier_id']));
-                }
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                    $barangs->push($supplier_barangs);
-                }
-                // $suppliers = Supplier::where('id', $supplier_barangs[0]->supplier_id)->get();
-                // dd($suppliers);
-            } else if ($get['supplier_nama']) {
-                $suppliers = Supplier::where('nama', 'like', "%$get[supplier_nama]%")->get();
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                    $barangs->push($supplier_barangs);
-                }
-                // dd($suppliers);
-            } else if ($get['supplier_id']) {
-                $suppliers = Supplier::where('id', $get['supplier_id'])->get();
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $get['supplier_id'])->get();
-                    $barangs->push($supplier_barangs);
-                }
-            } else {
-                $suppliers = Supplier::orderBy('nama')->get();
-                foreach ($suppliers as $supplier) {
-                    $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                    $barangs->push($supplier_barangs);
-                }
+        $suppliers = Supplier::with(['barangs' => function ($query) use ($request) {
+            $query->orderBy('nama', 'asc');
+            if ($request->filled('barang_id')) {
+                $query->where('id', $request->barang_id);
             }
 
-        } else {
-            $suppliers = Supplier::orderBy('nama')->get();
-            foreach ($suppliers as $supplier) {
-                $supplier_barangs = Barang::where('supplier_id', $supplier->id)->get();
-                $barangs->push($supplier_barangs);
+            if ($request->filled('barang_nama')) {
+                $query->where('nama', 'like', '%' . $request->barang_nama . '%');
             }
-        }
+
+        }])
+        ->when($request->filled('supplier_id'), function ($query) use ($request) {
+            $query->where('id', $request->supplier_id);
+        })
+        ->when($request->filled('supplier_nama'), function ($query) use ($request) {
+            $query->where('nama', 'like', '%' . $request->supplier_nama . '%');
+        })
+        ->orderBy('nama')
+        ->get();
 
 
         $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
@@ -77,96 +44,13 @@ class BarangController extends Controller
             'profile_menus' => Menu::get_profile_menus(),
             'pembelian_menus' => Menu::get_pembelian_menus(),
             'suppliers' => $suppliers,
-            'barangs' => $barangs,
+            // 'barangs' => $barangs,
             'label_supplier' => $label_supplier,
             'label_barang' => $label_barang,
         ];
         // dd($barangs[0][0]);
         return view('barangs.index', $data);
     }
-
-    // public function index(Request $request)
-    // {
-    //     $get = $request->query();
-
-    //     $suppliers = collect();
-    //     $barangs = collect();
-
-    //     // Awal query builder barang
-    //     $barangQuery = Barang::with('goodsPrices'); // eager load relasi harga
-
-    //     if (count($get) !== 0) {
-    //         // Filter berdasarkan ID barang
-    //         if (!empty($get['barang_id'])) {
-    //             $barang = $barangQuery->where('id', $get['barang_id'])->first();
-    //             if ($barang) {
-    //                 $suppliers = Supplier::where('id', $barang->supplier_id)->get();
-    //                 $barangs = collect([$barang]);
-    //             }
-
-    //         // Filter berdasarkan nama barang
-    //         } elseif (!empty($get['barang_nama'])) {
-    //             $barangs = $barangQuery
-    //                 ->where('nama', 'like', "%{$get['barang_nama']}%")
-    //                 ->get();
-    //             $supplierIds = $barangs->pluck('supplier_id')->unique();
-    //             $suppliers = Supplier::whereIn('id', $supplierIds)->orderBy('nama')->get();
-
-    //         // Filter berdasarkan nama supplier
-    //         } elseif (!empty($get['supplier_nama'])) {
-    //             $suppliers = Supplier::where('nama', 'like', "%{$get['supplier_nama']}%")
-    //                 ->orderBy('nama')
-    //                 ->get();
-    //             $barangs = $barangQuery
-    //                 ->whereIn('supplier_id', $suppliers->pluck('id'))
-    //                 ->get();
-
-    //         // Filter berdasarkan ID supplier
-    //         } elseif (!empty($get['supplier_id'])) {
-    //             $suppliers = Supplier::where('id', $get['supplier_id'])->get();
-    //             $barangs = $barangQuery
-    //                 ->where('supplier_id', $get['supplier_id'])
-    //                 ->get();
-
-    //         } else {
-    //             // Tidak ada filter valid, ambil semua supplier dan barang
-    //             $suppliers = Supplier::orderBy('nama')->get();
-    //             $barangs = $barangQuery->get();
-    //         }
-
-    //     } else {
-    //         // Tidak ada query string, ambil semua supplier dan barang
-    //         $suppliers = Supplier::orderBy('nama')->get();
-    //         $barangs = $barangQuery->get();
-    //     }
-
-    //     // Dropdown label
-    //     $label_supplier = Supplier::select('id', 'nama as label', 'nama as value')->orderBy('nama')->get();
-    //     $label_barang = Barang::select(
-    //         'id',
-    //         'nama as label',
-    //         'nama as value',
-    //         'satuan_sub',
-    //         'satuan_main',
-    //         'harga_main',
-    //         'jumlah_main',
-    //         'harga_total_main'
-    //     )->orderBy('nama')->get();
-
-    //     $data = [
-    //         'menus' => Menu::get(),
-    //         'route_now' => 'barangs.index',
-    //         'parent_route' => 'pembelians.index',
-    //         'profile_menus' => Menu::get_profile_menus(),
-    //         'pembelian_menus' => Menu::get_pembelian_menus(),
-    //         'suppliers' => $suppliers,
-    //         'barangs' => $barangs,
-    //         'label_supplier' => $label_supplier,
-    //         'label_barang' => $label_barang,
-    //     ];
-
-    //     return view('barangs.index', $data);
-    // }
 
     function store(Request $request) {
         $post = $request->post();
@@ -197,7 +81,7 @@ class BarangController extends Controller
             if ($post['jumlah_sub'] === null || $post['jumlah_sub'] === 0) {
                 $jumlah_sub = 100;
             } else {
-                $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+                $jumlah_sub = (float)($post['jumlah_sub']);
             }
             $harga_sub = $post['harga_sub'];
             $harga_total_sub = $post['harga_total_sub'];
@@ -211,7 +95,7 @@ class BarangController extends Controller
             'satuan_sub' => $satuan_sub,
             'harga_main' => $post['harga_main'],
             'harga_sub' => $harga_sub,
-            'jumlah_main' => (int)($post['jumlah_main'] * 100),
+            'jumlah_main' => (float)($post['jumlah_main']),
             'jumlah_sub' => $jumlah_sub,
             'harga_total_main' => $post['harga_total_main'],
             'harga_total_sub' => $harga_total_sub,
@@ -308,52 +192,105 @@ class BarangController extends Controller
             if ($post['jumlah_sub'] === null || $post['jumlah_sub'] === 0) {
                 $jumlah_sub = 100;
             } else {
-                $jumlah_sub = (int)($post['jumlah_sub'] * 100);
+                $jumlah_sub = (float)($post['jumlah_sub']);
             }
             $harga_sub = $post['harga_sub'];
             $harga_total_sub = $post['harga_total_sub'];
         }
         $harga_main_old = $barang->harga_main;
-        $barang->update([
-            'supplier_id' => $post['supplier_id'],
-            'supplier_nama' => $post['supplier_nama'],
-            'nama' => $post['barang_nama'],
-            'satuan_main' => $post['satuan_main'],
-            'satuan_sub' => $satuan_sub,
-            'harga_main' => $post['harga_main'],
-            'harga_sub' => $harga_sub,
-            'jumlah_main' => (int)($post['jumlah_main'] * 100),
-            'jumlah_sub' => $jumlah_sub,
-            'harga_total_main' => $post['harga_total_main'],
-            'harga_total_sub' => $harga_total_sub,
-            'keterangan' => $post['keterangan'],
-        ]);
-
-        // Update harga barang di tabel good_prices juga
-        $goods_price = GoodsPrice::where('goods_id', $barang->id)->where('unit', $barang->satuan_main)->where('price', $harga_main_old)->first();
-        if ($goods_price) {
-            $goods_price->harga_main = $post['harga_main'];
-            $goods_price->save();
-            $success_ .= '-GoodsPrice updated-';
-        } else {
-            GoodsPrice::create([
-                'goods_id' => $barang->id,
-                'goods_slug' => $barang->nama,
-                'supplier_id' => $barang->supplier_id,
-                'supplier_name' => $barang->supplier_nama,
-                'unit' => $barang->satuan_main,
-                'price' => $post['harga_main'],
-                'created_by' => $user->username,
+        DB::beginTransaction();
+        try {
+            $barang->update([
+                'supplier_id' => $post['supplier_id'],
+                'supplier_nama' => $post['supplier_nama'],
+                'nama' => $post['barang_nama'],
+                'satuan_main' => $post['satuan_main'],
+                'satuan_sub' => $satuan_sub,
+                'harga_main' => $post['harga_main'],
+                'harga_sub' => $harga_sub,
+                'jumlah_main' => (float)($post['jumlah_main']),
+                'jumlah_sub' => $jumlah_sub,
+                'harga_total_main' => $post['harga_total_main'],
+                'harga_total_sub' => $harga_total_sub,
+                'keterangan' => $post['keterangan'],
             ]);
-            $success_ .= '-new GoodsPrice created-';
-        }
 
-        $success_ .= '-barang updated-';
+            // Update harga barang di tabel good_prices juga
+            $goods_price = GoodsPrice::where('goods_id', $barang->id)->where('unit', $barang->satuan_main)->where('price', $harga_main_old)->first();
+            if ($goods_price) {
+                $goods_price->price = $post['harga_main'];
+                $goods_price->save();
+                $success_ .= '-GoodsPrice updated-';
+            } else {
+                GoodsPrice::create([
+                    'goods_id' => $barang->id,
+                    'goods_slug' => $barang->nama,
+                    'supplier_id' => $barang->supplier_id,
+                    'supplier_name' => $barang->supplier_nama,
+                    'unit' => $barang->satuan_main,
+                    'price' => $post['harga_main'],
+                    'created_by' => $user->username,
+                ]);
+                $success_ .= '-new GoodsPrice created-';
+            }
+
+            $success_ .= '-barang updated-';
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            dump($post);
+
+            $message = "Error: " . $th->getMessage()
+                . "\n\nFile: " . $th->getFile()
+                . "\n\nFile: " . $th->getLine()
+                . "\n\nTrace: " . $th->getTraceAsString();
+            dd($message);
+
+            return back()->withErrors([
+                'Error Gagal menyimpan transaksi: ' . $th->getMessage(),
+            ]);
+        }
 
         $feedback = [
             'success_' => $success_,
         ];
+        
         return back()->with($feedback);
 
+    }
+
+    function update_kategori(Barang $barang, Request $request) {
+        $validated = $request->validate([
+            'kategori_nama' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $barang->update([
+                'kategori_nama' => $validated['kategori_nama'],
+            ]);
+            $new_kategoris = Barang::where('supplier_id', $barang->supplier_id)
+                ->whereNotNull('kategori_nama')
+                ->groupBy('kategori_nama')
+                ->pluck('kategori_nama')
+                ->toArray();
+                
+            sort($new_kategoris);
+            // update $supplier->kategori_nama menjadi kombinasi nama-nama kategori yang ada di barang-barang, dipisahkan oleh "---" dan disorting sesuai abjad
+            $supplier = $barang->supplier;
+            $supplier->update([
+                'kategori_nama' => implode('---', $new_kategoris),
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withErrors([
+                'Error Gagal mengupdate kategori barang: ' . $th->getMessage(),
+            ]);
+        }
+
+        return back()->with('success_', 'Kategori barang berhasil diupdate.');
     }
 }
