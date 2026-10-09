@@ -261,8 +261,10 @@ class BarangController extends Controller
     }
 
     function update_kategori(Barang $barang, Request $request) {
+        // $post = $request->post();
+        // dd($post);
         $validated = $request->validate([
-            'kategori_nama' => 'required',
+            'kategori_nama' => 'nullable|string|max:100',
         ]);
 
         DB::beginTransaction();
