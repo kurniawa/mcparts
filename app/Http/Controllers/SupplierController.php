@@ -153,7 +153,7 @@ class SupplierController extends Controller
         }
         $supplier_kontaks = SupplierKontak::where('supplier_id', $supplier->id)->get();
         $label_kategori_uang_keluar = Kategori::kategoriUangKeluar();
-        $label_kategori = ['BIAYA BAHAN BAKU', 'BIAYA BAHAN PENDUKUNG', 'BIAYA PENGIRIMAN BARANG', 'BIAYA UTILITAS', 'PAJAK', 'BIAYA INVENTARIS (PERALATAN DAN PERLENGKAPAN)', 'BIAYA MAINTENANCE', 'BIAYA LAIN-LAIN'];
+        $label_kategori = ['BIAYA BAHAN BAKU', 'BIAYA BAHAN PENDUKUNG', 'BIAYA PENGIRIMAN BARANG', 'BIAYA UTILITAS', 'PAJAK', 'BIAYA INVENTARIS (PERALATAN DAN PERLENGKAPAN)', 'BIAYA MAINTENANCE', 'BIAYA LAIN-LAIN', 'NONE'];
 
         $data = [
             // 'goback' => 'home',
