@@ -18,7 +18,13 @@ class PembelianBarang extends Model
         'harga_t'  => 'decimal:2',
     ];
 
-    public function barang() {
-        return $this->hasOne(Barang::class, 'id', 'barang_id');
+    public function pembelian()
+    {
+        return $this->belongsTo(Pembelian::class);
+    }
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class);
     }
 }

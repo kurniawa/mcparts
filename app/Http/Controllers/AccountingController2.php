@@ -8,6 +8,7 @@ use App\Models\BilyetGiro;
 use App\Models\Menu;
 use App\Models\Nota;
 use App\Models\Pembelian;
+use App\Models\PembelianBarang;
 use App\Models\TransactionName;
 use App\Models\UserInstance;
 use Carbon\Carbon;
@@ -21,8 +22,8 @@ class AccountingController2 extends Controller
     public function laba_rugi(Request $request)
     {
         $get = $request->query();
-        $from = date('Y-m-d', strtotime('-1 month'));
-        $until = date('Y-m-d');
+        $from = Carbon::now()->subMonth()->startOfDay();
+        $until = Carbon::now()->endOfDay();
         $timerange = isset($get['timerange']) ? $get['timerange'] : null;
         $from_day = isset($get['from_day']) ? $get['from_day'] : null;
         $from_month = isset($get['from_month']) ? $get['from_month'] : null;
@@ -64,8 +65,8 @@ class AccountingController2 extends Controller
                 'to_year.min' => 'Until year must be at least 1900.',
                 'to_year.max' => 'Until year must be at most 2100.', 
             ]);
-            $from = date('Y-m-d', strtotime($get['from_year'] . '-' . $get['from_month'] . '-' . $get['from_day']));
-            $until = date('Y-m-d', strtotime($get['to_year'] . '-' . $get['to_month'] . '-' . $get['to_day']));
+            $from = Carbon::createFromDate($get['from_year'], $get['from_month'], $get['from_day'])->startOfDay();
+            $until = Carbon::createFromDate($get['to_year'], $get['to_month'], $get['to_day'])->endOfDay();
         }
 
         // Laporan Laba Rugi   
@@ -110,23 +111,33 @@ class AccountingController2 extends Controller
         /**
          * HARGA POKOK PENJUALAN
          */
-        $biaya_bahan_baku = Pembelian::whereBetween('created_at', [$from, $until])
-            ->sum(DB::raw("
-                CASE 
-                    WHEN status_bayar = 'LUNAS' THEN harga_total 
-                    WHEN status_bayar = 'SEBAGIAN' THEN amount_paid 
-                    ELSE 0 
-                END
-            "));
+        $total_biaya_bahan_baku = PembelianBarang::whereHas('pembelian', function ($query) use ($from, $until) {
+            $query->where('status_bayar', 'LUNAS');
+            $query->whereBetween('created_at', [$from, $until]);
+        })
+        ->whereHas('barang', function ($query) {
+            $query->where('kategori_nama', 'BIAYA BAHAN BAKU');
+        })
+        ->sum('harga_t');
+
+        $total_biaya_bahan_pendukung = PembelianBarang::whereHas('pembelian', function ($query) use ($from, $until) {
+            $query->where('status_bayar', 'LUNAS');
+            $query->whereBetween('created_at', [$from, $until]);
+        })
+        ->whereHas('barang', function ($query) {
+            $query->where('kategori_nama', 'BIAYA BAHAN PENDUKUNG');
+        })
+        ->sum('harga_t');
+
         $income_statement[] = [
             'name' => 'HARGA POKOK PENJUALAN',
             'childs' => [
-                ['name' => 'BIAYA BAHAN BAKU', 'amount' => $biaya_bahan_baku],
-                ['name' => 'BIAYA BAHAN BAKU RETURAN', 'amount' => $total_discount],
-                ['name' => 'BIAYA BAHAN PENDUKUNG', 'amount' => $pendapatan_bunga_dipotong_pajak_bunga],
+                ['name' => 'BIAYA BAHAN BAKU', 'amount' => $total_biaya_bahan_baku],
+                ['name' => 'BIAYA BAHAN BAKU RETURAN', 'amount' => 0],
+                ['name' => 'BIAYA BAHAN PENDUKUNG', 'amount' => $total_biaya_bahan_pendukung],
                 ['name' => 'BIAYA TENAGA KERJA', 'amount' => 0],
-                ['name' => 'BIAYA UTILITAS', 'amount' => $total_pendapatan],
-                ['name' => 'TOTAL HARGA POKOK PENJUALAN', 'amount' => $total_pendapatan],
+                ['name' => 'BIAYA UTILITAS', 'amount' => 0],
+                ['name' => 'TOTAL HARGA POKOK PENJUALAN', 'amount' => 0],
             ]
         ];
         $data = [
