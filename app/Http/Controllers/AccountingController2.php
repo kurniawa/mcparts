@@ -129,15 +129,25 @@ class AccountingController2 extends Controller
         })
         ->sum('harga_t');
 
+        $total_biaya_tenaga_kerja = Accounting::where('transaction_type', 'pengeluaran')->where('transaction_desc', 'LIKE', '%GAJI%')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+        
+        $total_biaya_utilitas = Accounting::where('transaction_type', 'pengeluaran')->where('kategori_level_one', 'BIAYA UTILITAS')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+
+        $total_harga_pokok_penjualan = $total_biaya_bahan_baku + $total_biaya_bahan_pendukung + $total_biaya_tenaga_kerja + $total_biaya_utilitas;
+
         $income_statement[] = [
             'name' => 'HARGA POKOK PENJUALAN',
             'childs' => [
                 ['name' => 'BIAYA BAHAN BAKU', 'amount' => $total_biaya_bahan_baku],
                 ['name' => 'BIAYA BAHAN BAKU RETURAN', 'amount' => 0],
                 ['name' => 'BIAYA BAHAN PENDUKUNG', 'amount' => $total_biaya_bahan_pendukung],
-                ['name' => 'BIAYA TENAGA KERJA', 'amount' => 0],
-                ['name' => 'BIAYA UTILITAS', 'amount' => 0],
-                ['name' => 'TOTAL HARGA POKOK PENJUALAN', 'amount' => 0],
+                ['name' => 'BIAYA TENAGA KERJA', 'amount' => $total_biaya_tenaga_kerja],
+                ['name' => 'BIAYA UTILITAS', 'amount' => $total_biaya_utilitas],
+                ['name' => 'TOTAL HARGA POKOK PENJUALAN', 'amount' => $total_harga_pokok_penjualan],
             ]
         ];
         $data = [
