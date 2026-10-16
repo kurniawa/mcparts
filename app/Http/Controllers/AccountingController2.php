@@ -150,6 +150,72 @@ class AccountingController2 extends Controller
                 ['name' => 'TOTAL HARGA POKOK PENJUALAN', 'amount' => $total_harga_pokok_penjualan],
             ]
         ];
+
+        /**
+         * BEBAN OPERASIONAL
+         */
+        $total_biaya_pengiriman = Accounting::where('transaction_type', 'pengeluaran')->where('kategori_level_two', 'OPERASIONAL PENGIRIMAN')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+        
+        $total_inventaris = Accounting::where('transaction_type', 'pengeluaran')->where('kategori_level_one', 'BIAYA INVENTARIS (PERALATAN DAN PERLENGKAPAN)')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+        
+        $total_maintenance = Accounting::where('transaction_type', 'pengeluaran')->where('kategori_level_one', 'BIAYA MAINTENANCE')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+        
+        $beban_penyusutan_kendaraan = 5021874; // Hardcoded for now, should be calculated based on asset depreciation
+        $biaya_adminsitrasi_perbankan = 0;
+        $beban_rupa_rupa = 0;
+        
+        $total_biaya_operasional = $total_biaya_pengiriman + $total_inventaris + $total_maintenance + $beban_penyusutan_kendaraan;
+        
+        $income_statement[] = [
+            'name' => 'BEBAN OPERASIONAL',
+            'childs' => [
+                ['name' => 'BIAYA PENGIRIMAN', 'amount' => $total_biaya_pengiriman],
+                ['name' => 'INVENTARIS KANTOR & PRODUKSI', 'amount' => $total_inventaris],
+                ['name' => 'MAINTENANCE', 'amount' => $total_maintenance],
+                ['name' => 'BEBAN PENYUSUTAN KENDARAAN', 'amount' => $beban_penyusutan_kendaraan],
+                ['name' => 'TOTAL BIAYA OPERASIONAL', 'amount' => $total_biaya_operasional],
+            ]
+        ];
+
+        /**
+         * PAJAK
+         */
+        $pph_pasal_21 = Accounting::where('transaction_type', 'pengeluaran')->where('kategori_level_two', 'PPH PASAL 21')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+
+        $pph_pasal_25_dan_29 = Accounting::where('transaction_type', 'pengeluaran')->where('kategori_level_two', 'PPH PASAL 25 DAN 29')->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $until)
+            ->sum('jumlah');
+
+        $total_pajak = $pph_pasal_21 + $pph_pasal_25_dan_29;
+
+        $income_statement[] = [
+            'name' => 'PAJAK',
+            'childs' => [
+                ['name' => 'PPH PASAL 21', 'amount' => $pph_pasal_21],
+                ['name' => 'PPH PASAL 25 DAN 29', 'amount' => $pph_pasal_25_dan_29],
+            ]
+        ];
+
+        /**
+         * LABA BERSIH
+         */
+        $laba_bersih = $total_pendapatan - $total_harga_pokok_penjualan - $total_biaya_operasional - $total_pajak;
+
+        $income_statement[] = [
+            'name' => 'LABA BERSIH',
+            'childs' => [
+                ['name' => 'LABA BERSIH', 'amount' => $laba_bersih],
+            ]
+        ];
+
         $data = [
             'menus' => Menu::get(),
             'route_now' => 'accounting.laba_rugi',

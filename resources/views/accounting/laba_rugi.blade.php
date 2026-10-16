@@ -5,21 +5,25 @@
       <h1 class="text-xl font-bold tracking-tight text-gray-900">App</h1>
     </div>
   </header> --}}
-<main>
+<main class="text-xs">
     <x-errors-any></x-errors-any>
     <x-validation-feedback></x-validation-feedback>
     <div class="mx-1 py-1 sm:px-6 lg:px-8 relative">
-        <div class="flex items-center">
-            <h1 class="text-xl font-bold">Laporan Laba-Rugi</h1>
-            {{-- <div class="ml-2">
-                <button onclick="table_to_excel('laba_rugi_table')" class="bg-violet-400 text-white font-semibold p-1 rounded">Export to Excel</button>
-            </div> --}}
+        <div class="flex justify-center">
+            <div>
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold">Laporan Laba-Rugi</h1>
+                    {{-- <div class="ml-2">
+                        <button onclick="table_to_excel('laba_rugi_table')" class="bg-violet-400 text-white font-semibold p-1 rounded">Export to Excel</button>
+                    </div> --}}
+                </div>
+                <div class="mt-2">
+                    {{-- {{ dump($timerange) }} --}}
+                    <x-filter-form :action="route('accounting.laba_rugi')" :showCustomer="false" :timerange="$timerange" :fromDay="$from_day" :fromMonth="$from_month" :fromYear="$from_year" :toDay="$to_day" :toMonth="$to_month" :toYear="$to_year"></x-filter-form>
+                </div>
+            </div>
         </div>
-        <div class="mt-2">
-            {{-- {{ dump($timerange) }} --}}
-            <x-filter-form :action="route('accounting.laba_rugi')" :showCustomer="false" :timerange="$timerange" :fromDay="$from_day" :fromMonth="$from_month" :fromYear="$from_year" :toDay="$to_day" :toMonth="$to_month" :toYear="$to_year"></x-filter-form>
-        </div>
-        <div class="mt-2">
+        <div class="flex justify-center mt-2">
             <table class="table-nice">
                 <thead>
                     <tr>
@@ -45,6 +49,7 @@
             </table>
         </div>
     </div>
+    <div class="mt-36"></div>
 </main>
 
 <style>
